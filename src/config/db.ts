@@ -25,6 +25,7 @@ const pool = new Pool({
     port: parseInt(process.env.DB_PORT || "5432")
 })
 
+// listens for new connections and when a new connection is requested from the pool it will execute this callback function
 pool.on("connect", () => {
     console.log("Connected to database");
 })

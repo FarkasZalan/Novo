@@ -1,6 +1,6 @@
 # CRUD Operations with Express and PostgreSQL (2025)
 
-This project is a simple CRUD (Create, Read, Update, Delete) application built with **Express.js** and **PostgreSQL**. Below is a brief overview of the project structure and the purpose of each file.
+This project is a simple CRUD application built with **Express.js** and **PostgreSQL**. Below is a brief overview of the project structure and the purpose of each file.
 
 ---
 
