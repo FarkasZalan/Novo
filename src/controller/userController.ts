@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
-import { createUserService, deleteUserService, getAllUsersService, getUserByIdService, updateUserService } from "../models/userMode";
-import errorHandling from "../middlewares/errorHandler";
+import { createUserService, deleteUserService, getAllUsersService, getUserByIdService, updateUserService } from "../models/userModel";
 import { NextFunction } from "connect";
 
 // Standardized response function
