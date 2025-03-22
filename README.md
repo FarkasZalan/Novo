@@ -34,6 +34,6 @@ This project is a simple CRUD application built with **Express.js** and **Postgr
 - **Purpose**: Defines API routes.
 - **Details**: Maps HTTP methods (POST, GET, PUT, DELETE) to controller functions.
 
-### **`index.ts`**
+### **`app.ts`**
 - **Purpose**: Entry point of the application.
 - **Details**: Sets up the Express app, configures middlewares (CORS, JSON parsing), and starts the server.
