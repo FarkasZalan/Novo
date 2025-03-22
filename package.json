@@ -1,0 +1,35 @@
+{
+  "name": "crud-operations-with-express",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "node dist/index.js",
+    "build": "tsc",
+    "dev": "nodemon src/index.ts",
+    "lint": "eslint src --ext .ts",
+    "format": "prettier --write src/**/*.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "eslint": "^9.23.0",
+    "eslint-config-prettier": "^10.1.1",
+    "eslint-plugin-prettier": "^5.2.3",
+    "express": "^4.21.2",
+    "joi": "^17.13.3",
+    "pg": "^8.14.1",
+    "prettier": "^3.5.3"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.1",
+    "@types/node": "^22.13.11",
+    "@types/pg": "^8.11.11",
+    "nodemon": "^3.1.9",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.2"
+  }
+}
