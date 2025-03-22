@@ -4,6 +4,15 @@ This project is a simple CRUD application built with **Express.js** and **Postgr
 
 ---
 
+## Requirements
+
+To run the project, you need:
+
+1. **Node.js development environment**, version `14.13.1` or newer.
+2. A file named `.env`. An example can be found in the project's root folder named [.env.example](./.env.example).
+
+---
+
 ## 🌟 Project Structure
 
 ### **`config/db.ts`**
