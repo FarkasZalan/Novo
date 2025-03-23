@@ -40,7 +40,7 @@ export const getAllUsers = async (req: Request, res: Response, next: NextFunctio
 
 export const getUserById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const user = await getUserByIdService(parseInt(req.params.id));
+        const user = await getUserByIdService(req.params.id);
         if (!user) {
             handleResponse(res, 404, "User not found", null);
             return;
@@ -54,7 +54,7 @@ export const getUserById = async (req: Request, res: Response, next: NextFunctio
 export const updateUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const { email, name } = req.body;
-        const updatedUser = await updateUserService(parseInt(req.params.id), email, name);
+        const updatedUser = await updateUserService(req.params.id, email, name);
         if (!updatedUser) {
             handleResponse(res, 404, "User not found", null);
             return;
@@ -67,7 +67,7 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
 
 export const deleteUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const deletedUser = await deleteUserService(parseInt(req.params.id));
+        const deletedUser = await deleteUserService(req.params.id);
         if (!deletedUser) {
             handleResponse(res, 404, "User not found", null);
             return;

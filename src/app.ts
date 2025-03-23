@@ -1,8 +1,9 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import pool from "./config/db";
+import pool, { initializeDatabase } from "./config/db";
 import userRoutes from "./routes/userRoutes";
+import projectRoutes from "./routes/projectRoutes";
 import errorHandling from "./middlewares/errorHandler";
 import createUserTable from "./data/createUserTable";
 
@@ -24,12 +25,15 @@ app.use(express.json()); // if the request has json data (body), it will be pars
 
 // Routes
 app.use("/api", userRoutes); // Prefix all routes with /api to avoid conflicts so now all routes start with /api
+app.use("/api", projectRoutes);
 
 // Error handling middleware
 app.use(errorHandling);
 
 // Create user table if it doesn't exist before server starts
-createUserTable();
+initializeDatabase().then(() => {
+    console.log("Database tables initialized");
+}).catch((error) => console.error("Error initializing database tables:", error));
 
 // Testing postgres connection
 app.get("/", async (_req, res) => {

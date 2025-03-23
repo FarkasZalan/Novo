@@ -1,5 +1,7 @@
 import pkg from "pg";
 import dotenv from "dotenv";
+import createUserTable from "../data/createUserTable";
+import createProjectsTable from "../data/createProjectTable";
 
 const { Pool } = pkg;
 
@@ -24,6 +26,12 @@ const pool = new Pool({
     password: process.env.DB_PASSWORD,
     port: parseInt(process.env.DB_PORT || "5432")
 })
+
+// Create tables when the app starts
+export const initializeDatabase = async () => {
+    await createUserTable();
+    await createProjectsTable();
+};
 
 // listens for new connections and when a new connection is requested from the pool it will execute this callback function
 pool.on("connect", () => {
