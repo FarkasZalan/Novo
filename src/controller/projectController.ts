@@ -18,7 +18,6 @@ export const createProject = async (req: Request, res: Response, next: NextFunct
     try {
         const { name, description } = req.body;
         const userId = req.params.userId;
-        console.log(userId);
         const newProject = await createProjectService(name, description, userId);
         handleResponse(res, 201, "Project created successfully", newProject);
     } catch (error: Error | any) {
@@ -34,7 +33,7 @@ export const createProject = async (req: Request, res: Response, next: NextFunct
 
 export const getAllProjects = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const projects = await getAllProjectForUsersService(req.params.id); // get all projects for the user;
+        const projects = await getAllProjectForUsersService(req.params.userId); // get all projects for the user;
         handleResponse(res, 200, "Projects fetched successfully", projects);
     } catch (error) {
         next(error);
@@ -43,7 +42,7 @@ export const getAllProjects = async (req: Request, res: Response, next: NextFunc
 
 export const getProjectById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const project = await getProjectByIdService(req.params.id);
+        const project = await getProjectByIdService(req.params.projectId);
         if (!project) {
             handleResponse(res, 404, "Project not found", null);
             return;
@@ -57,7 +56,8 @@ export const getProjectById = async (req: Request, res: Response, next: NextFunc
 export const updateProject = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const { name, description } = req.body;
-        const updateProject = await updateProjectService(name, description, req.params.projectId);
+        const procejtId = req.params.projectId;
+        const updateProject = await updateProjectService(name, description, procejtId);
         if (!updateProject) {
             handleResponse(res, 404, "Project not found", null);
             return;
@@ -70,7 +70,8 @@ export const updateProject = async (req: Request, res: Response, next: NextFunct
 
 export const deleteProject = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const deletedProject = await deleteProjectService(req.params.projectId);
+        const procejtId = req.params.projectId;
+        const deletedProject = await deleteProjectService(procejtId);
         if (!deletedProject) {
             handleResponse(res, 404, "Project not found", null);
             return;
