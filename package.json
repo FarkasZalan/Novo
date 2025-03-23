@@ -1,5 +1,5 @@
 {
-  "name": "crud-operations-with-express",
+  "name": "task-managger",
   "version": "1.0.0",
   "scripts": {
     "start": "node dist/app.js",
