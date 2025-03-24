@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import { createUserService, deleteUserService, getAllUsersService, getUserByIdService, updateUserService } from "../models/userModel";
 import { NextFunction } from "connect";
 import { createProjectService, deleteProjectService, getAllProjectForUsersService, getProjectByIdService, updateProjectService } from "../models/projectModel";
 
@@ -16,9 +15,8 @@ const handleResponse = (res: Response, status: number, message: string, data: an
 
 export const createProject = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const { name, description } = req.body;
-        const userId = req.params.userId;
-        const newProject = await createProjectService(name, description, userId);
+        const { name, description, user_id } = req.body;
+        const newProject = await createProjectService(name, description, user_id);
         handleResponse(res, 201, "Project created successfully", newProject);
     } catch (error: Error | any) {
         // Check for unique constraint violation (duplicate email)
@@ -33,7 +31,8 @@ export const createProject = async (req: Request, res: Response, next: NextFunct
 
 export const getAllProjects = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const projects = await getAllProjectForUsersService(req.params.userId); // get all projects for the user;
+        const userId = req.params.user_id;
+        const projects = await getAllProjectForUsersService(userId); // get all projects for the user;
         handleResponse(res, 200, "Projects fetched successfully", projects);
     } catch (error) {
         next(error);

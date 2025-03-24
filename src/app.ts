@@ -3,9 +3,9 @@ import cors from "cors";
 import dotenv from "dotenv";
 import pool, { initializeDatabase } from "./config/db";
 import userRoutes from "./routes/userRoutes";
+import authRoutes from "./routes/authRoutes";
 import projectRoutes from "./routes/projectRoutes";
 import errorHandling from "./middlewares/errorHandler";
-import createUserTable from "./data/createUserTable";
 
 dotenv.config();
 
@@ -24,6 +24,7 @@ app.use(cors()); // Enable CORS
 app.use(express.json()); // if the request has json data (body), it will be parsed to Javascript object and made available in req.body
 
 // Routes
+app.use("/api", authRoutes);
 app.use("/api", userRoutes); // Prefix all routes with /api to avoid conflicts so now all routes start with /api
 app.use("/api", projectRoutes);
 

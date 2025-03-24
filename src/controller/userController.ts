@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
-import { createUserService, deleteUserService, getAllUsersService, getUserByIdService, updateUserService } from "../models/userModel";
+import { deleteUserService, getAllUsersService, getUserByIdService, updateUserService } from "../models/userModel";
 import { NextFunction } from "connect";
+import bcrypt from "bcrypt";
 
 // Standardized response function
 // it's a function that returns a response to the client when a request is made (CRUD operations)
@@ -11,22 +12,6 @@ const handleResponse = (res: Response, status: number, message: string, data: an
         message,
         data
     });
-};
-
-export const createUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-        const { email, name } = req.body;
-        const newUser = await createUserService(email, name);
-        handleResponse(res, 201, "User created successfully", newUser);
-    } catch (error: Error | any) {
-        // Check for unique constraint violation (duplicate email)
-        if (error.code === "23505") {
-            handleResponse(res, 409, "Email already exists", null);
-        } else {
-            // Pass other errors to the next middleware (errorHandling middleware)
-            next(error);
-        }
-    }
 };
 
 export const getAllUsers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -54,7 +39,8 @@ export const getUserById = async (req: Request, res: Response, next: NextFunctio
 export const updateUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const { email, name } = req.body;
-        const updatedUser = await updateUserService(req.params.id, email, name);
+        const userHashedPassword = await bcrypt.hash(req.body.password, 10);
+        const updatedUser = await updateUserService(req.params.id, email, name, userHashedPassword);
         if (!updatedUser) {
             handleResponse(res, 404, "User not found", null);
             return;
@@ -72,6 +58,15 @@ export const deleteUser = async (req: Request, res: Response, next: NextFunction
             handleResponse(res, 404, "User not found", null);
             return;
         }
+
+        // Remove the refresh token cookie before deleting the user
+        res.clearCookie("refresh_token", {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production", // Only allow secure cookies in production mode
+            sameSite: "strict", // Prevent CSRF attacks
+            path: "/auth/refresh-token"
+        });
+
         handleResponse(res, 200, "User deleted successfully", deletedUser);
     } catch (error) {
         next(error);
