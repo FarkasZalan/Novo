@@ -2,6 +2,7 @@ import pkg from "pg";
 import dotenv from "dotenv";
 import createUserTable from "../data/createUserTable";
 import createProjectsTable from "../data/createProjectTable";
+import createTasksTable from "../data/createTaskTable";
 
 const { Pool } = pkg;
 
@@ -31,6 +32,7 @@ const pool = new Pool({
 export const initializeDatabase = async () => {
     await createUserTable();
     await createProjectsTable();
+    await createTasksTable();
 };
 
 // listens for new connections and when a new connection is requested from the pool it will execute this callback function

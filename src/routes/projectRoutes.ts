@@ -5,7 +5,7 @@ import { authenticateToken } from "../middlewares/authorization";
 const router = express.Router();
 
 // Create a project for a specific user
-router.post("/project", authenticateToken, createProject);
+router.post("/create-project", authenticateToken, createProject);
 
 // Get all projects for a specific user
 router.get("/user/:userId/projects", authenticateToken, getAllProjects);

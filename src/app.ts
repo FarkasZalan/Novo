@@ -5,6 +5,7 @@ import pool, { initializeDatabase } from "./config/db";
 import userRoutes from "./routes/userRoutes";
 import authRoutes from "./routes/authRoutes";
 import projectRoutes from "./routes/projectRoutes";
+import taskRoutes from "./routes/taskRoutes";
 import errorHandling from "./middlewares/errorHandler";
 
 dotenv.config();
@@ -27,6 +28,7 @@ app.use(express.json()); // if the request has json data (body), it will be pars
 app.use("/api", authRoutes);
 app.use("/api", userRoutes); // Prefix all routes with /api to avoid conflicts so now all routes start with /api
 app.use("/api", projectRoutes);
+app.use("/api", taskRoutes);
 
 // Error handling middleware
 app.use(errorHandling);
