@@ -1,6 +1,7 @@
 import pool from "../config/db";
 
 export const getAllProjectForUsersService = async (id: string) => {
+    console.log(id);
     const result = await pool.query("SELECT * FROM projects WHERE user_id = $1", [id]); // send a query to the database with one of the open connection from the pool
     return result.rows
 }

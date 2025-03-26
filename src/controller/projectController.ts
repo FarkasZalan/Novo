@@ -31,7 +31,7 @@ export const createProject = async (req: Request, res: Response, next: NextFunct
 
 export const getAllProjects = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const userId = req.params.userId;
+        const userId = req.user.id;
         const projects = await getAllProjectForUsersService(userId); // get all projects for the user;
         handleResponse(res, 200, "Projects fetched successfully", projects);
     } catch (error) {

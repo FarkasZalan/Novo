@@ -23,9 +23,10 @@ export const getAllUsers = async (req: Request, res: Response, next: NextFunctio
     }
 };
 
-export const getUserById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const getUserProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const user = await getUserByIdService(req.params.id);
+        const userId = req.user.id;
+        const user = await getUserByIdService(userId);
         if (!user) {
             handleResponse(res, 404, "User not found", null);
             return;
@@ -40,7 +41,8 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
     try {
         const { email, name } = req.body;
         const userHashedPassword = await bcrypt.hash(req.body.password, 10);
-        const updatedUser = await updateUserService(req.params.id, email, name, userHashedPassword);
+        const userId = req.user.id;
+        const updatedUser = await updateUserService(userId, email, name, userHashedPassword);
         if (!updatedUser) {
             handleResponse(res, 404, "User not found", null);
             return;
@@ -53,7 +55,8 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
 
 export const deleteUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const deletedUser = await deleteUserService(req.params.id);
+        const userId = req.user.id;
+        const deletedUser = await deleteUserService(userId);
         if (!deletedUser) {
             handleResponse(res, 404, "User not found", null);
             return;
