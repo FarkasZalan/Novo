@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { generateAccessToken } from '../utils/jwt-helpers';
+import { generateAccessToken } from '../utils/token-utils';
 import bcrypt from "bcrypt";
 import { findByEmail } from '../models/authModel';
 
@@ -12,7 +12,10 @@ declare module "express-serve-static-core" {
 }
 
 export const authenticateToken = (req: Request, res: Response, next: NextFunction): void => {
-    const authHeader = req.headers['authorization']; // Bearer <token>
+    // Bearer token
+    // Bearer token = "Bearer <token>" is a type of access token in HTTP, used to authenticate requests so basically whoever is holding the token can access the resources
+    // no extra verification required
+    const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
 
     if (!token) {
@@ -20,12 +23,13 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
         return;
     }
 
+    // Verify access token
     jwt.verify(token, process.env.JWT_SECRET as string, (err: any, user: any) => {
         if (err) {
             return res.status(403).json({ message: 'Invalid or expired access token' });
         }
         req.user = { id: user.id }; // add user id to request
-        next();
+        next(); // call next middleware
     });
 };
 

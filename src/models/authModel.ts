@@ -1,7 +1,7 @@
 import pool from "../config/db";
 import bcrypt from "bcrypt";
 
-export const createUserService = async (email: string, name: string, userHashedPassword: string) => {
+export const createUserQuery = async (email: string, name: string, userHashedPassword: string) => {
     const result = await pool.query("INSERT INTO users (email, name, password, updated_at) VALUES ($1, $2, $3, NOW()) RETURNING *", [email, name, userHashedPassword]);
     return result.rows[0];
 }

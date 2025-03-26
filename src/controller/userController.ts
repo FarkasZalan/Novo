@@ -1,11 +1,10 @@
 import { Request, Response } from "express";
-import { deleteUserService, getAllUsersService, getUserByIdService, updateUserService } from "../models/userModel";
+import { deleteUserQuery, getAllUsersQuery, getUserByIdQuery, updateUserQuery } from "../models/userModel";
 import { NextFunction } from "connect";
 import bcrypt from "bcrypt";
 
 // Standardized response function
 // it's a function that returns a response to the client when a request is made (CRUD operations)
-// it's make the routes more readable
 const handleResponse = (res: Response, status: number, message: string, data: any) => {
     return res.status(status).json({
         status,
@@ -16,7 +15,7 @@ const handleResponse = (res: Response, status: number, message: string, data: an
 
 export const getAllUsers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const users = await getAllUsersService();
+        const users = await getAllUsersQuery();
         handleResponse(res, 200, "Users fetched successfully", users);
     } catch (error) {
         next(error);
@@ -26,7 +25,7 @@ export const getAllUsers = async (req: Request, res: Response, next: NextFunctio
 export const getUserProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const userId = req.user.id;
-        const user = await getUserByIdService(userId);
+        const user = await getUserByIdQuery(userId);
         if (!user) {
             handleResponse(res, 404, "User not found", null);
             return;
@@ -42,7 +41,7 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
         const { email, name } = req.body;
         const userHashedPassword = await bcrypt.hash(req.body.password, 10);
         const userId = req.user.id;
-        const updatedUser = await updateUserService(userId, email, name, userHashedPassword);
+        const updatedUser = await updateUserQuery(userId, email, name, userHashedPassword);
         if (!updatedUser) {
             handleResponse(res, 404, "User not found", null);
             return;
@@ -56,7 +55,7 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
 export const deleteUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const userId = req.user.id;
-        const deletedUser = await deleteUserService(userId);
+        const deletedUser = await deleteUserQuery(userId);
         if (!deletedUser) {
             handleResponse(res, 404, "User not found", null);
             return;

@@ -1,19 +1,21 @@
 import { Request, Response, NextFunction } from 'express';
-import { getProjectByIdService } from '../models/projectModel';
-import { getTaskByIdService } from '../models/task.Model';
+import { getProjectByIdQuery } from '../models/projectModel';
+import { getTaskByIdQuery } from '../models/task.Model';
+import { Project } from '../schemas/projectSchema';
 
-// make authorization
+// authorization for projects and tasks
 export const authorizeProject = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const requestingUserId = req.user.id;
     const projectId = req.params.projectId;
 
-    const project: any = await getProjectByIdService(projectId);
+    const project: Project = await getProjectByIdQuery(projectId);
 
     if (!project) {
         res.status(404).json({ status: 404, message: "Project not found" });
         return
     }
 
+    // if the project owner is not the same as the requesting user
     if (project.user_id !== requestingUserId) {
         res.status(403).json({ status: 403, message: "Unauthorized" });
         return
@@ -27,20 +29,19 @@ export const authorizeTask = async (req: Request, res: Response, next: NextFunct
     const requestingUserId = req.user.id;
     const { projectId, taskId } = req.params;
 
-    const project: any = await getProjectByIdService(projectId);
+    const project: Project = await getProjectByIdQuery(projectId);
 
     if (!project) {
         res.status(404).json({ status: 404, message: "Project not found" });
         return
     }
 
-    console.log(project.user_id, requestingUserId);
     if (project.user_id !== requestingUserId) {
         res.status(403).json({ status: 403, message: "Unauthorized" });
         return
     }
 
-    const task = await getTaskByIdService(taskId);
+    const task = await getTaskByIdQuery(taskId);
     if (!task) {
         res.status(404).json({ status: 404, message: "Task not found" });
         return

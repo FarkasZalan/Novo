@@ -5,6 +5,7 @@ import { refreshAccessToken } from "../middlewares/authenticate";
 
 const router = express.Router();
 
+// auth routes
 router.post("/auth/register", validateUser, createUser);
 router.post("/auth/login", loginUser);
 router.post("/auth/refresh-token", refreshAccessToken)

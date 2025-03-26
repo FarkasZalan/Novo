@@ -1,10 +1,9 @@
 import { Request, Response } from "express";
 import { NextFunction } from "connect";
-import { createProjectService, deleteProjectService, getAllProjectForUsersService, getProjectByIdService, updateProjectService } from "../models/projectModel";
+import { createProjectQuery, deleteProjectQuery, getAllProjectForUsersQuery, getProjectByIdQuery, updateProjectQuery } from "../models/projectModel";
 
 // Standardized response function
 // it's a function that returns a response to the client when a request is made (CRUD operations)
-// it's make the routes more readable
 const handleResponse = (res: Response, status: number, message: string, data: any) => {
     return res.status(status).json({
         status,
@@ -16,7 +15,7 @@ const handleResponse = (res: Response, status: number, message: string, data: an
 export const createProject = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const { name, description, userId } = req.body;
-        const newProject = await createProjectService(name, description, userId);
+        const newProject = await createProjectQuery(name, description, userId);
         handleResponse(res, 201, "Project created successfully", newProject);
     } catch (error: Error | any) {
         // Check for unique constraint violation (duplicate email)
@@ -32,7 +31,7 @@ export const createProject = async (req: Request, res: Response, next: NextFunct
 export const getAllProjects = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const userId = req.user.id;
-        const projects = await getAllProjectForUsersService(userId); // get all projects for the user;
+        const projects = await getAllProjectForUsersQuery(userId); // get all projects for the user;
         handleResponse(res, 200, "Projects fetched successfully", projects);
     } catch (error) {
         next(error);
@@ -41,7 +40,7 @@ export const getAllProjects = async (req: Request, res: Response, next: NextFunc
 
 export const getProjectById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const project = await getProjectByIdService(req.params.projectId);
+        const project = await getProjectByIdQuery(req.params.projectId);
         if (!project) {
             handleResponse(res, 404, "Project not found", null);
             return;
@@ -56,7 +55,7 @@ export const updateProject = async (req: Request, res: Response, next: NextFunct
     try {
         const { name, description } = req.body;
         const procejtId = req.params.projectId;
-        const updateProject = await updateProjectService(name, description, procejtId);
+        const updateProject = await updateProjectQuery(name, description, procejtId);
         if (!updateProject) {
             handleResponse(res, 404, "Project not found", null);
             return;
@@ -70,7 +69,7 @@ export const updateProject = async (req: Request, res: Response, next: NextFunct
 export const deleteProject = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const procejtId = req.params.projectId;
-        const deletedProject = await deleteProjectService(procejtId);
+        const deletedProject = await deleteProjectQuery(procejtId);
         if (!deletedProject) {
             handleResponse(res, 404, "Project not found", null);
             return;

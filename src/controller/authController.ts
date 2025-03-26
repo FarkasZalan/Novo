@@ -1,12 +1,14 @@
 import { NextFunction } from "express";
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
-import { clearRefreshTokenInDB, createUserService, findByEmail, storeRefreshToken } from "../models/authModel";
-import { generateAccessToken, generateRefreshToken } from "../utils/jwt-helpers";
+import { clearRefreshTokenInDB, createUserQuery, findByEmail, storeRefreshToken } from "../models/authModel";
+import { generateAccessToken, generateRefreshToken } from "../utils/token-utils";
 import dotenv from "dotenv";
 
 dotenv.config();
 
+// Standardized response function
+// it's a function that returns a response to the client when a request is made (CRUD operations)
 const handleResponse = (res: Response, status: number, message: string, data: any) => {
     return res.status(status).json({
         status,
@@ -19,7 +21,7 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
     try {
         const { email, name } = req.body;
         const userHashedPassword = await bcrypt.hash(req.body.password, 10);
-        const newUser = await createUserService(email, name, userHashedPassword);
+        const newUser = await createUserQuery(email, name, userHashedPassword);
         handleResponse(res, 201, "User created successfully", newUser);
     } catch (error: Error | any) {
         // Check for unique constraint violation (duplicate email)
@@ -52,7 +54,10 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
 
         // JWT
 
-        // 1. Create new refresh session ID
+        // 1. Create new refresh session ID fro incremental security
+        // if the token is stolen then the attacker can use the refresh token to generate a new access token
+        // but with session ID the attacker can't reuse the refresh token because when the refresh token is used the 
+        // server checks the session ID and if it's doesn't match then the request is rejected
         const refreshSessionId = crypto.randomUUID(); // Generate a unique refresh session ID
 
         // 2. Store the hashed session ID in the database before generating the refresh token

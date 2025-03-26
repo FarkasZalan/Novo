@@ -18,6 +18,7 @@ const port = process.env.PORT || 3000;
 
 // Middlewares
 // Middlewares = functions that run between request and response eg. check if user is logged in, process the request data (json) etc
+// so these are process the request before reaching the controller
 
 // CORS = it's a security feature that denies browsers from making requests to other domains, ports, or protocols
 app.use(cors()); // Enable CORS

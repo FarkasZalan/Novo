@@ -7,6 +7,7 @@ import { authenticateToken } from "../middlewares/authenticate";
 const router = express.Router();
 
 // validateUser middleware is used to validate user input, if the input is valid, the next middleware will be called
+// authenticateToken middleware is used to authenticate user, if the user is authenticated, the next middleware will be called
 router.get("/users", getAllUsers);
 router.get("/user/profile", authenticateToken, getUserProfile);
 router.put("/user/update", authenticateToken, validateUser, updateUser);

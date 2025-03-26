@@ -1,10 +1,9 @@
 import { Request, Response } from "express";
 import { NextFunction } from "connect";
-import { createTaskService, deleteTaskService, getAllTaskForProjectService, getTaskByIdService, updateTaskService } from "../models/task.Model";
+import { createTaskQuery, deleteTaskQuery, getAllTaskForProjectQuery, getTaskByIdQuery, updateTaskQuery } from "../models/task.Model";
 
 // Standardized response function
 // it's a function that returns a response to the client when a request is made (CRUD operations)
-// it's make the routes more readable
 const handleResponse = (res: Response, status: number, message: string, data: any) => {
     return res.status(status).json({
         status,
@@ -16,7 +15,7 @@ const handleResponse = (res: Response, status: number, message: string, data: an
 export const createTask = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const { title, description, projectId, due_date, priority } = req.body;
-        const newTask = await createTaskService(title, description, projectId, due_date, priority, false);
+        const newTask = await createTaskQuery(title, description, projectId, due_date, priority, false);
         handleResponse(res, 201, "Task created successfully", newTask);
     } catch (error: Error | any) {
         // Check for unique constraint violation (duplicate email)
@@ -32,7 +31,7 @@ export const createTask = async (req: Request, res: Response, next: NextFunction
 export const getAllTasks = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const projectId = req.params.projectId;
-        const tasks = await getAllTaskForProjectService(projectId); // get all tasks for the project;
+        const tasks = await getAllTaskForProjectQuery(projectId); // get all tasks for the project;
         handleResponse(res, 200, "Tasks fetched successfully", tasks);
     } catch (error) {
         next(error);
@@ -41,7 +40,7 @@ export const getAllTasks = async (req: Request, res: Response, next: NextFunctio
 
 export const getTaskById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const task = await getTaskByIdService(req.params.taskId);
+        const task = await getTaskByIdQuery(req.params.taskId);
         if (!task) {
             handleResponse(res, 404, "Task not found", null);
             return;
@@ -56,7 +55,7 @@ export const updateTask = async (req: Request, res: Response, next: NextFunction
     try {
         const { title, description, projectId, due_date, priority, completed } = req.body;
         const taskId = req.params.taskId;
-        const updateTask = await updateTaskService(title, description, projectId, due_date, priority, completed, taskId);
+        const updateTask = await updateTaskQuery(title, description, projectId, due_date, priority, completed, taskId);
         if (!updateTask) {
             handleResponse(res, 404, "Task not found", null);
             return;
@@ -70,7 +69,7 @@ export const updateTask = async (req: Request, res: Response, next: NextFunction
 export const deleteTask = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const taskId = req.params.taskId;
-        const deletedTask = await deleteTaskService(taskId);
+        const deletedTask = await deleteTaskQuery(taskId);
         if (!deletedTask) {
             handleResponse(res, 404, "Task not found", null);
             return;
