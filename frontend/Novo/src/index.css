@@ -27,3 +27,6 @@
 .animation-delay-4000 {
   animation-delay: 4s;
 }
+
+
+@custom-variant dark (&:where(.dark, .dark *));

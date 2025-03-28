@@ -3,15 +3,15 @@ import { FaTasks, FaProjectDiagram, FaRegLightbulb, FaUserPlus } from "react-ico
 
 export const Home = () => {
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-900">
             {/* Hero Section */}
             <section className="relative overflow-hidden">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32">
                     <div className="relative z-10 text-center">
-                        <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
+                        <h1 className="text-4xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
                             Organize. <span className="text-indigo-600">Collaborate.</span> Achieve.
                         </h1>
-                        <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto mb-10">
+                        <p className="text-lg md:text-xl text-gray-600 dark:text-gray-200 max-w-3xl mx-auto mb-10">
                             Novo helps teams manage projects, track tasks, and resolve issues - all in one beautiful workspace.
                         </p>
                         <div className="flex flex-col sm:flex-row justify-center gap-4">
@@ -24,57 +24,52 @@ export const Home = () => {
                             </Link>
                             <Link
                                 to="/login"
-                                className="px-8 py-3 border border-gray-300 bg-white text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors shadow hover:shadow-md"
+                                className="px-8 py-3 border border-gray-300 dark:border-gray-600 bg-transparent text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors shadow hover:shadow-md"
                             >
                                 Sign In
                             </Link>
                         </div>
                     </div>
                 </div>
-                <div className="absolute inset-0 opacity-10">
-                    <div className="absolute top-0 left-1/4 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
-                    <div className="absolute top-0 right-1/4 w-72 h-72 bg-indigo-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
-                    <div className="absolute bottom-0 left-1/2 w-72 h-72 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
-                </div>
             </section>
 
             {/* Features Section */}
-            <section className="py-16 bg-white">
+            <section className="py-16 bg-white dark:bg-gray-800">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-16">
-                        <h2 className="text-3xl font-bold text-gray-900 mb-4">Powerful Features</h2>
-                        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                        <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-200 mb-4">Powerful Features</h2>
+                        <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
                             Everything you need to manage your projects effectively
                         </p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        <div className="bg-gray-50 p-8 rounded-xl hover:shadow-lg transition-shadow">
-                            <div className="w-14 h-14 bg-indigo-100 rounded-lg flex items-center justify-center mb-6">
-                                <FaProjectDiagram className="text-indigo-600 text-2xl" />
+                        <div className="bg-gray-50 dark:bg-gray-700 p-8 rounded-xl hover:shadow-lg transition-shadow">
+                            <div className="w-14 h-14 bg-indigo-100 dark:bg-indigo-500 rounded-lg flex items-center justify-center mb-6">
+                                <FaProjectDiagram className="text-indigo-600 dark:text-white text-2xl" />
                             </div>
-                            <h3 className="text-xl font-semibold text-gray-900 mb-3">Project Management</h3>
-                            <p className="text-gray-600">
+                            <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-200 mb-3">Project Management</h3>
+                            <p className="text-gray-600 dark:text-gray-300">
                                 Organize your work into projects with customizable workflows and team collaboration.
                             </p>
                         </div>
 
-                        <div className="bg-gray-50 p-8 rounded-xl hover:shadow-lg transition-shadow">
-                            <div className="w-14 h-14 bg-blue-100 rounded-lg flex items-center justify-center mb-6">
-                                <FaTasks className="text-blue-600 text-2xl" />
+                        <div className="bg-gray-50 dark:bg-gray-700 p-8 rounded-xl hover:shadow-lg transition-shadow">
+                            <div className="w-14 h-14 bg-blue-100 dark:bg-blue-600 rounded-lg flex items-center justify-center mb-6">
+                                <FaTasks className="text-blue-600 dark:text-white text-2xl" />
                             </div>
-                            <h3 className="text-xl font-semibold text-gray-900 mb-3">Task Tracking</h3>
-                            <p className="text-gray-600">
+                            <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-200 mb-3">Task Tracking</h3>
+                            <p className="text-gray-600 dark:text-gray-300">
                                 Create, assign, and track tasks with deadlines, priorities, and progress indicators.
                             </p>
                         </div>
 
-                        <div className="bg-gray-50 p-8 rounded-xl hover:shadow-lg transition-shadow">
-                            <div className="w-14 h-14 bg-purple-100 rounded-lg flex items-center justify-center mb-6">
-                                <FaRegLightbulb className="text-purple-600 text-2xl" />
+                        <div className="bg-gray-50 dark:bg-gray-700 p-8 rounded-xl hover:shadow-lg transition-shadow">
+                            <div className="w-14 h-14 bg-purple-100 dark:bg-purple-600 rounded-lg flex items-center justify-center mb-6">
+                                <FaRegLightbulb className="text-purple-600 dark:text-white text-2xl" />
                             </div>
-                            <h3 className="text-xl font-semibold text-gray-900 mb-3">Issue Resolution</h3>
-                            <p className="text-gray-600">
+                            <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-200 mb-3">Issue Resolution</h3>
+                            <p className="text-gray-600 dark:text-gray-300">
                                 Identify, categorize, and resolve issues efficiently with your team.
                             </p>
                         </div>
@@ -83,15 +78,15 @@ export const Home = () => {
             </section>
 
             {/* CTA Section */}
-            <section className="py-16 bg-indigo-600 text-white">
+            <section className="py-16 bg-indigo-600 text-white dark:bg-indigo-900">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <h2 className="text-3xl font-bold mb-6">Ready to boost your productivity?</h2>
-                    <p className="text-lg text-indigo-100 max-w-2xl mx-auto mb-8">
+                    <h2 className="text-3xl font-bold mb-6 dark:text-indigo-200">Ready to boost your productivity?</h2>
+                    <p className="text-lg text-indigo-100 dark:text-indigo-200 max-w-2xl mx-auto mb-8 dark:text-indigo-300">
                         Join thousands of teams who are already managing their work more effectively with Novo.
                     </p>
                     <Link
                         to="/register"
-                        className="inline-block px-8 py-3 bg-white text-indigo-600 font-medium rounded-lg hover:bg-gray-100 transition-colors shadow-lg hover:shadow-xl"
+                        className="dark:bg-indigo-600 dark:hover:bg-indigo-700 dark:text-white inline-block px-8 py-3 bg-white text-indigo-600 font-medium rounded-lg hover:bg-gray-100 transition-colors shadow-lg hover:shadow-xl"
                     >
                         Get Started for Free
                     </Link>

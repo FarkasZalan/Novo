@@ -1,24 +1,38 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
-import { FaUser, FaEnvelope, FaPlus, FaTasks } from "react-icons/fa";
+import { FaUser, FaEnvelope, FaPlus } from "react-icons/fa";
+import { DarkModeToggle } from "./DarkModeToggle";
 
 export const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
 
     return (
-        <nav className="bg-indigo-700 shadow-lg sticky top-0 z-50">
+        <nav className="bg-white dark:bg-gray-900 shadow-md sticky top-0 z-50 transition-all duration-300">
             <div className="mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
-                    {/* Logo/Brand - More distinctive */}
+                    {/* Logo/Brand */}
                     <div className="flex-shrink-0 flex items-center">
                         <Link
                             to="/"
-                            className="text-white text-2xl font-bold hover:text-indigo-200 transition-colors flex items-center"
+                            className="flex items-center text-gray-900 dark:text-white text-2xl font-bold hover:scale-105 transform transition-transform transition-colors"
                         >
-                            <span className="bg-white text-indigo-700 rounded-lg px-2 py-1 mr-2 flex items-center justify-center">
-                                <FaTasks className="mr-1" />
+                            <span className="text-indigo-600 dark:text-indigo-400 rounded-lg flex items-center justify-center">
+                                <svg
+                                    className="w-7 h-7"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2.5"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                >
+                                    <polygon
+                                        points="5 3, 19 3, 12 21"
+                                        className="text-indigo-600 dark:text-indigo-400"
+                                    ></polygon>
+                                </svg>
                             </span>
-                            <span className="hidden sm:inline">Novo</span>
+                            <span className="ml-2 hidden sm:inline uppercase tracking-wide">Novo</span>
                         </Link>
                     </div>
 
@@ -26,38 +40,46 @@ export const Navbar = () => {
                     <div className="hidden md:flex items-center space-x-4">
                         <Link
                             to="/projects"
-                            className="text-white hover:bg-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2"
+                            className="text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-indigo-500 px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2"
                         >
-                            <FaPlus className="text-indigo-200" />
+                            <FaPlus className="text-indigo-600 dark:text-indigo-200 hover:text-white dark:hover:text-indigo-100" />
                             New Project
                         </Link>
                         <Link
                             to="/profile"
-                            className="text-white hover:bg-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2"
+                            className="text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-indigo-500 px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2"
                         >
-                            <FaUser className="text-indigo-200" />
+                            <FaUser className="text-indigo-600 dark:text-indigo-200 hover:text-white dark:hover:text-indigo-100" />
                             Profile
                         </Link>
                         <Link
                             to="/contact"
-                            className="text-white hover:bg-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2"
+                            className="text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-indigo-500 px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2"
                         >
-                            <FaEnvelope className="text-indigo-200" />
+                            <FaEnvelope className="text-indigo-600 dark:text-indigo-200 hover:text-white dark:hover:text-indigo-100" />
                             Contact
                         </Link>
+
+                        {/* Dark Mode Toggle Button */}
+                        <DarkModeToggle />
+
                         <Link
                             to="/register"
-                            className="ml-2 bg-white text-indigo-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-100 transition-colors shadow hover:shadow-md flex items-center gap-1"
+                            className="ml-2 bg-indigo-600 text-white dark:bg-indigo-900 dark:text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700 dark:hover:bg-indigo-800 transition-colors shadow hover:shadow-md flex items-center gap-1"
                         >
                             Get Started
                         </Link>
                     </div>
 
-                    {/* Mobile menu button */}
+                    {/* Mobile Menu Button */}
                     <div className="md:hidden flex items-center">
+                        {/* Dark Mode Toggle in Mobile */}
+                        <DarkModeToggle />
+
+                        {/* Mobile Menu Toggle */}
                         <button
                             onClick={() => setIsOpen(!isOpen)}
-                            className="inline-flex items-center justify-center p-2 rounded-md text-white hover:text-indigo-200 hover:bg-indigo-600 focus:outline-none transition-colors"
+                            className="inline-flex items-center justify-center p-2 rounded-md text-gray-900 dark:text-white hover:text-indigo-200 hover:bg-indigo-600 focus:outline-none transition-colors"
                         >
                             <span className="sr-only">Open menu</span>
                             {isOpen ? (
@@ -74,12 +96,12 @@ export const Navbar = () => {
                 </div>
             </div>
 
-            {/* Mobile Navigation */}
+            {/* Mobile Navigation Menu */}
             <div className={`md:hidden ${isOpen ? 'block' : 'hidden'}`}>
-                <div className="pt-2 pb-3 space-y-1 px-2 bg-indigo-800 shadow-lg">
+                <div className="pt-2 pb-3 space-y-1 px-2 bg-indigo-700 dark:bg-[#1E1B47] shadow-lg">
                     <Link
                         to="/projects"
-                        className="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-indigo-700 transition-colors flex items-center gap-3"
+                        className="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-100 dark:hover:bg-indigo-500 transition-colors flex items-center gap-3"
                         onClick={() => setIsOpen(false)}
                     >
                         <FaPlus />
@@ -87,7 +109,7 @@ export const Navbar = () => {
                     </Link>
                     <Link
                         to="/profile"
-                        className="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-indigo-700 transition-colors flex items-center gap-3"
+                        className="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-100 dark:hover:bg-indigo-500 transition-colors flex items-center gap-3"
                         onClick={() => setIsOpen(false)}
                     >
                         <FaUser />
@@ -95,7 +117,7 @@ export const Navbar = () => {
                     </Link>
                     <Link
                         to="/contact"
-                        className="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-indigo-700 transition-colors flex items-center gap-3"
+                        className="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-100 dark:hover:bg-indigo-500 transition-colors flex items-center gap-3"
                         onClick={() => setIsOpen(false)}
                     >
                         <FaEnvelope />
@@ -103,7 +125,7 @@ export const Navbar = () => {
                     </Link>
                     <Link
                         to="/register"
-                        className="block px-3 py-2 rounded-md text-base font-medium bg-white text-indigo-700 hover:bg-gray-100 transition-colors mt-2 text-center flex items-center justify-center gap-2"
+                        className="block px-3 py-2 rounded-md text-base font-medium bg-white text-indigo-700 dark:bg-indigo-900 dark:text-white hover:bg-gray-100 dark:hover:bg-indigo-700 transition-colors mt-2 text-center flex items-center justify-center gap-2"
                         onClick={() => setIsOpen(false)}
                     >
                         Get Started
