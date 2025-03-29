@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { FaUser, FaEnvelope, FaPlus } from "react-icons/fa";
-import { DarkModeToggle } from "./DarkModeToggle";
+import { DarkModeToggle } from "../utils/DarkModeToggle";
 
 export const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);

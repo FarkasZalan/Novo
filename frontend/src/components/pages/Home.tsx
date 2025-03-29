@@ -1,7 +1,11 @@
 import { Link } from "react-router-dom";
+import { TypeAnimation } from 'react-type-animation';
 import { FaTasks, FaProjectDiagram, FaRegLightbulb, FaUserPlus } from "react-icons/fa";
+import { useState } from "react";
+import { Footer } from "../layouts/Footer";
 
 export const Home = () => {
+    const [currentWord, setCurrentWord] = useState('');
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-900">
             {/* Hero Section */}
@@ -9,7 +13,30 @@ export const Home = () => {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32">
                     <div className="relative z-10 text-center">
                         <h1 className="text-4xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
-                            Organize. <span className="text-indigo-600">Collaborate.</span> Achieve.
+                            <span className="block mb-2">Manage Your Work with <span className="text-indigo-600">Novo</span></span>
+                            <span className={currentWord === 'Collaborate.' ? 'text-indigo-600' : ''}>
+                                <TypeAnimation
+                                    sequence={[
+                                        () => setCurrentWord('Organize.'),
+                                        'Organize',
+                                        4000,
+                                        () => setCurrentWord('Collaborate.'),
+                                        'Collaborate',
+                                        4000,
+                                        () => setCurrentWord('Achieve.'),
+                                        'Achieve',
+                                        4000
+                                    ]}
+                                    wrapper="span"
+                                    speed={30}
+                                    repeat={Infinity}
+                                    style={{
+                                        display: 'inline-block',
+                                        opacity: 1,
+                                        transition: 'opacity 0.5s ease-in-out'
+                                    }}
+                                />
+                            </span>
                         </h1>
                         <p className="text-lg md:text-xl text-gray-600 dark:text-gray-200 max-w-3xl mx-auto mb-10">
                             Novo helps teams manage projects, track tasks, and resolve issues - all in one beautiful workspace.
@@ -20,7 +47,7 @@ export const Home = () => {
                                 className="px-8 py-3 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
                             >
                                 <FaUserPlus className="text-lg" />
-                                Get Started - It's Free
+                                Get Started For Free
                             </Link>
                             <Link
                                 to="/login"
@@ -94,35 +121,7 @@ export const Home = () => {
             </section>
 
             {/* Footer */}
-            <footer className="bg-gray-900 text-gray-400 py-12">
-                <div className="mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex flex-col md:flex-row justify-between items-center">
-                        <div className="mb-6 md:mb-0">
-                            <Link to="/" className="text-white text-2xl font-bold">
-                                Novo
-                            </Link>
-                            <p className="mt-2 text-sm">The modern task management solution</p>
-                        </div>
-                        <div className="flex space-x-6">
-                            <Link to="/about" className="hover:text-white transition-colors">
-                                About
-                            </Link>
-                            <Link to="/contact" className="hover:text-white transition-colors">
-                                Contact
-                            </Link>
-                            <Link to="/privacy" className="hover:text-white transition-colors">
-                                Privacy
-                            </Link>
-                            <Link to="/terms" className="hover:text-white transition-colors">
-                                Terms
-                            </Link>
-                        </div>
-                    </div>
-                    <div className="mt-8 pt-8 border-t border-gray-800 text-sm text-center">
-                        © {new Date().getFullYear()} Novo Task Manager. All rights reserved.
-                    </div>
-                </div>
-            </footer>
+            <Footer />
         </div>
     );
 };

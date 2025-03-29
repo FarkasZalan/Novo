@@ -24,7 +24,9 @@
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
     "pg": "^8.14.1",
-    "prettier": "^3.5.3"
+    "prettier": "^3.5.3",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
