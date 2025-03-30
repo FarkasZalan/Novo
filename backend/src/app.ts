@@ -22,7 +22,10 @@ const port = process.env.PORT || 3000;
 // so these are process the request before reaching the controller
 
 // CORS = it's a security feature that denies browsers from making requests to other domains, ports, or protocols
-app.use(cors()); // Enable CORS
+app.use(cors({
+    origin: "http://localhost:5173", // frontend url
+    credentials: true // allow cookies
+})); // Enable CORS
 
 // swagger config
 setupSwagger(app);

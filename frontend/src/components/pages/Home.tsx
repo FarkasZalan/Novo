@@ -2,7 +2,6 @@ import { Link } from "react-router-dom";
 import { TypeAnimation } from 'react-type-animation';
 import { FaTasks, FaProjectDiagram, FaRegLightbulb, FaUserPlus } from "react-icons/fa";
 import { useState } from "react";
-import { Footer } from "../layouts/Footer";
 
 export const Home = () => {
     const [currentWord, setCurrentWord] = useState('');
@@ -119,9 +118,6 @@ export const Home = () => {
                     </Link>
                 </div>
             </section>
-
-            {/* Footer */}
-            <Footer />
         </div>
     );
 };

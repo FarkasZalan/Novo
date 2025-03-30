@@ -1,25 +1,68 @@
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FaEnvelope, FaLock, FaGoogle, FaGithub } from "react-icons/fa";
-import { useState } from "react";
+import { login } from "../../../services/authService";
+import { useAuth } from "../../../context/AuthContext";
 
 export const Login = () => {
+    const location = useLocation();
     const [formData, setFormData] = useState({
         email: "",
         password: "",
     });
+    const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
+    const { setAuthState } = useAuth();
 
-    const handleChange = (e: any) => {
+    useEffect(() => {
+        if (location.state?.registeredEmail) {
+            setFormData(prev => ({
+                ...prev,
+                email: location.state.registeredEmail
+            }));
+        }
+    }, [location.state]);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        setFormData((prev) => ({
+        setFormData(prev => ({
             ...prev,
             [name]: value,
         }));
     };
 
-    const handleSubmit = (e: any) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Handle login logic here
-        console.log(formData);
+
+        try {
+            setLoading(true);
+            setError("");
+
+            const { data } = await login(
+                formData.email,
+                formData.password
+            );
+
+            setAuthState({
+                user: data.user,
+                accessToken: data.accessToken
+            });
+
+            navigate("/");
+        } catch (err: any) {
+            const errorMessage = err.response?.data?.message || "Login failed";
+            console.error(err);
+            setError(
+                errorMessage.includes("Invalid email")
+                    ? "Invalid email or password"
+                    : errorMessage.includes("Invalid password")
+                        ? "Invalid email or password"
+                        : errorMessage
+            );
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -40,6 +83,12 @@ export const Login = () => {
                         </Link>
                     </p>
                 </div>
+
+                {error && (
+                    <div className="mb-6 p-3 bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 rounded-lg text-sm">
+                        {error}
+                    </div>
+                )}
 
                 <div className="bg-white dark:bg-gray-800 shadow-xl rounded-lg p-8">
                     <form onSubmit={handleSubmit} className="space-y-6">
@@ -104,9 +153,19 @@ export const Login = () => {
                         <div>
                             <button
                                 type="submit"
-                                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors cursor-pointer"
+                                disabled={loading}
+                                className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors ${loading ? "opacity-70 cursor-not-allowed" : "cursor-pointer"
+                                    }`}
                             >
-                                Sign in
+                                {loading ? (
+                                    <span className="flex items-center">
+                                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Signing in...
+                                    </span>
+                                ) : "Sign in"}
                             </button>
                         </div>
                     </form>

@@ -1,6 +1,7 @@
-import { Link } from "react-router-dom";
-import { FaUser, FaEnvelope, FaLock, FaGoogle, FaGithub } from "react-icons/fa";
 import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { FaUser, FaEnvelope, FaLock, FaGoogle, FaGithub } from "react-icons/fa";
+import { register } from "../../../services/authService";
 
 export const Register = () => {
     const [formData, setFormData] = useState({
@@ -9,8 +10,11 @@ export const Register = () => {
         password: "",
         confirmPassword: ""
     });
+    const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
 
-    const handleChange = (e: any) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
@@ -18,10 +22,43 @@ export const Register = () => {
         }));
     };
 
-    const handleSubmit = (e: any) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Handle registration logic here
-        console.log(formData);
+
+        // Validation
+        if (formData.password !== formData.confirmPassword) {
+            setError("Passwords don't match");
+            return;
+        }
+        if (formData.password.length < 6) {
+            setError("Password must be at least 6 characters");
+            return;
+        }
+
+        try {
+            setLoading(true);
+            setError("");
+
+            await register(
+                formData.name,
+                formData.email,
+                formData.password
+            );
+
+            navigate("/login", {
+                state: { registeredEmail: formData.email }, // Optional: pass email to pre-fill login
+                replace: true
+            });
+
+            navigate("/login");
+        } catch (err: any) {
+            const errorMessage = err.response?.data?.message || "Registration failed";
+            setError(errorMessage.includes("23505")
+                ? "Email already exists"
+                : errorMessage);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -39,6 +76,12 @@ export const Register = () => {
                         </Link>
                     </p>
                 </div>
+
+                {error && (
+                    <div className="mb-6 p-3 bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 rounded-lg text-sm">
+                        {error}
+                    </div>
+                )}
 
                 <div className="bg-white dark:bg-gray-800 shadow-xl rounded-lg p-8">
                     <form onSubmit={handleSubmit} className="space-y-6">
@@ -152,9 +195,19 @@ export const Register = () => {
                         <div>
                             <button
                                 type="submit"
-                                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors  cursor-pointer"
+                                disabled={loading}
+                                className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors ${loading ? "opacity-70 cursor-not-allowed" : "cursor-pointer"
+                                    }`}
                             >
-                                Create Account
+                                {loading ? (
+                                    <span className="flex items-center">
+                                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Creating account...
+                                    </span>
+                                ) : "Create Account"}
                             </button>
                         </div>
                     </form>
@@ -174,7 +227,7 @@ export const Register = () => {
                         <div className="mt-6 grid grid-cols-2 gap-3">
                             <button
                                 type="button"
-                                className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors  cursor-pointer"
+                                className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors cursor-pointer"
                             >
                                 <FaGoogle className="h-5 w-5" />
                                 <span className="ml-2">Google</span>
@@ -182,7 +235,7 @@ export const Register = () => {
 
                             <button
                                 type="button"
-                                className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors  cursor-pointer"
+                                className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors cursor-pointer"
                             >
                                 <FaGithub className="h-5 w-5 text-gray-800 dark:text-gray-200" />
                                 <span className="ml-2">GitHub</span>

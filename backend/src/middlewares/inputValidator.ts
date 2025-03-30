@@ -5,8 +5,8 @@ import { taskSchema } from "../schemas/taskSchema";
 
 // middleware functions to validate inputs
 export const validateUser = (req: Request, res: Response, next: NextFunction): void => {
-    const { email, name } = req.body;
-    const { error } = userScheama.validate({ email, name }); // check if the input is valid
+    const { email, name, password } = req.body;
+    const { error } = userScheama.validate({ email, name, password }); // check if the input is valid
     if (error) {
         res.status(400).json({
             status: 400,
