@@ -7,6 +7,7 @@ import authRoutes from "./routes/authRoutes";
 import projectRoutes from "./routes/projectRoutes";
 import taskRoutes from "./routes/taskRoutes";
 import errorHandling from "./middlewares/errorHandler";
+import { setupSwagger } from "./config/swagger";
 
 dotenv.config();
 
@@ -22,6 +23,9 @@ const port = process.env.PORT || 3000;
 
 // CORS = it's a security feature that denies browsers from making requests to other domains, ports, or protocols
 app.use(cors()); // Enable CORS
+
+// swagger config
+setupSwagger(app);
 
 app.use(express.json()); // if the request has json data (body), it will be parsed to Javascript object and made available in req.body
 
