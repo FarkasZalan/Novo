@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
-import { FaUser, FaEnvelope, FaLock, FaSave, FaTimes } from "react-icons/fa";
+import { FaUser, FaEnvelope, FaLock, FaSave, FaTimes, FaGoogle, FaGithub } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { API_URL } from "../../../config/apiURL";
 import { useAuth } from "../../../context/AuthContext";
@@ -20,14 +20,38 @@ export const ProfileSettings = () => {
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
     const [loading, setLoading] = useState(false);
+    const [isOAuthUser, setIsOAuthUser] = useState(false);
+
+    useEffect(() => {
+        if (user) {
+            // Check if user is an OAuth user (Google/GitHub)
+            const oAuthUser = user.provider === 'google' || user.provider === 'github';
+            setIsOAuthUser(oAuthUser);
+
+            // Disable password fields for OAuth users
+            if (oAuthUser) {
+                setFormData(prev => ({
+                    ...prev,
+                    currentPassword: "",
+                    newPassword: "",
+                    confirmPassword: ""
+                }));
+            }
+        }
+    }, [user]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (isOAuthUser && (e.target.name === 'currentPassword' ||
+            e.target.name === 'newPassword' ||
+            e.target.name === 'confirmPassword')) {
+            return; // Ignore password changes for OAuth users
+        }
+
         const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
             [name]: value
         }));
-        // Clear error when user starts typing
         if (error) setError("");
     };
 
@@ -38,24 +62,31 @@ export const ProfileSettings = () => {
         setSuccess("");
 
         try {
-            // Only include password fields if they're being changed
             const updateData: any = {
                 name: formData.name,
                 email: formData.email
             };
+            // Block password updates for OAuth users
+            if (isOAuthUser && (formData.currentPassword || formData.newPassword || formData.confirmPassword)) {
+                throw new Error("Password cannot be changed for OAuth accounts");
+            }
 
-            if (formData.newPassword) {
-                if (formData.newPassword !== formData.confirmPassword) {
+            // Validate inputs for non-OAuth users
+            if (!isOAuthUser) {
+                if (formData.newPassword && formData.newPassword !== formData.confirmPassword) {
                     throw new Error("New passwords don't match");
                 }
-                if (!formData.currentPassword) {
+
+                if (formData.newPassword && !formData.currentPassword) {
                     throw new Error("Current password is required to change password");
                 }
+
                 updateData.password = formData.newPassword;
                 updateData.currentPassword = formData.currentPassword;
             }
 
-            const response = await axios.put(
+            // Update profile info only
+            const profileResponse = await axios.put(
                 `${API_URL}/user/update`,
                 updateData,
                 {
@@ -65,9 +96,10 @@ export const ProfileSettings = () => {
                 }
             );
 
+            // Update auth state
             setAuthState({
                 ...authState,
-                user: response.data.data
+                user: profileResponse.data.data
             });
 
             setSuccess("Profile updated successfully!");
@@ -77,19 +109,15 @@ export const ProfileSettings = () => {
                 newPassword: "",
                 confirmPassword: ""
             }));
+
         } catch (err: any) {
             let errorMessage = "Update failed";
 
             if (err.response) {
-                // Specific handling for incorrect current password
-                console.log(err.response.data.message)
                 if (err.response.data.message === "Current password is incorrect") {
                     errorMessage = "The current password you entered is incorrect";
-                    // Highlight the current password field by focusing it
                     const currentPasswordField = document.getElementById("currentPassword");
-                    if (currentPasswordField) {
-                        currentPasswordField.focus();
-                    }
+                    if (currentPasswordField) currentPasswordField.focus();
                 } else {
                     errorMessage = err.response.data.message || errorMessage;
                 }
@@ -169,79 +197,95 @@ export const ProfileSettings = () => {
                             </div>
                         </div>
 
-                        <div className="pt-6 border-t border-gray-200 dark:border-gray-700">
-                            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Change Password</h3>
-
-                            <div className="space-y-4">
-                                <div>
-                                    <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                        Current Password
-                                    </label>
-                                    <div className="relative">
-                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <FaLock className="h-5 w-5 text-gray-400" />
-                                        </div>
-                                        <input
-                                            id="currentPassword"
-                                            name="currentPassword"
-                                            type="password"
-                                            value={formData.currentPassword}
-                                            onChange={handleChange}
-                                            className={`block w-full pl-10 pr-3 py-3 border ${error.includes("current password")
-                                                ? "border-red-500 dark:border-red-400"
-                                                : "border-gray-300 dark:border-gray-600"
-                                                } rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500`}
-                                            placeholder="••••••••"
-                                        />
-                                    </div>
-                                    {error.includes("current password") && (
-                                        <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                                            {error}
-                                        </p>
-                                    )}
+                        {isOAuthUser && (
+                            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                                <div className="flex items-center text-blue-700 dark:text-blue-300">
+                                    {user?.provider === 'google' && <FaGoogle className="mr-2" />}
+                                    {user?.provider === 'github' && <FaGithub className="mr-2" />}
+                                    <span>
+                                        You're signed in with {user?.provider}. Password changes are not allowed for OAuth accounts.
+                                    </span>
                                 </div>
+                            </div>
+                        )}
 
-                                <div>
-                                    <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                        New Password
-                                    </label>
-                                    <div className="relative">
-                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <FaLock className="h-5 w-5 text-gray-400" />
+                        {!isOAuthUser && (
+                            <div className="pt-6 border-t border-gray-200 dark:border-gray-700">
+                                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+                                    Change Password
+                                </h3>
+
+                                <div className="space-y-4">
+                                    <div>
+                                        <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                            Current Password
+                                        </label>
+                                        <div className="relative">
+                                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <FaLock className="h-5 w-5 text-gray-400" />
+                                            </div>
+                                            <input
+                                                id="currentPassword"
+                                                name="currentPassword"
+                                                type="password"
+                                                value={formData.currentPassword}
+                                                onChange={handleChange}
+                                                className={`block w-full pl-10 pr-3 py-3 border ${error.includes("current password")
+                                                    ? "border-red-500 dark:border-red-400"
+                                                    : "border-gray-300 dark:border-gray-600"
+                                                    } rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500`}
+                                                placeholder="••••••••"
+                                            />
                                         </div>
-                                        <input
-                                            id="newPassword"
-                                            name="newPassword"
-                                            type="password"
-                                            value={formData.newPassword}
-                                            onChange={handleChange}
-                                            className="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                            placeholder="••••••••"
-                                        />
+                                        {error.includes("current password") && (
+                                            <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                                                {error}
+                                            </p>
+                                        )}
                                     </div>
-                                </div>
 
-                                <div>
-                                    <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                        Confirm New Password
-                                    </label>
-                                    <div className="relative">
-                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <FaLock className="h-5 w-5 text-gray-400" />
+                                    <div>
+                                        <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                            New Password
+                                        </label>
+                                        <div className="relative">
+                                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <FaLock className="h-5 w-5 text-gray-400" />
+                                            </div>
+                                            <input
+                                                id="newPassword"
+                                                name="newPassword"
+                                                type="password"
+                                                value={formData.newPassword}
+                                                onChange={handleChange}
+                                                className="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                                placeholder="••••••••"
+                                            />
                                         </div>
-                                        <input
-                                            id="confirmPassword"
-                                            name="confirmPassword"
-                                            type="password"
-                                            value={formData.confirmPassword}
-                                            onChange={handleChange}
-                                            className="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                            placeholder="••••••••"
-                                        />
+                                    </div>
+
+                                    <div>
+                                        <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                            Confirm New Password
+                                        </label>
+                                        <div className="relative">
+                                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <FaLock className="h-5 w-5 text-gray-400" />
+                                            </div>
+                                            <input
+                                                id="confirmPassword"
+                                                name="confirmPassword"
+                                                type="password"
+                                                value={formData.confirmPassword}
+                                                onChange={handleChange}
+                                                className="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                                placeholder="••••••••"
+                                            />
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        )}
 
                         <div className="flex justify-end space-x-4 pt-4">
                             <button

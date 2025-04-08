@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FaEnvelope, FaLock, FaGoogle, FaGithub } from "react-icons/fa";
-import { login } from "../../../services/authService";
+import { initiateGithubLogin, initiateGoogleLogin, login } from "../../../services/authService";
 import { useAuth } from "../../../context/AuthContext";
 
 export const Login = () => {
@@ -14,6 +14,14 @@ export const Login = () => {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const { setAuthState } = useAuth();
+
+    const handleGoogleLogin = () => {
+        initiateGoogleLogin();
+    };
+
+    const handleGithubLogin = () => {
+        initiateGithubLogin();
+    };
 
     useEffect(() => {
         if (location.state?.registeredEmail) {
@@ -185,6 +193,7 @@ export const Login = () => {
                         <div className="mt-6 grid grid-cols-2 gap-3">
                             <button
                                 type="button"
+                                onClick={handleGoogleLogin}
                                 className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors cursor-pointer"
                             >
                                 <FaGoogle className="h-5 w-5" />
@@ -193,6 +202,7 @@ export const Login = () => {
 
                             <button
                                 type="button"
+                                onClick={handleGithubLogin}
                                 className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors cursor-pointer"
                             >
                                 <FaGithub className="h-5 w-5 text-gray-800 dark:text-gray-200" />

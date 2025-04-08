@@ -36,3 +36,31 @@ export const refreshToken = async () => {
     });
     return response.data;
 };
+
+export const initiateGoogleLogin = () => {
+    window.location.href = `${API_URL}/auth/google`;
+};
+
+export const initiateGithubLogin = () => {
+    window.location.href = `${API_URL}/auth/github`;
+};
+
+export const handleOAuthCallback = async (token: string, userId: string) => {
+    try {
+        const response = await axios.get(`${API_URL}/users/${userId}`, {
+            headers: {
+                Authorization: `Bearer ${token}`  // Set as Bearer token
+            },
+            withCredentials: true
+        });
+        return {
+            data: {
+                user: response.data.data,
+                accessToken: token
+            }
+        };
+    } catch (error) {
+        console.error("OAuth callback handling error:", error);
+        throw error;
+    }
+};

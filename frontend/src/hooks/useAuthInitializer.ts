@@ -37,7 +37,6 @@ export const useAuthInitializer = (
                     });
                 }
             } catch (err) {
-                console.log('Auth init failed:', err);
                 await logout();
             } finally {
                 setIsLoading(false);

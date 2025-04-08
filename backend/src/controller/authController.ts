@@ -1,9 +1,15 @@
 import { NextFunction } from "express";
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
-import { clearRefreshTokenInDB, createUserQuery, findByEmail, storeRefreshToken } from "../models/authModel";
+import {
+    clearRefreshTokenInDB,
+    createUserQuery,
+    findByEmail,
+    storeRefreshToken
+} from "../models/authModel";
 import { generateAccessToken, generateRefreshToken } from "../utils/token-utils";
 import dotenv from "dotenv";
+import crypto from 'crypto';
 
 dotenv.config();
 
@@ -24,7 +30,6 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
         const newUser = await createUserQuery(email, name, userHashedPassword);
         handleResponse(res, 201, "User created successfully", newUser);
     } catch (error: Error | any) {
-        // Check for unique constraint violation (duplicate email)
         if (error.code === "23505") {
             handleResponse(res, 409, "Email already exists", null);
         } else {
@@ -42,6 +47,12 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
         const user = await findByEmail(email);
         if (!user) {
             handleResponse(res, 404, "Invalid email", null);
+            return;
+        }
+
+        // Handle OAuth users trying to log in with password
+        if (user.provider) {
+            handleResponse(res, 400, `Please log in using your ${user.provider} account`, null);
             return;
         }
 
@@ -67,12 +78,11 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
         const accessToken = generateAccessToken(user.id);
         const refreshToken = generateRefreshToken(user.id, refreshSessionId);
 
-
         // 4. Store refresh token in a HTTP-only cookie
         res.cookie("refresh_token", refreshToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production", // Only allow secure cookies in production mode
-            sameSite: "strict", // Prevent CSRF attacks
+            secure: process.env.NODE_ENV === "production",  // Only allow secure cookies in production mode
+            sameSite: "strict",  // Prevent CSRF attacks
             maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
         });
 
@@ -88,11 +98,12 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
 export const logoutUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const user = await findByEmail(req.body.email);
+
         // Remove the refresh token cookie
         res.clearCookie("refresh_token", {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production", // Only allow secure cookies in production mode
-            sameSite: "strict", // Prevent CSRF attacks
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
             path: "/auth/refresh-token"
         });
 

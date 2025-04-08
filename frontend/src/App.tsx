@@ -15,6 +15,7 @@ import { PublicRoute } from "./components/routes/PublicRoute";
 import { ProfileSettings } from "./components/pages/user/ProfileSettings";
 import { Footer } from "./components/layouts/Footer";
 import Projects from "./components/pages/project/Projects";
+import { OAuthCallback } from "./components/pages/auth/OAuthCallback";
 
 function App() {
   return (
@@ -36,6 +37,7 @@ function App() {
             <Route element={<PublicRoute />}>
               <Route path="/register" element={<Register />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/oauth-callback" element={<OAuthCallback />} />
             </Route>
 
             {/* Protected routes (only accessible when logged in) */}

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaUser, FaEnvelope, FaLock, FaGoogle, FaGithub } from "react-icons/fa";
-import { register } from "../../../services/authService";
+import { initiateGithubLogin, initiateGoogleLogin, register } from "../../../services/authService";
 
 export const Register = () => {
     const [formData, setFormData] = useState({
@@ -13,6 +13,14 @@ export const Register = () => {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+
+    const handleGoogleSignup = () => {
+        initiateGoogleLogin();
+    };
+
+    const handleGithubSignup = () => {
+        initiateGithubLogin();
+    };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -227,6 +235,7 @@ export const Register = () => {
                         <div className="mt-6 grid grid-cols-2 gap-3">
                             <button
                                 type="button"
+                                onClick={handleGoogleSignup}
                                 className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors cursor-pointer"
                             >
                                 <FaGoogle className="h-5 w-5" />
@@ -235,6 +244,7 @@ export const Register = () => {
 
                             <button
                                 type="button"
+                                onClick={handleGithubSignup}
                                 className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors cursor-pointer"
                             >
                                 <FaGithub className="h-5 w-5 text-gray-800 dark:text-gray-200" />

@@ -8,6 +8,9 @@ import projectRoutes from "./routes/projectRoutes";
 import taskRoutes from "./routes/taskRoutes";
 import errorHandling from "./middlewares/errorHandler";
 import { setupSwagger } from "./config/swagger";
+import passport from 'passport';
+import session from 'express-session';
+import { configurePassport } from './config/passport';
 
 dotenv.config();
 
@@ -17,13 +20,32 @@ const port = process.env.PORT || 3000;
 
 // app.use() is a function that is used to add middlewares, routes, etc to the express app
 
+// Session for oauth callback
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'keyboard cat',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        secure: process.env.NODE_ENV === 'production',
+        httpOnly: true,
+        sameSite: 'lax',
+        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    }
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Initialize passport configuration
+configurePassport();
+
 // Middlewares
 // Middlewares = functions that run between request and response eg. check if user is logged in, process the request data (json) etc
 // so these are process the request before reaching the controller
 
 // CORS = it's a security feature that denies browsers from making requests to other domains, ports, or protocols
 app.use(cors({
-    origin: "http://localhost:5173", // frontend url
+    origin: ["http://localhost:5173"], // frontend url
     credentials: true, // allow cookies
     exposedHeaders: ['set-cookie']
 })); // Enable CORS
@@ -41,6 +63,7 @@ app.use("/api", taskRoutes);
 
 // Error handling middleware
 app.use(errorHandling);
+
 
 // Create user table if it doesn't exist before server starts
 initializeDatabase().then(() => {
