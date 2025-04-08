@@ -1,6 +1,5 @@
 import express from "express";
 import { deleteUser, getAllUsers, getUserProfile, updateUser } from "../controller/userController";
-import { validateUser } from "../middlewares/inputValidator";
 import { authenticateToken } from "../middlewares/authenticate";
 
 const router = express.Router();
@@ -78,7 +77,7 @@ router.get("/user/profile", authenticateToken, getUserProfile);
  *       404:
  *         description: User not found
  */
-router.put("/user/update", authenticateToken, validateUser, updateUser);
+router.put("/user/update", authenticateToken, updateUser);
 
 /**
  * @swagger

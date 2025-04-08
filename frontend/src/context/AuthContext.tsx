@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import axios from 'axios';
+import { useAuthInitializer } from '../hooks/useAuthInitializer';
 import { refreshToken, logout as apiLogout } from '../services/authService';
 
 interface AuthState {
@@ -14,7 +15,6 @@ interface AuthContextType {
     logout: () => Promise<void>;
 }
 
-// Create context with default values
 const AuthContext = createContext<AuthContextType>({
     authState: { user: null, accessToken: null },
     setAuthState: () => { },
@@ -22,7 +22,6 @@ const AuthContext = createContext<AuthContextType>({
     logout: async () => { }
 });
 
-// Separate provider component for better Fast Refresh support
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [authState, setAuthState] = useState<AuthState>({
         user: null,
@@ -30,39 +29,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     const isAuthenticated = !!authState.accessToken && !!authState.user;
+    const isLoading = useAuthInitializer(setAuthState);
 
     const logout = async () => {
         try {
-            // Get the current user email before clearing state
             const userEmail = authState.user?.email;
-
-            // Clear auth state immediately for better UX
-            setAuthState({
-                user: null,
-                accessToken: null
-            });
-
-            // Call the logout API if we have the email
+            setAuthState({ user: null, accessToken: null });
+            localStorage.removeItem('authState');
             if (userEmail) {
                 await apiLogout(userEmail);
             }
-        } catch (error) {
-            console.error("Logout failed:", error);
-            // Even if API fails, we still want to clear local state
-            setAuthState({
-                user: null,
-                accessToken: null
-            });
+        } catch (err) {
+            console.error("Logout error:", err);
+            localStorage.removeItem('authState');
         }
     };
 
-    // Add axios interceptors
+    // Save auth state to localStorage
+    useEffect(() => {
+        if (authState.accessToken && authState.user) {
+            localStorage.setItem('authState', JSON.stringify(authState));
+        } else {
+            localStorage.removeItem('authState');
+        }
+    }, [authState]);
+
+    // Axios interceptors
     useEffect(() => {
         const requestInterceptor = axios.interceptors.request.use(
             (config) => {
                 if (authState.accessToken) {
                     config.headers.Authorization = `Bearer ${authState.accessToken}`;
                 }
+                config.withCredentials = true;
                 return config;
             },
             (error) => Promise.reject(error)
@@ -72,7 +71,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             (response) => response,
             async (error) => {
                 const originalRequest = error.config;
-
                 if (error.response?.status === 401 && !originalRequest._retry) {
                     originalRequest._retry = true;
 
@@ -84,9 +82,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                         });
                         originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
                         return axios(originalRequest);
-                    } catch (refreshError) {
+                    } catch (err) {
                         await logout();
-                        return Promise.reject(refreshError);
+                        return Promise.reject(err);
                     }
                 }
 
@@ -107,17 +105,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         logout
     };
 
-    return (
-        <AuthContext.Provider value={value}>
-            {children}
-        </AuthContext.Provider>
-    );
+    if (isLoading) {
+        return <div className="text-center mt-20 text-lg">Loading authentication...</div>;
+    }
+
+    return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-// Custom hook with proper Fast Refresh support
 export function useAuth() {
     const context = useContext(AuthContext);
-    if (context === undefined) {
+    if (!context) {
         throw new Error('useAuth must be used within an AuthProvider');
     }
     return context;

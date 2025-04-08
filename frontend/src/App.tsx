@@ -14,6 +14,7 @@ import { ProtectedRoute } from "./components/routes/ProtectedRoute";
 import { PublicRoute } from "./components/routes/PublicRoute";
 import { ProfileSettings } from "./components/pages/user/ProfileSettings";
 import { Footer } from "./components/layouts/Footer";
+import Projects from "./components/pages/project/Projects";
 
 function App() {
   return (
@@ -41,7 +42,7 @@ function App() {
             <Route element={<ProtectedRoute />}>
               <Route path="/profile" element={<Profile />} />
               <Route path="/profile-settings" element={<ProfileSettings />} />
-              {/* Add more protected routes here */}
+              <Route path="/projects" element={<Projects />} />
             </Route>
 
             {/* 404 fallback */}

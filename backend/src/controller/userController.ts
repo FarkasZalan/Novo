@@ -36,17 +36,42 @@ export const getUserProfile = async (req: Request, res: Response, next: NextFunc
     }
 };
 
+// controllers/userController.ts
 export const updateUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const { email, name } = req.body;
-        const userHashedPassword = await bcrypt.hash(req.body.password, 10);
+        const { email, name, password, currentPassword } = req.body;
         const userId = req.user.id;
-        const updatedUser = await updateUserQuery(userId, email, name, userHashedPassword);
-        if (!updatedUser) {
+
+        // Get current user data
+        const currentUser = await getUserByIdQuery(userId);
+        if (!currentUser) {
             handleResponse(res, 404, "User not found", null);
             return;
         }
-        handleResponse(res, 200, "User updated successfully", updatedUser);
+
+        // If password is being changed (provided in request)
+        if (password) {
+            // Verify current password if it's provided
+            if (!currentPassword) {
+                handleResponse(res, 400, "Current password is required to change password", null);
+                return;
+            }
+
+            const isPasswordValid = await bcrypt.compare(currentPassword, currentUser.password);
+            if (!isPasswordValid) {
+                handleResponse(res, 400, "Current password is incorrect", null);
+                return;
+            }
+
+            // Hash the new password
+            const userHashedPassword = await bcrypt.hash(password, 10);
+            const updatedUser = await updateUserQuery(userId, email, name, userHashedPassword);
+            handleResponse(res, 200, "User updated successfully (with password change)", updatedUser);
+        } else {
+            // Update without changing password
+            const updatedUser = await updateUserQuery(userId, email, name, currentUser.password);
+            handleResponse(res, 200, "User updated successfully", updatedUser);
+        }
     } catch (error) {
         next(error);
     }

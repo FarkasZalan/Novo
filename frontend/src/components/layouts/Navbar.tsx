@@ -1,13 +1,12 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
-import { FaUser, FaEnvelope, FaPlus, FaSignInAlt } from "react-icons/fa";
+import { FaUser, FaEnvelope, FaSignInAlt, FaTachometerAlt, FaFolderOpen } from "react-icons/fa";
 import { DarkModeToggle } from "../utils/DarkModeToggle";
 import { useAuth } from "../../context/AuthContext";
 
 export const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
     const { authState } = useAuth();
-    // Only consider authenticated if both accessToken and user exist
     const isAuthenticated = authState.accessToken !== null && authState.user !== null;
 
     return (
@@ -18,7 +17,7 @@ export const Navbar = () => {
                     <div className="flex-shrink-0 flex items-center">
                         <Link
                             to="/"
-                            className="flex items-center text-gray-900 dark:text-white text-2xl font-bold hover:scale-105 transform transition-transform transition-colors"
+                            className="flex items-center text-gray-900 dark:text-white text-2xl font-bold hover:scale-105 transform transition-transform"
                         >
                             <span className="text-indigo-600 dark:text-indigo-400 rounded-lg flex items-center justify-center">
                                 <svg
@@ -30,10 +29,7 @@ export const Navbar = () => {
                                     strokeLinecap="round"
                                     strokeLinejoin="round"
                                 >
-                                    <polygon
-                                        points="5 3, 19 3, 12 21"
-                                        className="text-indigo-600 dark:text-indigo-400"
-                                    ></polygon>
+                                    <polygon points="5 3, 19 3, 12 21" />
                                 </svg>
                             </span>
                             <span className="ml-2 hidden sm:inline uppercase tracking-wide">Novo</span>
@@ -45,17 +41,24 @@ export const Navbar = () => {
                         {isAuthenticated ? (
                             <>
                                 <Link
+                                    to="/dashboard"
+                                    className="text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-indigo-500 px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2"
+                                >
+                                    <FaTachometerAlt className="text-indigo-600 dark:text-indigo-200" />
+                                    Dashboard
+                                </Link>
+                                <Link
                                     to="/projects"
                                     className="text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-indigo-500 px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2"
                                 >
-                                    <FaPlus className="text-indigo-600 dark:text-indigo-200 hover:text-white dark:hover:text-indigo-100" />
-                                    New Project
+                                    <FaFolderOpen className="text-indigo-600 dark:text-indigo-200" />
+                                    Projects
                                 </Link>
                                 <Link
                                     to="/profile"
                                     className="text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-indigo-500 px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2"
                                 >
-                                    <FaUser className="text-indigo-600 dark:text-indigo-200 hover:text-white dark:hover:text-indigo-100" />
+                                    <FaUser className="text-indigo-600 dark:text-indigo-200" />
                                     Profile
                                 </Link>
                             </>
@@ -64,20 +67,18 @@ export const Navbar = () => {
                                 to="/contact"
                                 className="text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-indigo-500 px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2"
                             >
-                                <FaEnvelope className="text-indigo-600 dark:text-indigo-200 hover:text-white dark:hover:text-indigo-100" />
+                                <FaEnvelope className="text-indigo-600 dark:text-indigo-200" />
                                 Contact
                             </Link>
                         )}
 
-                        {/* Dark Mode Toggle Button (always visible) */}
+                        {/* Dark Mode Toggle */}
                         <DarkModeToggle />
 
-                        {isAuthenticated ? (
-                            <></>
-                        ) : (
+                        {!isAuthenticated && (
                             <Link
                                 to="/register"
-                                className="ml-2 bg-indigo-600 text-white dark:bg-indigo-900 dark:text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700 dark:hover:bg-indigo-800 transition-colors shadow hover:shadow-md flex items-center gap-1"
+                                className="ml-2 bg-indigo-600 text-white dark:bg-indigo-900 px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700 dark:hover:bg-indigo-800 transition-colors shadow hover:shadow-md flex items-center gap-1"
                             >
                                 <FaSignInAlt className="mr-1" />
                                 Get Started
@@ -85,15 +86,12 @@ export const Navbar = () => {
                         )}
                     </div>
 
-                    {/* Mobile Menu Button */}
+                    {/* Mobile Menu Toggle */}
                     <div className="md:hidden flex items-center">
-                        {/* Dark Mode Toggle in Mobile (always visible) */}
                         <DarkModeToggle />
-
-                        {/* Mobile Menu Toggle */}
                         <button
                             onClick={() => setIsOpen(!isOpen)}
-                            className="inline-flex items-center justify-center p-2 rounded-md text-gray-900 dark:text-white hover:text-indigo-200 hover:bg-indigo-600 focus:outline-none transition-colors"
+                            className="inline-flex items-center justify-center p-2 rounded-md text-gray-900 dark:text-white hover:text-indigo-200 hover:bg-indigo-600 transition-colors"
                         >
                             <span className="sr-only">Open menu</span>
                             {isOpen ? (
@@ -110,22 +108,30 @@ export const Navbar = () => {
                 </div>
             </div>
 
-            {/* Mobile Navigation Menu */}
+            {/* Mobile Navigation */}
             <div className={`md:hidden ${isOpen ? 'block' : 'hidden'}`}>
                 <div className="pt-2 pb-3 space-y-1 px-2 bg-indigo-700 dark:bg-[#1E1B47] shadow-lg">
                     {isAuthenticated ? (
                         <>
                             <Link
-                                to="/projects"
-                                className="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-100 dark:hover:bg-indigo-500 transition-colors flex items-center gap-3"
+                                to="/dashboard"
+                                className="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-100 dark:hover:bg-indigo-500 flex items-center gap-3"
                                 onClick={() => setIsOpen(false)}
                             >
-                                <FaPlus />
-                                New Project
+                                <FaTachometerAlt />
+                                Dashboard
+                            </Link>
+                            <Link
+                                to="/projects"
+                                className="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-100 dark:hover:bg-indigo-500 flex items-center gap-3"
+                                onClick={() => setIsOpen(false)}
+                            >
+                                <FaFolderOpen />
+                                Projects
                             </Link>
                             <Link
                                 to="/profile"
-                                className="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-100 dark:hover:bg-indigo-500 transition-colors flex items-center gap-3"
+                                className="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-100 dark:hover:bg-indigo-500 flex items-center gap-3"
                                 onClick={() => setIsOpen(false)}
                             >
                                 <FaUser />
@@ -136,7 +142,7 @@ export const Navbar = () => {
                         <>
                             <Link
                                 to="/contact"
-                                className="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-100 dark:hover:bg-indigo-500 transition-colors flex items-center gap-3"
+                                className="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-100 dark:hover:bg-indigo-500 flex items-center gap-3"
                                 onClick={() => setIsOpen(false)}
                             >
                                 <FaEnvelope />
@@ -144,7 +150,7 @@ export const Navbar = () => {
                             </Link>
                             <Link
                                 to="/register"
-                                className="block px-3 py-2 rounded-md text-base font-medium bg-white text-indigo-700 dark:bg-indigo-900 dark:text-white hover:bg-gray-100 dark:hover:bg-indigo-700 transition-colors mt-2 text-center flex items-center justify-center gap-2"
+                                className="block px-3 py-2 rounded-md text-base font-medium bg-white text-indigo-700 dark:bg-indigo-900 dark:text-white hover:bg-gray-100 dark:hover:bg-indigo-700 mt-2 text-center flex items-center justify-center gap-2"
                                 onClick={() => setIsOpen(false)}
                             >
                                 <FaSignInAlt />

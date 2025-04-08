@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { FaUser, FaEnvelope, FaCog, FaCalendarAlt, FaSignOutAlt, FaTasks, FaExclamationTriangle, FaTrash } from "react-icons/fa";
+import { FaUser, FaEnvelope, FaCog, FaCalendarAlt, FaSignOutAlt, FaTasks, FaExclamationTriangle, FaTrash, FaCrown, FaCheck, FaTimes } from "react-icons/fa";
 import { useAuth } from "../../../context/AuthContext";
 import { useState } from "react";
 import axios from "axios";
@@ -8,6 +8,7 @@ import { API_URL } from "../../../config/apiURL";
 export const Profile = () => {
     const { authState, logout } = useAuth();
     const user = authState.user;
+    console.log(user)
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [deleteError, setDeleteError] = useState("");
     const [deleteLoading, setDeleteLoading] = useState(false);
@@ -37,19 +38,19 @@ export const Profile = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
             {/* Profile Header */}
-            <section className="py-16 bg-indigo-600 text-white dark:bg-indigo-900">
+            <section className="py-16 bg-indigo-600 dark:bg-indigo-800 text-white">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex flex-col md:flex-row items-center justify-between">
                         <div className="flex items-center space-x-6">
-                            <div className="h-24 w-24 rounded-full bg-indigo-400 dark:bg-indigo-700 flex items-center justify-center text-4xl font-bold">
+                            <div className="h-24 w-24 rounded-full bg-indigo-500 dark:bg-indigo-700 flex items-center justify-center text-4xl font-bold">
                                 {user?.name?.charAt(0).toUpperCase() || 'U'}
                             </div>
                             <div>
                                 <h1 className="text-3xl font-bold">{user?.name || 'User'}</h1>
-                                <p className="text-indigo-100 dark:text-indigo-300 mt-1">{user?.email || 'user@example.com'}</p>
-                                <div className="flex items-center mt-2 text-indigo-200 dark:text-indigo-400">
+                                <p className="text-indigo-100 dark:text-indigo-200 mt-1">{user?.email || 'user@example.com'}</p>
+                                <div className="flex items-center mt-2 text-indigo-200 dark:text-indigo-300">
                                     <FaCalendarAlt className="mr-1" />
                                     <span>Member since {new Date(user?.created_at || Date.now()).toLocaleDateString()}</span>
                                 </div>
@@ -57,7 +58,7 @@ export const Profile = () => {
                         </div>
                         <Link
                             to="/profile-settings"
-                            className="mt-4 md:mt-0 px-6 py-3 bg-white text-indigo-600 dark:bg-indigo-800 dark:text-white rounded-lg font-medium hover:bg-gray-100 dark:hover:bg-indigo-700 transition-colors flex items-center"
+                            className="mt-4 md:mt-0 px-6 py-3 bg-white dark:bg-gray-100 text-indigo-600 dark:text-indigo-800 rounded-lg font-medium hover:bg-gray-100 dark:hover:bg-gray-200 transition-colors flex items-center"
                         >
                             <FaCog className="mr-2" />
                             Edit Profile
@@ -72,23 +73,31 @@ export const Profile = () => {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         {/* Left Column - User Info */}
                         <div className="md:col-span-1">
-                            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
-                                <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+                            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md dark:shadow-gray-700/50 p-6 transition-colors duration-200">
+                                <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4 flex items-center">
                                     <FaUser className="text-indigo-600 dark:text-indigo-400 mr-2" />
                                     Personal Information
                                 </h2>
                                 <div className="space-y-4">
                                     <div>
                                         <p className="text-sm text-gray-500 dark:text-gray-400">Full Name</p>
-                                        <p className="text-gray-900 dark:text-white font-medium">{user?.name || 'Not provided'}</p>
+                                        <p className="text-gray-800 dark:text-gray-100 font-medium">{user?.name || 'Not provided'}</p>
                                     </div>
                                     <div>
                                         <p className="text-sm text-gray-500 dark:text-gray-400">Email Address</p>
-                                        <p className="text-gray-900 dark:text-white font-medium">{user?.email || 'Not provided'}</p>
+                                        <p className="text-gray-800 dark:text-gray-100 font-medium">{user?.email || 'Not provided'}</p>
                                     </div>
                                     <div>
                                         <p className="text-sm text-gray-500 dark:text-gray-400">Account Type</p>
-                                        <p className="text-gray-900 dark:text-white font-medium">Premium Member</p>
+                                        <p className="text-gray-800 dark:text-gray-100 font-medium">
+                                            {user?.is_premium ? (
+                                                <span className="flex items-center text-yellow-500 dark:text-yellow-400">
+                                                    <FaCrown className="mr-1" /> Premium Member
+                                                </span>
+                                            ) : (
+                                                "Free Member"
+                                            )}
+                                        </p>
                                     </div>
                                 </div>
                             </div>
@@ -96,16 +105,111 @@ export const Profile = () => {
 
                         {/* Right Column - Activities and Actions */}
                         <div className="md:col-span-2 space-y-6">
+                            {/* Membership Status */}
+                            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md dark:shadow-gray-700/50 p-6 transition-colors duration-200">
+                                <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4 flex items-center">
+                                    <FaCrown className="text-yellow-500 dark:text-yellow-400 mr-2" />
+                                    Membership Status
+                                </h2>
+                                <div className="space-y-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-gray-50 dark:bg-gray-700 transition-colors duration-200">
+                                            <h3 className="font-bold text-lg mb-2 text-gray-800 dark:text-gray-200">Free Plan</h3>
+                                            <ul className="space-y-2">
+                                                <li className="flex items-center text-gray-700 dark:text-gray-300">
+                                                    {user?.is_premium ? (
+                                                        <FaTimes className="text-red-500 dark:text-red-400 mr-2" />
+                                                    ) : (
+                                                        <FaCheck className="text-green-500 dark:text-green-400 mr-2" />
+                                                    )}
+                                                    <span>3 projects max</span>
+                                                </li>
+                                                <li className="flex items-center text-gray-700 dark:text-gray-300">
+                                                    {user?.is_premium ? (
+                                                        <FaTimes className="text-red-500 dark:text-red-400 mr-2" />
+                                                    ) : (
+                                                        <FaCheck className="text-green-500 dark:text-green-400 mr-2" />
+                                                    )}
+                                                    <span>5 members per project</span>
+                                                </li>
+                                                <li className="flex items-center text-gray-700 dark:text-gray-300">
+                                                    {user?.is_premium ? (
+                                                        <FaTimes className="text-red-500 dark:text-red-400 mr-2" />
+                                                    ) : (
+                                                        <FaCheck className="text-green-500 dark:text-green-400 mr-2" />
+                                                    )}
+                                                    <span>Basic features</span>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div className="border border-yellow-500 dark:border-yellow-400 rounded-lg p-4 bg-yellow-50 dark:bg-gray-700 transition-colors duration-200">
+                                            <h3 className="font-bold text-lg mb-2 text-yellow-600 dark:text-yellow-400">Premium Plan</h3>
+                                            <ul className="space-y-2">
+                                                <li className="flex items-center text-gray-700 dark:text-gray-300">
+                                                    {user?.is_premium ? (
+                                                        <FaCheck className="text-green-500 dark:text-green-400 mr-2" />
+                                                    ) : (
+                                                        <span className="text-gray-500 dark:text-gray-400 mr-2">✓</span>
+                                                    )}
+                                                    <span>Unlimited projects</span>
+                                                </li>
+                                                <li className="flex items-center text-gray-700 dark:text-gray-300">
+                                                    {user?.is_premium ? (
+                                                        <FaCheck className="text-green-500 dark:text-green-400 mr-2" />
+                                                    ) : (
+                                                        <span className="text-gray-500 dark:text-gray-400 mr-2">✓</span>
+                                                    )}
+                                                    <span>Unlimited members</span>
+                                                </li>
+                                                <li className="flex items-center text-gray-700 dark:text-gray-300">
+                                                    {user?.is_premium ? (
+                                                        <FaCheck className="text-green-500 dark:text-green-400 mr-2" />
+                                                    ) : (
+                                                        <span className="text-gray-500 dark:text-gray-400 mr-2">✓</span>
+                                                    )}
+                                                    <span>Advanced features</span>
+                                                </li>
+                                                <li className="flex items-center text-gray-700 dark:text-gray-300">
+                                                    {user?.is_premium ? (
+                                                        <FaCheck className="text-green-500 dark:text-green-400 mr-2" />
+                                                    ) : (
+                                                        <span className="text-gray-500 dark:text-gray-400 mr-2">✓</span>
+                                                    )}
+                                                    <span>Priority support</span>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    {user?.is_premium ? (
+                                        <button
+                                            className="w-full mt-4 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white font-medium rounded-lg transition-colors duration-200 flex items-center justify-center cursor-pointer"
+                                            onClick={() => {/* Add manage subscription handler */ }}
+                                        >
+                                            <FaCog className="mr-2" />
+                                            Manage Membership
+                                        </button>
+                                    ) : (
+                                        <button
+                                            className="w-full mt-4 px-6 py-3 bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-600 dark:hover:bg-yellow-700 text-white font-medium rounded-lg transition-colors duration-200 flex items-center justify-center cursor-pointer"
+                                            onClick={() => {/* Add upgrade handler */ }}
+                                        >
+                                            <FaCrown className="mr-2" />
+                                            Upgrade to Premium - $9.99/month
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+
                             {/* Recent Activity */}
-                            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
-                                <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Recent Activity</h2>
+                            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md dark:shadow-gray-700/50 p-6 transition-colors duration-200">
+                                <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">Recent Activity</h2>
                                 <div className="space-y-4">
                                     <div className="flex items-start">
                                         <div className="flex-shrink-0 h-10 w-10 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center text-indigo-600 dark:text-indigo-300 mr-4">
                                             <FaTasks />
                                         </div>
                                         <div>
-                                            <p className="text-gray-900 dark:text-white">Created new project "Website Redesign"</p>
+                                            <p className="text-gray-800 dark:text-gray-200">Created new project "Website Redesign"</p>
                                             <p className="text-sm text-gray-500 dark:text-gray-400">2 hours ago</p>
                                         </div>
                                     </div>
@@ -114,7 +218,7 @@ export const Profile = () => {
                                             <FaEnvelope />
                                         </div>
                                         <div>
-                                            <p className="text-gray-900 dark:text-white">Received message from team member</p>
+                                            <p className="text-gray-800 dark:text-gray-200">Received message from team member</p>
                                             <p className="text-sm text-gray-500 dark:text-gray-400">1 day ago</p>
                                         </div>
                                     </div>
@@ -122,26 +226,13 @@ export const Profile = () => {
                             </div>
 
                             {/* Account Actions */}
-                            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
-                                <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Account Actions</h2>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <Link
-                                        to="/profile-settings/password"
-                                        className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                                    >
-                                        <h3 className="font-medium text-gray-900 dark:text-white">Change Password</h3>
-                                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Update your account password</p>
-                                    </Link>
-                                    <Link
-                                        to="/settings/notifications"
-                                        className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                                    >
-                                        <h3 className="font-medium text-gray-900 dark:text-white">Notification Settings</h3>
-                                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage your email preferences</p>
-                                    </Link>
+                            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md dark:shadow-gray-700/50 p-6 transition-colors duration-200">
+                                <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">Account Actions</h2>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    {/* Sign Out */}
                                     <button
                                         onClick={handleLogout}
-                                        className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-left cursor-pointer"
+                                        className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200 text-left cursor-pointer"
                                     >
                                         <div className="flex items-center text-red-600 dark:text-red-400">
                                             <FaSignOutAlt className="mr-2" />
@@ -149,11 +240,25 @@ export const Profile = () => {
                                         </div>
                                         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Log out of your account</p>
                                     </button>
+
+                                    {/* Manage Membership */}
+                                    <button
+                                        className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200 text-left cursor-pointer"
+                                        onClick={() => {/* Add subscription management logic */ }}
+                                    >
+                                        <div className="flex items-center text-indigo-600 dark:text-indigo-400">
+                                            <FaCrown className="mr-2" />
+                                            <h3 className="font-medium">{user?.is_premium ? "Manage Membership" : "Upgrade Membership"}</h3>
+                                        </div>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                            {user?.is_premium ? "Manage your premium subscription" : "Access premium features"}
+                                        </p>
+                                    </button>
                                 </div>
                             </div>
 
                             {/* Danger Zone */}
-                            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-red-200 dark:border-red-900">
+                            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md dark:shadow-gray-700/50 p-6 border border-red-200 dark:border-red-900 transition-colors duration-200">
                                 <h2 className="text-xl font-bold text-red-600 dark:text-red-400 mb-4 flex items-center">
                                     <FaExclamationTriangle className="mr-2" />
                                     Danger Zone
@@ -166,7 +271,7 @@ export const Profile = () => {
                                         </p>
                                         <button
                                             onClick={() => setShowDeleteConfirm(true)}
-                                            className="px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors flex items-center cursor-pointer"
+                                            className="px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200 flex items-center cursor-pointer"
                                         >
                                             <FaTrash className="mr-2" />
                                             Delete Account
@@ -187,14 +292,14 @@ export const Profile = () => {
                                         <div className="flex space-x-4">
                                             <button
                                                 onClick={() => setShowDeleteConfirm(false)}
-                                                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors cursor-pointer"
+                                                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors duration-200 cursor-pointer"
                                             >
                                                 Cancel
                                             </button>
                                             <button
                                                 onClick={handleDeleteAccount}
                                                 disabled={deleteLoading}
-                                                className={`px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors flex items-center cursor-pointer ${deleteLoading ? "opacity-70 cursor-not-allowed" : ""
+                                                className={`px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200 flex items-center cursor-pointer ${deleteLoading ? "opacity-70 cursor-not-allowed" : ""
                                                     }`}
                                             >
                                                 {deleteLoading ? (

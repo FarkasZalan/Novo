@@ -48,7 +48,7 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
         // check if password is correct
         const validPassword = await bcrypt.compare(password, user.password);
         if (!validPassword) {
-            handleResponse(res, 401, "Invalid password", null);
+            handleResponse(res, 400, "Invalid password", null);
             return;
         }
 
@@ -73,7 +73,6 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
             httpOnly: true,
             secure: process.env.NODE_ENV === "production", // Only allow secure cookies in production mode
             sameSite: "strict", // Prevent CSRF attacks
-            path: "/auth/refresh-token",
             maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
         });
 
