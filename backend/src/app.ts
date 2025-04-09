@@ -21,10 +21,15 @@ const port = process.env.PORT || 3000;
 // app.use() is a function that is used to add middlewares, routes, etc to the express app
 
 // Session for oauth callback
+
+// Session:
+// A session is a way to store information about user authentication so don't need to login every refresh or navigation
 app.use(session({
-    secret: process.env.SESSION_SECRET || 'keyboard cat',
-    resave: false,
-    saveUninitialized: false,
+    secret: process.env.SESSION_SECRET || 'keyboard cat', // Session ID, random long string
+    resave: false, // Don't save session if unmodified
+    saveUninitialized: false, // Don't create session for unauthenticated users
+
+    // session cookie to store session ID
     cookie: {
         secure: process.env.NODE_ENV === 'production',
         httpOnly: true,
