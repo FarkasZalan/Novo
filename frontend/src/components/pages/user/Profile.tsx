@@ -21,16 +21,28 @@ export const Profile = () => {
         setDeleteError("");
 
         try {
+            // The axios interceptor will automatically handle token refresh
+            // if the token is expired, so we can proceed directly with the delete request
             await axios.delete(`${API_URL}/user/delete`, {
                 headers: {
                     Authorization: `Bearer ${authState.accessToken}`
-                }
+                },
+                withCredentials: true // Important for cookies
             });
 
             await logout();
         } catch (err: any) {
-            const errorMessage = err.response?.data?.message || "Account deletion failed";
-            setDeleteError(errorMessage);
+            console.error("Delete account error:", err);
+
+            // Handle different error types
+            if (err.response?.status === 401) {
+                setDeleteError("Session expired. Please try again.");
+            } else if (err.response?.status === 403) {
+                setDeleteError("Access denied. Your session may have expired. Please try logging out and back in.");
+            } else {
+                const errorMessage = err.response?.data?.message || "Account deletion failed";
+                setDeleteError(errorMessage);
+            }
         } finally {
             setDeleteLoading(false);
         }

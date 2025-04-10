@@ -1,3 +1,4 @@
+// handle auth API requests
 import axios from 'axios';
 import { API_URL } from '../config/apiURL';
 
@@ -34,11 +35,19 @@ export const logout = async (email: string) => {
 export const refreshToken = async () => {
     try {
         const response = await axios.post(`${API_URL}/auth/refresh-token`, {}, {
-            withCredentials: true,
+            withCredentials: true, // Important for cookies
             headers: {
                 'Content-Type': 'application/json'
             }
         });
+
+        // Check if the response has the expected structure
+        if (!response.data || !response.data.accessToken || !response.data.user) {
+            console.error("Invalid refresh token response structure:", response.data);
+            throw new Error("Invalid refresh token response");
+        }
+
+        // Return the response data directly
         return response.data;
     } catch (error: any) {
         console.error('Refresh token error details:', {
@@ -48,7 +57,14 @@ export const refreshToken = async () => {
             data: error.response?.data,
             cookies: document.cookie
         });
-        throw error;
+
+        // error object
+        const enhancedError = new Error(error.response?.data?.message || error.message || 'Failed to refresh token');
+        enhancedError.name = 'TokenRefreshError';
+        (enhancedError as any).status = error.response?.status;
+        (enhancedError as any).originalError = error;
+
+        throw enhancedError;
     }
 };
 

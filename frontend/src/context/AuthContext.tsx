@@ -4,11 +4,33 @@ import { useAuthInitializer } from '../hooks/useAuthInitializer';
 import { refreshToken, logout as apiLogout } from '../services/authService';
 import { useNavigate } from 'react-router-dom';
 
+/**
+ * AuthState Interface
+ * 
+ * This interface defines the structure of the authentication state:
+ * - user: Contains user information (name, email, etc.)
+ * - accessToken: The JWT token used for API authentication
+ * 
+ * This state is stored in memory and persisted to localStorage
+ */
 interface AuthState {
     user: any;
     accessToken: string | null;
 }
 
+/**
+ * AuthContextType Interface
+ * 
+ * This interface defines the shape of the authentication context:
+ * - authState: The current authentication state
+ * - setAuthState: Function to update the authentication state
+ * - isAuthenticated: Boolean indicating if a user is logged in
+ * - logout: Function to log the user out
+ * - darkMode: Boolean indicating if dark mode is enabled
+ * - toggleDarkMode: Function to toggle dark mode
+ * 
+ * This context is provided to all components in the app via AuthProvider
+ */
 interface AuthContextType {
     authState: AuthState;
     setAuthState: (authState: AuthState) => void;
@@ -18,6 +40,16 @@ interface AuthContextType {
     toggleDarkMode: () => void;
 }
 
+/**
+ * AuthContext
+ * 
+ * This is the React context that will be used to share authentication state
+ * throughout the application. It's initialized with default values that will
+ * be overridden by the AuthProvider.
+ * 
+ * The context allows any component in the app to access authentication state
+ * and methods without prop drilling.
+ */
 const AuthContext = createContext<AuthContextType>({
     authState: { user: null, accessToken: null },
     setAuthState: () => { },
@@ -27,17 +59,48 @@ const AuthContext = createContext<AuthContextType>({
     toggleDarkMode: () => { }
 });
 
+/**
+ * AuthProvider Component
+ * 
+ * This is the main provider component that wraps the application and provides
+ * authentication context to all child components.
+ * 
+ * It manages:
+ * 1. Authentication state (user info and access token)
+ * 2. Dark mode preferences
+ * 3. Axios interceptors for automatic token handling
+ * 4. Persistence of auth state to localStorage
+ * 
+ * @param children - React components that will have access to the auth context
+ */
 export function AuthProvider({ children }: { children: ReactNode }) {
+    // State to store user information and access token
     const [authState, setAuthState] = useState<AuthState>({
         user: null,
         accessToken: null
     });
+
+    // State to manage dark mode preference
     const [darkMode, setDarkMode] = useState<boolean | null>(null);
+
+    // Derived state that indicates if a user is authenticated
     const isAuthenticated = !!authState.accessToken && !!authState.user;
+
+    // Custom hook to initialize authentication state
     const isLoading = useAuthInitializer(setAuthState);
+
+    // React Router hook for navigation
     const navigate = useNavigate();
 
-    // Initialize dark/light theme
+    /**
+     * Initialize dark/light theme
+     * 
+     * This effect runs once when the component mounts and:
+     * 1. Checks localStorage for saved theme preference
+     * 2. Falls back to system preference if no saved preference
+     * 3. Applies the theme to the document
+     * 4. Saves the preference to localStorage
+     */
     useEffect(() => {
         const savedTheme = localStorage.getItem('darkMode');
         const prefersDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -62,6 +125,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.setItem('darkMode', String(initialMode));
     }, []);
 
+    /**
+     * Toggle dark mode
+     * 
+     * This function:
+     * 1. Toggles the darkMode state
+     * 2. Updates the document class
+     * 3. Saves the preference to localStorage
+     */
     const toggleDarkMode = () => {
         const newMode = !darkMode!;
         setDarkMode(newMode);
@@ -75,6 +146,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.setItem('darkMode', String(newMode));
     };
 
+    /**
+     * Logout function
+     * 
+     * This function:
+     * 1. Clears the auth state in memory
+     * 2. Removes auth data from localStorage
+     * 3. Calls the API to invalidate the refresh token
+     * 4. Clears all cookies
+     * 
+     * It's designed to work even if the API call fails, ensuring the user
+     * is always logged out locally.
+     */
     const logout = async () => {
         try {
             const userEmail = authState.user?.email;
@@ -83,13 +166,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             if (userEmail) {
                 await apiLogout(userEmail);
             }
+            // Clear any other auth-related data
+            document.cookie.split(";").forEach(function (c) {
+                document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+            });
         } catch (err) {
             console.error("Logout error:", err);
+            // Even if the API call fails, clear local auth state
+            setAuthState({ user: null, accessToken: null });
             localStorage.removeItem('authState');
         }
     };
 
-    // Save auth state to localStorage
+    /**
+     * Persist auth state to localStorage
+     * 
+     * This effect runs whenever authState changes and:
+     * 1. Saves auth state to localStorage if user is authenticated
+     * 2. Removes auth data from localStorage if user is not authenticated
+     * 
+     * This ensures the auth state persists across page refreshes.
+     */
     useEffect(() => {
         if (authState.accessToken && authState.user) {
             localStorage.setItem('authState', JSON.stringify(authState));
@@ -98,8 +195,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
     }, [authState]);
 
-    // Axios interceptors
+    /**
+     * Set up axios interceptors
+     * 
+     * This effect sets up two interceptors:
+     * 1. Request interceptor: Adds the access token to all outgoing requests
+     * 2. Response interceptor: Handles token errors (401/403) by:
+     *    - Attempting to refresh the token
+     *    - Retrying the original request with the new token
+     *    - Logging out if refresh fails
+     * 
+     * The interceptors are cleaned up when the component unmounts.
+     */
     useEffect(() => {
+        // Request interceptor to add token to all requests
         const requestInterceptor = axios.interceptors.request.use(
             (config) => {
                 if (authState.accessToken) {
@@ -111,25 +220,49 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             (error) => Promise.reject(error)
         );
 
-        // refresh access token
+        // Response interceptor to handle token errors
         const responseInterceptor = axios.interceptors.response.use(
             (response) => response,
             async (error) => {
                 const originalRequest = error.config;
-                if (error.response?.status === 401 && !originalRequest._retry) {
+
+                // Check if the error is due to an expired token (401) or invalid token (403)
+                const isTokenError = error.response?.status === 401 || error.response?.status === 403;
+                const hasNotRetried = !originalRequest._retry;
+
+                if (isTokenError && hasNotRetried) {
                     originalRequest._retry = true;
 
                     try {
-                        const { data } = await refreshToken();
+                        // Attempt to refresh the token
+                        const data = await refreshToken();
+                        console.log("Token refreshed successfully");
+
+                        // Update auth state with new token
                         setAuthState({
                             user: data.user,
                             accessToken: data.accessToken
                         });
-                        originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
-                        return axios(originalRequest);
-                    } catch (err) {
+
+                        // Create a new request with the updated token
+                        const newRequest = {
+                            ...originalRequest,
+                            headers: {
+                                ...originalRequest.headers,
+                                Authorization: `Bearer ${data.accessToken}`
+                            }
+                        };
+
+                        // Add a small delay to ensure the token is properly set in the auth state
+                        await new Promise(resolve => setTimeout(resolve, 100));
+
+                        // Retry the original request with the new token
+                        return axios(newRequest);
+                    } catch (refreshError) {
+                        console.error("Failed to refresh token:", refreshError);
+                        // If refresh fails, log out the user
                         await logout();
-                        return Promise.reject(err);
+                        return Promise.reject(refreshError);
                     }
                 }
 
@@ -137,13 +270,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
         );
 
+        // Clean up interceptors when component unmounts
         return () => {
             axios.interceptors.request.eject(requestInterceptor);
             axios.interceptors.response.eject(responseInterceptor);
         };
     }, [authState.accessToken]);
 
-    // Context value
+    // Context value object that will be provided to consumers
     const value = {
         authState,
         setAuthState,
@@ -153,7 +287,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         toggleDarkMode
     };
 
-    // Loading screen while authentication is being checked
+    // Show loading screen while authentication is being checked
     if (isLoading) {
         return (
             <div className={`min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4 ${darkMode ? 'dark' : ''}`}>
@@ -224,10 +358,51 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         );
     }
 
-    // Render the app
+    // Render the app with the auth context provider
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
+/**
+ * useAuth Hook
+ * 
+ * This is a custom hook that provides access to the authentication context.
+ * It's a crucial part of the authentication system because:
+ * 
+ * 1. It provides a clean, consistent API for components to access auth state and methods
+ * 2. It ensures components can only use auth context when wrapped in an AuthProvider
+ * 3. It simplifies component code by abstracting away the context consumption logic
+ * 4. It provides type safety for the auth context
+ * 
+ * Usage example:
+ * ```tsx
+ * function MyComponent() {
+ *   const { authState, logout } = useAuth();
+ *   
+ *   return (
+ *     <div>
+ *       {authState.user ? (
+ *         <button onClick={logout}>Logout</button>
+ *       ) : (
+ *         <Link to="/login">Login</Link>
+ *       )}
+ *     </div>
+ *   );
+ * }
+ * ```
+ * 
+ * Without this hook, components would need to use useContext directly:
+ * ```tsx
+ * const authContext = useContext(AuthContext);
+ * if (!authContext) {
+ *   throw new Error('useAuth must be used within an AuthProvider');
+ * }
+ * ```
+ * 
+ * This hook encapsulates this boilerplate code and provides a better developer experience.
+ * 
+ * @returns The authentication context
+ * @throws Error if used outside of an AuthProvider
+ */
 export function useAuth() {
     const context = useContext(AuthContext);
     if (!context) {

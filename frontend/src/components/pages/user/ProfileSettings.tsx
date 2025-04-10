@@ -92,7 +92,8 @@ export const ProfileSettings = () => {
                 {
                     headers: {
                         Authorization: `Bearer ${authState.accessToken}`
-                    }
+                    },
+                    withCredentials: true // Important for cookies
                 }
             );
 
@@ -114,7 +115,11 @@ export const ProfileSettings = () => {
             let errorMessage = "Update failed";
 
             if (err.response) {
-                if (err.response.data.message === "Current password is incorrect") {
+                if (err.response.status === 401 || err.response.status === 403) {
+                    // The axios interceptor should have already tried to refresh the token
+                    // If we still get an error, it means the refresh failed
+                    errorMessage = "Session expired. Please try again.";
+                } else if (err.response.data.message === "Current password is incorrect") {
                     errorMessage = "The current password you entered is incorrect";
                     const currentPasswordField = document.getElementById("currentPassword");
                     if (currentPasswordField) currentPasswordField.focus();

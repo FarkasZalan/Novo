@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { refreshToken } from '../services/authService';
 import { useAuth } from '../context/AuthContext';
 
-// Custom hook to initialize authentication state
+// Custom hook to initialize authentication state when the app loads
 // checks for stored authentication data in localStorage
 // if found, it sets the auth state and tries to refresh the token in the background
 // if not found, it tries to refresh the access token and sets the auth state
@@ -26,7 +26,7 @@ export const useAuthInitializer = (
 
                     // Then try to refresh in background
                     try {
-                        const { data } = await refreshToken();
+                        const data = await refreshToken();
 
                         // Update the auth state with the refreshed data
                         setAuthState({
@@ -40,13 +40,20 @@ export const useAuthInitializer = (
                             accessToken: data.accessToken
                         }));
                     } catch (refreshError) {
-                        console.error('Token refresh failed, using stored credentials:', refreshError);
-                        // Don't logout here - use the stored credentials
+                        console.error('Token refresh failed during initialization:', refreshError);
+                        // Check if the error is due to an expired refresh token
+                        if ((refreshError as any).status === 403) {
+                            // If the refresh token is expired, we need to logout
+                            await logout();
+                        } else {
+                            // For other errors, keep using the stored credentials
+                            console.log("Using stored credentials despite refresh failure");
+                        }
                     }
                 } else {
                     // No stored credentials, try fresh refresh
                     try {
-                        const { data } = await refreshToken();
+                        const data = await refreshToken();
 
                         // Set the auth state with the refreshed data
                         setAuthState({
@@ -60,7 +67,7 @@ export const useAuthInitializer = (
                             accessToken: data.accessToken
                         }));
                     } catch (refreshError) {
-                        console.error('Fresh refresh failed:', refreshError);
+                        console.error('Fresh refresh failed during initialization:', refreshError);
                         // If no stored credentials and refresh fails, we need to logout
                         await logout();
                     }

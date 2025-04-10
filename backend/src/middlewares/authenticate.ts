@@ -26,7 +26,10 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
     // Verify access token
     jwt.verify(token, process.env.JWT_SECRET as string, (err: any, user: any) => {
         if (err) {
-            return res.status(403).json({ message: 'Invalid or expired access token' });
+            if (err.name === 'TokenExpiredError') {
+                return res.status(401).json({ message: 'Access token expired' });
+            }
+            return res.status(403).json({ message: 'Invalid access token' });
         }
         req.user = { id: user.id }; // add user id to request
         next(); // call next middleware
@@ -43,18 +46,17 @@ export const refreshAccessToken = async (req: Request, res: Response, next: Next
             return;
         }
 
-        // Verify refresh token
-        // Decode refresh token
+        // Verify and decode refresh token
         let decoded: any;
         try {
             decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET as string);
         } catch (jwtError) {
             console.error('JWT verification error:', jwtError);
-            res.status(403).json({ message: "Invalid refresh token" });
+            res.status(403).json({ message: "Invalid or expired refresh token" });
             return;
         }
 
-        // Check if the decoded token has the required properties
+        // Check if the decoded token has the required properties (session id and user id)
         if (!decoded.id) {
             console.error('Refresh token missing id property');
             res.status(403).json({ message: "Invalid refresh token format" });
