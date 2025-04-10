@@ -46,7 +46,6 @@ export const configurePassport = () => {
 
             // Prepare user data for the database
             const userData = {
-                id: profile.id, // Google unique ID for user
                 displayName: profile.displayName, // User's full name from Google profile
                 email: email // User's email
             };

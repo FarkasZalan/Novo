@@ -11,7 +11,6 @@ const createUserTable = async () => {
       is_premium BOOLEAN DEFAULT FALSE,
       refresh_session_id VARCHAR(255),
       provider VARCHAR(50),
-      provider_id VARCHAR(255),
       reset_password_token VARCHAR(255),
       reset_password_expires TIMESTAMP,
       is_verified BOOLEAN DEFAULT FALSE,

@@ -64,15 +64,15 @@ export const findOrCreateOAuthUser = async (profile: any, provider: string) => {
     if (result.rows.length > 0) {
         // User exists, update provider info if needed
         await pool.query(
-            "UPDATE users SET provider = $1, provider_id = $2, is_verified = TRUE, verification_token_expires = NULL, verification_token = NULL, updated_at = NOW() WHERE id = $3",
-            [provider, profile.id, result.rows[0].id]
+            "UPDATE users SET provider = $1, is_verified = TRUE, verification_token_expires = NULL, verification_token = NULL, updated_at = NOW() WHERE id = $2",
+            [provider, result.rows[0].id]
         );
         return result.rows[0];
     } else {
         // Create new user
         const newUser = await pool.query(
-            "INSERT INTO users (email, name, password, provider, provider_id, is_verified, verification_token_expires, verification_token, updated_at) VALUES ($1, $2, $3, $4, $5, TRUE, NULL, NULL, NOW()) RETURNING *",
-            [profile.email, profile.displayName, 'OAUTH_USER', provider, profile.id]
+            "INSERT INTO users (email, name, password, provider, is_verified, verification_token_expires, verification_token, updated_at) VALUES ($1, $2, $3, $4, TRUE, NULL, NULL, NOW()) RETURNING *",
+            [profile.email, profile.displayName, 'OAUTH_USER', provider]
         );
         return newUser.rows[0]; // Return the newly created user
     }
