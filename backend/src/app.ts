@@ -12,7 +12,8 @@ import passport from 'passport';
 import session from 'express-session';
 import { configurePassport } from './config/passport';
 import cookieParser from 'cookie-parser';
-import { connectRedis } from "./config/redis";
+import { connectRedis, redisClient } from "./config/redis";
+import { RedisStore } from "connect-redis";
 
 dotenv.config();
 
@@ -26,7 +27,12 @@ const port = process.env.PORT || 3000;
 
 // Session:
 // A session is a way to store information about user authentication so don't need to login every refresh or navigation
+// now we store session in redis
 app.use(session({
+    store: new RedisStore({
+        client: redisClient,
+        prefix: 'session:'
+    }),
     secret: process.env.SESSION_SECRET || 'keyboard cat', // Session ID, random long string
     resave: false, // Don't save session if unmodified
     saveUninitialized: false, // Don't create session for unauthenticated users

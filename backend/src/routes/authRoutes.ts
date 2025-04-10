@@ -196,6 +196,19 @@ router.post("/auth/refresh-token", refreshAccessToken);
  */
 router.post("/auth/logout", logoutUser);
 
+
+
+
+/**
+ * OAuth:
+ * call the /auth/google on frontend where click one of the buttons
+ * open the google consent screen and authorize
+ * redirect to /auth/google/callback (passport.ts callback url) with the user info what get from passport
+ * send the state_token to the frontend in url and save token and user id in redis
+ * the frontend fetch the access token and user id from redis with the call the /auth/oauth-state
+ * send the token and user id to the frontend from the authController with the call the /auth/oauth-state
+ */
+
 /**
  * @swagger
  * /auth/google:
@@ -229,7 +242,7 @@ router.get('/auth/google/callback',
     passport.authenticate('google', { session: false, failureRedirect: '/login' }),
     async (req, res) => {
         try {
-            const user = req.user; // get from passport
+            const user = req.user; // get from passport where create the user (see config/passport.ts and then findOrCreateOAuthUser function)
 
             // Generate session ID and tokens similar to regular login
             const refreshSessionId = crypto.randomUUID();
@@ -249,7 +262,7 @@ router.get('/auth/google/callback',
             // Generate a temporary state token
             const stateToken = crypto.randomBytes(32).toString('hex');
 
-            // Store the state token and user data in a temporary storage (Redis)
+            // Store the state token and user data in redis
             await redisClient.setEx(
                 `oauth_state:${stateToken}`,
                 5 * 60, // 5 minutes expiry
@@ -303,7 +316,7 @@ router.get('/auth/github/callback',
     passport.authenticate('github', { session: false, failureRedirect: '/login' }),
     async (req, res) => {
         try {
-            const user = req.user;
+            const user = req.user; // get from passport where create the user (see config/passport.ts and then findOrCreateOAuthUser function)
 
             // Generate session ID and tokens similar to regular login
             const refreshSessionId = crypto.randomUUID();
@@ -323,7 +336,7 @@ router.get('/auth/github/callback',
             // Generate a temporary state token
             const stateToken = crypto.randomBytes(32).toString('hex');
 
-            // Store the state token and user data in a temporary storage (Redis)
+            // Store the state token and user data in redis
             await redisClient.setEx(
                 `oauth_state:${stateToken}`,
                 5 * 60, // 5 minutes expiry

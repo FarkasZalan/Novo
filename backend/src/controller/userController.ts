@@ -90,8 +90,8 @@ export const deleteUser = async (req: Request, res: Response, next: NextFunction
         res.clearCookie("refresh_token", {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production", // Only allow secure cookies in production mode
-            sameSite: "strict", // Prevent CSRF attacks
-            path: "/auth/refresh-token"
+            sameSite: "lax",
+            path: "/"
         });
 
         handleResponse(res, 200, "User deleted successfully", deletedUser);

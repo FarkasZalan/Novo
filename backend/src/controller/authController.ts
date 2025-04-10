@@ -115,7 +115,15 @@ export const logoutUser = async (req: Request, res: Response, next: NextFunction
             path: "/" // Set path to root to ensure it's available for all routes
         });
 
-        await clearRefreshTokenInDB(user.id);
+        // Only try to clear the refresh token if user exists
+        if (user && user.id) {
+            try {
+                await clearRefreshTokenInDB(user.id);
+            } catch (tokenError) {
+                console.error("Error clearing refresh token:", tokenError);
+                // Continue even if this fails
+            }
+        }
         handleResponse(res, 200, "User logged out successfully", null);
     } catch (error) {
         next(error);
