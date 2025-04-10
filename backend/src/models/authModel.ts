@@ -74,7 +74,7 @@ export const findOrCreateOAuthUser = async (profile: any, provider: string) => {
             "INSERT INTO users (email, name, password, provider, provider_id, updated_at) VALUES ($1, $2, $3, $4, $5, NOW()) RETURNING *",
             [profile.email, profile.displayName, 'OAUTH_USER', provider, profile.id]
         );
-        return newUser.rows[0];
+        return newUser.rows[0]; // Return the newly created user
     }
 };
 

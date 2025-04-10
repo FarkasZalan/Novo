@@ -6,6 +6,7 @@ import passport from "passport";
 import { storeRefreshToken } from "../models/authModel";
 import { generateAccessToken, generateRefreshToken } from "../utils/token-utils";
 import crypto from 'crypto';
+import { redisClient } from "../config/redis";
 
 const router = express.Router();
 
@@ -228,7 +229,7 @@ router.get('/auth/google/callback',
     passport.authenticate('google', { session: false, failureRedirect: '/login' }),
     async (req, res) => {
         try {
-            const user = req.user as any;
+            const user = req.user; // get from passport
 
             // Generate session ID and tokens similar to regular login
             const refreshSessionId = crypto.randomUUID();
@@ -248,20 +249,17 @@ router.get('/auth/google/callback',
             // Generate a temporary state token
             const stateToken = crypto.randomBytes(32).toString('hex');
 
-            // Store the state token and user data in a temporary storage (currently in server memory but later maybe on Redis)
-            global.oauthStateStore = global.oauthStateStore || {};
-            global.oauthStateStore[stateToken] = {
-                accessToken,
-                user: {
-                    id: user.id,
-                    email: user.email,
-                    name: user.name,
-                    is_premium: user.is_premium,
-                    provider: user.provider,
-                    created_at: user.created_at
-                },
-                expiresAt: Date.now() + 5 * 60 * 1000 // 5 minutes expiry
-            };
+            // Store the state token and user data in a temporary storage (Redis)
+            await redisClient.setEx(
+                `oauth_state:${stateToken}`,
+                5 * 60, // 5 minutes expiry
+                JSON.stringify({
+                    accessToken,
+                    user: {
+                        id: user.id
+                    }
+                })
+            );
 
             // Redirect to frontend with just the state token
             res.redirect(`${process.env.FRONTEND_URL}/oauth-callback?state=${stateToken}`);
@@ -305,7 +303,7 @@ router.get('/auth/github/callback',
     passport.authenticate('github', { session: false, failureRedirect: '/login' }),
     async (req, res) => {
         try {
-            const user = req.user as any;
+            const user = req.user;
 
             // Generate session ID and tokens similar to regular login
             const refreshSessionId = crypto.randomUUID();
@@ -325,20 +323,17 @@ router.get('/auth/github/callback',
             // Generate a temporary state token
             const stateToken = crypto.randomBytes(32).toString('hex');
 
-            // Store the state token and user data in a temporary storage
-            global.oauthStateStore = global.oauthStateStore || {};
-            global.oauthStateStore[stateToken] = {
-                accessToken,
-                user: {
-                    id: user.id,
-                    email: user.email,
-                    name: user.name,
-                    is_premium: user.is_premium,
-                    provider: user.provider,
-                    created_at: user.created_at
-                },
-                expiresAt: Date.now() + 5 * 60 * 1000 // 5 minutes expiry
-            };
+            // Store the state token and user data in a temporary storage (Redis)
+            await redisClient.setEx(
+                `oauth_state:${stateToken}`,
+                5 * 60, // 5 minutes expiry
+                JSON.stringify({
+                    accessToken,
+                    user: {
+                        id: user.id,
+                    }
+                })
+            );
 
             // Redirect to frontend with just the state token
             res.redirect(`${process.env.FRONTEND_URL}/oauth-callback?state=${stateToken}`);

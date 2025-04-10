@@ -52,11 +52,11 @@ export const refreshAccessToken = async (req: Request, res: Response, next: Next
             decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET as string);
         } catch (jwtError) {
             console.error('JWT verification error:', jwtError);
-            res.status(403).json({ message: "Invalid or expired refresh token" });
+            res.status(403).json({ message: "Invalid refresh token" });
             return;
         }
 
-        // Check if the decoded token has the required properties (session id and user id)
+        // Check if the decoded token has the required properties
         if (!decoded.id) {
             console.error('Refresh token missing id property');
             res.status(403).json({ message: "Invalid refresh token format" });

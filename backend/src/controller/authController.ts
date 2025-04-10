@@ -14,28 +14,8 @@ import { generateAccessToken, generateRefreshToken } from "../utils/token-utils"
 import { sendPasswordResetEmail } from "../services/emailService";
 import dotenv from "dotenv";
 import crypto from 'crypto';
-import pool from "../config/db";
-
-// Define the type for the global OAuth state store
-// this is used to store the access token and user data in a temporary storage until the user logs in with google or github account
-interface OAuthStateData {
-    accessToken: string;
-    user: {
-        id: string;
-        email: string;
-        name: string;
-        is_premium: boolean;
-        provider: string;
-        created_at: string;
-    };
-    expiresAt: number; // 5 minutes
-}
-
-// Declare the global variable with proper typing
-// it's a dictionary where the key is the state token (use in the URL) and the value is the access token and user data
-declare global {
-    var oauthStateStore: { [key: string]: OAuthStateData } | undefined;
-}
+import { redisClient } from "../config/redis";
+import { getUserByIdQuery } from "../models/userModel";
 
 dotenv.config();
 
@@ -153,34 +133,33 @@ export const getOAuthState = async (req: Request, res: Response, next: NextFunct
             return;
         }
 
-        // Initialize the store if it doesn't exist
-        if (!global.oauthStateStore) {
-            global.oauthStateStore = {};
-        }
+        const stateData = await redisClient.get(`oauth_state:${state}`);
 
-        // Get the state data
-        const stateData = global.oauthStateStore[state];
 
         if (!stateData) {
             handleResponse(res, 404, "State token not found or expired", null);
             return;
         }
 
-        // Check if the state token has expired
-        if (stateData.expiresAt < Date.now()) {
-            // Clean up expired token
-            delete global.oauthStateStore[state];
-            handleResponse(res, 404, "State token expired", null);
+        // Clean up the used token
+        await redisClient.del(`oauth_state:${state}`);
+
+        const stateDataParsed = JSON.parse(stateData);
+        if (!stateDataParsed.accessToken || !stateDataParsed.user) {
+            handleResponse(res, 400, "Invalid state data", null);
             return;
         }
 
-        // Clean up the used token
-        delete global.oauthStateStore[state];
+        const user = await getUserByIdQuery(stateDataParsed.user.id);
+        if (!user) {
+            handleResponse(res, 404, "User not found", null);
+            return;
+        }
 
         // Return the state data
         handleResponse(res, 200, "OAuth state data retrieved successfully", {
-            accessToken: stateData.accessToken,
-            user: stateData.user
+            accessToken: stateDataParsed.accessToken,
+            user: user
         });
     } catch (error) {
         next(error);

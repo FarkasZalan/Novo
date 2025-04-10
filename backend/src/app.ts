@@ -12,6 +12,7 @@ import passport from 'passport';
 import session from 'express-session';
 import { configurePassport } from './config/passport';
 import cookieParser from 'cookie-parser';
+import { connectRedis } from "./config/redis";
 
 dotenv.config();
 
@@ -79,6 +80,8 @@ app.use(errorHandling);
 // Create user table if it doesn't exist before server starts
 initializeDatabase().then(() => {
     console.log("Database tables initialized");
+    // Connect to Redis
+    return connectRedis();
 }).catch((error) => console.error("Error initializing database tables:", error));
 
 // Testing postgres connection
