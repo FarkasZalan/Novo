@@ -16,6 +16,8 @@ import { ProfileSettings } from "./components/pages/user/ProfileSettings";
 import { Footer } from "./components/layouts/Footer";
 import Projects from "./components/pages/project/Projects";
 import { OAuthCallback } from "./components/pages/auth/OAuthCallback";
+import { ForgotPassword } from "./components/pages/auth/ForgotPassword";
+import { ResetPassword } from "./components/pages/auth/ResetPassword";
 
 function App() {
   return (
@@ -38,6 +40,8 @@ function App() {
               <Route path="/register" element={<Register />} />
               <Route path="/login" element={<Login />} />
               <Route path="/oauth-callback" element={<OAuthCallback />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password/:token" element={<ResetPassword />} />
             </Route>
 
             {/* Protected routes (only accessible when logged in) */}

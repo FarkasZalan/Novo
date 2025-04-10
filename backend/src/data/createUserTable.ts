@@ -12,6 +12,8 @@ const createUserTable = async () => {
       refresh_session_id VARCHAR(255),
       provider VARCHAR(50),
       provider_id VARCHAR(255),
+      reset_password_token VARCHAR(255),
+      reset_password_expires TIMESTAMP,
       created_at TIMESTAMP DEFAULT NOW(),
       updated_at TIMESTAMP DEFAULT NOW()
     )`

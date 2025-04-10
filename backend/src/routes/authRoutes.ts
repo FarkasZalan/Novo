@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import { createUser, loginUser, logoutUser, getOAuthState } from "../controller/authController";
+import { createUser, loginUser, logoutUser, getOAuthState, requestPasswordReset, resetUserPassword, verifyResetPasswordToken } from "../controller/authController";
 import { validateUser } from "../middlewares/inputValidator";
 import { refreshAccessToken } from "../middlewares/authenticate";
 import passport from "passport";
@@ -394,5 +394,101 @@ router.get('/auth/github/callback',
  *         description: State token not found or expired
  */
 router.get('/auth/oauth-state', getOAuthState);
+
+/**
+ * @swagger
+ * /auth/forgot-password:
+ *   post:
+ *     summary: Request a password reset
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: User's email address
+ *                 example: user@example.com
+ *     responses:
+ *       200:
+ *         description: If the email is registered, a password reset link will be sent
+ *       400:
+ *         description: Email is required
+ */
+router.post("/auth/forgot-password", requestPasswordReset);
+
+/**
+ * @swagger
+ * /auth/verify-reset-token/{token}:
+ *   get:
+ *     summary: Verify a password reset token
+ *     tags: [Authentication]
+ *     parameters:
+ *       - in: path
+ *         name: token
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Reset token received via email
+ *     responses:
+ *       200:
+ *         description: Token verified successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 email:
+ *                   type: string
+ *                   description: Email associated with the token
+ *       400:
+ *         description: Invalid or expired reset token
+ */
+router.get("/auth/verify-reset-token/:token", verifyResetPasswordToken);
+
+/**
+ * @swagger
+ * /auth/reset-password:
+ *   post:
+ *     summary: Reset a user's password
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - token
+ *               - newPassword
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: User's email address
+ *                 example: user@example.com
+ *               token:
+ *                 type: string
+ *                 description: Reset token received via email
+ *                 example: abc123def456
+ *               newPassword:
+ *                 type: string
+ *                 minLength: 6
+ *                 description: New password (min 6 characters)
+ *                 example: newPassword123
+ *     responses:
+ *       200:
+ *         description: Password reset successfully
+ *       400:
+ *         description: Invalid or expired reset token
+ */
+router.post("/auth/reset-password", resetUserPassword);
 
 export default router;

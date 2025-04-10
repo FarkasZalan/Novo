@@ -5,11 +5,16 @@ import {
     clearRefreshTokenInDB,
     createUserQuery,
     findByEmail,
-    storeRefreshToken
+    storeRefreshToken,
+    createPasswordResetToken,
+    resetPassword,
+    findUserEmailByResetPasswordToken,
 } from "../models/authModel";
 import { generateAccessToken, generateRefreshToken } from "../utils/token-utils";
+import { sendPasswordResetEmail } from "../services/emailService";
 import dotenv from "dotenv";
 import crypto from 'crypto';
+import pool from "../config/db";
 
 // Define the type for the global OAuth state store
 // this is used to store the access token and user data in a temporary storage until the user logs in with google or github account
@@ -177,6 +182,115 @@ export const getOAuthState = async (req: Request, res: Response, next: NextFunct
             accessToken: stateData.accessToken,
             user: stateData.user
         });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// send password reset email
+export const requestPasswordReset = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            handleResponse(res, 400, "Email is required", null);
+            return;
+        }
+
+        // Find the user by email
+        const user = await findByEmail(email);
+
+        // If user not found, still return success to prevent email enumeration
+        if (!user) {
+            handleResponse(res, 200, "If your email is registered, you will receive a password reset link", null);
+            return;
+        }
+
+        // Check if user is an OAuth user
+        if (user.provider) {
+            handleResponse(res, 400, `This account is linked to ${user.provider}. Please use ${user.provider} to sign in.`, null);
+            return;
+        }
+
+        // Create a reset token
+        const resetToken = await createPasswordResetToken(email);
+
+        // This should never be null at this point, but TypeScript doesn't know that
+        if (!resetToken) {
+            handleResponse(res, 500, "Failed to create reset token", null);
+            return;
+        }
+
+        // Send the reset email
+        await sendPasswordResetEmail(email, resetToken);
+
+        handleResponse(res, 200, "If your email is registered, you will receive a password reset link", null);
+    } catch (error) {
+        next(error);
+    }
+};
+
+// Verify a reset password token
+export const verifyResetPasswordToken = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const { token } = req.params;
+        if (!token) {
+            handleResponse(res, 400, "Token is required", null);
+            return;
+        }
+
+        // Query for a user where a reset token exists and has not expired
+        let foundEmail = await findUserEmailByResetPasswordToken(token);
+
+        if (!foundEmail) {
+            handleResponse(res, 400, "Invalid or expired reset token", null);
+            return;
+        }
+
+        handleResponse(res, 200, "Token verified successfully", { email: foundEmail });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const resetUserPassword = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const { email, token, newPassword } = req.body;
+
+        if (!email || !token || !newPassword) {
+            handleResponse(res, 400, "Email, token, and new password are required", null);
+            return;
+        }
+
+        // Validate password
+        if (newPassword.length < 6) {
+            handleResponse(res, 400, "Password must be at least 6 characters", null);
+            return;
+        }
+
+        // Find the user by email
+        const user = await findByEmail(email);
+
+        if (!user) {
+            handleResponse(res, 400, "User not found", null);
+            return;
+        }
+
+        // Check if user is an OAuth user
+        if (user.provider) {
+            handleResponse(res, 400, `This account is linked to ${user.provider}. Please use ${user.provider} to sign in.`, null);
+            return;
+        }
+
+        // Reset the password
+        const success = await resetPassword(email, newPassword);
+
+        if (!success) {
+            handleResponse(res, 400, "Invalid or expired reset token", null);
+            return;
+        }
+
+        handleResponse(res, 200, "Password reset successfully", null);
     } catch (error) {
         next(error);
     }
