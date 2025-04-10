@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FaEnvelope, FaLock, FaGoogle, FaGithub } from "react-icons/fa";
-import { initiateGithubLogin, initiateGoogleLogin, login } from "../../../services/authService";
+import { initiateGithubLogin, initiateGoogleLogin, login, resendVerificationEmail } from "../../../services/authService";
 import { useAuth } from "../../../context/AuthContext";
 
 export const Login = () => {
@@ -12,6 +12,8 @@ export const Login = () => {
     });
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
+    const [resendLoading, setResendLoading] = useState(false);
+    const [resendSuccess, setResendSuccess] = useState("");
     const navigate = useNavigate();
     const { setAuthState } = useAuth();
 
@@ -40,12 +42,35 @@ export const Login = () => {
         }));
     };
 
+    const handleResendVerification = async () => {
+        try {
+            setResendLoading(true);
+
+            if (!formData.email) {
+                setError("Please enter your email address first");
+                setResendLoading(false);
+                return;
+            }
+
+            await resendVerificationEmail(formData.email);
+            setError(""); // Clear error after successful resend
+            setResendSuccess("Verification email resent. Please check your inbox.");
+        } catch (err: any) {
+            const errorMessage = err.response?.data?.message || "Failed to resend verification email";
+            setError(errorMessage);
+            setResendSuccess("");
+        } finally {
+            setResendLoading(false);
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         try {
             setLoading(true);
             setError("");
+            setResendSuccess("");
 
             const { data } = await login(
                 formData.email,
@@ -93,8 +118,62 @@ export const Login = () => {
                 </div>
 
                 {error && (
-                    <div className="mb-6 p-3 bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 rounded-lg text-sm">
-                        {error}
+                    <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                        <div className="flex flex-col items-center text-center">
+                            <div className="flex items-center">
+                                <svg className="h-5 w-5 text-red-500 dark:text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                                </svg>
+                                <p className="ml-2 text-md font-medium text-red-700 dark:text-red-300">
+                                    {error}
+                                </p>
+                            </div>
+
+                            {error.includes("verify your email") && (
+                                <div className="mt-4 w-full flex justify-center">
+                                    <button
+                                        onClick={handleResendVerification}
+                                        disabled={resendLoading}
+                                        className={`inline-flex items-center px-4 py-2 rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-150 cursor-pointer ${resendLoading ? "opacity-70 cursor-not-allowed" : ""}`}
+                                    >
+                                        {resendLoading ? (
+                                            <>
+                                                <svg
+                                                    className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    fill="none"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                </svg>
+                                                Sending...
+                                            </>
+                                        ) : (
+                                            "Resend Verification Email"
+                                        )}
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+
+                {resendSuccess && (
+                    <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                        <div className="flex flex-col items-center text-center">
+                            <div className="flex items-center">
+                                <svg className="h-5 w-5 text-green-500 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                </svg>
+                                <p className="ml-2 text-md font-medium text-green-700 dark:text-green-300">
+                                    {resendSuccess}
+                                </p>
+                            </div>
+                            <p className="mt-2 text-xm text-green-600 dark:text-green-400">
+                                This verification email will expire in 5 minutes.
+                            </p>
+                        </div>
                     </div>
                 )}
 

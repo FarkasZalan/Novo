@@ -18,6 +18,7 @@ import Projects from "./components/pages/project/Projects";
 import { OAuthCallback } from "./components/pages/auth/OAuthCallback";
 import { ForgotPassword } from "./components/pages/auth/ForgotPassword";
 import { ResetPassword } from "./components/pages/auth/ResetPassword";
+import { VerifyEmail } from "./components/pages/auth/VerifyEmail";
 
 function App() {
   return (
@@ -42,6 +43,7 @@ function App() {
               <Route path="/oauth-callback" element={<OAuthCallback />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password/:token" element={<ResetPassword />} />
+              <Route path="/verify-email" element={<VerifyEmail />} />
             </Route>
 
             {/* Protected routes (only accessible when logged in) */}

@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import { createUser, loginUser, logoutUser, getOAuthState, requestPasswordReset, resetUserPassword, verifyResetPasswordToken } from "../controller/authController";
+import { createUser, loginUser, logoutUser, getOAuthState, requestPasswordReset, resetUserPassword, verifyResetPasswordToken, resendVerificationEmail, verifyEmail } from "../controller/authController";
 import { validateUser } from "../middlewares/inputValidator";
 import { refreshAccessToken } from "../middlewares/authenticate";
 import passport from "passport";
@@ -498,5 +498,58 @@ router.get("/auth/verify-reset-token/:token", verifyResetPasswordToken);
  *         description: Invalid or expired reset token
  */
 router.post("/auth/reset-password", resetUserPassword);
+
+/**
+ * @swagger
+ * /auth/verify-email:
+ *   post:
+ *     summary: Verify user's email with a token
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - token
+ *             properties:
+ *               token:
+ *                 type: string
+ *                 description: Verification token sent to user's email
+ *     responses:
+ *       200:
+ *         description: Email verified successfully
+ *       400:
+ *         description: Invalid or expired token
+ */
+router.post("/auth/verify-email", verifyEmail);
+
+/**
+ * @swagger
+ * /auth/resend-verification:
+ *   post:
+ *     summary: Resend verification email
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: User's email address
+ *     responses:
+ *       200:
+ *         description: Verification email resent
+ *       400:
+ *         description: Email not found or user already verified
+ */
+router.post("/auth/resend-verification", resendVerificationEmail);
 
 export default router;

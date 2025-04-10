@@ -9,9 +9,12 @@ import {
     createPasswordResetToken,
     resetPassword,
     findUserEmailByResetPasswordToken,
+    findUserByVerificationToken,
+    verifyUserEmail,
+    createVerificationToken,
 } from "../models/authModel";
 import { generateAccessToken, generateRefreshToken } from "../utils/token-utils";
-import { sendPasswordResetEmail } from "../services/emailService";
+import { sendPasswordResetEmail, sendVerificationEmail } from "../services/emailService";
 import dotenv from "dotenv";
 import crypto from 'crypto';
 import { redisClient } from "../config/redis";
@@ -34,6 +37,13 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
         const { email, name } = req.body;
         const userHashedPassword = await bcrypt.hash(req.body.password, 10);
         const newUser = await createUserQuery(email, name, userHashedPassword);
+
+        // Generate verification token and send email
+        const verificationToken = await createVerificationToken(email);
+        if (verificationToken) {
+            await sendVerificationEmail(email, verificationToken);
+        }
+
         handleResponse(res, 201, "User created successfully", newUser);
     } catch (error: Error | any) {
         if (error.code === "23505") {
@@ -59,6 +69,12 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
         // Handle OAuth users trying to log in with password
         if (user.provider) {
             handleResponse(res, 400, `Please log in using your ${user.provider} account`, null);
+            return;
+        }
+
+        // Check if email is verified
+        if (!user.is_verified) {
+            handleResponse(res, 400, "Please verify your email before logging in", null);
             return;
         }
 
@@ -278,6 +294,65 @@ export const resetUserPassword = async (req: Request, res: Response, next: NextF
         }
 
         handleResponse(res, 200, "Password reset successfully", null);
+    } catch (error) {
+        next(error);
+    }
+};
+
+// if the token is match with the user then verify
+export const verifyEmail = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const { token } = req.body;
+        if (!token) {
+            handleResponse(res, 400, "Token is required", null);
+            return;
+        }
+
+        // Find user with this verification token
+        const user = await findUserByVerificationToken(token);
+
+        if (!user) {
+            handleResponse(res, 400, "Invalid or expired verification token", null);
+            return;
+        }
+
+        // Verify the user
+        await verifyUserEmail(user.id);
+
+        handleResponse(res, 200, "Email verified successfully", null);
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const resendVerificationEmail = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const { email } = req.body;
+        if (!email) {
+            handleResponse(res, 400, "Email is required", null);
+            return;
+        }
+
+        // Find the user by email
+        const user = await findByEmail(email);
+        if (!user) {
+            handleResponse(res, 400, "If this email is registered, you will receive a verification email", null);
+            return;
+        }
+
+        // Check if user is already verified
+        if (user.is_verified) {
+            handleResponse(res, 400, "This email is already verified", null);
+            return;
+        }
+
+        // Generate verification token and send email
+        const verificationToken = await createVerificationToken(email);
+        if (verificationToken) {
+            await sendVerificationEmail(email, verificationToken);
+        }
+
+        handleResponse(res, 200, "If this email is registered, you will receive a verification email", null);
     } catch (error) {
         next(error);
     }

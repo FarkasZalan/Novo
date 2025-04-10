@@ -14,6 +14,9 @@ const createUserTable = async () => {
       provider_id VARCHAR(255),
       reset_password_token VARCHAR(255),
       reset_password_expires TIMESTAMP,
+      is_verified BOOLEAN DEFAULT FALSE,
+      verification_token VARCHAR(255),
+      verification_token_expires TIMESTAMP,
       created_at TIMESTAMP DEFAULT NOW(),
       updated_at TIMESTAMP DEFAULT NOW()
     )`

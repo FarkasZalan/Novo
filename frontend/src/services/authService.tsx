@@ -68,6 +68,30 @@ export const refreshToken = async () => {
     }
 };
 
+export const verifyEmail = async (token: string) => {
+    try {
+        const response = await axios.post(`${API_URL}/auth/verify-email`, {
+            token
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Email verification error:", error);
+        throw error;
+    }
+};
+
+export const resendVerificationEmail = async (email: string) => {
+    try {
+        const response = await axios.post(`${API_URL}/auth/resend-verification`, {
+            email
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Resend verification error:", error);
+        throw error;
+    }
+};
+
 // OAuth functions
 export const initiateGoogleLogin = () => {
     window.location.href = `${API_URL}/auth/google`;

@@ -64,14 +64,14 @@ export const findOrCreateOAuthUser = async (profile: any, provider: string) => {
     if (result.rows.length > 0) {
         // User exists, update provider info if needed
         await pool.query(
-            "UPDATE users SET provider = $1, provider_id = $2, updated_at = NOW() WHERE id = $3",
+            "UPDATE users SET provider = $1, provider_id = $2, is_verified = TRUE, verification_token_expires = NULL, verification_token = NULL, updated_at = NOW() WHERE id = $3",
             [provider, profile.id, result.rows[0].id]
         );
         return result.rows[0];
     } else {
         // Create new user
         const newUser = await pool.query(
-            "INSERT INTO users (email, name, password, provider, provider_id, updated_at) VALUES ($1, $2, $3, $4, $5, NOW()) RETURNING *",
+            "INSERT INTO users (email, name, password, provider, provider_id, is_verified, verification_token_expires, verification_token, updated_at) VALUES ($1, $2, $3, $4, $5, TRUE, NULL, NULL, NOW()) RETURNING *",
             [profile.email, profile.displayName, 'OAUTH_USER', provider, profile.id]
         );
         return newUser.rows[0]; // Return the newly created user
@@ -99,7 +99,7 @@ export const createPasswordResetToken = async (email: string): Promise<string | 
 
     // Store the hashed token and expiration time in the database
     const expirationTime = new Date();
-    expirationTime.setHours(expirationTime.getHours() + 1); // Token expires in 1 hour
+    expirationTime.setMinutes(expirationTime.getMinutes() + 5); // Token expires in 5 minutes
 
     await pool.query(
         "UPDATE users SET reset_password_token = $1, reset_password_expires = $2, updated_at = NOW() WHERE id = $3",
@@ -148,4 +148,56 @@ export const resetPassword = async (email: string, newPassword: string): Promise
     );
 
     return true;
+};
+
+export const createVerificationToken = async (email: string): Promise<string | null> => {
+    // Find the user by email
+    const user = await findByEmail(email);
+
+    if (!user) {
+        return null;
+    }
+
+    // Generate a random token
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+
+    // Hash the token before storing it
+    const hashedToken = await bcrypt.hash(verificationToken, 10);
+
+    // Store the hashed token and expiration time in the database
+    const expirationTime = new Date();
+    expirationTime.setMinutes(expirationTime.getMinutes() + 5); // Token expires in 5 minutes
+
+    await pool.query(
+        "UPDATE users SET verification_token = $1, verification_token_expires = $2, updated_at = NOW() WHERE id = $3",
+        [hashedToken, expirationTime, user.id]
+    );
+
+    return verificationToken;
+};
+
+export const findUserByVerificationToken = async (token: string) => {
+    const result = await pool.query(
+        "SELECT * FROM users WHERE verification_token IS NOT NULL AND verification_token_expires > NOW()",
+        []
+    );
+
+    if (result.rows.length === 0) {
+        return null;
+    }
+
+    for (const user of result.rows) {
+        const isMatch = await bcrypt.compare(token, user.verification_token);
+        if (isMatch) {
+            return user;
+        }
+    }
+    return null;
+};
+
+export const verifyUserEmail = async (userId: string) => {
+    await pool.query(
+        "UPDATE users SET is_verified = TRUE, verification_token = NULL, verification_token_expires = NULL, updated_at = NOW() WHERE id = $1",
+        [userId]
+    );
 };

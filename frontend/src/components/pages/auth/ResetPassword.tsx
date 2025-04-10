@@ -126,13 +126,13 @@ export const ResetPassword = () => {
                 </div>
 
                 {error && (
-                    <div className="mb-6 p-3 bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 rounded-lg text-sm">
+                    <div className="mb-6 p-3 bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 rounded-lg text-md">
                         {error}
                     </div>
                 )}
 
                 {success && (
-                    <div className="mb-6 p-3 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 rounded-lg text-sm flex items-center">
+                    <div className="mb-6 p-3 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 rounded-lg text-md flex items-center">
                         <FaCheck className="mr-2" />
                         Password reset successful! You can now log in with your new password.
                     </div>

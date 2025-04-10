@@ -28,12 +28,15 @@ const port = process.env.PORT || 3000;
 // Session:
 // A session is a way to store information about user authentication so don't need to login every refresh or navigation
 // now we store session in redis
+
+// session is required to OAuth because we need to store the state of the user in the session what retuns from the OAuth provider (Google or Github auth screen)
+// and with this session don't need to login every refresh or navigation
 app.use(session({
     store: new RedisStore({
         client: redisClient,
         prefix: 'session:'
     }),
-    secret: process.env.SESSION_SECRET || 'keyboard cat', // Session ID, random long string
+    secret: process.env.SESSION_SECRET as string, // Session ID, random long string
     resave: false, // Don't save session if unmodified
     saveUninitialized: false, // Don't create session for unauthenticated users
 
@@ -42,11 +45,17 @@ app.use(session({
         secure: process.env.NODE_ENV === 'production',
         httpOnly: true,
         sameSite: 'lax',
-        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+        maxAge: 5 * 60 * 1000 // 5 min
     }
 }));
 
 app.use(passport.initialize());
+
+// integrate express session with passport
+// store the user id in the session
+// after login the passport remembers the user id in the session
+
+// this is necesary for OAuth
 app.use(passport.session());
 
 // Initialize passport configuration
