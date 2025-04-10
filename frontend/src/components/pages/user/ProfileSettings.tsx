@@ -203,7 +203,7 @@ export const ProfileSettings = () => {
                                     {user?.provider === 'google' && <FaGoogle className="mr-2" />}
                                     {user?.provider === 'github' && <FaGithub className="mr-2" />}
                                     <span>
-                                        You're signed in with {user?.provider}. Password changes are not allowed for OAuth accounts.
+                                        You're signed in with a {user?.provider} account. Password changes are not allowed for OAuth accounts.
                                     </span>
                                 </div>
                             </div>

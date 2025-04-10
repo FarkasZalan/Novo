@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { generateAccessToken } from '../utils/token-utils';
 import bcrypt from "bcrypt";
-import { findByEmail } from '../models/authModel';
+import { getUserByIdQuery } from '../models/userModel';
 
 
 declare module "express-serve-static-core" {
@@ -38,23 +38,53 @@ export const refreshAccessToken = async (req: Request, res: Response, next: Next
     try {
         const refreshToken = req.cookies.refresh_token; // Get refresh token from cookie
         if (!refreshToken) {
+            console.log('No refresh token found in cookies');
             res.status(401).json({ message: "Refresh token not found" });
+            return;
         }
 
         // Verify refresh token
         // Decode refresh token
-        const decoded: any = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET as string);
-
-        // Fetch user from DB
-        const user = await findByEmail(decoded.id);
-        if (!user) {
-            res.status(404).json({ message: "User not found" });
+        let decoded: any;
+        try {
+            decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET as string);
+        } catch (jwtError) {
+            console.error('JWT verification error:', jwtError);
+            res.status(403).json({ message: "Invalid refresh token" });
+            return;
         }
 
-        // Compare seession ID from token with the hashed session ID from DB
-        const isValidSession = await bcrypt.compare(decoded.sessionId, user.refresh_session_id);
+        // Check if the decoded token has the required properties
+        if (!decoded.id) {
+            console.error('Refresh token missing id property');
+            res.status(403).json({ message: "Invalid refresh token format" });
+            return;
+        }
+
+        // Fetch user from DB
+        const user = await getUserByIdQuery(decoded.id);
+        if (!user) {
+            res.status(404).json({ message: "User not found" });
+            return;
+        }
+
+        // Check if user has a refresh session ID
+        if (!user.refresh_session_id) {
+            res.status(403).json({ message: "No refresh session found" });
+            return;
+        }
+
+        // Check if the decoded token has the sessionId property
+        if (!decoded.refreshSessionId) {
+            res.status(403).json({ message: "Invalid refresh token format" });
+            return;
+        }
+
+        // Compare session ID from token with the hashed session ID from DB
+        const isValidSession = await bcrypt.compare(decoded.refreshSessionId, user.refresh_session_id);
         if (!isValidSession) {
             res.status(403).json({ message: "Invalid session" });
+            return;
         }
 
         // Generate new access token
@@ -66,6 +96,7 @@ export const refreshAccessToken = async (req: Request, res: Response, next: Next
             user
         });
     } catch (error) {
+        console.error('Refresh token error:', error);
         res.status(403).json({ message: "Invalid refresh token" });
     }
 };

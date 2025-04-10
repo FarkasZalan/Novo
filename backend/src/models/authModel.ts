@@ -13,16 +13,43 @@ export const findByEmail = async (email: string) => {
 
 // Store Refresh Token
 export const storeRefreshToken = async (userId: string, refreshSessionId: string) => {
-    const hashedSessionId = await bcrypt.hash(refreshSessionId, 10); // Hash the refresh session ID
-    await pool.query("UPDATE users SET refresh_session_id = $1, updated_at = NOW() WHERE id = $2 RETURNING *", [hashedSessionId, userId]);
+    try {
+        const hashedSessionId = await bcrypt.hash(refreshSessionId, 10); // Hash the refresh session ID
 
-    return hashedSessionId;
+        const result = await pool.query(
+            "UPDATE users SET refresh_session_id = $1, updated_at = NOW() WHERE id = $2 RETURNING *",
+            [hashedSessionId, userId]
+        );
+
+        if (result.rows.length === 0) {
+            console.error('Failed to update user with refresh session ID');
+            throw new Error('Failed to update user with refresh session ID');
+        }
+        return hashedSessionId;
+    } catch (error) {
+        console.error('Error storing refresh token:', error);
+        throw error;
+    }
 }
 
 // Clear Refresh Token on logout
 export const clearRefreshTokenInDB = async (userId: string) => {
-    const result = await pool.query("UPDATE users SET refresh_session_id = NULL, updated_at = NOW() WHERE id = $1 RETURNING *", [userId]);
-    return result.rows[0];
+    try {
+        const result = await pool.query(
+            "UPDATE users SET refresh_session_id = NULL, updated_at = NOW() WHERE id = $1 RETURNING *",
+            [userId]
+        );
+
+        if (result.rows.length === 0) {
+            console.error('Failed to clear refresh token for user');
+            throw new Error('Failed to clear refresh token for user');
+        }
+
+        return result.rows[0];
+    } catch (error) {
+        console.error('Error clearing refresh token:', error);
+        throw error;
+    }
 }
 
 // Find or create OAuth user (Google, GitHub)

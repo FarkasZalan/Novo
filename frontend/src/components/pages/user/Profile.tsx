@@ -8,7 +8,6 @@ import { API_URL } from "../../../config/apiURL";
 export const Profile = () => {
     const { authState, logout } = useAuth();
     const user = authState.user;
-    console.log(user)
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [deleteError, setDeleteError] = useState("");
     const [deleteLoading, setDeleteLoading] = useState(false);

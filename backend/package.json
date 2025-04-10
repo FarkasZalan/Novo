@@ -29,11 +29,13 @@
     "passport-google-oauth20": "^2.0.0",
     "pg": "^8.14.1",
     "prettier": "^3.5.3",
+    "redis": "^4.7.0",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
+    "@types/cookie-parser": "^1.4.8",
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.1",
     "@types/express-session": "^1.18.1",

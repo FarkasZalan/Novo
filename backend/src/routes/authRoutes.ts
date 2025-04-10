@@ -1,5 +1,5 @@
-import express from "express";
-import { createUser, loginUser, logoutUser } from "../controller/authController";
+import express, { Request, Response } from "express";
+import { createUser, loginUser, logoutUser, getOAuthState } from "../controller/authController";
 import { validateUser } from "../middlewares/inputValidator";
 import { refreshAccessToken } from "../middlewares/authenticate";
 import passport from "passport";
@@ -245,8 +245,26 @@ router.get('/auth/google/callback',
                 maxAge: 7 * 24 * 60 * 60 * 1000
             });
 
-            // Redirect to frontend with token (you'd normally use a more secure approach)
-            res.redirect(`${process.env.FRONTEND_URL}/oauth-callback?token=${accessToken}&userId=${user.id}&email=${user.email}&name=${user.name}&isPremium=${user.is_premium}&createdAt=${user.created_at}&provider=${user.provider}`);
+            // Generate a temporary state token
+            const stateToken = crypto.randomBytes(32).toString('hex');
+
+            // Store the state token and user data in a temporary storage (currently in server memory but later maybe on Redis)
+            global.oauthStateStore = global.oauthStateStore || {};
+            global.oauthStateStore[stateToken] = {
+                accessToken,
+                user: {
+                    id: user.id,
+                    email: user.email,
+                    name: user.name,
+                    is_premium: user.is_premium,
+                    provider: user.provider,
+                    created_at: user.created_at
+                },
+                expiresAt: Date.now() + 5 * 60 * 1000 // 5 minutes expiry
+            };
+
+            // Redirect to frontend with just the state token
+            res.redirect(`${process.env.FRONTEND_URL}/oauth-callback?state=${stateToken}`);
         } catch (error) {
             console.error('OAuth callback error:', error);
             res.redirect('/login?error=oauth_failed');
@@ -304,13 +322,77 @@ router.get('/auth/github/callback',
                 maxAge: 7 * 24 * 60 * 60 * 1000
             });
 
-            // Redirect to frontend with token
-            res.redirect(`${process.env.FRONTEND_URL}/oauth-callback?token=${accessToken}&userId=${user.id}&email=${user.email}&name=${user.name}&isPremium=${user.is_premium}&createdAt=${user.created_at}&provider=${user.provider}`);
+            // Generate a temporary state token
+            const stateToken = crypto.randomBytes(32).toString('hex');
+
+            // Store the state token and user data in a temporary storage
+            global.oauthStateStore = global.oauthStateStore || {};
+            global.oauthStateStore[stateToken] = {
+                accessToken,
+                user: {
+                    id: user.id,
+                    email: user.email,
+                    name: user.name,
+                    is_premium: user.is_premium,
+                    provider: user.provider,
+                    created_at: user.created_at
+                },
+                expiresAt: Date.now() + 5 * 60 * 1000 // 5 minutes expiry
+            };
+
+            // Redirect to frontend with just the state token
+            res.redirect(`${process.env.FRONTEND_URL}/oauth-callback?state=${stateToken}`);
         } catch (error) {
             console.error('OAuth callback error:', error);
             res.redirect('/login?error=oauth_failed');
         }
     }
 );
+
+/**
+ * @swagger
+ * /auth/oauth-state:
+ *   get:
+ *     summary: Fetch OAuth state data
+ *     tags: [Authentication]
+ *     parameters:
+ *       - in: query
+ *         name: state
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: State token received from OAuth callback
+ *     responses:
+ *       200:
+ *         description: OAuth state data retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 accessToken:
+ *                   type: string
+ *                   description: JWT access token
+ *                 user:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                     email:
+ *                       type: string
+ *                     name:
+ *                       type: string
+ *                     is_premium:
+ *                       type: boolean
+ *                     provider:
+ *                       type: string
+ *                     created_at:
+ *                       type: string
+ *       400:
+ *         description: Invalid or missing state token
+ *       404:
+ *         description: State token not found or expired
+ */
+router.get('/auth/oauth-state', getOAuthState);
 
 export default router;

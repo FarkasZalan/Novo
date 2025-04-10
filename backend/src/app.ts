@@ -11,6 +11,7 @@ import { setupSwagger } from "./config/swagger";
 import passport from 'passport';
 import session from 'express-session';
 import { configurePassport } from './config/passport';
+import cookieParser from 'cookie-parser';
 
 dotenv.config();
 
@@ -52,8 +53,13 @@ configurePassport();
 app.use(cors({
     origin: ["http://localhost:5173"], // frontend url
     credentials: true, // allow cookies
-    exposedHeaders: ['set-cookie']
+    exposedHeaders: ['set-cookie'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
 })); // Enable CORS
+
+// Cookie parser middleware
+app.use(cookieParser());
 
 // swagger config
 setupSwagger(app);
