@@ -18,7 +18,15 @@ const createUserTable = async () => {
       verification_token_expires TIMESTAMP,
       created_at TIMESTAMP DEFAULT NOW(),
       updated_at TIMESTAMP DEFAULT NOW()
-    )`
+    );
+    
+    -- Additional indexes for users table
+        CREATE INDEX IF NOT EXISTS idx_users_email ON users(email); -- Already covered by UNIQUE
+        CREATE INDEX IF NOT EXISTS idx_users_reset_token ON users(reset_password_token) WHERE reset_password_token IS NOT NULL;
+        CREATE INDEX IF NOT EXISTS idx_users_verification_token ON users(verification_token) WHERE verification_token IS NOT NULL;
+        CREATE INDEX IF NOT EXISTS idx_users_is_premium ON users(is_premium) WHERE is_premium = TRUE;
+        CREATE INDEX IF NOT EXISTS idx_users_created_at ON users(created_at);
+    `
 
     try {
         await pool.query(queryText); // send a query to the database with one of the open connection from the pool

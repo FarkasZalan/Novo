@@ -16,7 +16,7 @@ export const authorizeProject = async (req: Request, res: Response, next: NextFu
     }
 
     // if the project owner is not the same as the requesting user
-    if (project.user_id !== requestingUserId) {
+    if (project.owner_id !== requestingUserId) {
         res.status(403).json({ status: 403, message: "Unauthorized" });
         return
     }
@@ -36,7 +36,7 @@ export const authorizeTask = async (req: Request, res: Response, next: NextFunct
         return
     }
 
-    if (project.user_id !== requestingUserId) {
+    if (project.owner_id !== requestingUserId) {
         res.status(403).json({ status: 403, message: "Unauthorized" });
         return
     }

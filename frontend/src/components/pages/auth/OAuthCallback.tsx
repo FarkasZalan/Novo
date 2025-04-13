@@ -33,8 +33,11 @@ export const OAuthCallback = () => {
                     accessToken: response.data.accessToken
                 });
 
-                // Redirect to home page on success
-                navigate("/");
+                // Redirect to dashboard page on success
+                setTimeout(() => {
+                    navigate("/dashboard");
+                    console.log("Redirecting to dashboard...");
+                }, 100);
             } catch (err) {
                 console.error("OAuth callback error:", err);
                 navigate("/login", { state: { error: "OAuth authentication failed" } });

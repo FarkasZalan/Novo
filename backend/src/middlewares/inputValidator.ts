@@ -19,8 +19,8 @@ export const validateUser = (req: Request, res: Response, next: NextFunction): v
 };
 
 export const validateProject = (req: Request, res: Response, next: NextFunction): void => {
-    const { name, description, userId } = req.body;
-    const { error } = projectSchema.validate({ name, description, userId });
+    const { name, description, ownerId } = req.body;
+    const { error } = projectSchema.validate({ name, description, ownerId });
     if (error) {
         res.status(400).json({
             status: 400,

@@ -9,16 +9,28 @@ import { PrivacyPolicy } from "./components/pages/Privacy";
 import { TermsOfService } from "./components/pages/TermsOfService";
 import { About } from "./components/pages/About";
 import { ScrollToTop } from "./components/utils/ScrollToTop";
-import { AuthProvider } from "./context/AuthContext";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ProtectedRoute } from "./components/routes/ProtectedRoute";
 import { PublicRoute } from "./components/routes/PublicRoute";
 import { ProfileSettings } from "./components/pages/user/ProfileSettings";
 import { Footer } from "./components/layouts/Footer";
-import Projects from "./components/pages/project/Projects";
 import { OAuthCallback } from "./components/pages/auth/OAuthCallback";
 import { ForgotPassword } from "./components/pages/auth/ForgotPassword";
 import { ResetPassword } from "./components/pages/auth/ResetPassword";
 import { VerifyEmail } from "./components/pages/auth/VerifyEmail";
+import { Dashboard } from "./components/pages/project/Dashboard";
+import { CreateProject } from "./components/pages/project/CreateProject";
+import { EditProject } from "./components/pages/project/EditProject";
+
+function RootRedirect() {
+  const { isAuthenticated } = useAuth();
+
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />;
+  } else {
+    return <Navigate to="/home" replace />;
+  }
+}
 
 function App() {
   return (
@@ -29,7 +41,10 @@ function App() {
         <main className="flex-grow">
           <Routes>
             {/* Public routes */}
-            <Route path="/" element={<Home />} />
+
+            {/* Root path that redirects based on auth status */}
+            <Route path="/" element={<RootRedirect />} />
+
             <Route path="/home" element={<Home />} />
             <Route path="/about" element={<About />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
@@ -40,7 +55,6 @@ function App() {
             <Route element={<PublicRoute />}>
               <Route path="/register" element={<Register />} />
               <Route path="/login" element={<Login />} />
-              <Route path="/oauth-callback" element={<OAuthCallback />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password/:token" element={<ResetPassword />} />
               <Route path="/verify-email" element={<VerifyEmail />} />
@@ -48,9 +62,21 @@ function App() {
 
             {/* Protected routes (only accessible when logged in) */}
             <Route element={<ProtectedRoute />}>
+              {/* OAuth callback route */}
+              {/* need to move outside from publicRoutes, 
+              becasue when the user authState is updatedt to authenticated, 
+              the route is redirect to "/" because of the public route but in the protected route if the user is somehow not authenticated 
+              the route is not redirect to "/login" else on success login/register the route is redirect to "/dashboard  */}
+              <Route path="/oauth-callback" element={<OAuthCallback />} />
+
+              {/* User routes */}
               <Route path="/profile" element={<Profile />} />
               <Route path="/profile-settings" element={<ProfileSettings />} />
-              <Route path="/projects" element={<Projects />} />
+
+              {/* Project routes */}
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/projects/new" element={<CreateProject />} />
+              <Route path="/projects/:projectId/edit" element={<EditProject />} />
             </Route>
 
             {/* 404 fallback */}

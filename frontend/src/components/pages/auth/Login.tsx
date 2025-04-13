@@ -82,7 +82,9 @@ export const Login = () => {
                 accessToken: data.accessToken
             });
 
-            navigate("/");
+            setTimeout(() => {
+                navigate("/dashboard");
+            }, 100);
         } catch (err: any) {
             const errorMessage = err.response?.data?.message || "Login failed";
             console.error(err);

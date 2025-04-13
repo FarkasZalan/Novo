@@ -13,7 +13,14 @@ const createTasksTable = async () => {
             completed BOOLEAN,
             created_at TIMESTAMP DEFAULT NOW(),
             updated_at TIMESTAMP
-        )
+        );
+
+        -- Additional indexes for tasks table
+        CREATE INDEX IF NOT EXISTS idx_tasks_project_id ON tasks(project_id);
+        CREATE INDEX IF NOT EXISTS idx_tasks_completed ON tasks(completed) WHERE completed = FALSE;
+        CREATE INDEX IF NOT EXISTS idx_tasks_due_date ON tasks(due_date);
+        CREATE INDEX IF NOT EXISTS idx_tasks_priority ON tasks(priority);
+        CREATE INDEX IF NOT EXISTS idx_tasks_created_at ON tasks(created_at);
     `;
 
     try {

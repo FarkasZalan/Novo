@@ -9,6 +9,7 @@ export const Profile = () => {
     const { authState, logout } = useAuth();
     const user = authState.user;
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [deleteConfirmation, setDeleteConfirmation] = useState("");
     const [deleteError, setDeleteError] = useState("");
     const [deleteLoading, setDeleteLoading] = useState(false);
 
@@ -17,24 +18,26 @@ export const Profile = () => {
     };
 
     const handleDeleteAccount = async () => {
+        if (deleteConfirmation !== user?.email) {
+            setDeleteError("Please type your email exactly to confirm deletion");
+            return;
+        }
+
         setDeleteLoading(true);
         setDeleteError("");
 
         try {
-            // The axios interceptor will automatically handle token refresh
-            // if the token is expired, so we can proceed directly with the delete request
             await axios.delete(`${API_URL}/user/delete`, {
                 headers: {
                     Authorization: `Bearer ${authState.accessToken}`
                 },
-                withCredentials: true // Important for cookies
+                withCredentials: true
             });
 
             await logout();
         } catch (err: any) {
             console.error("Delete account error:", err);
 
-            // Handle different error types
             if (err.response?.status === 401) {
                 setDeleteError("Session expired. Please try again.");
             } else if (err.response?.status === 403) {
@@ -269,68 +272,87 @@ export const Profile = () => {
                             </div>
 
                             {/* Danger Zone */}
-                            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md dark:shadow-gray-700/50 p-6 border border-red-200 dark:border-red-900 transition-colors duration-200">
-                                <h2 className="text-xl font-bold text-red-600 dark:text-red-400 mb-4 flex items-center">
-                                    <FaExclamationTriangle className="mr-2" />
-                                    Danger Zone
-                                </h2>
+                            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md dark:shadow-gray-700/50 overflow-hidden transition-colors duration-200 border border-red-200 dark:border-red-900/50">
+                                <div className="px-6 py-4 border-b border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/10">
+                                    <h2 className="text-xl font-semibold text-red-600 dark:text-red-400 flex items-center">
+                                        <FaExclamationTriangle className="mr-2" />
+                                        Danger Zone
+                                    </h2>
+                                </div>
 
-                                {!showDeleteConfirm ? (
-                                    <>
-                                        <p className="text-gray-700 dark:text-gray-300 mb-4">
-                                            Deleting your account will permanently remove all your data. This action cannot be undone.
-                                        </p>
-                                        <button
-                                            onClick={() => setShowDeleteConfirm(true)}
-                                            className="px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200 flex items-center cursor-pointer"
-                                        >
-                                            <FaTrash className="mr-2" />
-                                            Delete Account
-                                        </button>
-                                    </>
-                                ) : (
-                                    <>
-                                        <p className="text-gray-700 dark:text-gray-300 mb-4 font-medium">
-                                            Are you sure you want to delete your account? All your data will be permanently removed.
-                                        </p>
-
-                                        {deleteError && (
-                                            <div className="mb-4 p-2 bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 rounded text-sm">
-                                                {deleteError}
+                                <div className="px-6 py-4">
+                                    {!showDeleteConfirm ? (
+                                        <div className="flex flex-col md:flex-row md:items-center justify-between">
+                                            <div className="mb-4 md:mb-0">
+                                                <h3 className="font-medium text-gray-900 dark:text-gray-100">Delete your account</h3>
+                                                <p className="text-sm text-gray-600 dark:text-gray-400">
+                                                    This will permanently delete all your data. This action cannot be undone.
+                                                </p>
                                             </div>
-                                        )}
-
-                                        <div className="flex space-x-4">
                                             <button
-                                                onClick={() => setShowDeleteConfirm(false)}
-                                                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors duration-200 cursor-pointer"
+                                                onClick={() => setShowDeleteConfirm(true)}
+                                                className="px-4 py-2 bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800 text-white rounded-lg font-medium cursor-pointer transition-colors duration-200 flex items-center justify-center"
                                             >
-                                                Cancel
-                                            </button>
-                                            <button
-                                                onClick={handleDeleteAccount}
-                                                disabled={deleteLoading}
-                                                className={`px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200 flex items-center cursor-pointer ${deleteLoading ? "opacity-70 cursor-not-allowed" : ""
-                                                    }`}
-                                            >
-                                                {deleteLoading ? (
-                                                    <span className="flex items-center">
-                                                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                                        </svg>
-                                                        Deleting...
-                                                    </span>
-                                                ) : (
-                                                    <>
-                                                        <FaTrash className="mr-2" />
-                                                        Confirm Delete
-                                                    </>
-                                                )}
+                                                <FaTrash className="mr-2" />
+                                                Delete Account
                                             </button>
                                         </div>
-                                    </>
-                                )}
+                                    ) : (
+                                        <div className="space-y-4">
+                                            <div className="space-y-3">
+                                                <p className="text-sm text-gray-600 dark:text-gray-400">
+                                                    To confirm, type your email address <span className="font-mono bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">{user?.email}</span> below:
+                                                </p>
+                                                <input
+                                                    type="text"
+                                                    className="block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                                                    placeholder={`Type "${user?.email}" to confirm`}
+                                                    value={deleteConfirmation}
+                                                    onChange={(e) => setDeleteConfirmation(e.target.value)}
+                                                />
+                                            </div>
+
+                                            {deleteError && (
+                                                <div className="text-sm text-red-600 dark:text-red-400">
+                                                    {deleteError}
+                                                </div>
+                                            )}
+
+                                            <div className="flex space-x-3">
+                                                <button
+                                                    onClick={() => {
+                                                        setShowDeleteConfirm(false);
+                                                        setDeleteConfirmation("");
+                                                        setDeleteError("");
+                                                    }}
+                                                    className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors duration-200"
+                                                >
+                                                    Cancel
+                                                </button>
+                                                <button
+                                                    onClick={handleDeleteAccount}
+                                                    disabled={deleteConfirmation !== user?.email || deleteLoading}
+                                                    className={`px-4 py-2 rounded-lg font-medium text-white flex items-center justify-center ${deleteConfirmation !== user?.email || deleteLoading
+                                                        ? 'bg-red-400 dark:bg-red-800 cursor-not-allowed opacity-70'
+                                                        : 'bg-red-600 hover:bg-red-700 dark:bg-red-700 cursor-pointer dark:hover:bg-red-800'
+                                                        } transition-colors duration-200`}
+                                                >
+                                                    {deleteLoading ? (
+                                                        <>
+                                                            <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                            </svg>
+                                                            Deleting...
+                                                        </>
+                                                    ) : (
+                                                        'Delete Account'
+                                                    )}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>

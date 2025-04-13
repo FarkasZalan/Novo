@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
-import { FaUser, FaEnvelope, FaSignInAlt, FaTachometerAlt, FaFolderOpen } from "react-icons/fa";
+import { FaUser, FaEnvelope, FaSignInAlt, FaPlus } from "react-icons/fa";
 import { DarkModeToggle } from "../utils/DarkModeToggle";
 import { useAuth } from "../../context/AuthContext";
 
@@ -15,7 +15,27 @@ export const Navbar = () => {
                 <div className="flex justify-between items-center h-16">
                     {/* Logo/Brand */}
                     <div className="flex-shrink-0 flex items-center">
-                        <Link
+                        {isAuthenticated ? (
+                            <Link
+                                to="/dashboard"
+                                className="flex items-center text-gray-900 dark:text-white text-2xl font-bold hover:scale-105 transform transition-transform"
+                            >
+                                <span className="text-indigo-600 dark:text-indigo-400 rounded-lg flex items-center justify-center">
+                                    <svg
+                                        className="w-7 h-7"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2.5"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                    >
+                                        <polygon points="5 3, 19 3, 12 21" />
+                                    </svg>
+                                </span>
+                                <span className="ml-2 hidden sm:inline uppercase tracking-wide">Novo</span>
+                            </Link>
+                        ) : <Link
                             to="/"
                             className="flex items-center text-gray-900 dark:text-white text-2xl font-bold hover:scale-105 transform transition-transform"
                         >
@@ -33,7 +53,7 @@ export const Navbar = () => {
                                 </svg>
                             </span>
                             <span className="ml-2 hidden sm:inline uppercase tracking-wide">Novo</span>
-                        </Link>
+                        </Link>}
                     </div>
 
                     {/* Desktop Navigation */}
@@ -41,18 +61,11 @@ export const Navbar = () => {
                         {isAuthenticated ? (
                             <>
                                 <Link
-                                    to="/dashboard"
+                                    to="/new"
                                     className="text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-indigo-500 px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2"
                                 >
-                                    <FaTachometerAlt className="text-indigo-600 dark:text-indigo-200" />
-                                    Dashboard
-                                </Link>
-                                <Link
-                                    to="/projects"
-                                    className="text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-indigo-500 px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2"
-                                >
-                                    <FaFolderOpen className="text-indigo-600 dark:text-indigo-200" />
-                                    Projects
+                                    <FaPlus className="text-indigo-600 dark:text-indigo-200" />
+                                    New
                                 </Link>
                                 <Link
                                     to="/profile"
@@ -114,20 +127,11 @@ export const Navbar = () => {
                     {isAuthenticated ? (
                         <>
                             <Link
-                                to="/dashboard"
-                                className="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-100 dark:hover:bg-indigo-500 flex items-center gap-3"
-                                onClick={() => setIsOpen(false)}
+                                to="/new"
+                                className="text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-indigo-500 px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2"
                             >
-                                <FaTachometerAlt />
-                                Dashboard
-                            </Link>
-                            <Link
-                                to="/projects"
-                                className="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-100 dark:hover:bg-indigo-500 flex items-center gap-3"
-                                onClick={() => setIsOpen(false)}
-                            >
-                                <FaFolderOpen />
-                                Projects
+                                <FaPlus className="text-indigo-600 dark:text-indigo-200" />
+                                New
                             </Link>
                             <Link
                                 to="/profile"

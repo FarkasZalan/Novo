@@ -14,8 +14,8 @@ const handleResponse = (res: Response, status: number, message: string, data: an
 
 export const createProject = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const { name, description, userId } = req.body;
-        const newProject = await createProjectQuery(name, description, userId);
+        const { name, description, ownerId } = req.body;
+        const newProject = await createProjectQuery(name, description, ownerId);
         handleResponse(res, 201, "Project created successfully", newProject);
     } catch (error: Error | any) {
         // Check for unique constraint violation (duplicate email)
@@ -30,8 +30,8 @@ export const createProject = async (req: Request, res: Response, next: NextFunct
 
 export const getAllProjects = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const userId = req.user.id;
-        const projects = await getAllProjectForUsersQuery(userId); // get all projects for the user;
+        const ownerId = req.user.id;
+        const projects = await getAllProjectForUsersQuery(ownerId); // get all projects for the user;
         handleResponse(res, 200, "Projects fetched successfully", projects);
     } catch (error) {
         next(error);
