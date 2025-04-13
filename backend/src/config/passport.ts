@@ -80,7 +80,6 @@ export const configurePassport = () => {
             }
 
             const userData = {
-                id: profile.id,
                 displayName: profile.displayName || profile.username,
                 email: email
             };
