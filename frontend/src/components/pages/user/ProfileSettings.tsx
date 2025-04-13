@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
 import { FaUser, FaEnvelope, FaLock, FaSave, FaTimes, FaGoogle, FaGithub } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import { API_URL } from "../../../config/apiURL";
 import { useAuth } from "../../../context/AuthContext";
+import { updateUser } from "../../../services/userService";
 
 export const ProfileSettings = () => {
     const { authState, setAuthState } = useAuth();
@@ -86,21 +85,12 @@ export const ProfileSettings = () => {
             }
 
             // Update profile info only
-            const profileResponse = await axios.put(
-                `${API_URL}/user/update`,
-                updateData,
-                {
-                    headers: {
-                        Authorization: `Bearer ${authState.accessToken}`
-                    },
-                    withCredentials: true // Important for cookies
-                }
-            );
+            const profileResponse = await updateUser(updateData, authState.accessToken!);
 
             // Update auth state
             setAuthState({
                 ...authState,
-                user: profileResponse.data.data
+                user: profileResponse
             });
 
             setSuccess("Profile updated successfully!");
@@ -115,11 +105,7 @@ export const ProfileSettings = () => {
             let errorMessage = "Update failed";
 
             if (err.response) {
-                if (err.response.status === 401 || err.response.status === 403) {
-                    // The axios interceptor should have already tried to refresh the token
-                    // If we still get an error, it means the refresh failed
-                    errorMessage = "Session expired. Please try again.";
-                } else if (err.response.data.message === "Current password is incorrect") {
+                if (err.response.data.message === "Current password is incorrect") {
                     errorMessage = "The current password you entered is incorrect";
                     const currentPasswordField = document.getElementById("currentPassword");
                     if (currentPasswordField) currentPasswordField.focus();
