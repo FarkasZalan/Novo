@@ -2,6 +2,13 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaUser, FaEnvelope, FaLock, FaGoogle, FaGithub } from "react-icons/fa";
 import { initiateGithubLogin, initiateGoogleLogin, register } from "../../../services/authService";
+import { fetchAllRegisteredUsers } from "../../../services/userService";
+
+interface RegisteredUser {
+    name: string;
+    email: string;
+    password: string;
+}
 
 export const Register = () => {
     const [formData, setFormData] = useState({
@@ -13,6 +20,12 @@ export const Register = () => {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
     const [registeredSuccessfully, setRegisteredSuccessfully] = useState(false);
+    const [fieldErrors, setFieldErrors] = useState({
+        name: "",
+        email: "",
+        password: "",
+        confirmPassword: ""
+    });
     const navigate = useNavigate();
 
     const handleGoogleSignup = () => {
@@ -23,30 +36,80 @@ export const Register = () => {
         initiateGithubLogin();
     };
 
+    const validateField = (name: string, value: string) => {
+        let error = "";
+
+        switch (name) {
+            case "name":
+                if (!value.trim()) error = "Name is required";
+                else if (value.length < 2) error = "Name must be at least 2 characters";
+                break;
+            case "email":
+                if (!value.trim()) error = "Email is required";
+                else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) error = "Invalid email format";
+                break;
+            case "password":
+                if (!value.trim()) error = "Password is required";
+                else if (value.length < 6) error = "Password must be at least 6 characters";
+                break;
+            case "confirmPassword":
+                if (!value.trim()) error = "Please confirm your password";
+                else if (value !== formData.password) error = "Passwords don't match";
+                break;
+        }
+
+        return error;
+    };
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
             [name]: value
         }));
+
+        // Validate the field
+        const error = validateField(name, value);
+        setFieldErrors(prev => ({
+            ...prev,
+            [name]: error
+        }));
+
+        if (error) setError("");
+    };
+
+    const validateForm = () => {
+        let valid = true;
+        const newFieldErrors = { ...fieldErrors };
+
+        // Validate all fields
+        for (const [name, value] of Object.entries(formData)) {
+            const error = validateField(name, value);
+            newFieldErrors[name as keyof typeof newFieldErrors] = error;
+            if (error) valid = false;
+        }
+
+        setFieldErrors(newFieldErrors);
+        return valid;
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        // Validation
-        if (formData.password !== formData.confirmPassword) {
-            setError("Passwords don't match");
-            return;
-        }
-        if (formData.password.length < 6) {
-            setError("Password must be at least 6 characters");
+        if (!validateForm()) {
+            setError("Please fix the errors in the form");
             return;
         }
 
         try {
             setLoading(true);
             setError("");
+
+            const registeredUsers = await fetchAllRegisteredUsers();
+            if (registeredUsers.some((user: RegisteredUser) => user.email === formData.email)) {
+                setError("Email already exists");
+                return;
+            }
 
             await register(
                 formData.name,
@@ -65,9 +128,7 @@ export const Register = () => {
             setRegisteredSuccessfully(true);
         } catch (err: any) {
             const errorMessage = err.response?.data?.message || "Registration failed";
-            setError(errorMessage.includes("23505")
-                ? "Email already exists"
-                : errorMessage);
+            setError(errorMessage);
         } finally {
             setLoading(false);
         }
@@ -154,10 +215,15 @@ export const Register = () => {
                                         required
                                         value={formData.name}
                                         onChange={handleChange}
-                                        className="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                        className={`block w-full pl-10 pr-3 py-3 border ${fieldErrors.name ? "border-red-500 dark:border-red-400" : "border-gray-300 dark:border-gray-600"} rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500`}
                                         placeholder="John Carter"
                                     />
                                 </div>
+                                {fieldErrors.name && (
+                                    <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                                        {fieldErrors.name}
+                                    </p>
+                                )}
                             </div>
 
                             <div>
@@ -176,10 +242,15 @@ export const Register = () => {
                                         required
                                         value={formData.email}
                                         onChange={handleChange}
-                                        className="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                        className={`block w-full pl-10 pr-3 py-3 border ${fieldErrors.email ? "border-red-500 dark:border-red-400" : "border-gray-300 dark:border-gray-600"} rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500`}
                                         placeholder="you@example.com"
                                     />
                                 </div>
+                                {fieldErrors.email && (
+                                    <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                                        {fieldErrors.email}
+                                    </p>
+                                )}
                             </div>
 
                             <div>
@@ -198,10 +269,15 @@ export const Register = () => {
                                         required
                                         value={formData.password}
                                         onChange={handleChange}
-                                        className="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                        className={`block w-full pl-10 pr-3 py-3 border ${fieldErrors.password ? "border-red-500 dark:border-red-400" : "border-gray-300 dark:border-gray-600"} rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500`}
                                         placeholder="••••••••"
                                     />
                                 </div>
+                                {fieldErrors.password && (
+                                    <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                                        {fieldErrors.password}
+                                    </p>
+                                )}
                             </div>
 
                             <div>
@@ -220,10 +296,15 @@ export const Register = () => {
                                         required
                                         value={formData.confirmPassword}
                                         onChange={handleChange}
-                                        className="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                        className={`block w-full pl-10 pr-3 py-3 border ${fieldErrors.confirmPassword ? "border-red-500 dark:border-red-400" : "border-gray-300 dark:border-gray-600"} rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500`}
                                         placeholder="••••••••"
                                     />
                                 </div>
+                                {fieldErrors.confirmPassword && (
+                                    <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                                        {fieldErrors.confirmPassword}
+                                    </p>
+                                )}
                             </div>
 
                             <div className="flex items-center">

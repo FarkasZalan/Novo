@@ -39,7 +39,7 @@ export const Footer = () => {
                     </div>
                 </div>
                 <div className="mt-8 pt-8 border-t border-gray-200 dark:border-gray-800 text-sm text-center">
-                    © {new Date().getFullYear()} Novo Task Manager. All rights reserved.
+                    © {new Date().getFullYear()} Novo. All rights reserved.
                 </div>
             </div>
         </footer>

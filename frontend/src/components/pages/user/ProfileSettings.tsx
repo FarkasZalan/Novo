@@ -20,14 +20,19 @@ export const ProfileSettings = () => {
     const [success, setSuccess] = useState("");
     const [loading, setLoading] = useState(false);
     const [isOAuthUser, setIsOAuthUser] = useState(false);
+    const [fieldErrors, setFieldErrors] = useState({
+        name: "",
+        email: "",
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: ""
+    });
 
     useEffect(() => {
         if (user) {
-            // Check if user is an OAuth user (Google/GitHub)
             const oAuthUser = user.provider === 'google' || user.provider === 'github';
             setIsOAuthUser(oAuthUser);
 
-            // Disable password fields for OAuth users
             if (oAuthUser) {
                 setFormData(prev => ({
                     ...prev,
@@ -38,6 +43,29 @@ export const ProfileSettings = () => {
             }
         }
     }, [user]);
+
+    const validateField = (name: string, value: string) => {
+        let error = "";
+
+        switch (name) {
+            case "name":
+                if (!value.trim()) error = "Name is required";
+                else if (value.length < 2) error = "Name must be at least 2 characters";
+                break;
+            case "email":
+                if (!value.trim()) error = "Email is required";
+                else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) error = "Invalid email format";
+                break;
+            case "newPassword":
+                if (value && !isOAuthUser && value.length < 6) error = "Password must be at least 6 characters";
+                break;
+            case "confirmPassword":
+                if (value && formData.newPassword !== value) error = "Passwords don't match";
+                break;
+        }
+
+        return error;
+    };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (isOAuthUser && (e.target.name === 'currentPassword' ||
@@ -51,7 +79,34 @@ export const ProfileSettings = () => {
             ...prev,
             [name]: value
         }));
+
+        // Validate the field
+        const error = validateField(name, value);
+        setFieldErrors(prev => ({
+            ...prev,
+            [name]: error
+        }));
+
         if (error) setError("");
+    };
+
+    const validateForm = () => {
+        let valid = true;
+        const newFieldErrors = { ...fieldErrors };
+
+        // Validate all fields
+        for (const [name, value] of Object.entries(formData)) {
+            if (isOAuthUser && (name === 'currentPassword' || name === 'newPassword' || name === 'confirmPassword')) {
+                continue;
+            }
+
+            const error = validateField(name, value as string);
+            newFieldErrors[name as keyof typeof newFieldErrors] = error;
+            if (error) valid = false;
+        }
+
+        setFieldErrors(newFieldErrors);
+        return valid;
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -60,17 +115,22 @@ export const ProfileSettings = () => {
         setError("");
         setSuccess("");
 
+        if (!validateForm()) {
+            setLoading(false);
+            setError("Please fix the errors in the form");
+            return;
+        }
+
         try {
             const updateData: any = {
                 name: formData.name,
                 email: formData.email
             };
-            // Block password updates for OAuth users
+
             if (isOAuthUser && (formData.currentPassword || formData.newPassword || formData.confirmPassword)) {
                 throw new Error("Password cannot be changed for OAuth accounts");
             }
 
-            // Validate inputs for non-OAuth users
             if (!isOAuthUser) {
                 if (formData.newPassword && formData.newPassword !== formData.confirmPassword) {
                     throw new Error("New passwords don't match");
@@ -84,10 +144,8 @@ export const ProfileSettings = () => {
                 updateData.currentPassword = formData.currentPassword;
             }
 
-            // Update profile info only
             const profileResponse = await updateUser(updateData, authState.accessToken!);
 
-            // Update auth state
             setAuthState({
                 ...authState,
                 user: profileResponse
@@ -107,6 +165,10 @@ export const ProfileSettings = () => {
             if (err.response) {
                 if (err.response.data.message === "Current password is incorrect") {
                     errorMessage = "The current password you entered is incorrect";
+                    setFieldErrors(prev => ({
+                        ...prev,
+                        currentPassword: errorMessage
+                    }));
                     const currentPasswordField = document.getElementById("currentPassword");
                     if (currentPasswordField) currentPasswordField.focus();
                 } else {
@@ -123,7 +185,7 @@ export const ProfileSettings = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6 lg:px-8 relative">
             <div className="max-w-3xl mx-auto">
                 <div className="text-center mb-8">
                     <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Profile Settings</h1>
@@ -144,7 +206,16 @@ export const ProfileSettings = () => {
                     </div>
                 )}
 
-                <div className="bg-white dark:bg-gray-800 shadow-xl rounded-lg p-8">
+                <div className="bg-white dark:bg-gray-800 shadow-xl rounded-lg p-8 relative">
+                    <div className="flex justify-end">
+                        <button
+                            onClick={() => navigate(-1)}
+                            className="text-gray-400 hover:text-gray-600 dark:hover:text-white focus:outline-none cursor-pointer"
+                            aria-label="Close"
+                        >
+                            <FaTimes className="h-5 w-5" />
+                        </button>
+                    </div>
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div>
                             <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -161,10 +232,15 @@ export const ProfileSettings = () => {
                                     required
                                     value={formData.name}
                                     onChange={handleChange}
-                                    className="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                    className={`block w-full pl-10 pr-3 py-3 border ${fieldErrors.name ? "border-red-500 dark:border-red-400" : "border-gray-300 dark:border-gray-600"} rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500`}
                                     placeholder="John Carter"
                                 />
                             </div>
+                            {fieldErrors.name && (
+                                <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                                    {fieldErrors.name}
+                                </p>
+                            )}
                         </div>
 
                         <div>
@@ -182,10 +258,15 @@ export const ProfileSettings = () => {
                                     required
                                     value={formData.email}
                                     onChange={handleChange}
-                                    className="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                    className={`block w-full pl-10 pr-3 py-3 border ${fieldErrors.email ? "border-red-500 dark:border-red-400" : "border-gray-300 dark:border-gray-600"} rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500`}
                                     placeholder="you@example.com"
                                 />
                             </div>
+                            {fieldErrors.email && (
+                                <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                                    {fieldErrors.email}
+                                </p>
+                            )}
                         </div>
 
                         {isOAuthUser && (
@@ -221,16 +302,13 @@ export const ProfileSettings = () => {
                                                 type="password"
                                                 value={formData.currentPassword}
                                                 onChange={handleChange}
-                                                className={`block w-full pl-10 pr-3 py-3 border ${error.includes("current password")
-                                                    ? "border-red-500 dark:border-red-400"
-                                                    : "border-gray-300 dark:border-gray-600"
-                                                    } rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500`}
+                                                className={`block w-full pl-10 pr-3 py-3 border ${fieldErrors.currentPassword ? "border-red-500 dark:border-red-400" : "border-gray-300 dark:border-gray-600"} rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500`}
                                                 placeholder="••••••••"
                                             />
                                         </div>
-                                        {error.includes("current password") && (
+                                        {fieldErrors.currentPassword && (
                                             <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                                                {error}
+                                                {fieldErrors.currentPassword}
                                             </p>
                                         )}
                                     </div>
@@ -249,10 +327,15 @@ export const ProfileSettings = () => {
                                                 type="password"
                                                 value={formData.newPassword}
                                                 onChange={handleChange}
-                                                className="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                                className={`block w-full pl-10 pr-3 py-3 border ${fieldErrors.newPassword ? "border-red-500 dark:border-red-400" : "border-gray-300 dark:border-gray-600"} rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500`}
                                                 placeholder="••••••••"
                                             />
                                         </div>
+                                        {fieldErrors.newPassword && (
+                                            <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                                                {fieldErrors.newPassword}
+                                            </p>
+                                        )}
                                     </div>
 
                                     <div>
@@ -269,10 +352,15 @@ export const ProfileSettings = () => {
                                                 type="password"
                                                 value={formData.confirmPassword}
                                                 onChange={handleChange}
-                                                className="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                                className={`block w-full pl-10 pr-3 py-3 border ${fieldErrors.confirmPassword ? "border-red-500 dark:border-red-400" : "border-gray-300 dark:border-gray-600"} rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500`}
                                                 placeholder="••••••••"
                                             />
                                         </div>
+                                        {fieldErrors.confirmPassword && (
+                                            <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                                                {fieldErrors.confirmPassword}
+                                            </p>
+                                        )}
                                     </div>
                                 </div>
                             </div>

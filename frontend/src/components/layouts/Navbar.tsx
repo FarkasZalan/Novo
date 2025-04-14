@@ -1,13 +1,18 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
-import { FaUser, FaEnvelope, FaSignInAlt, FaPlus } from "react-icons/fa";
+import { FaUser, FaEnvelope, FaSignInAlt, FaPlus, FaHome } from "react-icons/fa";
 import { DarkModeToggle } from "../utils/DarkModeToggle";
 import { useAuth } from "../../context/AuthContext";
 
 export const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
     const { authState } = useAuth();
+    const location = useLocation();
     const isAuthenticated = authState.accessToken !== null && authState.user !== null;
+
+    // Define routes where we want to show Dashboard instead of New
+    const showDashboardRoutes = ['/home', '/privacy', '/about', '/contact', '/terms'];
+    const shouldShowDashboard = showDashboardRoutes.includes(location.pathname);
 
     return (
         <nav className="bg-white dark:bg-gray-900 shadow-md sticky top-0 z-50 transition-all duration-300">
@@ -60,13 +65,23 @@ export const Navbar = () => {
                     <div className="hidden md:flex items-center space-x-4">
                         {isAuthenticated ? (
                             <>
-                                <Link
-                                    to="/new"
-                                    className="text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-indigo-500 px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2"
-                                >
-                                    <FaPlus className="text-indigo-600 dark:text-indigo-200" />
-                                    New
-                                </Link>
+                                {shouldShowDashboard ? (
+                                    <Link
+                                        to="/dashboard"
+                                        className="text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-indigo-500 px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2"
+                                    >
+                                        <FaHome className="text-indigo-600 dark:text-indigo-200" />
+                                        Dashboard
+                                    </Link>
+                                ) : (
+                                    <Link
+                                        to="/new"
+                                        className="text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-indigo-500 px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2"
+                                    >
+                                        <FaPlus className="text-indigo-600 dark:text-indigo-200" />
+                                        New
+                                    </Link>
+                                )}
                                 <Link
                                     to="/profile"
                                     className="text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-indigo-500 px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2"
@@ -126,13 +141,25 @@ export const Navbar = () => {
                 <div className="pt-2 pb-3 space-y-1 px-2 bg-indigo-700 dark:bg-[#1E1B47] shadow-lg">
                     {isAuthenticated ? (
                         <>
-                            <Link
-                                to="/new"
-                                className="text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-indigo-500 px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2"
-                            >
-                                <FaPlus className="text-indigo-600 dark:text-indigo-200" />
-                                New
-                            </Link>
+                            {shouldShowDashboard ? (
+                                <Link
+                                    to="/dashboard"
+                                    className="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-100 dark:hover:bg-indigo-500 flex items-center gap-3"
+                                    onClick={() => setIsOpen(false)}
+                                >
+                                    <FaHome />
+                                    Dashboard
+                                </Link>
+                            ) : (
+                                <Link
+                                    to="/new"
+                                    className="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-100 dark:hover:bg-indigo-500 flex items-center gap-3"
+                                    onClick={() => setIsOpen(false)}
+                                >
+                                    <FaPlus />
+                                    New
+                                </Link>
+                            )}
                             <Link
                                 to="/profile"
                                 className="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-100 dark:hover:bg-indigo-500 flex items-center gap-3"
