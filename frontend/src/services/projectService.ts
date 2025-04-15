@@ -8,6 +8,7 @@ export const fetchProjects = async (token: string) => {
                 Authorization: `Bearer ${token}`
             }
         });
+        console.log(response.data);
         return response.data.data.map((project: any) => ({
             id: project.id,
             name: project.name,
@@ -15,8 +16,8 @@ export const fetchProjects = async (token: string) => {
             total_tasks: project.total_tasks,
             completed_tasks: project.completed_tasks,
             status: project.status,
-            progress: (project.completed_tasks / project.total_tasks) * 100 || 0, // Calculate progress
-            members: 1 // You can modify this to fetch actual member count if needed
+            progress: project.total_tasks ? Math.round((project.completed_tasks / project.total_tasks) * 100) : 0,
+            members: project.memberCount
         }));
     } catch (error) {
         console.error("Error fetching projects:", error);

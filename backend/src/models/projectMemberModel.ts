@@ -28,6 +28,19 @@ export const getProjectMemberQuery = async (project_id: string, user_id: string)
     return result.rows[0]
 }
 
+// count the active project members and pending invitations with the same project id
+export const getProjectTotalMemberCountsQuery = async (project_id: string) => {
+    const result = await pool.query(`
+        SELECT 
+        (
+            SELECT COUNT(*) FROM project_members WHERE project_id = $1 
+        ) + (
+            SELECT COUNT(*) FROM pending_project_invitations WHERE project_id = $1
+        ) AS total_member_count`,
+        [project_id]); // send a query to the database with one of the open connection from the pool
+    return parseInt(result.rows[0].total_member_count, 10)
+}
+
 export const deleteUserFromProjectQuery = async (project_id: string, user_id: string) => {
     await pool.query("DELETE FROM project_members WHERE project_id = $1 AND user_id = $2 RETURNING *", [project_id, user_id]);
 }

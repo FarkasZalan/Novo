@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { NextFunction } from "connect";
 import { createProjectQuery, deleteProjectQuery, getAllProjectForUsersQuery, getProjectByIdQuery, updateProjectQuery } from "../models/projectModel";
+import { getProjectTotalMemberCountsQuery } from "../models/projectMemberModel";
 
 // Standardized response function
 // it's a function that returns a response to the client when a request is made (CRUD operations)
@@ -32,7 +33,15 @@ export const getAllProjects = async (req: Request, res: Response, next: NextFunc
     try {
         const ownerId = req.user.id;
         const projects = await getAllProjectForUsersQuery(ownerId); // get all projects for the user;
-        handleResponse(res, 200, "Projects fetched successfully", projects);
+        const projectsWithMembers = await Promise.all(projects.map(async (project) => {
+            const memberCount = await getProjectTotalMemberCountsQuery(project.id);
+            return {
+                ...project,
+                memberCount
+            };
+        }));
+
+        handleResponse(res, 200, "Projects fetched successfully", projectsWithMembers);
     } catch (error) {
         next(error);
     }

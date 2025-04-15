@@ -19,8 +19,8 @@ import { ForgotPassword } from "./components/pages/auth/ForgotPassword";
 import { ResetPassword } from "./components/pages/auth/ResetPassword";
 import { VerifyEmail } from "./components/pages/auth/VerifyEmail";
 import { Dashboard } from "./components/pages/project/Dashboard";
-import { CreateProject } from "./components/pages/project/CreateProject";
-import { EditProject } from "./components/pages/project/EditProject";
+import { CreateProject } from "./components/pages/project/ProjectHandle/CreateProject";
+import { EditProject } from "./components/pages/project/ProjectHandle/EditProject";
 import { ProjectPage } from "./components/pages/project/ProjectPage";
 
 function RootRedirect() {

@@ -11,9 +11,9 @@ import {
     FaCheck,
     FaSearch
 } from "react-icons/fa";
-import { useAuth } from "../../../context/AuthContext";
-import { updateProject, deleteProject, fetchProjectById } from "../../../services/projectService";
-import { fetchAllRegisteredUsers } from "../../../services/userService";
+import { useAuth } from "../../../../context/AuthContext";
+import { updateProject, deleteProject, fetchProjectById } from "../../../../services/projectService";
+import { fetchAllRegisteredUsers } from "../../../../services/userService";
 
 interface Project {
     id: string;
@@ -233,12 +233,24 @@ export const EditProject = () => {
                                 Update your project details and settings
                             </p>
                         </div>
-                        <button
-                            onClick={() => navigate("/dashboard")}
-                            className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-pointer"
-                        >
-                            <FaTimes className="w-5 h-5" />
-                        </button>
+                        <div className="flex space-x-2">
+                            <button
+                                onClick={() => navigate(`/projects/${projectId}`)}
+                                className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-pointer"
+                                title="Go to Project"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                </svg>
+                            </button>
+                            <button
+                                onClick={() => navigate("/dashboard")}
+                                className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-pointer"
+                                title="Close"
+                            >
+                                <FaTimes className="w-5 h-5" />
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

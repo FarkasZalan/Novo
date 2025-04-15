@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaPlus, FaTimes } from "react-icons/fa";
-import { useAuth } from "../../../context/AuthContext";
-import { createProject } from "../../../services/projectService";
+import { useAuth } from "../../../../context/AuthContext";
+import { createProject } from "../../../../services/projectService";
 
 export const CreateProject = () => {
     const { authState } = useAuth();
@@ -122,8 +122,8 @@ export const CreateProject = () => {
                                     value={formData.name}
                                     onChange={handleChange}
                                     className={`block w-full px-4 py-2 border ${fieldErrors.name
-                                            ? "border-red-300 dark:border-red-700 focus:ring-red-500 focus:border-red-500"
-                                            : "border-gray-300 dark:border-gray-600 focus:ring-indigo-500 focus:border-indigo-500"
+                                        ? "border-red-300 dark:border-red-700 focus:ring-red-500 focus:border-red-500"
+                                        : "border-gray-300 dark:border-gray-600 focus:ring-indigo-500 focus:border-indigo-500"
                                         } rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100`}
                                     placeholder="e.g. Website Redesign"
                                 />
@@ -154,8 +154,8 @@ export const CreateProject = () => {
                                     type="submit"
                                     disabled={isSubmitting}
                                     className={`w-full md:w-auto px-6 py-3 rounded-lg font-medium text-white flex items-center justify-center cursor-pointer ${isSubmitting
-                                            ? 'bg-indigo-400 dark:bg-indigo-600 cursor-not-allowed'
-                                            : 'bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800'
+                                        ? 'bg-indigo-400 dark:bg-indigo-600 cursor-not-allowed'
+                                        : 'bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800'
                                         } transition-colors duration-200`}
                                 >
                                     {isSubmitting ? (
