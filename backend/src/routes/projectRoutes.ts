@@ -9,6 +9,8 @@ import {
 import { validateProject } from "../middlewares/inputValidator";
 import { authenticateToken } from "../middlewares/authenticate";
 import { authorizeProject } from "../middlewares/authorization";
+import { addUsersToProject, getAllProjectMembers, removeUserFromProject } from "../controller/projectMembersController";
+
 
 const router = express.Router();
 
@@ -150,5 +152,53 @@ router.put("/project/:projectId", authenticateToken, authorizeProject, validateP
  *         description: Project not found
  */
 router.delete("/project/:projectId", authenticateToken, authorizeProject, deleteProject);
+
+
+/**
+ * @swagger
+ * /project/{projectId}/add-members:
+ *   post:
+ *     summary: Add users to a project
+ *     tags: [Projects]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: projectId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: "123e4567-e89b-12d3-a456-426614174000"
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               users:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     userId:
+ *                       type: string
+ *                     role:
+ *                       type: string
+ *                       example: "member"
+ *                     status:
+ *                       type: string
+ *                       example: "pending"
+ *     responses:
+ *       200:
+ *         description: Users added to project
+ *       400:
+ *         description: Bad request
+ */
+router.post("/project/:projectId/add-members", authenticateToken, authorizeProject, addUsersToProject);
+
+router.get("/project/:projectId/members", authenticateToken, authorizeProject, getAllProjectMembers);
+
+router.delete("/project/:projectId/members/", authenticateToken, authorizeProject, removeUserFromProject);
 
 export default router;

@@ -21,6 +21,7 @@ import { VerifyEmail } from "./components/pages/auth/VerifyEmail";
 import { Dashboard } from "./components/pages/project/Dashboard";
 import { CreateProject } from "./components/pages/project/CreateProject";
 import { EditProject } from "./components/pages/project/EditProject";
+import { ProjectPage } from "./components/pages/project/ProjectPage";
 
 function RootRedirect() {
   const { isAuthenticated } = useAuth();
@@ -77,6 +78,7 @@ function App() {
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/projects/new" element={<CreateProject />} />
               <Route path="/projects/:projectId/edit" element={<EditProject />} />
+              <Route path="/projects/:projectId" element={<ProjectPage />} />
             </Route>
 
             {/* 404 fallback */}

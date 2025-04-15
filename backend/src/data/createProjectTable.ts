@@ -10,6 +10,8 @@ const createProjectsTable = async () => {
             description TEXT,
             status VARCHAR(20) DEFAULT 'not-started' CHECK (status IN ('not-started', 'in-progress', 'completed')),
             progress INTEGER DEFAULT 0 CHECK (progress >= 0 AND progress <= 100),
+            total_tasks INTEGER DEFAULT 0,
+            completed_tasks INTEGER DEFAULT 0,
             created_at TIMESTAMP DEFAULT NOW(),
             updated_at TIMESTAMP
         );
@@ -19,6 +21,8 @@ const createProjectsTable = async () => {
         CREATE INDEX IF NOT EXISTS idx_projects_created_at ON projects(created_at);
         CREATE INDEX IF NOT EXISTS idx_projects_name ON projects(name);
         CREATE INDEX IF NOT EXISTS idx_projects_status ON projects(status);
+        CREATE INDEX IF NOT EXISTS idx_projects_total_tasks ON projects(total_tasks);
+        CREATE INDEX IF NOT EXISTS idx_projects_completed_tasks ON projects(completed_tasks);
     `;
 
     try {

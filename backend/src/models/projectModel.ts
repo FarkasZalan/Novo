@@ -1,9 +1,25 @@
 import pool from "../config/db";
+import { addUserToProjectQuery } from "./projectMemberModel";
 
-export const getAllProjectForUsersQuery = async (id: string) => {
-    const result = await pool.query("SELECT * FROM projects WHERE owner_id = $1", [id]); // send a query to the database with one of the open connection from the pool
-    return result.rows
-}
+export const getAllProjectForUsersQuery = async (userId: string) => {
+    const query = `
+        -- Projects where user is owner (selects only project columns)
+        SELECT p.*, 'owner' AS user_role
+        FROM projects p
+        WHERE p.owner_id = $1
+        
+        UNION
+        
+        -- Projects where user is member (selects same columns + role)
+        SELECT p.*, pm.role AS user_role
+        FROM projects p
+        JOIN project_members pm ON p.id = pm.project_id
+        WHERE pm.user_id = $1 AND pm.status = 'active'
+    `;
+
+    const result = await pool.query(query, [userId]);
+    return result.rows;
+};
 
 export const getProjectByIdQuery = async (id: string) => {
     const result = await pool.query("SELECT * FROM projects WHERE id = $1", [id]);
@@ -15,10 +31,6 @@ export const createProjectQuery = async (name: string, description: string, owne
     const result = await pool.query("INSERT INTO projects (name, description, owner_id, updated_at) VALUES ($1, $2, $3, NOW()) RETURNING *", [name, description, owner_id]);
     await addUserToProjectQuery(result.rows[0].id, owner_id, 'owner');
     return result.rows[0];
-}
-
-export const addUserToProjectQuery = async (project_id: string, user_id: string, role: string) => {
-    await pool.query("INSERT INTO project_members (project_id, user_id, role) VALUES ($1, $2, $3) RETURNING *", [project_id, user_id, role]);
 }
 
 export const updateProjectQuery = async (name: string, description: string, id: string) => {

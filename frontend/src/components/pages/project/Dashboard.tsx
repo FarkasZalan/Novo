@@ -58,8 +58,8 @@ export const Dashboard = () => {
         inProgress: projects.filter(p => p.status === "in-progress").length,
         completed: projects.filter(p => p.status === "completed").length,
         overdue: 1, // You would calculate this based on due dates
-        totalTasks: 0,
-        completedTasks: 0
+        totalTasks: projects.reduce((total, project) => total + project.total_tasks, 0),
+        completedTasks: projects.reduce((total, project) => total + project.completed_tasks, 0)
     };
 
     const getStatusIcon = (status: string) => {
@@ -218,25 +218,25 @@ export const Dashboard = () => {
                         <nav className="-mb-px flex space-x-8 overflow-x-auto pb-2">
                             <button
                                 onClick={() => setActiveTab("all")}
-                                className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${activeTab === "all" ? "border-indigo-500 text-indigo-600 dark:text-indigo-400" : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-500"}`}
+                                className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm cursor-pointer ${activeTab === "all" ? "border-indigo-500 text-indigo-600 dark:text-indigo-400" : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-500"}`}
                             >
                                 All Projects
                             </button>
                             <button
                                 onClick={() => setActiveTab("in-progress")}
-                                className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${activeTab === "in-progress" ? "border-yellow-500 text-yellow-600 dark:text-yellow-400" : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-500"}`}
+                                className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm cursor-pointer ${activeTab === "in-progress" ? "border-yellow-500 text-yellow-600 dark:text-yellow-400" : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-500"}`}
                             >
                                 In Progress
                             </button>
                             <button
                                 onClick={() => setActiveTab("completed")}
-                                className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${activeTab === "completed" ? "border-green-500 text-green-600 dark:text-green-400" : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-500"}`}
+                                className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm cursor-pointer ${activeTab === "completed" ? "border-green-500 text-green-600 dark:text-green-400" : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-500"}`}
                             >
                                 Completed
                             </button>
                             <button
                                 onClick={() => setActiveTab("not-started")}
-                                className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${activeTab === "not-started" ? "border-gray-500 text-gray-600 dark:text-gray-400" : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-500"}`}
+                                className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm cursor-pointer ${activeTab === "not-started" ? "border-gray-500 text-gray-600 dark:text-gray-400" : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-500"}`}
                             >
                                 Not Started
                             </button>
@@ -270,7 +270,7 @@ export const Dashboard = () => {
                                                 </div>
                                                 <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
                                                     <FaTasks className="mr-1.5" />
-                                                    <span>{1}/{1} tasks</span>
+                                                    <span>{project.total_tasks}/{project.completed_tasks} tasks</span>
                                                 </div>
 
 

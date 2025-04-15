@@ -12,8 +12,8 @@ export const fetchProjects = async (token: string) => {
             id: project.id,
             name: project.name,
             description: project.description,
-            totalTasks: project.total_tasks,
-            completedTasks: project.completed_tasks,
+            total_tasks: project.total_tasks,
+            completed_tasks: project.completed_tasks,
             status: project.status,
             progress: (project.completed_tasks / project.total_tasks) * 100 || 0, // Calculate progress
             members: 1 // You can modify this to fetch actual member count if needed
@@ -86,6 +86,63 @@ export const deleteProject = async (projectId: string, token: string) => {
         return response.data;
     } catch (error) {
         console.error("Error deleting project:", error);
+        throw error;
+    }
+};
+
+export const addMembersToProject = async (projectId: string, users: Array<{ id: string, email: string; name: string, role: "member" | "admin"; }>, token: string) => {
+    try {
+        // Transform the data to match with the backend API
+        const payload = users.map(user => ({
+            userId: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+        }));
+
+        const response = await axios.post(
+            `${API_URL}/project/${projectId}/add-members`,
+            { users: payload },
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Error adding members:", error);
+        throw error;
+    }
+};
+
+export const getProjectMembers = async (projectId: string, token: string) => {
+    try {
+        const response = await axios.get(`${API_URL}/project/${projectId}/members`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return response.data.data;
+    } catch (error) {
+        console.error("Error fetching project members:", error);
+        throw error;
+    }
+};
+
+export const deleteMemberFromProject = async (projectId: string, userId: string, currentUserId: string, token: string) => {
+    try {
+        const response = await axios.delete(`${API_URL}/project/${projectId}/members`,
+            {
+                data: { userId, currentUserId },
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Error deleting project member:", error);
         throw error;
     }
 };
