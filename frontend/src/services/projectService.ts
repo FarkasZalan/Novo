@@ -14,6 +14,7 @@ export const fetchProjects = async (token: string) => {
             name: project.name,
             description: project.description,
             total_tasks: project.total_tasks,
+            owner_id: project.owner_id,
             completed_tasks: project.completed_tasks,
             status: project.status,
             progress: project.total_tasks ? Math.round((project.completed_tasks / project.total_tasks) * 100) : 0,
@@ -134,6 +135,23 @@ export const getProjectMembers = async (projectId: string, token: string) => {
 export const deleteMemberFromProject = async (projectId: string, userId: string, currentUserId: string, token: string) => {
     try {
         const response = await axios.delete(`${API_URL}/project/${projectId}/members`,
+            {
+                data: { userId, currentUserId },
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Error deleting project member:", error);
+        throw error;
+    }
+};
+
+export const leaveProject = async (projectId: string, userId: string, currentUserId: string, token: string) => {
+    try {
+        const response = await axios.delete(`${API_URL}/project/${projectId}/members/leave`,
             {
                 data: { userId, currentUserId },
                 headers: {

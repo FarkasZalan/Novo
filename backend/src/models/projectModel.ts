@@ -2,22 +2,7 @@ import pool from "../config/db";
 import { addUserToProjectQuery } from "./projectMemberModel";
 
 export const getAllProjectForUsersQuery = async (userId: string) => {
-    const query = `
-        -- Projects where user is owner (selects only project columns)
-        SELECT p.*, 'owner' AS user_role
-        FROM projects p
-        WHERE p.owner_id = $1
-        
-        UNION
-        
-        -- Projects where user is member (selects same columns + role)
-        SELECT p.*, pm.role AS user_role
-        FROM projects p
-        JOIN project_members pm ON p.id = pm.project_id
-        WHERE pm.user_id = $1 AND pm.status = 'active'
-    `;
-
-    const result = await pool.query(query, [userId]);
+    const result = await pool.query(`SELECT * FROM projects JOIN project_members ON projects.id = project_members.project_id WHERE project_members.user_id = $1`, [userId]);
     return result.rows;
 };
 

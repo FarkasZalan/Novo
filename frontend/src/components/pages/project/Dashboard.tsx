@@ -9,11 +9,13 @@ import {
     FaCheckCircle,
     FaClock,
     FaExclamationTriangle,
-    FaCog
+    FaCog,
+    FaSignOutAlt
 } from "react-icons/fa";
 import { useEffect, useState } from "react";
 import { useAuth } from "../../../context/AuthContext";
-import { fetchProjects } from "../../../services/projectService";
+import { fetchProjects, leaveProject } from "../../../services/projectService";
+import { ConfirmationDialog } from "./ConfirmationDialog";
 
 export const Dashboard = () => {
     const { authState } = useAuth();
@@ -23,6 +25,8 @@ export const Dashboard = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const navigate = useNavigate();
+    const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
+    const [projectToLeave, setProjectToLeave] = useState<string | null>(null);
 
     useEffect(() => {
         const loadProjects = async () => {
@@ -72,6 +76,55 @@ export const Dashboard = () => {
                 return <FaExclamationTriangle className="text-gray-400" />;
             default:
                 return null;
+        }
+    };
+
+    // Function to check if the current user is the project owner
+    const isProjectOwner = (project: Project) => {
+        return project.owner_id === authState.user?.id;
+    };
+
+    const handleLeaveProject = async () => {
+        if (!projectToLeave || !authState.user?.id) return;
+
+        try {
+            await leaveProject(projectToLeave, authState.user.id, authState.user.id, authState.accessToken!);
+
+            // Refresh the projects list
+            const updatedProjects = await fetchProjects(authState.accessToken!);
+            setProjects(updatedProjects);
+            setShowLeaveConfirm(false);
+        } catch (err) {
+            console.error("Failed to leave project:", err);
+            // You might want to show an error toast here
+        }
+    };
+
+    // Function to render appropriate action buttons based on ownership
+    const renderActionButtons = (project: Project) => {
+        if (isProjectOwner(project)) {
+            return (
+                <button
+                    className="p-2 rounded-full text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors duration-200 cursor-pointer"
+                    onClick={() => navigate(`/projects/${project.id}/edit`)}
+                    aria-label="Edit project"
+                >
+                    <FaCog className="w-5 h-5" />
+                </button>
+            );
+        } else {
+            return (
+                <button
+                    className="p-2 rounded-full text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-200 cursor-pointer"
+                    onClick={() => {
+                        setProjectToLeave(project.id!);
+                        setShowLeaveConfirm(true);
+                    }}
+                    aria-label="Leave project"
+                >
+                    <FaSignOutAlt className="w-5 h-5" />
+                </button>
+            );
         }
     };
 
@@ -259,6 +312,11 @@ export const Dashboard = () => {
                                                 <span className="inline-flex items-center">
                                                     {getStatusIcon(project.status)}
                                                 </span>
+                                                {!isProjectOwner(project) && (
+                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+                                                        Member
+                                                    </span>
+                                                )}
                                             </div>
                                             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 truncate">
                                                 {project.description}
@@ -270,10 +328,8 @@ export const Dashboard = () => {
                                                 </div>
                                                 <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
                                                     <FaTasks className="mr-1.5" />
-                                                    <span>{project.total_tasks}/{project.completed_tasks} tasks</span>
+                                                    <span>{project.completed_tasks}/{project.total_tasks} tasks</span>
                                                 </div>
-
-
                                             </div>
                                         </div>
 
@@ -291,18 +347,8 @@ export const Dashboard = () => {
                                                 </p>
                                             </div>
 
-                                            {/* Action Menu */}
-                                            <div className="relative">
-                                                <div className="relative group">
-                                                    <button
-                                                        className="p-2 rounded-full text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors duration-200 cursor-pointer"
-                                                        onClick={() => navigate(`/projects/${project.id}/edit`)}
-                                                        aria-label="Edit project"
-                                                    >
-                                                        <FaCog className="w-5 h-5" />
-                                                    </button>
-                                                </div>
-                                            </div>
+                                            {/* Action Button */}
+                                            {renderActionButtons(project)}
                                         </div>
                                     </div>
                                 </div>
@@ -390,6 +436,16 @@ export const Dashboard = () => {
                     </div>
                 </div>
             </main>
+
+            <ConfirmationDialog
+                isOpen={showLeaveConfirm}
+                onClose={() => setShowLeaveConfirm(false)}
+                onConfirm={handleLeaveProject}
+                title="Leave Project?"
+                message="Are you sure you want to leave this project? You won't be able to access it unless you're invited again."
+                confirmText="Leave Project"
+                confirmColor="red"
+            />
         </div>
     );
 };

@@ -9,7 +9,7 @@ import {
 import { validateProject } from "../middlewares/inputValidator";
 import { authenticateToken } from "../middlewares/authenticate";
 import { authorizeProject } from "../middlewares/authorization";
-import { addUsersToProject, getAllProjectMembers, removeUserFromProject } from "../controller/projectMembersController";
+import { addUsersToProject, getAllProjectMembers, leaveProject, removeUserFromProject } from "../controller/projectMembersController";
 
 
 const router = express.Router();
@@ -200,5 +200,7 @@ router.post("/project/:projectId/add-members", authenticateToken, authorizeProje
 router.get("/project/:projectId/members", authenticateToken, authorizeProject, getAllProjectMembers);
 
 router.delete("/project/:projectId/members/", authenticateToken, authorizeProject, removeUserFromProject);
+
+router.delete("/project/:projectId/members/leave", authenticateToken, authorizeProject, leaveProject);
 
 export default router;

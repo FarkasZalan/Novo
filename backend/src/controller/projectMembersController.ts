@@ -121,3 +121,27 @@ export const removeUserFromProject = async (req: Request, res: Response, next: N
         next(error);
     }
 }
+
+export const leaveProject = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const projectId = req.params.projectId;
+        const { userId, currentUserId } = req.body
+
+        const currentUser: any = await getProjectMemberQuery(projectId, currentUserId);
+
+        if (!currentUser) {
+            handleResponse(res, 404, "Current user not found", null);
+            return;
+        }
+
+        if (currentUser.role === "owner") {
+            handleResponse(res, 400, "You cannot leave your own project, you must delete it", null);
+            return
+        }
+
+        await deleteUserFromProjectQuery(projectId, userId);
+        handleResponse(res, 200, "User removed successfully", null);
+    } catch (error) {
+        next(error);
+    }
+}

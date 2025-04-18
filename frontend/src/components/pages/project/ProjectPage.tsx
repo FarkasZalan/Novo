@@ -9,15 +9,17 @@ import {
     FaUserPlus,
     FaEdit,
     FaArrowLeft,
+    FaSignOutAlt,
 } from "react-icons/fa";
 import { useAuth } from "../../../context/AuthContext";
-import { fetchProjectById, getProjectMembers, deleteMemberFromProject } from "../../../services/projectService";
+import { fetchProjectById, getProjectMembers, deleteMemberFromProject, leaveProject } from "../../../services/projectService";
 import { AddMemberDialog } from "./ProjectTabs/MemberHandle/AddMemberModal";
 import { MembersTab } from "./ProjectTabs/MemberHandle/MembersTab";
 import { TasksTab } from "./ProjectTabs/TasksTab";
 import { FilesTab } from "./ProjectTabs/FilesTab";
 import ProjectMember from "../../../types/projectMember";
 import { DiscussionsTab } from "./ProjectTabs/DiscussionTab";
+import { ConfirmationDialog } from "./ConfirmationDialog";
 
 export const ProjectPage = () => {
     const { projectId } = useParams<{ projectId: string }>();
@@ -32,13 +34,26 @@ export const ProjectPage = () => {
     const [members, setMembers] = useState<ProjectMember[]>([]);
     const [membersLoading, setMembersLoading] = useState(false);
     const [membersError, setMembersError] = useState<string | null>(null);
+    const [userRole, setUserRole] = useState<string | null>(null);
+    const [showLeaveConfirm, setShowLeaveConfirm] = useState(false); // confrim dialog
+    const [showRemoveMemberConfirm, setShowRemoveMemberConfirm] = useState(false);
+    const [memberToRemove, setMemberToRemove] = useState<string | null>(null);
 
+    // Load project data
     useEffect(() => {
         const loadProject = async () => {
             try {
                 setLoading(true);
                 const projectData = await fetchProjectById(projectId!, authState.accessToken!);
                 setProject(projectData);
+
+                // Check if the current user is the project owner
+                if (projectData.owner_id === authState.user?.id) {
+                    setUserRole("owner");
+                }
+
+                // Load member data immediately to determine permissions
+                await loadMemberData();
             } catch (err) {
                 setError("Failed to load project");
                 console.error(err);
@@ -47,17 +62,11 @@ export const ProjectPage = () => {
             }
         };
 
-        if (authState.accessToken && projectId) {
-            loadProject();
-        }
-    }, [authState.accessToken, projectId]);
-
-    useEffect(() => {
-        const loadMembers = async () => {
-            if (projectId && authState.accessToken && activeTab === "members") {
+        // Helper function to load member data
+        const loadMemberData = async () => {
+            if (projectId && authState.accessToken) {
                 try {
                     setMembersLoading(true);
-                    setMembersError(null);
                     const membersData = await getProjectMembers(projectId, authState.accessToken);
 
                     // Destructure the response into members and pending members array
@@ -74,7 +83,19 @@ export const ProjectPage = () => {
                             email: userDetails.email,
                             joined_at: member.joined_at,
                         };
-                    }).filter((member: ProjectMember) => member.id !== authState.user?.id);
+                    });
+
+                    // Check if current user has admin role (if not already identified as owner)
+                    if (userRole !== "owner") {
+                        const currentUserMember = transformedMembers.find(
+                            (member: any) => member.id === authState.user?.id
+                        );
+                        if (currentUserMember && currentUserMember.role === "admin") {
+                            setUserRole("admin");
+                        } else if (currentUserMember) {
+                            setUserRole(currentUserMember.role);
+                        }
+                    }
 
                     const transformedPendingMembers = pending
                         .filter((member: ProjectMember) => member.id !== authState.user?.id)
@@ -98,8 +119,63 @@ export const ProjectPage = () => {
             }
         };
 
-        loadMembers();
-    }, [projectId, authState.accessToken, activeTab, authState.user?.id]);
+        if (authState.accessToken && projectId) {
+            loadProject();
+        }
+    }, [authState.accessToken, projectId, authState.user?.id]);
+
+    // Refreshes member data when active tab changes to members
+    useEffect(() => {
+        const refreshTabData = async () => {
+            if (activeTab === "members" && projectId && authState.accessToken) {
+                try {
+                    setMembersLoading(true);
+                    setMembersError(null);
+                    const membersData = await getProjectMembers(projectId, authState.accessToken);
+
+                    // Destructure the response into members and pending members array
+                    const [members = [], pending = []] = membersData;
+
+                    // Transform active members
+                    const transformedMembers = members.map((member: any) => {
+                        const userDetails = member.user || {};
+                        return {
+                            id: member.user_id,
+                            name: userDetails.name || 'Unknown User',
+                            role: member.role,
+                            status: 'active',
+                            email: userDetails.email,
+                            joined_at: member.joined_at,
+                        };
+                    });
+
+                    const transformedPendingMembers = pending
+                        .filter((member: ProjectMember) => member.id !== authState.user?.id)
+                        .map((member: ProjectMember) => ({
+                            id: member.id,
+                            name: member?.name || member.email.split('@')[0],
+                            role: member.role,
+                            status: 'pending',
+                            email: member?.email,
+                            joined_at: member.joined_at
+                        }));
+
+                    const allMembers = [...transformedMembers, ...transformedPendingMembers];
+                    setMembers(allMembers);
+                } catch (err) {
+                    setMembersError("Failed to load project members");
+                    console.error(err);
+                } finally {
+                    setMembersLoading(false);
+                }
+            }
+        };
+
+        refreshTabData();
+    }, [activeTab, projectId, authState.accessToken, authState.user?.id]);
+
+    const canAddMembers = userRole === "owner" || userRole === "admin";
+    const canEditProject = userRole === "owner";
 
     const getStatusBadge = (status: string) => {
         switch (status) {
@@ -173,6 +249,27 @@ export const ProjectPage = () => {
             setMembers(prevMembers => prevMembers.filter(member => member.id !== memberId));
         } catch (err) {
             console.error(err);
+        } finally {
+            setMemberToRemove(null);
+            setShowRemoveMemberConfirm(false);
+        }
+    };
+
+    // trigger the confirmation modal for removing a member
+    const confirmRemoveMember = (memberId: string) => {
+        setMemberToRemove(memberId);
+        setShowRemoveMemberConfirm(true);
+    };
+
+    const handleLeaveProject = async () => {
+        if (!projectId || !authState.user?.id) return;
+
+        try {
+            await leaveProject(projectId, authState.user.id, authState.user.id, authState.accessToken!);
+            navigate('/dashboard');
+        } catch (err) {
+            console.error("Failed to leave project:", err);
+            // You might want to show an error toast here
         }
     };
 
@@ -246,20 +343,34 @@ export const ProjectPage = () => {
                         </div>
 
                         <div className="flex space-x-3">
-                            <button
-                                onClick={() => setShowAddMember(true)}
-                                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 cursor-pointer dark:hover:bg-indigo-800 text-white rounded-lg font-medium transition-colors duration-200 flex items-center"
-                            >
-                                <FaUserPlus className="mr-2" />
-                                Add Member
-                            </button>
-                            <Link
-                                to={`/projects/${projectId}/edit`}
-                                className="px-4 py-2 border border-gray-300 dark:border-gray-600 cursor-pointer bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-medium transition-colors duration-200 flex items-center"
-                            >
-                                <FaEdit className="mr-2" />
-                                Edit
-                            </Link>
+                            {canAddMembers && (
+                                <button
+                                    onClick={() => setShowAddMember(true)}
+                                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 cursor-pointer dark:hover:bg-indigo-800 text-white rounded-lg font-medium transition-colors duration-200 flex items-center"
+                                >
+                                    <FaUserPlus className="mr-2" />
+                                    Add Member
+                                </button>
+                            )}
+                            {canEditProject && (
+                                <Link
+                                    to={`/projects/${projectId}/edit`}
+                                    className="px-4 py-2 border border-gray-300 dark:border-gray-600 cursor-pointer bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-medium transition-colors duration-200 flex items-center"
+                                >
+                                    <FaEdit className="mr-2" />
+                                    Edit
+                                </Link>
+                            )}
+
+                            {!canEditProject && (
+                                <button
+                                    onClick={() => setShowLeaveConfirm(true)}
+                                    className="px-4 py-2 border border-red-300 dark:border-red-600 cursor-pointer bg-white dark:bg-gray-700 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg font-medium transition-colors duration-200 flex items-center"
+                                >
+                                    <FaSignOutAlt className="mr-2" />
+                                    Leave Project
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -375,7 +486,7 @@ export const ProjectPage = () => {
                             membersLoading={membersLoading}
                             membersError={membersError}
                             authState={authState}
-                            handleRemoveMember={handleRemoveMember}
+                            handleRemoveMember={confirmRemoveMember}
                             setShowAddMember={setShowAddMember}
                         />
                     )}
@@ -385,7 +496,7 @@ export const ProjectPage = () => {
             </main>
 
             {/* Add Member Modal */}
-            {showAddMember && project && (
+            {showAddMember && project && canAddMembers && (
                 <AddMemberDialog
                     project={project}
                     onClose={() => setShowAddMember(false)}
@@ -394,6 +505,27 @@ export const ProjectPage = () => {
                     }}
                 />
             )}
+
+            {/* Leave Project Modal */}
+            <ConfirmationDialog
+                isOpen={showLeaveConfirm}
+                onClose={() => setShowLeaveConfirm(false)}
+                onConfirm={handleLeaveProject}
+                title="Leave Project?"
+                message="Are you sure you want to leave this project? You won't be able to access it unless you're invited again."
+                confirmText="Leave Project"
+                confirmColor="red"
+            />
+
+            <ConfirmationDialog
+                isOpen={showRemoveMemberConfirm}
+                onClose={() => setShowRemoveMemberConfirm(false)}
+                onConfirm={() => memberToRemove && handleRemoveMember(memberToRemove)}
+                title="Remove Member?"
+                message="Are you sure you want to remove this member from the project?"
+                confirmText="Remove Member"
+                confirmColor="red"
+            />
         </div>
     );
 };
