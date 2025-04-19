@@ -18,8 +18,8 @@ import { MembersTab } from "./ProjectTabs/MemberHandle/MembersTab";
 import { TasksTab } from "./ProjectTabs/TasksTab";
 import { FilesTab } from "./ProjectTabs/FilesTab";
 import ProjectMember from "../../../types/projectMember";
-import { DiscussionsTab } from "./ProjectTabs/DiscussionTab";
 import { ConfirmationDialog } from "./ConfirmationDialog";
+import toast from "react-hot-toast";
 
 export const ProjectPage = () => {
     const { projectId } = useParams<{ projectId: string }>();
@@ -462,12 +462,6 @@ export const ProjectPage = () => {
                             Members
                         </button>
                         <button
-                            onClick={() => setActiveTab("discussions")}
-                            className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm cursor-pointer ${activeTab === "discussions" ? "border-indigo-500 text-indigo-600 dark:text-indigo-400" : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-500"}`}
-                        >
-                            Discussions
-                        </button>
-                        <button
                             onClick={() => setActiveTab("files")}
                             className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm cursor-pointer ${activeTab === "files" ? "border-indigo-500 text-indigo-600 dark:text-indigo-400" : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-500"}`}
                         >
@@ -490,7 +484,6 @@ export const ProjectPage = () => {
                             setShowAddMember={setShowAddMember}
                         />
                     )}
-                    {activeTab === "discussions" && <DiscussionsTab authState={authState} />}
                     {activeTab === "files" && <FilesTab />}
                 </div>
             </main>
@@ -501,6 +494,7 @@ export const ProjectPage = () => {
                     project={project}
                     onClose={() => setShowAddMember(false)}
                     onInvite={async () => {
+                        toast.success('Member invited successfully!');
                         await refreshMembers();
                     }}
                 />
@@ -509,7 +503,10 @@ export const ProjectPage = () => {
             {/* Leave Project Modal */}
             <ConfirmationDialog
                 isOpen={showLeaveConfirm}
-                onClose={() => setShowLeaveConfirm(false)}
+                onClose={() =>
+                    toast.success('You left the project successfully!') &&
+                    setShowLeaveConfirm(false)
+                }
                 onConfirm={handleLeaveProject}
                 title="Leave Project?"
                 message="Are you sure you want to leave this project? You won't be able to access it unless you're invited again."
@@ -520,7 +517,10 @@ export const ProjectPage = () => {
             <ConfirmationDialog
                 isOpen={showRemoveMemberConfirm}
                 onClose={() => setShowRemoveMemberConfirm(false)}
-                onConfirm={() => memberToRemove && handleRemoveMember(memberToRemove)}
+                onConfirm={() =>
+                    toast.success('Member removed successfully!') &&
+                    memberToRemove && handleRemoveMember(memberToRemove)
+                }
                 title="Remove Member?"
                 message="Are you sure you want to remove this member from the project?"
                 confirmText="Remove Member"

@@ -5,15 +5,10 @@ import {
     FaTimes,
     FaTrash,
     FaExclamationTriangle,
-    FaLock,
-    FaUserPlus,
-    FaUserMinus,
     FaCheck,
-    FaSearch
 } from "react-icons/fa";
 import { useAuth } from "../../../../context/AuthContext";
 import { updateProject, deleteProject, fetchProjectById } from "../../../../services/projectService";
-import { fetchAllRegisteredUsers } from "../../../../services/userService";
 
 interface Project {
     id: string;
@@ -41,41 +36,6 @@ export const EditProject = () => {
         name?: string;
         description?: string;
     }>({});
-
-    const [showAddMemberSection, setShowAddMemberSection] = useState(false);
-    const [searchMemberQuery, setSearchMemberQuery] = useState("");
-    const [selectedRole, setSelectedRole] = useState<"member" | "admin">("member");
-    const [potentialMembers, setPotentialMembers] = useState<
-        { id: string; name: string; email: string }[]
-    >([]);
-
-    // Fetch registered users when component mounts
-    useEffect(() => {
-        const loadRegisteredUsers = async () => {
-            try {
-                const users = await fetchAllRegisteredUsers();
-
-                const formattedUsers = users.map((user: any) => ({
-                    id: user.id,
-                    name: user.name,
-                    email: user.email
-                }));
-
-                setPotentialMembers(formattedUsers);
-            } catch (err) {
-                console.error("Failed to load users:", err);
-            }
-        };
-
-        loadRegisteredUsers();
-    }, []);
-
-    const handleAddMember = (memberId: string) => {
-        // API call to add member would go here
-        console.log(`Added member ${memberId} as ${selectedRole}`);
-        setSearchMemberQuery("");
-        setShowAddMemberSection(false);
-    };
 
     const [formData, setFormData] = useState({
         name: "",
@@ -273,7 +233,7 @@ export const EditProject = () => {
                             {successMessage.includes("updated") && (
                                 <button
                                     onClick={() => navigate(`/projects/${projectId}`)}
-                                    className="ml-auto px-3 py-1 bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-800 text-white text-sm rounded transition-colors duration-200"
+                                    className="ml-auto px-3 cursor-pointer py-1 bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-800 text-white text-sm rounded transition-colors duration-200"
                                 >
                                     View Project
                                 </button>
@@ -356,243 +316,6 @@ export const EditProject = () => {
                             </button>
                         </div>
                     </form>
-                </div>
-
-                {/* Project Members Card */}
-                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md dark:shadow-gray-700/50 overflow-hidden transition-colors duration-200">
-                    <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-                        <div>
-                            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Project Members</h2>
-                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                {project.members} member{project.members !== 1 ? 's' : ''}
-                            </p>
-                        </div>
-                        <button
-                            className={`px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center cursor-pointer ${showAddMemberSection
-                                ? "bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200"
-                                : "bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white"
-                                }`}
-                            onClick={() => setShowAddMemberSection(!showAddMemberSection)}
-                        >
-                            <FaUserPlus className="mr-2" />
-                            {showAddMemberSection ? "Cancel" : "Add Member"}
-                        </button>
-                    </div>
-
-                    {/* Add Member Section */}
-                    {showAddMemberSection && (
-                        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/30">
-                            <div className="space-y-4">
-                                <div>
-                                    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">Invite to Project</h3>
-                                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                                        Search for existing users or invite new members by email
-                                    </p>
-
-                                    {/* Search Input */}
-                                    <div className="relative mb-4">
-                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <FaSearch className="text-gray-400" />
-                                        </div>
-                                        <input
-                                            type="text"
-                                            className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                            placeholder="Search by name or email"
-                                            value={searchMemberQuery}
-                                            onChange={(e) => setSearchMemberQuery(e.target.value)}
-                                        />
-                                    </div>
-
-                                    {/* Role Selection */}
-                                    <div className="mb-4">
-                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                            Role
-                                        </label>
-                                        <div className="flex space-x-3">
-                                            <button
-                                                onClick={() => setSelectedRole("admin")}
-                                                className={`flex-1 py-2 rounded-lg border cursor-pointer ${selectedRole === "admin"
-                                                    ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-100"
-                                                    : "border-gray-300 dark:text-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600"
-                                                    }`}
-                                            >
-                                                Admin
-                                            </button>
-                                            <button
-                                                onClick={() => setSelectedRole("member")}
-                                                className={`flex-1 py-2 rounded-lg border cursor-pointer ${selectedRole === "member"
-                                                    ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-100"
-                                                    : "border-gray-300 dark:border-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600"
-                                                    }`}
-                                            >
-                                                Member
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    {/* Search Results or Invite Option */}
-                                    {searchMemberQuery ? (
-                                        <>
-                                            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                                Search Results
-                                            </h4>
-                                            {potentialMembers.filter(member =>
-                                                member.name.toLowerCase().includes(searchMemberQuery.toLowerCase()) ||
-                                                member.email.toLowerCase().includes(searchMemberQuery.toLowerCase())
-                                            ).length > 0 ? (
-                                                <div className="space-y-2 max-h-48 overflow-y-auto
-                                                                scroll-custom
-                                                                scrollbar-thin 
-                                                                scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600
-                                                                scrollbar-track-gray-100 dark:scrollbar-track-gray-800
-                                                                scrollbar-thumb-rounded-full
-                                                                transition-all duration-200">
-                                                    {potentialMembers
-                                                        .filter(member =>
-                                                            member.name.toLowerCase().includes(searchMemberQuery.toLowerCase()) ||
-                                                            member.email.toLowerCase().includes(searchMemberQuery.toLowerCase())
-                                                        )
-                                                        .map((member) => (
-                                                            <div
-                                                                key={member.id}
-                                                                className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
-                                                            >
-                                                                <div className="flex items-center space-x-3">
-                                                                    <div className="h-9 w-9 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center text-indigo-600 dark:text-indigo-300 font-medium text-sm">
-                                                                        {member.name
-                                                                            .split(' ')
-                                                                            .map((name) => name.charAt(0))
-                                                                            .join('')
-                                                                            .toUpperCase()
-                                                                        }
-                                                                    </div>
-                                                                    <div>
-                                                                        <p className="font-medium text-gray-900 dark:text-gray-100 text-sm">
-                                                                            {member.name}
-                                                                        </p>
-                                                                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                                                                            {member.email}
-                                                                        </p>
-                                                                    </div>
-                                                                </div>
-                                                                <button
-                                                                    onClick={() => handleAddMember(member.id)}
-                                                                    className="px-3 py-1 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 cursor-pointer dark:hover:bg-indigo-800 text-white text-xs rounded-lg transition-colors duration-200"
-                                                                >
-                                                                    Add
-                                                                </button>
-                                                            </div>
-                                                        ))}
-                                                </div>
-                                            ) : (
-                                                <div className="text-center py-6">
-                                                    <div className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 mb-3">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                                                        </svg>
-                                                    </div>
-                                                    <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">
-                                                        No users found
-                                                    </h4>
-                                                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
-                                                        The user you're looking for doesn't exist in our system yet.
-                                                    </p>
-                                                    <button
-                                                        onClick={() => console.log(`Send invite to ${searchMemberQuery}`)}
-                                                        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white text-sm rounded-lg transition-colors duration-200 flex items-center mx-auto"
-                                                    >
-                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                                        </svg>
-                                                        Send Invitation Email
-                                                    </button>
-                                                </div>
-                                            )}
-                                        </>
-                                    ) : (
-                                        <div className="text-center py-6">
-                                            <div className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 mb-3">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                                </svg>
-                                            </div>
-                                            <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">
-                                                Search for members
-                                            </h4>
-                                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                                                Start typing to search for existing users
-                                            </p>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Existing Members List */}
-                    <div className="px-6 py-4 divide-y divide-gray-200 dark:divide-gray-700">
-                        {/* Owner */}
-                        <div className="flex items-center justify-between py-3">
-                            <div className="flex items-center space-x-4">
-                                <div className="relative">
-                                    <div className="h-10 w-10 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center text-indigo-600 dark:text-indigo-300">
-                                        {authState.user?.name
-                                            .split(' ')          // Split full name into array of words ['John', 'Doe']
-                                            .map((n: string) => n[0]) // Get first letter of each word ['J', "D']
-                                            .join('')            // Combine letters 'JD'
-                                            .toUpperCase()}
-                                    </div>
-                                    <span className="absolute bottom-0 right-0 block h-2.5 w-2.5 rounded-full bg-green-400 ring-2 ring-white dark:ring-gray-800"></span>
-                                </div>
-                                <div>
-                                    <p className="font-medium text-gray-900 dark:text-gray-100">
-                                        {authState.user?.name} (You)
-                                    </p>
-                                    <p className="text-sm text-gray-500 dark:text-gray-400">Owner</p>
-                                </div>
-                            </div>
-                            <span className="px-3 py-1 text-xs font-medium rounded-full bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 flex items-center">
-                                <FaLock className="mr-1" /> Owner
-                            </span>
-                        </div>
-
-                        {/* Sample Members */}
-                        {[
-                            { id: "2", name: "Sarah Johnson", email: "sarah@example.com", role: "Admin", status: "active" },
-                            { id: "3", name: "Michael Chen", email: "michael@example.com", role: "Member", status: "pending" },
-                        ].map((member) => (
-                            <div key={member.id} className="flex items-center justify-between py-3">
-                                <div className="flex items-center space-x-4">
-                                    <div className="relative">
-                                        <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-300">
-                                            {member.name
-                                                .split(' ')
-                                                .map((n) => n[0])
-                                                .join('')
-                                                .toUpperCase()}
-                                        </div>
-                                        <span className={`absolute bottom-0 right-0 block h-2.5 w-2.5 rounded-full ${member.status === 'active' ? 'bg-green-400' : 'bg-yellow-400'
-                                            } ring-2 ring-white dark:ring-gray-800`}></span>
-                                    </div>
-                                    <div>
-                                        <p className="font-medium text-gray-900 dark:text-gray-100">{member.name}</p>
-                                        <p className="text-sm text-gray-500 dark:text-gray-400">{member.role}</p>
-                                        {member.status === 'pending' && (
-                                            <span className="inline-block mt-1 px-2 py-0.5 text-xs font-medium rounded bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200">
-                                                Pending Invitation
-                                            </span>
-                                        )}
-                                    </div>
-                                </div>
-                                <button
-                                    className="p-2 text-red-500 hover:text-red-700 dark:hover:text-red-400 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 cursor-pointer"
-                                    onClick={() => console.log(`Remove member ${member.id}`)}
-                                >
-                                    <FaUserMinus />
-                                </button>
-                            </div>
-                        ))}
-                    </div>
                 </div>
 
                 {/* Danger Zone Card */}
