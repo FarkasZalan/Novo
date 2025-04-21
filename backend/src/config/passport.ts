@@ -6,6 +6,7 @@ import { findOrCreateOAuthUser } from '../models/authModel';
 import dotenv from 'dotenv';
 import { VerifyCallback } from 'passport-oauth2';
 import pool from '../config/db';
+import { addUserToProjectQuery, deletePendingUserQuery, getPendingProjectsForPendingUserByEmailQuery } from '../models/projectMemberModel';
 
 dotenv.config();
 
@@ -53,6 +54,18 @@ export const configurePassport = () => {
             // Find or create user in the database
             const user = await findOrCreateOAuthUser(userData, 'google');
 
+            const pendingUserProjects = await getPendingProjectsForPendingUserByEmailQuery(user.email);
+
+            if (pendingUserProjects) {
+                for (const invite of pendingUserProjects) {
+                    try {
+                        await addUserToProjectQuery(invite.project_id, user.id, invite.role, invite.inviter_name);
+                        await deletePendingUserQuery(invite.id);
+                    } catch (error) {
+                        console.error("oauth activate user error", error);
+                    }
+                }
+            }
             // Success - pass user object to the passport
             return done(null, user);
         } catch (error) {
@@ -85,6 +98,19 @@ export const configurePassport = () => {
             };
 
             const user = await findOrCreateOAuthUser(userData, 'github');
+
+            const pendingUserProjects = await getPendingProjectsForPendingUserByEmailQuery(user.email);
+
+            if (pendingUserProjects) {
+                for (const invite of pendingUserProjects) {
+                    try {
+                        await addUserToProjectQuery(invite.project_id, user.id, invite.role, invite.inviter_name);
+                        await deletePendingUserQuery(invite.id);
+                    } catch (error) {
+                        console.error("oauth activate user error", error);
+                    }
+                }
+            }
             return done(null, user);
         } catch (error) {
             return done(error);

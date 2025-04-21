@@ -1,7 +1,9 @@
 import { Request, Response } from "express";
 import { NextFunction } from "connect";
 import { getUserByIdQuery } from "../models/userModel";
-import { inviteToProjectQuery, addUserToProjectQuery, getProjectMembersQuery, deleteUserFromProjectQuery, deletePendingUserQuery, getProjectMemberQuery, getPendingUsersQuery, getPendingUserQuery } from "../models/projectMemberModel";
+import { inviteToProjectQuery, addUserToProjectQuery, getProjectMembersQuery, deleteUserFromProjectQuery, deletePendingUserQuery, getProjectMemberQuery, getPendingUsersQuery, getPendingUserQuery, updateProjectMemberRoleQuery, updatePendingUserRoleQuery } from "../models/projectMemberModel";
+import { sendProjectInviteExistingUserEmail, sendProjectInviteNewUserEmail } from "../services/emailService";
+import { getProjectByIdQuery } from "../models/projectModel";
 
 // Standardized response function
 // it's a function that returns a response to the client when a request is made (CRUD operations)
@@ -16,7 +18,20 @@ const handleResponse = (res: Response, status: number, message: string, data: an
 export const addUsersToProject = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const projectId = req.params.projectId;
-        const { users } = req.body;
+        const { users, currentUserId } = req.body;
+
+        const currentUser = await getUserByIdQuery(currentUserId);
+        const project = await getProjectByIdQuery(projectId);
+
+        if (!project) {
+            handleResponse(res, 404, "Project not found", null);
+            return;
+        }
+
+        if (!currentUser) {
+            handleResponse(res, 403, "Unauthorized", null);
+            return;
+        }
 
         if (!Array.isArray(users) || users.length === 0) {
             handleResponse(res, 400, "No users provided", null);
@@ -25,17 +40,18 @@ export const addUsersToProject = async (req: Request, res: Response, next: NextF
         const addedUsers = [];
 
         for (const user of users) {
-            const { userId, role = "member" } = user;
+            const { id: userId, role = "member" } = user;
 
             try {
                 if (!userId) {
-                    await inviteToProjectQuery(projectId, user.email, role);
+                    await inviteToProjectQuery(projectId, user.email, role, currentUser.name);
+                    await sendProjectInviteNewUserEmail(user.email, currentUser.name, project.name, currentUser.email);
                 } else {
-                    await addUserToProjectQuery(projectId, userId, role);
+                    await addUserToProjectQuery(projectId, userId, role, currentUser.name);
+                    await sendProjectInviteExistingUserEmail(user.email, currentUser.name, project.name, projectId, currentUser.email);
                 }
                 addedUsers.push({ userId, status: "success" });
             } catch (error: any) {
-                console.log("huhhh", error);
                 if (error.code === "23505") {
                     addedUsers.push({ userId, status: "exists" });
                 } else {
@@ -46,6 +62,40 @@ export const addUsersToProject = async (req: Request, res: Response, next: NextF
 
 
         handleResponse(res, 200, "Project updated successfully", addedUsers);
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const resendProjectInvite = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const projectId = req.params.projectId;
+        const { inviteUserId, currentUserId } = req.body.data;
+
+        const project = await getProjectByIdQuery(projectId);
+
+        if (!project) {
+            handleResponse(res, 404, "Project not found", null);
+            return;
+        }
+
+        const user = await getUserByIdQuery(currentUserId);
+
+        if (!user) {
+            handleResponse(res, 404, "User not found", null);
+            return;
+        }
+
+        const inviteUser = await getPendingUserQuery(projectId, inviteUserId);
+
+        if (!inviteUser) {
+            handleResponse(res, 404, "Invited user not found", null);
+            return;
+        }
+
+        await sendProjectInviteNewUserEmail(inviteUser.email, user.name, project.name, user.email);
+
+        handleResponse(res, 200, "Invite resent successfully", null);
     } catch (error) {
         next(error);
     }
@@ -71,6 +121,44 @@ export const getAllProjectMembers = async (req: Request, res: Response, next: Ne
 
 
         handleResponse(res, 200, "Project fetched successfully", [users, pendingUsers]);
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const updateProjectMemberRole = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const projectId = req.params.projectId;
+        const { userId, currentUserId, role } = req.body.data;
+
+        const currentUser: any = await getProjectMemberQuery(projectId, currentUserId);
+
+        if (!currentUser) {
+            handleResponse(res, 404, "Current user not found", null);
+            return;
+        }
+
+        if (currentUser.role === "owner" || currentUser.role === 'admin') {
+            let inviteToUpdate = await getUserByIdQuery(userId);
+
+            if (!inviteToUpdate) {
+                inviteToUpdate = await getPendingUserQuery(projectId, userId);
+
+                if (!inviteToUpdate) {
+                    handleResponse(res, 404, "User not found", null);
+                    return;
+                }
+
+                await updatePendingUserRoleQuery(inviteToUpdate.id, role);
+            } else {
+                await updateProjectMemberRoleQuery(projectId, inviteToUpdate.id, role);
+            }
+        } else {
+            handleResponse(res, 400, "You don't have permission to update this user", null);
+            return;
+        }
+
+        handleResponse(res, 200, "Project updated successfully", null);
     } catch (error) {
         next(error);
     }

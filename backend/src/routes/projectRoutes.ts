@@ -8,8 +8,8 @@ import {
 } from "../controller/projectController";
 import { validateProject } from "../middlewares/inputValidator";
 import { authenticateToken } from "../middlewares/authenticate";
-import { authorizeProject } from "../middlewares/authorization";
-import { addUsersToProject, getAllProjectMembers, leaveProject, removeUserFromProject } from "../controller/projectMembersController";
+import { authorizeProject, authorizeProjectForOwner } from "../middlewares/authorization";
+import { addUsersToProject, getAllProjectMembers, leaveProject, removeUserFromProject, resendProjectInvite, updateProjectMemberRole } from "../controller/projectMembersController";
 
 
 const router = express.Router();
@@ -128,7 +128,7 @@ router.get("/project/:projectId", authenticateToken, authorizeProject, getProjec
  *       404:
  *         description: Project not found
  */
-router.put("/project/:projectId", authenticateToken, authorizeProject, validateProject, updateProject);
+router.put("/project/:projectId", authenticateToken, authorizeProjectForOwner, validateProject, updateProject);
 
 /**
  * @swagger
@@ -151,7 +151,7 @@ router.put("/project/:projectId", authenticateToken, authorizeProject, validateP
  *       404:
  *         description: Project not found
  */
-router.delete("/project/:projectId", authenticateToken, authorizeProject, deleteProject);
+router.delete("/project/:projectId", authenticateToken, authorizeProjectForOwner, deleteProject);
 
 
 /**
@@ -199,8 +199,12 @@ router.post("/project/:projectId/add-members", authenticateToken, authorizeProje
 
 router.get("/project/:projectId/members", authenticateToken, authorizeProject, getAllProjectMembers);
 
+router.put("/project/:projectId/members/", authenticateToken, authorizeProject, updateProjectMemberRole);
+
 router.delete("/project/:projectId/members/", authenticateToken, authorizeProject, removeUserFromProject);
 
 router.delete("/project/:projectId/members/leave", authenticateToken, authorizeProject, leaveProject);
+
+router.post("/project/:projectId/members/re-invite", authenticateToken, authorizeProject, resendProjectInvite);
 
 export default router;

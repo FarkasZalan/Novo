@@ -269,7 +269,7 @@ export const ProjectPage = () => {
             navigate('/dashboard');
         } catch (err) {
             console.error("Failed to leave project:", err);
-            // You might want to show an error toast here
+            toast.error("Failed to leave project");
         }
     };
 
@@ -471,7 +471,7 @@ export const ProjectPage = () => {
                 </div>
 
                 {/* Tab Content */}
-                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md dark:shadow-gray-700/50 overflow-hidden transition-colors duration-200">
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md dark:shadow-gray-700/50 transition-colors duration-200">
                     {activeTab === "tasks" && <TasksTab project={project} />}
                     {activeTab === "members" && (
                         <MembersTab
@@ -494,7 +494,7 @@ export const ProjectPage = () => {
                     project={project}
                     onClose={() => setShowAddMember(false)}
                     onInvite={async () => {
-                        toast.success('Member invited successfully!');
+                        toast.success('Member(s) invited successfully!');
                         await refreshMembers();
                     }}
                 />

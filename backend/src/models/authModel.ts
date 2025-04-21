@@ -1,6 +1,7 @@
 import pool from "../config/db";
 import bcrypt from "bcrypt";
 import crypto from 'crypto';
+import { sendWelcomeEmail } from "../services/emailService";
 
 export const createUserQuery = async (email: string, name: string, userHashedPassword: string) => {
     const result = await pool.query("INSERT INTO users (email, name, password, updated_at) VALUES ($1, $2, $3, NOW()) RETURNING *", [email, name, userHashedPassword]);
@@ -74,6 +75,8 @@ export const findOrCreateOAuthUser = async (profile: any, provider: string) => {
             "INSERT INTO users (email, name, password, provider, is_verified, verification_token_expires, verification_token, updated_at) VALUES ($1, $2, $3, $4, TRUE, NULL, NULL, NOW()) RETURNING *",
             [profile.email, profile.displayName, 'OAUTH_USER', provider]
         );
+
+        await sendWelcomeEmail(profile.email, profile.displayName);
         return newUser.rows[0]; // Return the newly created user
     }
 };

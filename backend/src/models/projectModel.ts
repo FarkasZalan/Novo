@@ -14,7 +14,7 @@ export const getProjectByIdQuery = async (id: string) => {
 // Returning * = return all rows that was affected by the query e.g if one user was created, updated or deleted then it will return with that row from the database
 export const createProjectQuery = async (name: string, description: string, owner_id: string) => {
     const result = await pool.query("INSERT INTO projects (name, description, owner_id, updated_at) VALUES ($1, $2, $3, NOW()) RETURNING *", [name, description, owner_id]);
-    await addUserToProjectQuery(result.rows[0].id, owner_id, 'owner');
+    await addUserToProjectQuery(result.rows[0].id, owner_id, 'owner', name);
     return result.rows[0];
 }
 

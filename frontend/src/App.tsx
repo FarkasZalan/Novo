@@ -22,6 +22,7 @@ import { Dashboard } from "./components/pages/project/Dashboard";
 import { CreateProject } from "./components/pages/project/ProjectHandle/CreateProject";
 import { EditProject } from "./components/pages/project/ProjectHandle/EditProject";
 import { ProjectPage } from "./components/pages/project/ProjectPage";
+import { ProtectedProjectForOwner } from "./components/routes/ProjectOwnerRoute";
 
 function RootRedirect() {
   const { isAuthenticated } = useAuth();
@@ -77,8 +78,12 @@ function App() {
               {/* Project routes */}
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/projects/new" element={<CreateProject />} />
-              <Route path="/projects/:projectId/edit" element={<EditProject />} />
+
               <Route path="/projects/:projectId" element={<ProjectPage />} />
+            </Route>
+
+            <Route element={<ProtectedProjectForOwner />}>
+              <Route path="/projects/:projectId/edit" element={<EditProject />} />
             </Route>
 
             {/* 404 fallback */}

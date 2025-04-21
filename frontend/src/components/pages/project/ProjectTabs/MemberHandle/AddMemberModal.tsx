@@ -37,6 +37,7 @@ export const AddMemberDialog = ({ project, onClose, onInvite }: AddMemberModalPr
     const modalRef = useRef<HTMLDivElement>(null);
     const searchInputRef = useRef<HTMLInputElement>(null);
     const emailAlreadyInProject = projectMemberEmails.includes(manualEmail);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Close modal when clicking outside
     useEffect(() => {
@@ -114,26 +115,32 @@ export const AddMemberDialog = ({ project, onClose, onInvite }: AddMemberModalPr
         }
 
         setError(null);
-        await addMembersToProject(
-            project.id!,
-            selectedUsers.map(user => ({
-                id: user.id,
-                email: user.email,
-                name: user.name,
-                role: user.role
-            })),
-            authState.accessToken!
-        );
+        setIsSubmitting(true); // Start loading
 
-        onInvite();
-
-
-        onClose();
+        try {
+            await addMembersToProject(
+                project.id!,
+                selectedUsers.map(user => ({
+                    id: user.id,
+                    email: user.email,
+                    name: user.name,
+                    role: user.role
+                })),
+                authState.accessToken!,
+                authState.user!.id
+            );
+            onInvite();
+            onClose();
+        } catch (error) {
+            console.error("Failed to add members:", error);
+            setError("Failed to send invitations. Please try again.");
+        } finally {
+            setIsSubmitting(false); // End loading
+        }
     };
 
     const handleSelectUser = (user: User) => {
         // Prevent adding if the user is already in the project (either registered or invited)
-        console.log(projectMemberEmails, projectMemberEmails.includes(user.email), user.email)
         if (projectMemberIds.includes(user.id)) {
             return;
         }
@@ -390,11 +397,20 @@ export const AddMemberDialog = ({ project, onClose, onInvite }: AddMemberModalPr
                         </button>
                         <button
                             onClick={handleSubmit}
-                            disabled={selectedUsers.length === 0 && !manualEmail}
+                            disabled={selectedUsers.length === 0 && !manualEmail || isSubmitting}
                             className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 cursor-pointer dark:bg-indigo-700 dark:hover:bg-indigo-800 dark:text-gray-100 text-white rounded-lg font-medium flex items-center disabled:opacity-50"
                         >
-                            <FaUserPlus className="mr-2" />
-                            Send Invitation{selectedUsers.length !== 1 ? 's' : ''}
+                            {isSubmitting ? (
+                                <>
+                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                    Sending...
+                                </>
+                            ) : (
+                                <>
+                                    <FaUserPlus className="mr-2" />
+                                    Send Invitation{selectedUsers.length !== 1 ? 's' : ''}
+                                </>
+                            )}
                         </button>
                     </div>
                 </div>

@@ -14,11 +14,12 @@ import {
     createVerificationToken,
 } from "../models/authModel";
 import { generateAccessToken, generateRefreshToken } from "../utils/token-utils";
-import { sendPasswordResetEmail, sendVerificationEmail } from "../services/emailService";
+import { sendPasswordResetEmail, sendVerificationEmail, sendWelcomeEmail } from "../services/emailService";
 import dotenv from "dotenv";
 import crypto from 'crypto';
 import { redisClient } from "../config/redis";
 import { getUserByIdQuery } from "../models/userModel";
+import { getPendingProjectsForPendingUserByEmailQuery, addUserToProjectQuery, deletePendingUserQuery } from "../models/projectMemberModel";
 
 dotenv.config();
 
@@ -318,6 +319,20 @@ export const verifyEmail = async (req: Request, res: Response, next: NextFunctio
 
         // Verify the user
         await verifyUserEmail(user.id);
+
+        const pendingUserProjects = await getPendingProjectsForPendingUserByEmailQuery(user.email);
+        if (pendingUserProjects) {
+            for (const invite of pendingUserProjects) {
+                try {
+                    await addUserToProjectQuery(invite.project_id, user.id, invite.role, invite.inviter_name);
+                    await deletePendingUserQuery(invite.id);
+                } catch (error) {
+                    console.error("normal register activate user error", error);
+                }
+            }
+        }
+
+        await sendWelcomeEmail(user.email, user.name);
 
         handleResponse(res, 200, "Email verified successfully", null);
     } catch (error) {

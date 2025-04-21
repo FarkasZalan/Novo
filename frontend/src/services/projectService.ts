@@ -92,19 +92,11 @@ export const deleteProject = async (projectId: string, token: string) => {
     }
 };
 
-export const addMembersToProject = async (projectId: string, users: Array<{ id: string, email: string; name: string, role: "member" | "admin"; }>, token: string) => {
+export const addMembersToProject = async (projectId: string, users: Array<{ id: string, email: string; name: string, role: "member" | "admin"; }>, token: string, currentUserId: string) => {
     try {
-        // Transform the data to match with the backend API
-        const payload = users.map(user => ({
-            userId: user.id,
-            email: user.email,
-            name: user.name,
-            role: user.role,
-        }));
-
         const response = await axios.post(
             `${API_URL}/project/${projectId}/add-members`,
-            { users: payload },
+            { users, currentUserId },
             {
                 headers: {
                     Authorization: `Bearer ${token}`
@@ -117,6 +109,24 @@ export const addMembersToProject = async (projectId: string, users: Array<{ id: 
         throw error;
     }
 };
+
+export const resendProjectInvite = async (projectId: string, inviteUserId: string, currentUserId: string, token: string) => {
+    try {
+        const response = await axios.post(
+            `${API_URL}/project/${projectId}/members/re-invite`,
+            {
+                data: { inviteUserId, currentUserId },
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Error resending project invite:", error);
+        throw error;
+    }
+}
 
 export const getProjectMembers = async (projectId: string, token: string) => {
     try {
@@ -131,6 +141,23 @@ export const getProjectMembers = async (projectId: string, token: string) => {
         throw error;
     }
 };
+
+export const updateProjectMemberRole = async (projectId: string, userId: string, currentUserId: string, role: string, token: string) => {
+    try {
+        const response = await axios.put(`${API_URL}/project/${projectId}/members/`,
+            {
+                data: { userId, currentUserId, role },
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Error updating project member role:", error);
+        throw error;
+    }
+}
 
 export const deleteMemberFromProject = async (projectId: string, userId: string, currentUserId: string, token: string) => {
     try {

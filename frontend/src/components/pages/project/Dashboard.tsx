@@ -16,6 +16,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../../../context/AuthContext";
 import { fetchProjects, leaveProject } from "../../../services/projectService";
 import { ConfirmationDialog } from "./ConfirmationDialog";
+import toast from "react-hot-toast";
 
 export const Dashboard = () => {
     const { authState } = useAuth();
@@ -96,7 +97,7 @@ export const Dashboard = () => {
             setShowLeaveConfirm(false);
         } catch (err) {
             console.error("Failed to leave project:", err);
-            // You might want to show an error toast here
+            toast.error("Failed to leave project");
         }
     };
 
@@ -439,7 +440,9 @@ export const Dashboard = () => {
 
             <ConfirmationDialog
                 isOpen={showLeaveConfirm}
-                onClose={() => setShowLeaveConfirm(false)}
+                onClose={() =>
+                    toast.success('You left the project successfully!') &&
+                    setShowLeaveConfirm(false)}
                 onConfirm={handleLeaveProject}
                 title="Leave Project?"
                 message="Are you sure you want to leave this project? You won't be able to access it unless you're invited again."
