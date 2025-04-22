@@ -1,7 +1,7 @@
 import { FaUserMinus, FaTimes, FaUserPlus, FaChevronDown } from "react-icons/fa";
 import ProjectMember from "../../../../../types/projectMember";
 import { useState } from "react";
-import { updateProjectMemberRole, resendProjectInvite } from "../../../../../services/projectService";
+import { updateProjectMemberRole, resendProjectInvite } from "../../../../../services/projectMemberService";
 import toast from "react-hot-toast";
 
 interface MembersTabProps {

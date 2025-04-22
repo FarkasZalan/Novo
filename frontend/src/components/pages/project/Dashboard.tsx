@@ -14,9 +14,10 @@ import {
 } from "react-icons/fa";
 import { useEffect, useState } from "react";
 import { useAuth } from "../../../context/AuthContext";
-import { fetchProjects, leaveProject } from "../../../services/projectService";
+import { fetchProjects } from "../../../services/projectService";
 import { ConfirmationDialog } from "./ConfirmationDialog";
 import toast from "react-hot-toast";
+import { leaveProject } from "../../../services/projectMemberService";
 
 export const Dashboard = () => {
     const { authState } = useAuth();

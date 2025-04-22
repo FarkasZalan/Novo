@@ -23,6 +23,7 @@ import { CreateProject } from "./components/pages/project/ProjectHandle/CreatePr
 import { EditProject } from "./components/pages/project/ProjectHandle/EditProject";
 import { ProjectPage } from "./components/pages/project/ProjectPage";
 import { ProtectedProjectForOwner } from "./components/routes/ProjectOwnerRoute";
+import { FilesTab } from "./components/pages/project/ProjectTabs/FilesTab";
 
 function RootRedirect() {
   const { isAuthenticated } = useAuth();
@@ -78,8 +79,8 @@ function App() {
               {/* Project routes */}
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/projects/new" element={<CreateProject />} />
-
               <Route path="/projects/:projectId" element={<ProjectPage />} />
+              <Route path="/projects/:projectId/files" element={<FilesTab />} />
             </Route>
 
             <Route element={<ProtectedProjectForOwner />}>

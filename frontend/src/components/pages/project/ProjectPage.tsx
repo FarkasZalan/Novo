@@ -12,7 +12,7 @@ import {
     FaSignOutAlt,
 } from "react-icons/fa";
 import { useAuth } from "../../../context/AuthContext";
-import { fetchProjectById, getProjectMembers, deleteMemberFromProject, leaveProject } from "../../../services/projectService";
+import { fetchProjectById } from "../../../services/projectService";
 import { AddMemberDialog } from "./ProjectTabs/MemberHandle/AddMemberModal";
 import { MembersTab } from "./ProjectTabs/MemberHandle/MembersTab";
 import { TasksTab } from "./ProjectTabs/TasksTab";
@@ -20,6 +20,7 @@ import { FilesTab } from "./ProjectTabs/FilesTab";
 import ProjectMember from "../../../types/projectMember";
 import { ConfirmationDialog } from "./ConfirmationDialog";
 import toast from "react-hot-toast";
+import { getProjectMembers, deleteMemberFromProject, leaveProject } from "../../../services/projectMemberService";
 
 export const ProjectPage = () => {
     const { projectId } = useParams<{ projectId: string }>();
