@@ -10,7 +10,6 @@ const createFilesTable = async () => {
             mime_type VARCHAR(100) NOT NULL, -- File type (application/pdf, image/png, etc.)
             size BIGINT NOT NULL, -- File size in bytes
             uploaded_by UUID REFERENCES users(id) ON DELETE SET NULL, -- Who uploaded the file
-            description TEXT,
             file_data BYTEA NOT NULL,
             created_at TIMESTAMP DEFAULT NOW()
         );

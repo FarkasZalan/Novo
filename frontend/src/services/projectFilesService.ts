@@ -15,12 +15,11 @@ export const fetchProjectFiles = async (projectId: string, token: string) => {
     }
 };
 
-export const createProjectFile = async (projectId: string, token: string, file: File, uploaded_by: string, description: string) => {
+export const createProjectFile = async (projectId: string, token: string, file: File, uploaded_by: string) => {
     try {
         const formData = new FormData();
         formData.append('file', file);
         formData.append('uploaded_by', uploaded_by);
-        formData.append('description', description);
 
         const response = await axios.post(`${API_URL}/project/${projectId}/files`, formData, {
             headers: {

@@ -15,7 +15,6 @@ interface ProjectFile {
     size: number;
     uploaded_by_name: string;
     uploaded_by_email: string;
-    description: string;
     created_at: string;
 }
 
@@ -141,32 +140,53 @@ export const FilesTab = () => {
         setSelectedFiles(prev => prev.filter((_, i) => i !== index));
     };
 
+
     const handleFileUpload = async () => {
         if (!canManageFiles) {
             toast.error("You don't have permission to upload files");
             return;
         }
-
         if (selectedFiles.length === 0 || !projectId || !authState.accessToken) return;
 
-        try {
-            setIsUploading(true);
-            const uploadPromises = selectedFiles.map(file =>
-                createProjectFile(projectId, authState.accessToken!, file, authState.user!.id, "")
-            );
+        setIsUploading(true);
 
-            const uploadedFiles = await Promise.all(uploadPromises);
-            setFiles(prevFiles => [...uploadedFiles, ...prevFiles]);
-            toast.success(`${uploadedFiles.length} file(s) uploaded successfully!`);
-            setSelectedFiles([]);
-            if (fileInputRef.current) fileInputRef.current.value = "";
-            loadFiles();
-        } catch (err) {
-            toast.error("Failed to upload file(s)");
-            console.error(err);
-        } finally {
-            setIsUploading(false);
+        // Kick off one upload promise per file
+        const uploadPromises = selectedFiles.map(file =>
+            createProjectFile(projectId, authState.accessToken!, file, authState.user!.id)
+                .then(res => ({ status: "fulfilled" as const, file, value: res }))
+                .catch(err => ({ status: "rejected" as const, file, reason: err }))
+        );
+
+        // Wait for all of them
+        const results = await Promise.all(uploadPromises);
+
+        const successfulUploads: ProjectFile[] = [];
+        results.forEach(result => {
+            if (result.status === "fulfilled") {
+                successfulUploads.push(result.value);
+            } else {
+                const err = result.reason;
+                // Axios‑style error; adjust if you use fetch
+                const status = err.response?.status;
+                if (status === 413) {
+                    toast.error(`“${result.file.name}” is too large (max 10 MB).`);
+                } else {
+                    toast.error(`Failed to upload “${result.file.name}”.`);
+                    console.error(err);
+                }
+            }
+        });
+
+        // Update UI
+        if (successfulUploads.length > 0) {
+            setFiles(prev => [...successfulUploads, ...prev]);
+            toast.success(`${successfulUploads.length} file(s) uploaded successfully!`);
         }
+
+        // Reset
+        setSelectedFiles([]);
+        if (fileInputRef.current) fileInputRef.current.value = "";
+        setIsUploading(false);
     };
 
     const handleDownloadFile = async (fileId: string) => {
@@ -473,11 +493,6 @@ export const FilesTab = () => {
                                         <span>•</span>
                                         <span>{formatDate(file.created_at)}</span>
                                     </div>
-                                    {file.description && (
-                                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 truncate">
-                                            {file.description}
-                                        </p>
-                                    )}
                                 </div>
                             </div>
                             <div className="flex space-x-2">

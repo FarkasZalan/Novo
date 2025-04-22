@@ -5,8 +5,8 @@ export const getAllFilesQuery = async (procejtId: string) => {
     return result.rows
 }
 
-export const createFileQuery = async (project_id: string, file_name: string, mime_type: string, size: number, uploaded_by_id: number, description: string, file_data?: Buffer) => {
-    const result = await pool.query("INSERT INTO files (project_id, file_name, mime_type, size, uploaded_by , description, file_data, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *", [project_id, file_name, mime_type, size, uploaded_by_id, description, file_data, new Date()]);
+export const createFileQuery = async (project_id: string, file_name: string, mime_type: string, size: number, uploaded_by_id: number, file_data?: Buffer) => {
+    const result = await pool.query("INSERT INTO files (project_id, file_name, mime_type, size, uploaded_by, file_data, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *", [project_id, file_name, mime_type, size, uploaded_by_id, file_data, new Date()]);
     return result.rows[0]
 }
 

@@ -42,7 +42,7 @@ export const getFilesForProject = async (req: Request, res: Response, next: Next
 export const createFile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const projectId = req.params.projectId;
-        const { description, uploaded_by } = req.body;
+        const { uploaded_by } = req.body;
         const file = req.file;
 
         if (!file) {
@@ -56,7 +56,7 @@ export const createFile = async (req: Request, res: Response, next: NextFunction
             return;
         }
 
-        const newFile = await createFileQuery(projectId, file.originalname, file.mimetype, file.size, uploaded_by, description, file.buffer);
+        const newFile = await createFileQuery(projectId, file.originalname, file.mimetype, file.size, uploaded_by, file.buffer);
 
         handleResponse(res, 201, "File uploaded and saved to DB", newFile);
     } catch (err) {
