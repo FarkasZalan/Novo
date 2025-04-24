@@ -9,17 +9,7 @@ export const fetchProjects = async (token: string) => {
             }
         });
 
-        return response.data.data.map((project: any) => ({
-            id: project.id,
-            name: project.name,
-            description: project.description,
-            total_tasks: project.total_tasks,
-            owner_id: project.owner_id,
-            completed_tasks: project.completed_tasks,
-            status: project.status,
-            progress: project.total_tasks ? Math.round((project.completed_tasks / project.total_tasks) * 100) : 0,
-            members: project.memberCount
-        }));
+        return response.data.data
     } catch (error) {
         console.error("Error fetching projects:", error);
         throw error;

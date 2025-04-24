@@ -4,7 +4,7 @@ import crypto from 'crypto';
 import { sendWelcomeEmail } from "../services/emailService";
 
 export const createUserQuery = async (email: string, name: string, userHashedPassword: string) => {
-    const result = await pool.query("INSERT INTO users (email, name, password, updated_at) VALUES ($1, $2, $3, NOW()) RETURNING *", [email, name, userHashedPassword]);
+    const result = await pool.query("INSERT INTO users (email, name, password, updated_at) VALUES ($1, $2, $3, $4) RETURNING *", [email, name, userHashedPassword, new Date()]);
     return result.rows[0];
 }
 
@@ -19,8 +19,8 @@ export const storeRefreshToken = async (userId: string, refreshSessionId: string
         const hashedSessionId = await bcrypt.hash(refreshSessionId, 10); // Hash the refresh session ID
 
         const result = await pool.query(
-            "UPDATE users SET refresh_session_id = $1, updated_at = NOW() WHERE id = $2 RETURNING *",
-            [hashedSessionId, userId]
+            "UPDATE users SET refresh_session_id = $1, updated_at = $2 WHERE id = $3 RETURNING *",
+            [hashedSessionId, new Date(), userId]
         );
 
         if (result.rows.length === 0) {
@@ -38,8 +38,8 @@ export const storeRefreshToken = async (userId: string, refreshSessionId: string
 export const clearRefreshTokenInDB = async (userId: string) => {
     try {
         const result = await pool.query(
-            "UPDATE users SET refresh_session_id = NULL, updated_at = NOW() WHERE id = $1 RETURNING *",
-            [userId]
+            "UPDATE users SET refresh_session_id = NULL, updated_at = $1 WHERE id = $2 RETURNING *",
+            [new Date(), userId]
         );
 
         if (result.rows.length === 0) {
@@ -72,8 +72,8 @@ export const findOrCreateOAuthUser = async (profile: any, provider: string) => {
     } else {
         // Create new user
         const newUser = await pool.query(
-            "INSERT INTO users (email, name, password, provider, is_verified, verification_token_expires, verification_token, updated_at) VALUES ($1, $2, $3, $4, TRUE, NULL, NULL, NOW()) RETURNING *",
-            [profile.email, profile.displayName, 'OAUTH_USER', provider]
+            "INSERT INTO users (email, name, password, provider, is_verified, verification_token_expires, verification_token, updated_at) VALUES ($1, $2, $3, $4, TRUE, NULL, $5, $6) RETURNING *",
+            [profile.email, profile.displayName, 'OAUTH_USER', provider, new Date(), new Date()]
         );
 
         await sendWelcomeEmail(profile.email, profile.displayName);
@@ -105,8 +105,8 @@ export const createPasswordResetToken = async (email: string): Promise<string | 
     expirationTime.setMinutes(expirationTime.getMinutes() + 5); // Token expires in 5 minutes
 
     await pool.query(
-        "UPDATE users SET reset_password_token = $1, reset_password_expires = $2, updated_at = NOW() WHERE id = $3",
-        [hashedToken, expirationTime, user.id]
+        "UPDATE users SET reset_password_token = $1, reset_password_expires = $2, updated_at = $3 WHERE id = $4",
+        [hashedToken, expirationTime, new Date(), user.id]
     );
 
     return resetToken;
@@ -146,8 +146,8 @@ export const resetPassword = async (email: string, newPassword: string): Promise
 
     // Update the user's password and clear the reset token
     await pool.query(
-        "UPDATE users SET password = $1, reset_password_token = NULL, reset_password_expires = NULL, updated_at = NOW() WHERE email = $2",
-        [hashedPassword, email]
+        "UPDATE users SET password = $1, reset_password_token = NULL, reset_password_expires = NULL, updated_at = $2 WHERE email = $3",
+        [hashedPassword, new Date(), email]
     );
 
     return true;
@@ -172,8 +172,8 @@ export const createVerificationToken = async (email: string): Promise<string | n
     expirationTime.setMinutes(expirationTime.getMinutes() + 5); // Token expires in 5 minutes
 
     await pool.query(
-        "UPDATE users SET verification_token = $1, verification_token_expires = $2, updated_at = NOW() WHERE id = $3",
-        [hashedToken, expirationTime, user.id]
+        "UPDATE users SET verification_token = $1, verification_token_expires = $2, updated_at = $3 WHERE id = $4",
+        [hashedToken, expirationTime, new Date(), user.id]
     );
 
     return verificationToken;

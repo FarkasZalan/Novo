@@ -30,12 +30,16 @@ export const Dashboard = () => {
     const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
     const [projectToLeave, setProjectToLeave] = useState<string | null>(null);
 
+
     useEffect(() => {
         const loadProjects = async () => {
             try {
                 setLoading(true);
-                const data = await fetchProjects(authState.accessToken!);
-                setProjects(data);
+                const projects: Project[] = await fetchProjects(authState.accessToken!);
+
+                console.log(projects);
+
+                setProjects(projects);
             } catch (err) {
                 setError("Failed to load projects");
                 console.error(err);
@@ -62,10 +66,7 @@ export const Dashboard = () => {
     const stats = {
         totalProjects: projects.length,
         inProgress: projects.filter(p => p.status === "in-progress").length,
-        completed: projects.filter(p => p.status === "completed").length,
-        overdue: 1, // You would calculate this based on due dates
-        totalTasks: projects.reduce((total, project) => total + project.total_tasks, 0),
-        completedTasks: projects.reduce((total, project) => total + project.completed_tasks, 0)
+        completed: projects.filter(p => p.status === "completed").length
     };
 
     const getStatusIcon = (status: string) => {
@@ -107,9 +108,12 @@ export const Dashboard = () => {
         if (isProjectOwner(project)) {
             return (
                 <button
-                    className="p-2 rounded-full text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors duration-200 cursor-pointer"
-                    onClick={() => navigate(`/projects/${project.id}/edit`)}
-                    aria-label="Edit project"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/projects/${project.id}/edit`);
+                    }}
+                    className="p-2 rounded-full cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                    title="Edit project"
                 >
                     <FaCog className="w-5 h-5" />
                 </button>
@@ -183,7 +187,7 @@ export const Dashboard = () => {
             {/* Main Content */}
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {/* Stats Cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                     {/* Total Projects */}
                     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md dark:shadow-gray-700/50 p-6 transition-colors duration-200">
                         <div className="flex items-center justify-between">
@@ -219,21 +223,6 @@ export const Dashboard = () => {
                             </div>
                             <div className="p-3 rounded-lg bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-300">
                                 <FaCheckCircle className="text-2xl" />
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Tasks Completed */}
-                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md dark:shadow-gray-700/50 p-6 transition-colors duration-200">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Tasks Completed</p>
-                                <p className="text-3xl font-bold text-gray-900 dark:text-gray-100 mt-1">
-                                    {stats.completedTasks}<span className="text-lg text-gray-500 dark:text-gray-400">/{stats.totalTasks}</span>
-                                </p>
-                            </div>
-                            <div className="p-3 rounded-lg bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300">
-                                <FaTasks className="text-2xl" />
                             </div>
                         </div>
                     </div>
@@ -302,14 +291,13 @@ export const Dashboard = () => {
                     <div className="divide-y divide-gray-200 dark:divide-gray-700">
                         {filteredProjects.length > 0 ? (
                             filteredProjects.map((project) => (
-                                <div key={project.id} className="px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200">
+                                <div key={project.id} className="px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200 cursor-pointer"
+                                    onClick={() => navigate(`/projects/${project.id}`)}>
                                     <div className="flex flex-col md:flex-row md:items-center justify-between">
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center space-x-3">
                                                 <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
-                                                    <Link to={`/projects/${project.id}`} className="hover:underline">
-                                                        {project.name}
-                                                    </Link>
+                                                    {project.name}
                                                 </h3>
                                                 <span className="inline-flex items-center">
                                                     {getStatusIcon(project.status)}
@@ -341,11 +329,11 @@ export const Dashboard = () => {
                                                 <div className="h-2 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
                                                     <div
                                                         className="h-full bg-indigo-600 dark:bg-indigo-500"
-                                                        style={{ width: `${project.progress}%` }}
+                                                        style={{ width: `${project.total_tasks ? Math.round((project.completed_tasks! / project.total_tasks) * 100) : 0}%` }}
                                                     />
                                                 </div>
                                                 <p className="mt-1 text-xs text-center text-gray-500 dark:text-gray-400">
-                                                    {project.progress}% complete
+                                                    {project.total_tasks ? Math.round((project.completed_tasks! / project.total_tasks) * 100) : 0}% complete
                                                 </p>
                                             </div>
 

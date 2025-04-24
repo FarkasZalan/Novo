@@ -11,6 +11,7 @@ const createTasksTable = async () => {
             due_date Timestamp,
             priority VARCHAR(255),
             completed BOOLEAN,
+            status VARCHAR(20) DEFAULT 'not-started' CHECK (status IN ('not-started', 'in-progress', 'completed')),
             created_at TIMESTAMP DEFAULT NOW(),
             updated_at TIMESTAMP
         );
@@ -21,6 +22,8 @@ const createTasksTable = async () => {
         CREATE INDEX IF NOT EXISTS idx_tasks_due_date ON tasks(due_date);
         CREATE INDEX IF NOT EXISTS idx_tasks_priority ON tasks(priority);
         CREATE INDEX IF NOT EXISTS idx_tasks_created_at ON tasks(created_at);
+        CREATE INDEX IF NOT EXISTS idx_tasks_updated_at ON tasks(updated_at);
+        CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status);
     `;
 
     try {

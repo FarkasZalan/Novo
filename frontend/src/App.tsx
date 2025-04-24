@@ -24,6 +24,10 @@ import { EditProject } from "./components/pages/project/ProjectHandle/EditProjec
 import { ProjectPage } from "./components/pages/project/ProjectPage";
 import { ProtectedProjectForOwner } from "./components/routes/ProjectOwnerRoute";
 import { FilesTab } from "./components/pages/project/ProjectTabs/FilesTab";
+import { CreateTaskPage } from "./components/pages/task/CreateTaskPage";
+import { TasksManagerPage } from "./components/pages/task/TaskManaggerPage";
+import { UpdateTaskPage } from "./components/pages/task/UpdateTaskPage";
+import { TaskDetails } from "./components/pages/task/TaskDetails";
 
 function RootRedirect() {
   const { isAuthenticated } = useAuth();
@@ -38,10 +42,10 @@ function RootRedirect() {
 function App() {
   return (
     <AuthProvider>
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
         <ScrollToTop />
         <Navbar />
-        <main className="flex-grow">
+        <main className="flex-grow bg-transparent">
           <Routes>
             {/* Public routes */}
 
@@ -81,6 +85,12 @@ function App() {
               <Route path="/projects/new" element={<CreateProject />} />
               <Route path="/projects/:projectId" element={<ProjectPage />} />
               <Route path="/projects/:projectId/files" element={<FilesTab />} />
+
+              { /* Task routes */}
+              <Route path="/projects/:projectId/tasks" element={<TasksManagerPage />} />
+              <Route path="/projects/:projectId/tasks/new" element={<CreateTaskPage />} />
+              <Route path="/projects/:projectId/tasks/:taskId/edit" element={<UpdateTaskPage />} />
+              <Route path="/projects/:projectId/tasks/:taskId" element={<TaskDetails />} />
             </Route>
 
             <Route element={<ProtectedProjectForOwner />}>

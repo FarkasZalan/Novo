@@ -2,9 +2,8 @@ import Joid from "joi";
 
 export const taskSchema = Joid.object({
     title: Joid.string().min(2).required(),
-    description: Joid.string(),
-    projectId: Joid.string().required(),
-    due_date: Joid.date(),
-    priority: Joid.string(),
-    completed: Joid.boolean().required()
+    description: Joid.string().optional().allow(''),
+    due_date: Joid.date().optional().allow(null),
+    priority: Joid.string().optional().allow(null),
+    status: Joid.string().required()
 })

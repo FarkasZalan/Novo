@@ -33,8 +33,8 @@ export const validateProject = (req: Request, res: Response, next: NextFunction)
 }
 
 export const validateTask = (req: Request, res: Response, next: NextFunction): void => {
-    const { title, description, projectId, due_date, priority, completed } = req.body;
-    const { error } = taskSchema.validate({ title, description, projectId, due_date, priority, completed });
+    const { title, description, due_date, priority, status } = req.body;
+    const { error } = taskSchema.validate({ title, description, due_date, priority, status });
     if (error) {
         res.status(400).json({
             status: 400,

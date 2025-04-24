@@ -11,7 +11,7 @@ export const getUserByIdQuery = async (id: string) => {
 }
 
 export const updateUserQuery = async (id: string, email: string, name: string, userHashedPassword: string) => {
-    const result = await pool.query("UPDATE users SET email = $1, name = $2 , password = $3, updated_at = NOW() WHERE id = $4 RETURNING *", [email, name, userHashedPassword, id]);
+    const result = await pool.query("UPDATE users SET email = $1, name = $2 , password = $3, updated_at = $4 WHERE id = $5 RETURNING *", [email, name, userHashedPassword, new Date(), id]);
     return result.rows[0];
 }
 

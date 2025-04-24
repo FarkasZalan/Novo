@@ -1,5 +1,5 @@
 import express from "express";
-import { createTask, deleteTask, getAllTasks, getTaskById, updateTask } from "../controller/taskController";
+import { createTask, deleteTask, getAllTasks, getTaskById, getTaskCountForProject, updateTask } from "../controller/taskController";
 import { validateProject, validateTask } from "../middlewares/inputValidator";
 import { authenticateToken } from "../middlewares/authenticate";
 import { authorizeProject, authorizeTask } from "../middlewares/authorization";
@@ -119,6 +119,8 @@ router.get("/project/:projectId/tasks", authenticateToken, authorizeProject, get
  *         description: Task not found
  */
 router.get("/project/:projectId/task/:taskId", authenticateToken, authorizeTask, getTaskById);
+
+router.get("/project/:projectId/task-counts", authenticateToken, authorizeProject, getTaskCountForProject);
 
 /**
  * @swagger

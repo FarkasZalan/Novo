@@ -45,7 +45,7 @@ export const ProjectPage = () => {
         const loadProject = async () => {
             try {
                 setLoading(true);
-                const projectData = await fetchProjectById(projectId!, authState.accessToken!);
+                const projectData: Project = await fetchProjectById(projectId!, authState.accessToken!);
                 setProject(projectData);
 
                 // Check if the current user is the project owner
@@ -417,14 +417,14 @@ export const ProjectPage = () => {
                             <div>
                                 <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Progress</p>
                                 <p className="text-3xl font-bold text-gray-900 dark:text-gray-100 mt-1">
-                                    {project.progress || 0}%
+                                    {Math.round((project.completed_tasks / project.total_tasks!) * 100) || 0}%
                                 </p>
                             </div>
                             <div className="w-16">
                                 <div className="h-2 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
                                     <div
                                         className="h-full bg-indigo-600 dark:bg-indigo-500"
-                                        style={{ width: `${project.progress}%` }}
+                                        style={{ width: `${Math.round((project.completed_tasks / project.total_tasks!) * 100)}%` }}
                                     />
                                 </div>
                             </div>
@@ -473,7 +473,7 @@ export const ProjectPage = () => {
 
                 {/* Tab Content */}
                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md dark:shadow-gray-700/50 transition-colors duration-200">
-                    {activeTab === "tasks" && <TasksTab project={project} />}
+                    {activeTab === "tasks" && <TasksTab />}
                     {activeTab === "members" && (
                         <MembersTab
                             project={project}

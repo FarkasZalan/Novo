@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { NextFunction } from "connect";
-import { createTaskQuery, deleteTaskQuery, getAllTaskForProjectQuery, getTaskByIdQuery, updateTaskQuery } from "../models/task.Model";
+import { createTaskQuery, deleteTaskQuery, getAllTaskForProjectQuery, getCompletedTaskCountForProjectQuery, getInProgressTaskCountForProjectQuery, getTaskByIdQuery, getTaskCountForProjectQuery, updateTaskQuery } from "../models/task.Model";
+import { recalculateProjectStatus } from "../models/projectModel";
 
 // Standardized response function
 // it's a function that returns a response to the client when a request is made (CRUD operations)
@@ -14,8 +15,11 @@ const handleResponse = (res: Response, status: number, message: string, data: an
 
 export const createTask = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const { title, description, projectId, due_date, priority } = req.body;
-        const newTask = await createTaskQuery(title, description, projectId, due_date, priority, false);
+        const projectId = req.params.projectId;
+        const { title, description, due_date, priority } = req.body;
+        const newTask = await createTaskQuery(title, description, projectId, due_date, priority);
+
+        await recalculateProjectStatus(projectId);
         handleResponse(res, 201, "Task created successfully", newTask);
     } catch (error: Error | any) {
         // Check for unique constraint violation (duplicate email)
@@ -53,18 +57,37 @@ export const getTaskById = async (req: Request, res: Response, next: NextFunctio
 
 export const updateTask = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const { title, description, projectId, due_date, priority, completed } = req.body;
+        const projectId = req.params.projectId;
+        const { title, description, due_date, priority, status } = req.body;
         const taskId = req.params.taskId;
-        const updateTask = await updateTaskQuery(title, description, projectId, due_date, priority, completed, taskId);
+
+        const updateTask = await updateTaskQuery(title, description, projectId, due_date, priority, taskId, status);
+
+
         if (!updateTask) {
             handleResponse(res, 404, "Task not found", null);
             return;
         }
+
+        await recalculateProjectStatus(projectId);
         handleResponse(res, 200, "Task updated successfully", updateTask);
     } catch (error) {
         next(error);
     }
 };
+
+export const getTaskCountForProject = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const projectId = req.params.projectId;
+        const taskCount = await getTaskCountForProjectQuery(projectId);
+        const completedTaskCount = await getCompletedTaskCountForProjectQuery(projectId);
+        const inProgressTaskCount = await getInProgressTaskCountForProjectQuery(projectId);
+
+        handleResponse(res, 200, "Task count fetched successfully", { taskCount, completedTaskCount, inProgressTaskCount });
+    } catch (error) {
+        next(error);
+    }
+}
 
 export const deleteTask = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
@@ -74,6 +97,8 @@ export const deleteTask = async (req: Request, res: Response, next: NextFunction
             handleResponse(res, 404, "Task not found", null);
             return;
         }
+
+        await recalculateProjectStatus(deletedTask.project_id);
         handleResponse(res, 200, "Task deleted successfully", deletedTask);
     } catch (error) {
         next(error);
