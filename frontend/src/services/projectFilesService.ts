@@ -35,7 +35,7 @@ export const createProjectFile = async (projectId: string, token: string, file: 
     }
 };
 
-export const downloadFile = async (fileId: string, procejtId: string, token: string) => {
+export const downloadProjectFile = async (fileId: string, procejtId: string, token: string) => {
     try {
         const response = await axios.get(`${API_URL}/project/${procejtId}/files/${fileId}`, {
             headers: {

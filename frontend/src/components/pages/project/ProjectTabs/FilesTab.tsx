@@ -3,7 +3,7 @@ import { FaTrash, FaDownload, FaUpload, FaTimes, FaCheck } from "react-icons/fa"
 import { useParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useAuth } from "../../../../context/AuthContext";
-import { fetchProjectFiles, createProjectFile, deleteProjectFile, downloadFile } from "../../../../services/projectFilesService";
+import { fetchProjectFiles, createProjectFile, deleteProjectFile, downloadProjectFile } from "../../../../services/projectFilesService";
 import { getProjectMembers } from "../../../../services/projectMemberService";
 import { ConfirmationDialog } from "../ConfirmationDialog";
 
@@ -193,7 +193,7 @@ export const FilesTab = () => {
         if (!projectId || !authState.accessToken) return;
 
         try {
-            const blob = await downloadFile(fileId, projectId, authState.accessToken);
+            const blob = await downloadProjectFile(fileId, projectId, authState.accessToken);
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;

@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { FaCheck, FaEnvelope, FaArrowLeft } from "react-icons/fa";
 import { verifyEmail as apiVerifyEmail, resendVerificationEmail } from "../../../services/authService";
 
 export const VerifyEmail = () => {
     const location = useLocation();
+    const hasVerified = useRef(false);
     const navigate = useNavigate();
     const [token, setToken] = useState("");
     const [email, setEmail] = useState("");
@@ -18,7 +19,8 @@ export const VerifyEmail = () => {
         const query = new URLSearchParams(location.search);
         const tokenParam = query.get("token");
 
-        if (tokenParam) {
+        if (tokenParam && !hasVerified.current) {
+            hasVerified.current = true;
             setToken(tokenParam);
             handleVerify(tokenParam);
         }
@@ -33,6 +35,9 @@ export const VerifyEmail = () => {
             await apiVerifyEmail(token);
 
             setSuccess(true);
+
+            // remove token from URL so effect won’t re-fire
+            navigate(window.location.pathname, { replace: true });
         } catch (err: any) {
             const errorMessage = err.response?.data?.message || "Email verification failed";
             console.error(err);
