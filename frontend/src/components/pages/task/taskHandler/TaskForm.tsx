@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useAuth } from '../../../context/AuthContext';
-import { createTask, fetchTasks, updateTask } from '../../../services/taskService';
+import { useAuth } from '../../../../context/AuthContext';
+import { createTask, fetchTasks, updateTask } from '../../../../services/taskService';
 import { FaCalendarAlt, FaArrowLeft, FaSave, FaTimes } from 'react-icons/fa';
+import toast from 'react-hot-toast';
 
 export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
     const { projectId, taskId } = useParams<{ projectId: string; taskId: string }>();
@@ -65,6 +66,8 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
                     priority,
                     status
                 );
+
+                toast.success('Task updated successfully');
             } else {
                 await createTask(
                     projectId!,
@@ -74,6 +77,8 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
                     dueDate ? new Date(dueDate) : undefined,
                     priority
                 );
+
+                toast.success('Task created successfully');
             }
             navigate(-1);
         } catch (err) {

@@ -3,10 +3,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { FaArrowLeft, FaFlag, FaList, FaPlus, FaThLarge } from 'react-icons/fa';
 import { useAuth } from '../../../context/AuthContext';
 import { fetchTasks } from '../../../services/taskService';
-import { TaskBoard } from './TaskBoard';
-import { TaskList } from './TaskList';
+import { TaskBoard } from './taskComponents/TaskBoard';
+import { TaskList } from './taskComponents/TaskList';
 import { fetchProjectById } from '../../../services/projectService';
-import { Milestones } from './Milestones';
+import { Milestones } from './taskComponents/Milestones';
 
 export const TasksManagerPage: React.FC = () => {
     const { projectId } = useParams<{ projectId: string }>();

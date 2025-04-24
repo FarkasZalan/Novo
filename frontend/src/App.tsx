@@ -24,10 +24,10 @@ import { EditProject } from "./components/pages/project/ProjectHandle/EditProjec
 import { ProjectPage } from "./components/pages/project/ProjectPage";
 import { ProtectedProjectForOwner } from "./components/routes/ProjectOwnerRoute";
 import { FilesTab } from "./components/pages/project/ProjectTabs/FilesTab";
-import { CreateTaskPage } from "./components/pages/task/CreateTaskPage";
+import { CreateTaskPage } from "./components/pages/task/taskHandler/CreateTaskPage";
 import { TasksManagerPage } from "./components/pages/task/TaskManaggerPage";
-import { UpdateTaskPage } from "./components/pages/task/UpdateTaskPage";
-import { TaskDetails } from "./components/pages/task/TaskDetails";
+import { UpdateTaskPage } from "./components/pages/task/taskHandler/UpdateTaskPage";
+import { TaskDetails } from "./components/pages/task/taskComponents/TaskDetails";
 
 function RootRedirect() {
   const { isAuthenticated } = useAuth();

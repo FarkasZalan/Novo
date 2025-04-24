@@ -31,9 +31,11 @@ export const recalculateProjectStatus = async (project_id: string) => {
     let status = 'not-started';
     if (completed === total && total > 0) {
         status = 'completed';
-    } else if (completed > 0) {
+    } else if (completed < total) {
         status = 'in-progress';
     }
+
+    console.log(status);
 
     const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
 

@@ -13,9 +13,9 @@ import {
     FaTag,
     FaPaperclip
 } from 'react-icons/fa';
-import { fetchTask } from '../../../services/taskService';
+import { fetchTask } from '../../../../services/taskService';
 import { toast } from 'react-hot-toast';
-import { useAuth } from '../../../context/AuthContext';
+import { useAuth } from '../../../../context/AuthContext';
 
 export const TaskDetails: React.FC = () => {
     const { taskId, projectId } = useParams<{ taskId: string; projectId: string }>();
