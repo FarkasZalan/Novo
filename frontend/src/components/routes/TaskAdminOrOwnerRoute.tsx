@@ -1,6 +1,6 @@
 import { Navigate, Outlet, useParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { useProjectPermissions } from "../../hooks/useTaskInit";
+import { useProjectPermissions } from "../../hooks/useProjectPermissionForTaskInit";
 
 export const ProtectedProjectForTaskManagement = () => {
     const { isAuthenticated } = useAuth();
