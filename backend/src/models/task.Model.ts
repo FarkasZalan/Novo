@@ -1,7 +1,7 @@
 import pool from "../config/db";
 
 export const getAllTaskForProjectQuery = async (id: string, order_by: string, order: string) => {
-    const result = await pool.query("SELECT * FROM tasks WHERE project_id = $1 ORDER BY " + order_by + " " + order, [id]); // send a query to the database with one of the open connection from the pool
+    const result = await pool.query("SELECT * FROM tasks WHERE project_id = $1 ORDER BY " + order_by + " " + order + ", due_date ASC", [id]); // send a query to the database with one of the open connection from the pool
     return result.rows
 }
 
