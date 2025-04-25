@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { FaClock, FaCheckCircle, FaCircle } from 'react-icons/fa';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import { updateTask } from '../../../../../services/taskService';
+import { updateTaskStatus } from '../../../../../services/taskService';
 import { useAuth } from '../../../../../context/AuthContext';
 import toast from 'react-hot-toast';
 import { Task } from '../../../../../types/task';
@@ -13,6 +13,7 @@ import { motion } from 'framer-motion';
 interface TaskBoardProps {
     tasks: Task[];
     onTaskUpdate?: (updatedTask: Task) => void;
+    canManageTasks: boolean;
 }
 
 const statusLabels: Record<string, { label: string, icon: React.ReactNode, color: string }> = {
@@ -35,7 +36,7 @@ const statusLabels: Record<string, { label: string, icon: React.ReactNode, color
 
 // tasks = list of all tasks
 // onTaskUpdate = function to pass the task id and the new status when a task is moved
-export const TaskBoard: React.FC<TaskBoardProps> = React.memo(({ tasks, onTaskUpdate }) => {
+export const TaskBoard: React.FC<TaskBoardProps> = React.memo(({ tasks, onTaskUpdate, canManageTasks }) => {
     const navigate = useNavigate();
 
     // useParams to get the project id from the url
@@ -72,16 +73,7 @@ export const TaskBoard: React.FC<TaskBoardProps> = React.memo(({ tasks, onTaskUp
                 };
 
                 // Call the service to update the task on the backend
-                await updateTask(
-                    taskId,
-                    projectId!,
-                    authState.accessToken!,
-                    updatedTask.title,
-                    updatedTask.description || '',
-                    updatedTask.due_date ? new Date(updatedTask.due_date) : undefined,
-                    updatedTask.priority,
-                    updatedTask.status
-                );
+                await updateTaskStatus(taskId, projectId!, authState.accessToken!, newStatus);
 
                 // Call tha parent component's (TaskManaggerPage.tsx) onTaskUpdate so the parent can update it's copy of the task list
                 onTaskUpdate?.(updatedTask);
@@ -115,6 +107,7 @@ export const TaskBoard: React.FC<TaskBoardProps> = React.memo(({ tasks, onTaskUp
                     onTaskUpdate={handleTaskUpdate}
                     draggedTask={draggedTask}
                     setDraggedTask={handleSetDraggedTask}
+                    canManageTasks={canManageTasks}
                 />
             );
         });

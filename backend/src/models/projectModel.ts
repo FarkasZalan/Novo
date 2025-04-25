@@ -36,8 +36,6 @@ export const recalculateProjectStatus = async (project_id: string) => {
         status = 'in-progress';
     }
 
-    console.log(status);
-
     const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
 
     await pool.query(

@@ -69,6 +69,23 @@ export const updateTask = async (taskId: string, procejt_Id: string, token: stri
     }
 };
 
+export const updateTaskStatus = async (taskId: string, projectId: string, token: string, status: string) => {
+    try {
+        console.log(status)
+        const response = await axios.put(`${API_URL}/project/${projectId}/task/${taskId}/status`, {
+            status
+        }, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Error updating task status:", error);
+        throw error;
+    }
+}
+
 export const fetchAllTasksCount = async (projectId: string, token: string) => {
     try {
         const response = await axios.get(`${API_URL}/project/${projectId}/task-counts`, {

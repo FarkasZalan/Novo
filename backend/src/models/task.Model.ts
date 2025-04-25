@@ -21,6 +21,11 @@ export const updateTaskQuery = async (title: string, description: string, projec
     return result.rows[0];
 }
 
+export const updateTaskStatusQuery = async (status: string, id: string) => {
+    const result = await pool.query("UPDATE tasks SET status = $1, updated_at = $2 WHERE id = $3 RETURNING *", [status, new Date(), id]);
+    return result.rows[0];
+}
+
 export const getTaskCountForProjectQuery = async (id: string) => {
     const result = await pool.query("SELECT COUNT(*) FROM tasks WHERE project_id = $1", [id]);
     return parseInt(result.rows[0].count, 10);

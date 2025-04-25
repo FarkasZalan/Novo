@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { NextFunction } from "connect";
-import { createTaskQuery, deleteTaskQuery, getAllTaskForProjectQuery, getCompletedTaskCountForProjectQuery, getInProgressTaskCountForProjectQuery, getTaskByIdQuery, getTaskCountForProjectQuery, updateTaskQuery } from "../models/task.Model";
+import { createTaskQuery, deleteTaskQuery, getAllTaskForProjectQuery, getCompletedTaskCountForProjectQuery, getInProgressTaskCountForProjectQuery, getTaskByIdQuery, getTaskCountForProjectQuery, updateTaskQuery, updateTaskStatusQuery } from "../models/task.Model";
 import { recalculateProjectStatus } from "../models/projectModel";
 
 // Standardized response function
@@ -77,6 +77,25 @@ export const updateTask = async (req: Request, res: Response, next: NextFunction
         next(error);
     }
 };
+
+export const updateTaskStatus = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const projectId = req.params.projectId;
+        const taskId = req.params.taskId;
+        const { status } = req.body;
+
+        const updateTask = await updateTaskStatusQuery(status, taskId);
+        if (!updateTask) {
+            handleResponse(res, 404, "Task not found", null);
+            return;
+        }
+
+        await recalculateProjectStatus(projectId);
+        handleResponse(res, 200, "Task updated successfully", updateTask);
+    } catch (error) {
+        next(error);
+    }
+}
 
 export const getTaskCountForProject = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {

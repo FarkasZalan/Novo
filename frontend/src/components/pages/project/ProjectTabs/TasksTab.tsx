@@ -3,12 +3,14 @@ import { useNavigate, useParams } from "react-router-dom";
 import { FaTasks, FaChevronRight, FaPlus } from "react-icons/fa";
 import { useAuth } from "../../../../context/AuthContext";
 import { fetchAllTasksForProject } from "../../../../services/taskService";
+import { fetchProjectById } from "../../../../services/projectService";
+import { getProjectMembers } from "../../../../services/projectMemberService";
 
 export const TasksTab = () => {
     const { projectId } = useParams<{ projectId: string }>();
     const { authState } = useAuth();
     const navigate = useNavigate();
-
+    const [canManageTasks, setCanManageTasks] = useState(false);
     const [tasks, setTasks] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -17,21 +19,40 @@ export const TasksTab = () => {
         const loadTasks = async () => {
             try {
                 setLoading(true);
-                setError(null);
-                const taskData = await fetchAllTasksForProject(projectId!, authState.accessToken!, "updated_at", "desc");
-                setTasks(taskData);
+                const data = await fetchAllTasksForProject(projectId!, authState.accessToken!, "updated_at", "desc");
+                const projectData = await fetchProjectById(projectId!, authState.accessToken!);
+                setTasks(data);
+
+                // Check if current user is owner or admin
+                if (projectData.owner_id === authState.user?.id) {
+                    setCanManageTasks(true);
+                } else {
+                    // Check if user is admin
+                    const members = await getProjectMembers(projectId!, authState.accessToken!);
+                    const [activeMembers = []] = members;
+                    const currentUserMember = activeMembers.find(
+                        (member: any) => member.user_id === authState.user?.id
+                    );
+                    if (currentUserMember && currentUserMember.role === "admin") {
+                        setCanManageTasks(true);
+                    }
+                }
             } catch (err) {
-                console.error("Error loading tasks:", err);
-                setError("Failed to load tasks");
+                setError('Failed to load tasks');
+                console.error(err);
             } finally {
                 setLoading(false);
             }
         };
 
-        if (projectId && authState.accessToken) {
-            loadTasks();
-        }
+        if (projectId && authState.accessToken) loadTasks();
     }, [projectId, authState.accessToken]);
+
+
+
+
+
+
 
     const handleNavigateToTaskManager = () => {
         navigate(`/projects/${projectId}/tasks`);
@@ -45,15 +66,17 @@ export const TasksTab = () => {
         <div className="p-6">
             <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Recent Tasks</h2>
-                <div className="flex space-x-3">
-                    <button
-                        onClick={handleCreateNewTask}
-                        className="px-4 py-2 cursor-pointer flex items-center space-x-2 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white rounded-lg font-medium transition-colors duration-200 shadow-sm hover:shadow-md"
-                    >
-                        <FaPlus className="text-sm" />
-                        <span>New Task</span>
-                    </button>
-                </div>
+                {canManageTasks && (
+                    <div className="flex space-x-3">
+                        <button
+                            onClick={handleCreateNewTask}
+                            className="px-4 py-2 cursor-pointer flex items-center space-x-2 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white rounded-lg font-medium transition-colors duration-200 shadow-sm hover:shadow-md"
+                        >
+                            <FaPlus className="text-sm" />
+                            <span>New Task</span>
+                        </button>
+                    </div>
+                )}
             </div>
 
             {/* Tasks Preview */}
@@ -71,13 +94,15 @@ export const TasksTab = () => {
                         <FaTasks className="text-4xl mb-3" />
                         <p className="text-lg">No tasks found for this project</p>
                         <p className="text-sm mt-1">Create your first task to get started</p>
-                        <button
-                            onClick={handleNavigateToTaskManager}
-                            className="mt-4 px-4 py-2 cursor-pointer flex items-center space-x-2 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white rounded-lg font-medium transition-colors duration-200"
-                        >
-                            <FaPlus />
-                            <span>Opem Task Manager</span>
-                        </button>
+                        {canManageTasks && (
+                            <button
+                                onClick={handleNavigateToTaskManager}
+                                className="mt-4 px-4 py-2 cursor-pointer flex items-center space-x-2 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white rounded-lg font-medium transition-colors duration-200"
+                            >
+                                <FaPlus />
+                                <span>Open Task Manager</span>
+                            </button>
+                        )}
                     </div>
                 ) : (
                     <>

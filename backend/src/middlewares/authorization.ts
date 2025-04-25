@@ -74,3 +74,31 @@ export const authorizeTask = async (req: Request, res: Response, next: NextFunct
     // Task is owned by the user
     next();
 }
+
+export const authorizeTaskForOwnerAndAdmin = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const requestingUserId = req.user.id;
+    const { projectId, taskId } = req.params;
+
+    const project: Project = await getProjectByIdQuery(projectId);
+
+    if (!project) {
+        res.status(404).json({ status: 404, message: "Project not found" });
+        return
+    }
+
+    const projectMembers = await getProjectMembersQuery(projectId);
+
+    if (!projectMembers.find(member => member.user_id === requestingUserId && (member.role === "owner" || member.role === "admin"))) {
+        res.status(403).json({ status: 403, message: "Unauthorized" });
+        return
+    }
+
+    const task = await getTaskByIdQuery(taskId);
+    if (!task) {
+        res.status(404).json({ status: 404, message: "Task not found" });
+        return
+    }
+
+    // Task is owned by the user
+    next();
+}

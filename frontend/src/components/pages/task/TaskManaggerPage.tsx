@@ -7,6 +7,7 @@ import { TaskBoard } from './taskComponents/board/TaskBoard';
 import { TaskList } from './taskComponents/TaskList';
 import { fetchProjectById } from '../../../services/projectService';
 import { Milestones } from './taskComponents/Milestones';
+import { getProjectMembers } from '../../../services/projectMemberService';
 
 // Define Task interface to improve type safety
 interface Task {
@@ -27,14 +28,31 @@ export const TasksManagerPage: React.FC = () => {
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [view, setView] = useState<'board' | 'list' | 'milestones'>('board');
+    const [canManageTasks, setCanManageTasks] = useState(false);
 
     useEffect(() => {
         const loadTasks = async () => {
             try {
                 setLoading(true);
                 const data = await fetchAllTasksForProject(projectId!, authState.accessToken!, "priority", "asc");
-                setProject(await fetchProjectById(projectId!, authState.accessToken!));
+                const projectData = await fetchProjectById(projectId!, authState.accessToken!);
+                setProject(projectData);
                 setTasks(data);
+
+                // Check if current user is owner or admin
+                if (projectData.owner_id === authState.user?.id) {
+                    setCanManageTasks(true);
+                } else {
+                    // Check if user is admin
+                    const members = await getProjectMembers(projectId!, authState.accessToken!);
+                    const [activeMembers = []] = members;
+                    const currentUserMember = activeMembers.find(
+                        (member: any) => member.user_id === authState.user?.id
+                    );
+                    if (currentUserMember && currentUserMember.role === "admin") {
+                        setCanManageTasks(true);
+                    }
+                }
             } catch (err) {
                 setError('Failed to load tasks');
                 console.error(err);
@@ -75,12 +93,14 @@ export const TasksManagerPage: React.FC = () => {
                             Managing tasks for <span className="font-semibold">{project?.name}</span>
                         </p>
                     </div>
-                    <button
-                        onClick={() => navigate(`/projects/${projectId}/tasks/new`)}
-                        className="inline-flex cursor-pointer items-center px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold shadow transition-all"
-                    >
-                        <FaPlus className="mr-2" /> New Task
-                    </button>
+                    {canManageTasks && (
+                        <button
+                            onClick={() => navigate(`/projects/${projectId}/tasks/new`)}
+                            className="inline-flex cursor-pointer items-center px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold shadow transition-all"
+                        >
+                            <FaPlus className="mr-2" /> New Task
+                        </button>
+                    )}
                 </div>
 
                 {/* View Toggle */}
@@ -117,9 +137,9 @@ export const TasksManagerPage: React.FC = () => {
                 ) : (
                     <div className="animate-fade-in">
                         {view === 'board' ? (
-                            <TaskBoard tasks={tasks} onTaskUpdate={handleTaskUpdate} />
+                            <TaskBoard tasks={tasks} onTaskUpdate={handleTaskUpdate} canManageTasks={canManageTasks} />
                         ) : view === 'list' ? (
-                            <TaskList tasks={tasks} />
+                            <TaskList tasks={tasks} canManageTasks={canManageTasks} />
                         ) : (
                             <Milestones />
                         )}

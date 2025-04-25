@@ -314,7 +314,7 @@ export const Dashboard = () => {
                                             <div className="mt-2 flex flex-wrap gap-4">
                                                 <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
                                                     <FaUsers className="mr-1.5" />
-                                                    <span>{project.members} members</span>
+                                                    <span>{project.memberCount} members</span>
                                                 </div>
                                                 <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
                                                     <FaTasks className="mr-1.5" />

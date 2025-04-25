@@ -13,9 +13,10 @@ interface Task {
 
 interface TaskListProps {
     tasks: Task[];
+    canManageTasks: boolean;
 }
 
-export const TaskList: React.FC<TaskListProps> = ({ tasks }) => {
+export const TaskList: React.FC<TaskListProps> = ({ tasks, canManageTasks }) => {
     const navigate = useNavigate();
     const { projectId } = useParams<{ projectId: string }>();
 
@@ -61,12 +62,14 @@ export const TaskList: React.FC<TaskListProps> = ({ tasks }) => {
                 <p className="text-gray-600 dark:text-gray-300 max-w-md mx-auto mb-6">
                     Create your first task to start tracking your project's progress.
                 </p>
-                <button
-                    onClick={() => navigate(`/projects/${projectId}/tasks/new`)}
-                    className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white rounded-lg font-medium transition-colors flex items-center mx-auto"
-                >
-                    <FaPlus className="mr-2" /> Create First Task
-                </button>
+                {canManageTasks && (
+                    <button
+                        onClick={() => navigate(`/projects/${projectId}/tasks/new`)}
+                        className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white rounded-lg font-medium transition-colors flex items-center mx-auto"
+                    >
+                        <FaPlus className="mr-2" /> Create First Task
+                    </button>
+                )}
             </div>
         );
     }
@@ -89,9 +92,12 @@ export const TaskList: React.FC<TaskListProps> = ({ tasks }) => {
                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 Due Date
                             </th>
-                            <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                Actions
-                            </th>
+                            {canManageTasks && (
+                                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                    Actions
+                                </th>
+                            )}
+
                         </tr>
                     </thead>
                     <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
@@ -120,18 +126,22 @@ export const TaskList: React.FC<TaskListProps> = ({ tasks }) => {
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                     {task.due_date ? new Date(task.due_date).toLocaleDateString() : '—'}
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            navigate(`/projects/${projectId}/tasks/${task.id}/edit`);
-                                        }}
-                                        className="p-2 rounded-full cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
-                                        title="Edit task"
-                                    >
-                                        <FaEdit />
-                                    </button>
-                                </td>
+                                {canManageTasks && (
+                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                navigate(`/projects/${projectId}/tasks/${task.id}/edit`);
+                                            }}
+                                            className="p-2 rounded-full cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                                            title="Edit task"
+                                        >
+                                            <FaEdit />
+                                        </button>
+
+                                    </td>
+                                )}
                             </tr>
                         ))}
                     </tbody>

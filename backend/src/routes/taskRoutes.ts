@@ -1,8 +1,8 @@
 import express from "express";
-import { createTask, deleteTask, getAllTasks, getTaskById, getTaskCountForProject, updateTask } from "../controller/taskController";
+import { createTask, deleteTask, getAllTasks, getTaskById, getTaskCountForProject, updateTask, updateTaskStatus } from "../controller/taskController";
 import { validateProject, validateTask } from "../middlewares/inputValidator";
 import { authenticateToken } from "../middlewares/authenticate";
-import { authorizeProject, authorizeTask } from "../middlewares/authorization";
+import { authorizeProject, authorizeTask, authorizeTaskForOwnerAndAdmin } from "../middlewares/authorization";
 
 const router = express.Router();
 
@@ -175,7 +175,9 @@ router.get("/project/:projectId/task-counts", authenticateToken, authorizeProjec
  *       404:
  *         description: Task not found
  */
-router.put("/project/:projectId/task/:taskId", authenticateToken, authorizeTask, validateTask, updateTask);
+router.put("/project/:projectId/task/:taskId", authenticateToken, authorizeTaskForOwnerAndAdmin, validateTask, updateTask);
+
+router.put("/project/:projectId/task/:taskId/status", authenticateToken, authorizeTask, updateTaskStatus);
 
 /**
  * @swagger
@@ -206,6 +208,6 @@ router.put("/project/:projectId/task/:taskId", authenticateToken, authorizeTask,
  *       404:
  *         description: Task not found
  */
-router.delete("/project/:projectId/task/:taskId", authenticateToken, authorizeTask, deleteTask);
+router.delete("/project/:projectId/task/:taskId", authenticateToken, authorizeTaskForOwnerAndAdmin, deleteTask);
 
 export default router;

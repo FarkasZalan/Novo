@@ -437,7 +437,7 @@ export const ProjectPage = () => {
                             <div>
                                 <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Team Members</p>
                                 <p className="text-3xl font-bold text-gray-900 dark:text-gray-100 mt-1">
-                                    {members.length + 1 || 1}
+                                    {members.length || 1}
                                 </p>
                             </div>
                             <div className="p-3 rounded-lg bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300">

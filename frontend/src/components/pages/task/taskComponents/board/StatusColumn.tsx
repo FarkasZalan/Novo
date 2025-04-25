@@ -15,6 +15,7 @@ interface Props {
     onTaskUpdate: (taskId: string, newStatus: string) => Promise<void>;
     draggedTask: Task | null;
     setDraggedTask: (task: Task | null) => void;
+    canManageTasks: boolean;
 }
 
 // Droppable Column Component representing a task status column
@@ -25,7 +26,8 @@ const StatusColumn: React.FC<Props> = React.memo(({
     onAddTask,
     onTaskUpdate,
     draggedTask,
-    setDraggedTask
+    setDraggedTask,
+    canManageTasks
 }) => {
     // Create a ref for the column element
     const columnRef = useRef<HTMLDivElement>(null);
@@ -88,15 +90,17 @@ const StatusColumn: React.FC<Props> = React.memo(({
                 transition={{ type: 'spring', stiffness: 500, damping: 30 }}
             >
                 <div className="space-y-3">
-                    <motion.button
-                        onClick={() => onAddTask(statusKey)}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        className="w-full flex cursor-pointer items-center justify-center gap-2 p-3 text-sm font-medium rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-indigo-300 dark:hover:border-indigo-500 text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all mb-3"
-                    >
-                        <FaPlus />
-                        <span>Add Task</span>
-                    </motion.button>
+                    {canManageTasks && (
+                        <motion.button
+                            onClick={() => onAddTask(statusKey)}
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className="w-full flex cursor-pointer items-center justify-center gap-2 p-3 text-sm font-medium rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-indigo-300 dark:hover:border-indigo-500 text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all mb-3"
+                        >
+                            <FaPlus />
+                            <span>Add Task</span>
+                        </motion.button>
+                    )}
 
                     {taskCards}
 

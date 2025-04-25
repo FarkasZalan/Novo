@@ -28,6 +28,7 @@ import { CreateTaskPage } from "./components/pages/task/taskHandler/CreateTaskPa
 import { TasksManagerPage } from "./components/pages/task/TaskManaggerPage";
 import { UpdateTaskPage } from "./components/pages/task/taskHandler/UpdateTaskPage";
 import { TaskDetails } from "./components/pages/task/taskComponents/TaskDetails";
+import { ProtectedProjectForTaskManagement } from "./components/routes/TaskAdminOrOwnerRoute";
 
 function RootRedirect() {
   const { isAuthenticated } = useAuth();
@@ -88,13 +89,16 @@ function App() {
 
               { /* Task routes */}
               <Route path="/projects/:projectId/tasks" element={<TasksManagerPage />} />
-              <Route path="/projects/:projectId/tasks/new" element={<CreateTaskPage />} />
-              <Route path="/projects/:projectId/tasks/:taskId/edit" element={<UpdateTaskPage />} />
               <Route path="/projects/:projectId/tasks/:taskId" element={<TaskDetails />} />
             </Route>
 
             <Route element={<ProtectedProjectForOwner />}>
               <Route path="/projects/:projectId/edit" element={<EditProject />} />
+            </Route>
+
+            <Route element={<ProtectedProjectForTaskManagement />}>
+              <Route path="/projects/:projectId/tasks/new" element={<CreateTaskPage />} />
+              <Route path="/projects/:projectId/tasks/:taskId/edit" element={<UpdateTaskPage />} />
             </Route>
 
             {/* 404 fallback */}

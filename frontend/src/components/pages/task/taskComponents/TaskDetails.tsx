@@ -15,6 +15,8 @@ import {
 } from 'react-icons/fa';
 import { fetchTask } from '../../../../services/taskService';
 import { useAuth } from '../../../../context/AuthContext';
+import { fetchProjectById } from '../../../../services/projectService';
+import { getProjectMembers } from '../../../../services/projectMemberService';
 
 export const TaskDetails: React.FC = () => {
     const { taskId, projectId } = useParams<{ taskId: string; projectId: string }>();
@@ -23,12 +25,28 @@ export const TaskDetails: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const navigate = useNavigate();
     const { authState } = useAuth();
+    const [canManageTasks, setCanManageTasks] = useState(false);
 
     useEffect(() => {
         const loadTask = async () => {
             try {
                 const fetched = await fetchTask(taskId!, projectId!, authState.accessToken!);
                 setTask(fetched);
+
+                // Check permissions
+                const project = await fetchProjectById(projectId!, authState.accessToken!);
+                if (project.owner_id === authState.user?.id) {
+                    setCanManageTasks(true);
+                } else {
+                    const members = await getProjectMembers(projectId!, authState.accessToken!);
+                    const [activeMembers = []] = members;
+                    const currentUserMember = activeMembers.find(
+                        (member: any) => member.user_id === authState.user?.id
+                    );
+                    if (currentUserMember && currentUserMember.role === "admin") {
+                        setCanManageTasks(true);
+                    }
+                }
             } catch (err) {
                 console.error(err);
                 setError('Failed to load task.');
@@ -122,13 +140,15 @@ export const TaskDetails: React.FC = () => {
                         <FaArrowLeft className="mr-2" />
                         Back to tasks
                     </button>
-                    <button
-                        onClick={() => navigate(`/projects/${projectId}/tasks/${taskId}/edit`, { replace: true })}
-                        className="flex items-center cursor-pointer px-4 py-2 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white rounded-xl shadow transition-colors"
-                    >
-                        <FaEdit className="mr-2" />
-                        Edit Task
-                    </button>
+                    {canManageTasks && (
+                        <button
+                            onClick={() => navigate(`/projects/${projectId}/tasks/${taskId}/edit`, { replace: true })}
+                            className="flex items-center cursor-pointer px-4 py-2 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white rounded-xl shadow transition-colors"
+                        >
+                            <FaEdit className="mr-2" />
+                            Edit Task
+                        </button>
+                    )}
                 </div>
 
                 {/* Task Card */}
