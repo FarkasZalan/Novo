@@ -3,7 +3,7 @@ import { addUserToProjectQuery } from "./projectMemberModel";
 import { getCompletedTaskCountForProjectQuery, getInProgressTaskCountForProjectQuery, getTaskCountForProjectQuery } from "./task.Model";
 
 export const getAllProjectForUsersQuery = async (userId: string) => {
-    const result = await pool.query(`SELECT * FROM projects JOIN project_members ON projects.id = project_members.project_id WHERE project_members.user_id = $1`, [userId]);
+    const result = await pool.query(`SELECT * FROM projects JOIN project_members ON projects.id = project_members.project_id WHERE project_members.user_id = $1 ORDER BY projects.updated_at DESC`, [userId]);
     return result.rows;
 };
 
