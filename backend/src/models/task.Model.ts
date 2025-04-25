@@ -1,7 +1,7 @@
 import pool from "../config/db";
 
-export const getAllTaskForProjectQuery = async (id: string) => {
-    const result = await pool.query("SELECT * FROM tasks WHERE project_id = $1 ORDER BY updated_at DESC", [id]); // send a query to the database with one of the open connection from the pool
+export const getAllTaskForProjectQuery = async (id: string, order_by: string, order: string) => {
+    const result = await pool.query("SELECT * FROM tasks WHERE project_id = $1 ORDER BY " + order_by + " " + order, [id]); // send a query to the database with one of the open connection from the pool
     return result.rows
 }
 
@@ -11,8 +11,8 @@ export const getTaskByIdQuery = async (id: string) => {
 }
 
 // Returning * = return all rows that was affected by the query e.g if one user was created, updated or deleted then it will return with that row from the database
-export const createTaskQuery = async (title: string, description: string, project_id: string, due_date: Date, priority: string) => {
-    const result = await pool.query("INSERT INTO tasks (title, description, project_id, due_date, priority, updated_at, status) VALUES ($1, $2, $3, $4, $5, $6, 'not-started') RETURNING *", [title, description, project_id, due_date, priority, new Date()]);
+export const createTaskQuery = async (title: string, description: string, project_id: string, due_date: Date, priority: string, status: string) => {
+    const result = await pool.query("INSERT INTO tasks (title, description, project_id, due_date, priority, updated_at, status) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *", [title, description, project_id, due_date, priority, new Date(), status]);
     return result.rows[0];
 }
 

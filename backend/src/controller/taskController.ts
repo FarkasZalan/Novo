@@ -16,8 +16,8 @@ const handleResponse = (res: Response, status: number, message: string, data: an
 export const createTask = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const projectId = req.params.projectId;
-        const { title, description, due_date, priority } = req.body;
-        const newTask = await createTaskQuery(title, description, projectId, due_date, priority);
+        const { title, description, due_date, priority, status } = req.body;
+        const newTask = await createTaskQuery(title, description, projectId, due_date, priority, status);
 
         await recalculateProjectStatus(projectId);
         handleResponse(res, 201, "Task created successfully", newTask);
@@ -35,7 +35,9 @@ export const createTask = async (req: Request, res: Response, next: NextFunction
 export const getAllTasks = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const projectId = req.params.projectId;
-        const tasks = await getAllTaskForProjectQuery(projectId); // get all tasks for the project;
+        const orderBy = typeof req.query.order_by === 'string' ? req.query.order_by : "updated_at";
+        const order = typeof req.query.order === 'string' ? req.query.order : "desc";
+        const tasks = await getAllTaskForProjectQuery(projectId, orderBy, order); // get all tasks for the project;
         handleResponse(res, 200, "Tasks fetched successfully", tasks);
     } catch (error) {
         next(error);
@@ -92,13 +94,14 @@ export const getTaskCountForProject = async (req: Request, res: Response, next: 
 export const deleteTask = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const taskId = req.params.taskId;
+        const projectId = req.params.projectId;
         const deletedTask = await deleteTaskQuery(taskId);
         if (!deletedTask) {
             handleResponse(res, 404, "Task not found", null);
             return;
         }
 
-        await recalculateProjectStatus(deletedTask.project_id);
+        await recalculateProjectStatus(projectId);
         handleResponse(res, 200, "Task deleted successfully", deletedTask);
     } catch (error) {
         next(error);

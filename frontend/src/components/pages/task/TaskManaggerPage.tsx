@@ -2,18 +2,28 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FaArrowLeft, FaFlag, FaList, FaPlus, FaThLarge } from 'react-icons/fa';
 import { useAuth } from '../../../context/AuthContext';
-import { fetchTasks } from '../../../services/taskService';
-import { TaskBoard } from './taskComponents/TaskBoard';
+import { fetchAllTasksForProject } from '../../../services/taskService';
+import { TaskBoard } from './taskComponents/board/TaskBoard';
 import { TaskList } from './taskComponents/TaskList';
 import { fetchProjectById } from '../../../services/projectService';
 import { Milestones } from './taskComponents/Milestones';
+
+// Define Task interface to improve type safety
+interface Task {
+    id: string;
+    title: string;
+    description?: string;
+    status: string;
+    priority: 'low' | 'medium' | 'high';
+    due_date?: string;
+}
 
 export const TasksManagerPage: React.FC = () => {
     const { projectId } = useParams<{ projectId: string }>();
     const [project, setProject] = useState<any>(null);
     const { authState } = useAuth();
     const navigate = useNavigate();
-    const [tasks, setTasks] = useState<any[]>([]);
+    const [tasks, setTasks] = useState<Task[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [view, setView] = useState<'board' | 'list' | 'milestones'>('board');
@@ -22,7 +32,7 @@ export const TasksManagerPage: React.FC = () => {
         const loadTasks = async () => {
             try {
                 setLoading(true);
-                const data = await fetchTasks(projectId!, authState.accessToken!);
+                const data = await fetchAllTasksForProject(projectId!, authState.accessToken!, "priority", "asc");
                 setProject(await fetchProjectById(projectId!, authState.accessToken!));
                 setTasks(data);
             } catch (err) {
@@ -36,6 +46,16 @@ export const TasksManagerPage: React.FC = () => {
         if (projectId && authState.accessToken) loadTasks();
     }, [projectId, authState.accessToken]);
 
+    // Handler for task updates (used for drag and drop)
+    // so when a task is moved to another column (status) then update the task list in the local state, so the UI shows the new status
+    const handleTaskUpdate = (updatedTask: Task) => {
+        setTasks(currentTasks =>
+            currentTasks.map(task =>
+                task.id === updatedTask.id ? updatedTask : task
+            )
+        );
+    };
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-8 px-4 md:px-12 transition-colors duration-300">
             <div className="max-w-screen-2xl mx-auto">
@@ -44,7 +64,7 @@ export const TasksManagerPage: React.FC = () => {
                     <div>
                         <div className="flex items-center">
                             <button
-                                onClick={() => navigate(-1)}
+                                onClick={() => navigate(`/projects/${projectId}`)}
                                 className="mr-4 p-2 rounded-full cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition"
                             >
                                 <FaArrowLeft />
@@ -97,7 +117,7 @@ export const TasksManagerPage: React.FC = () => {
                 ) : (
                     <div className="animate-fade-in">
                         {view === 'board' ? (
-                            <TaskBoard tasks={tasks} />
+                            <TaskBoard tasks={tasks} onTaskUpdate={handleTaskUpdate} />
                         ) : view === 'list' ? (
                             <TaskList tasks={tasks} />
                         ) : (

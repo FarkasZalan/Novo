@@ -82,7 +82,7 @@ function App() {
 
               {/* Project routes */}
               <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/projects/new" element={<CreateProject />} />
+              <Route path="/new" element={<CreateProject />} />
               <Route path="/projects/:projectId" element={<ProjectPage />} />
               <Route path="/projects/:projectId/files" element={<FilesTab />} />
 

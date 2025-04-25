@@ -325,7 +325,7 @@ export const ProjectPage = () => {
                     <div className="flex flex-col space-y-4 md:space-y-0 md:flex-row md:items-center md:justify-between">
                         <div className="flex items-center space-x-4">
                             <button
-                                onClick={() => navigate(-1)}
+                                onClick={() => navigate(`/dashboard`, { replace: true })}
                                 className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-pointer"
                             >
                                 <FaArrowLeft className="w-5 h-5" />

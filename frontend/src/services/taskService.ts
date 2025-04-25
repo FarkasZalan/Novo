@@ -1,9 +1,9 @@
 import axios from 'axios';
 import { API_URL } from '../config/apiURL';
 
-export const fetchTasks = async (projectId: string, token: string) => {
+export const fetchAllTasksForProject = async (projectId: string, token: string, order_by: string, order: string) => {
     try {
-        const response = await axios.get(`${API_URL}/project/${projectId}/tasks`, {
+        const response = await axios.get(`${API_URL}/project/${projectId}/tasks?order_by=${order_by}&order=${order}`, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -15,15 +15,14 @@ export const fetchTasks = async (projectId: string, token: string) => {
     }
 };
 
-export const createTask = async (projectId: string, token: string, title: string, description: string, due_date?: Date, priority?: string, status: string = 'not-started', completed: boolean = false) => {
+export const createTask = async (projectId: string, token: string, title: string, description: string, due_date?: Date, priority?: string, status: string = 'not-started') => {
     try {
         const response = await axios.post(`${API_URL}/project/${projectId}/tasks/new`, {
             title,
             description,
             due_date,
             priority,
-            status,
-            completed
+            status
         }, {
             headers: {
                 Authorization: `Bearer ${token}`
@@ -84,9 +83,9 @@ export const fetchAllTasksCount = async (projectId: string, token: string) => {
     }
 };
 
-export const deleteTask = async (taskId: string, token: string) => {
+export const deleteTask = async (taskId: string, projectId: string, token: string) => {
     try {
-        const response = await axios.delete(`${API_URL}/task/${taskId}`, {
+        const response = await axios.delete(`${API_URL}/project/${projectId}/task/${taskId}`, {
             headers: {
                 Authorization: `Bearer ${token}`
             }

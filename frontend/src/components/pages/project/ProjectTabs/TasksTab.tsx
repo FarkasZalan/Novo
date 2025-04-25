@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { FaTasks, FaChevronRight, FaPlus } from "react-icons/fa";
 import { useAuth } from "../../../../context/AuthContext";
-import { fetchTasks } from "../../../../services/taskService";
+import { fetchAllTasksForProject } from "../../../../services/taskService";
 
 export const TasksTab = () => {
     const { projectId } = useParams<{ projectId: string }>();
@@ -18,7 +18,7 @@ export const TasksTab = () => {
             try {
                 setLoading(true);
                 setError(null);
-                const taskData = await fetchTasks(projectId!, authState.accessToken!);
+                const taskData = await fetchAllTasksForProject(projectId!, authState.accessToken!, "updated_at", "desc");
                 setTasks(taskData);
             } catch (err) {
                 console.error("Error loading tasks:", err);
@@ -72,11 +72,11 @@ export const TasksTab = () => {
                         <p className="text-lg">No tasks found for this project</p>
                         <p className="text-sm mt-1">Create your first task to get started</p>
                         <button
-                            onClick={handleCreateNewTask}
+                            onClick={handleNavigateToTaskManager}
                             className="mt-4 px-4 py-2 cursor-pointer flex items-center space-x-2 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white rounded-lg font-medium transition-colors duration-200"
                         >
                             <FaPlus />
-                            <span>Create Task</span>
+                            <span>Opem Task Manager</span>
                         </button>
                     </div>
                 ) : (

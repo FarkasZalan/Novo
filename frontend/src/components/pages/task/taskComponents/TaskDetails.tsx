@@ -14,7 +14,6 @@ import {
     FaPaperclip
 } from 'react-icons/fa';
 import { fetchTask } from '../../../../services/taskService';
-import { toast } from 'react-hot-toast';
 import { useAuth } from '../../../../context/AuthContext';
 
 export const TaskDetails: React.FC = () => {
@@ -33,7 +32,6 @@ export const TaskDetails: React.FC = () => {
             } catch (err) {
                 console.error(err);
                 setError('Failed to load task.');
-                toast.error('Failed to load task details');
             } finally {
                 setLoading(false);
             }
@@ -97,10 +95,10 @@ export const TaskDetails: React.FC = () => {
 
     if (error || !task) {
         return (
-            <div className="text-center py-8 min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+            <div className="text-center flex flex-col py-8 min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
                 <div className="text-red-500 dark:text-red-400 text-lg mb-4">{error}</div>
                 <button
-                    onClick={() => navigate(-1)}
+                    onClick={() => navigate(`/projects/${projectId}/tasks`)}
                     className="px-4 cursor-pointer py-2 cursor-pointer bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white rounded-lg transition-colors"
                 >
                     Go Back
@@ -118,14 +116,14 @@ export const TaskDetails: React.FC = () => {
                 {/* Header */}
                 <div className="flex items-center justify-between mb-8">
                     <button
-                        onClick={() => navigate(-1)}
+                        onClick={() => navigate(`/projects/${projectId}/tasks`, { replace: true })}
                         className="flex items-center cursor-pointer text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 transition-colors"
                     >
                         <FaArrowLeft className="mr-2" />
                         Back to tasks
                     </button>
                     <button
-                        onClick={() => navigate(`/projects/${projectId}/tasks/${taskId}/edit`)}
+                        onClick={() => navigate(`/projects/${projectId}/tasks/${taskId}/edit`, { replace: true })}
                         className="flex items-center cursor-pointer px-4 py-2 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white rounded-xl shadow transition-colors"
                     >
                         <FaEdit className="mr-2" />

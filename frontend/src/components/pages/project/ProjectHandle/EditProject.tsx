@@ -204,7 +204,7 @@ export const EditProject = () => {
                                 </svg>
                             </button>
                             <button
-                                onClick={() => navigate("/dashboard")}
+                                onClick={() => navigate(-1)}
                                 className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-pointer"
                                 title="Close"
                             >

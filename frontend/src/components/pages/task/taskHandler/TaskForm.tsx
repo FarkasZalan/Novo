@@ -1,21 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../../../context/AuthContext';
-import { createTask, fetchTasks, updateTask } from '../../../../services/taskService';
-import { FaCalendarAlt, FaArrowLeft, FaSave, FaTimes } from 'react-icons/fa';
+import { createTask, deleteTask, fetchAllTasksForProject, updateTask } from '../../../../services/taskService';
+import { FaCalendarAlt, FaArrowLeft, FaSave, FaTimes, FaTrash, FaExclamationTriangle } from 'react-icons/fa';
 import toast from 'react-hot-toast';
+import { ConfirmationDialog } from '../../project/ConfirmationDialog';
 
 export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
     const { projectId, taskId } = useParams<{ projectId: string; taskId: string }>();
+    const [statusParam] = useSearchParams();
     const { authState } = useAuth();
     const navigate = useNavigate();
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const taskStatus = statusParam.get('status') || 'not-started';
 
     const [formData, setFormData] = useState({
         title: '',
         description: '',
         dueDate: '',
         priority: 'low' as 'low' | 'medium' | 'high',
-        status: 'not-started' as 'not-started' | 'in-progress' | 'completed',
+        status: taskStatus as 'not-started' | 'in-progress' | 'completed',
         completed: false
     });
 
@@ -25,7 +29,7 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
     useEffect(() => {
         if (isEdit && projectId && taskId) {
             setLoading(true);
-            fetchTasks(projectId, authState.accessToken!)
+            fetchAllTasksForProject(projectId, authState.accessToken!, "priority", "asc")
                 .then(tasks => {
                     const task = tasks.find((t: any) => t.id === taskId);
                     if (task) {
@@ -75,12 +79,13 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
                     title,
                     description,
                     dueDate ? new Date(dueDate) : undefined,
-                    priority
+                    priority,
+                    status
                 );
 
                 toast.success('Task created successfully');
             }
-            navigate(-1);
+            navigate(`/projects/${projectId}/tasks`, { replace: true });
         } catch (err) {
             console.error(err);
             setError('Failed to save task. Please try again.');
@@ -95,6 +100,20 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
             ...prev,
             [name]: value
         }));
+    };
+
+    const handleDeleteTask = async () => {
+        if (!taskId) return;
+        try {
+            setLoading(true);
+            await deleteTask(taskId, projectId!, authState.accessToken!);
+            navigate(`/projects/${projectId}/tasks`, { replace: true });
+        } catch (err) {
+            console.error(err);
+            toast.error('Failed to delete task');
+        } finally {
+            setLoading(false);
+        }
     };
 
     if (loading && isEdit) {
@@ -216,28 +235,57 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
                     </div>
                 </div>
 
-                <div className="mt-8 flex justify-end space-x-4">
-                    <button
-                        type="button"
-                        onClick={() => navigate(-1)}
-                        className="px-4 py-2 border cursor-pointer border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center"
-                    >
+                {/* Action Buttons */}
+                <div className="mt-8 flex flex-col sm:flex-row gap-2 sm:gap-2 justify-end sm:space-x-4">
+                    <button type="button" onClick={() => navigate(-1)} className="px-4 cursor-pointer py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center">
                         <FaTimes className="mr-2" /> Cancel
                     </button>
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className="px-6 py-2 cursor-pointer bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white rounded-lg font-medium shadow-sm hover:shadow transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center"
-                    >
-                        {loading ? (
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                        ) : (
-                            <FaSave className="mr-2" />
-                        )}
+                    <button type="submit" disabled={loading} className="px-6 cursor-pointer py-2 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white rounded-lg font-medium shadow-sm flex items-center justify-center disabled:opacity-70">
+                        {loading ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div> : <FaSave className="mr-2" />}
                         {isEdit ? 'Update Task' : 'Create Task'}
                     </button>
                 </div>
             </form>
+
+            {/* Danger Zone Section */}
+            {isEdit && (
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden border border-red-200 dark:border-red-900/50 mt-8">
+                    <div className="px-6 py-4 bg-red-50 dark:bg-red-900/10 border-b border-red-200 dark:border-red-900/50">
+                        <h2 className="text-xl font-semibold text-red-600 dark:text-red-400 flex items-center">
+                            <FaExclamationTriangle className="mr-2" /> Danger Zone
+                        </h2>
+                    </div>
+                    <div className="px-6 py-4">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between">
+                            <div className="mb-4 md:mb-0">
+                                <h3 className="font-medium text-gray-900 dark:text-gray-100">Delete this task</h3>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">This will permanently delete the task. This action cannot be undone.</p>
+                            </div>
+                            <button
+                                onClick={() => setShowDeleteConfirm(true)}
+                                className="px-4 py-2 bg-red-600 hover:bg-red-700 cursor-pointer dark:bg-red-700 dark:hover:bg-red-800 text-white rounded-lg font-medium flex items-center transition-colors"
+                                disabled={loading}
+                            >
+                                <FaTrash className="mr-2" /> Delete Task
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Confirmation Dialog for Delete */}
+            <ConfirmationDialog
+                isOpen={showDeleteConfirm}
+                onClose={() => setShowDeleteConfirm(false)}
+                onConfirm={() => {
+                    handleDeleteTask();
+                    toast.success('Task deleted successfully!');
+                }}
+                title="Delete Task?"
+                message="Are you sure you want to delete this task? This action cannot be undone."
+                confirmText="Delete Task"
+                confirmColor="red"
+            />
         </div>
     );
 };

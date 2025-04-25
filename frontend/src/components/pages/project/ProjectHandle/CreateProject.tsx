@@ -54,7 +54,7 @@ export const CreateProject = () => {
                 authState.user.id,
                 authState.accessToken!
             );
-            navigate("/dashboard");
+            navigate("/dashboard", { replace: true });
         } catch (err: any) {
             if (err.response?.status === 400) {
                 if (err.response.data?.error) {
@@ -85,7 +85,7 @@ export const CreateProject = () => {
                     <div className="flex justify-between items-center">
                         <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Create New Project</h1>
                         <button
-                            onClick={() => navigate("/dashboard")}
+                            onClick={() => navigate(-1)}
                             className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-pointer"
                         >
                             <FaTimes className="w-5 h-5" />
