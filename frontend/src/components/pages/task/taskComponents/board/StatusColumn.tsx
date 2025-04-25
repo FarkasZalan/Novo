@@ -68,7 +68,7 @@ const StatusColumn: React.FC<Props> = React.memo(({
     }, [tasks, onTaskUpdate, setDraggedTask]);
 
     return (
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col">
             <div className="flex items-center justify-between mb-4 px-2">
                 <div className="flex items-center space-x-2">
                     {statusInfo.icon}
