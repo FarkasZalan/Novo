@@ -2,19 +2,21 @@ import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
+import { isPast, isToday, isTomorrow } from 'date-fns';
 import { Task } from '../../../../../types/task';
 
+// one task card
 const DraggableTaskCard: React.FC<{ task: Task }> = React.memo(({ task }) => {
     const navigate = useNavigate();
     const { projectId } = useParams<{ projectId: string }>();
 
     const {
-        attributes,
-        listeners,
-        setNodeRef,
-        transform,
-        isDragging,
-    } = useDraggable({
+        attributes, // keyboard accessibility
+        listeners, // click/touch accessibility
+        setNodeRef, // which element to make draggable
+        transform, // movement animations
+        isDragging, // style differently when dragging
+    } = useDraggable({ // makes the element draggable
         id: task.id,
         data: {
             type: 'task',
@@ -23,6 +25,7 @@ const DraggableTaskCard: React.FC<{ task: Task }> = React.memo(({ task }) => {
         }
     });
 
+    // the original task card, the 'shadow' card that stays in the original column until the drag ends
     const style = {
         transform: isDragging ? undefined : CSS.Translate.toString(transform),
     };
@@ -43,10 +46,14 @@ const DraggableTaskCard: React.FC<{ task: Task }> = React.memo(({ task }) => {
 
     return (
         <div
+
+            // the draggable element setup
             ref={setNodeRef}
             style={style}
             {...attributes}
             {...listeners}
+
+            // the e.stopPropagation() is denying the click event from the parent element
             onClick={(e) => {
                 e.stopPropagation();
                 navigate(`/projects/${projectId}/tasks/${task.id}`);
@@ -63,9 +70,23 @@ const DraggableTaskCard: React.FC<{ task: Task }> = React.memo(({ task }) => {
 
             <div className="flex items-center justify-between mt-3">
                 {task.due_date && (
-                    <span className="text-xs text-gray-500 dark:text-gray-400">
-                        Due {new Date(task.due_date).toLocaleDateString()}
-                    </span>
+                    <div className="flex items-center gap-1">
+                        <span className={
+                            `inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${task.status !== 'completed'
+                                ? isPast(new Date(task.due_date)) || isToday(new Date(task.due_date))
+                                    ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200" // Overdue/Today
+                                    : isTomorrow(new Date(task.due_date))
+                                        ? "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200" // Tomorrow
+                                        : "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200" // Future
+                                : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300" // Completed
+                            }`
+                        }>
+                            Due {new Date(task.due_date).toLocaleDateString()}
+                            {/* status indicator */}
+                            {task.status !== 'completed' && isToday(new Date(task.due_date)) && " • Today"}
+                            {task.status !== 'completed' && isTomorrow(new Date(task.due_date)) && " • Tomorrow"}
+                        </span>
+                    </div>
                 )}
                 {getPriorityBadge(task.priority)}
             </div>

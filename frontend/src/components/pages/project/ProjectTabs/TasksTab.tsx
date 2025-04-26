@@ -5,6 +5,7 @@ import { useAuth } from "../../../../context/AuthContext";
 import { fetchAllTasksForProject } from "../../../../services/taskService";
 import { fetchProjectById } from "../../../../services/projectService";
 import { getProjectMembers } from "../../../../services/projectMemberService";
+import { isPast, isToday, isTomorrow } from "date-fns";
 
 export const TasksTab = () => {
     const { projectId } = useParams<{ projectId: string }>();
@@ -138,8 +139,23 @@ export const TasksTab = () => {
                                                     </span>
                                                 )}
                                                 {task.due_date && (
-                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
+                                                    <span className={
+                                                        `inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${task.status !== 'completed'
+                                                            ? isPast(new Date(task.due_date)) || isToday(new Date(task.due_date))
+                                                                ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200" // Overdue/Today
+                                                                : isTomorrow(new Date(task.due_date))
+                                                                    ? "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200" // Tomorrow
+                                                                    : "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200" // Future
+                                                            : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300" // Completed
+                                                        }`
+                                                    }>
                                                         Due {new Date(task.due_date).toLocaleDateString()}
+                                                        {task.status !== 'completed' && isToday(new Date(task.due_date)) && (
+                                                            <span className="ml-1">(Today)</span>
+                                                        )}
+                                                        {task.status !== 'completed' && isTomorrow(new Date(task.due_date)) && (
+                                                            <span className="ml-1">(Tomorrow)</span>
+                                                        )}
                                                     </span>
                                                 )}
                                             </div>

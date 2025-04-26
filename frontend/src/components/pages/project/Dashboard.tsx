@@ -106,6 +106,8 @@ export const Dashboard = () => {
         if (isProjectOwner(project)) {
             return (
                 <button
+                    // the e.stopPropagation() is denying the click event from the parent element
+                    // so on hover and click to the settings button it will not redirect to the project page instead go to edit the project if have permission
                     onClick={(e) => {
                         e.stopPropagation();
                         navigate(`/projects/${project.id}/edit`);

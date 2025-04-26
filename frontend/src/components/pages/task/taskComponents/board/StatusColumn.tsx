@@ -14,6 +14,7 @@ interface Props {
     activeTask: Task | null;
 }
 
+// represent a column in the task board
 const StatusColumn: React.FC<Props> = React.memo(({
     statusKey,
     statusInfo,
@@ -22,8 +23,11 @@ const StatusColumn: React.FC<Props> = React.memo(({
     canManageTasks,
     activeTask
 }) => {
+    // useDroppable make the element accept draggable items
+    // setNodeRef where we want to drop the draggable items
+    // isOver is a boolean that is true when the user is hovering over a task over a column
     const { setNodeRef, isOver } = useDroppable({
-        id: statusKey,
+        id: statusKey, // the id of the column (not-started, in-progress, completed)
         data: {
             type: 'column',
             status: statusKey
@@ -42,6 +46,7 @@ const StatusColumn: React.FC<Props> = React.memo(({
                 </div>
             </div>
 
+            {/* dropable area*/}
             <motion.div
                 ref={setNodeRef}
                 className={`flex-1 rounded-xl p-4 ${statusInfo.color} min-h-64 transition-all duration-200`}
@@ -52,6 +57,7 @@ const StatusColumn: React.FC<Props> = React.memo(({
                 transition={{ type: 'spring', stiffness: 500, damping: 30 }}
             >
                 <div className="space-y-3">
+                    {/* add task button if the user have permission */}
                     {canManageTasks && (
                         <motion.button
                             onClick={() => onAddTask(statusKey)}
@@ -72,6 +78,7 @@ const StatusColumn: React.FC<Props> = React.memo(({
                         </div>
                     )}
 
+                    {/* tasks in the column */}
                     {tasks.map((task) => (
                         <motion.div
                             key={task.id}
@@ -79,6 +86,7 @@ const StatusColumn: React.FC<Props> = React.memo(({
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.2 }}
                         >
+                            {/* one task card */}
                             <DraggableTaskCard task={task} />
                         </motion.div>
                     ))}

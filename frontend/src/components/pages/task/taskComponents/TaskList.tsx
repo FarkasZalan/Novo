@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { FaEdit, FaCircle, FaClock, FaCheckCircle, FaPlus, FaTasks } from 'react-icons/fa';
+import { isPast, isToday, isTomorrow } from 'date-fns';
 
 interface Task {
     id: string;
@@ -124,7 +125,27 @@ export const TaskList: React.FC<TaskListProps> = ({ tasks, canManageTasks }) => 
                                     {getPriorityBadge(task.priority)}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                    {task.due_date ? new Date(task.due_date).toLocaleDateString() : '—'}
+                                    {task.due_date ? (
+                                        <div className="flex items-center gap-1">
+                                            <span className={
+                                                `inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${task.status !== 'completed'
+                                                    ? isPast(new Date(task.due_date)) || isToday(new Date(task.due_date))
+                                                        ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200" // Overdue/Today
+                                                        : isTomorrow(new Date(task.due_date))
+                                                            ? "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200" // Tomorrow
+                                                            : "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200" // Future
+                                                    : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300" // Completed
+                                                }`
+                                            }>
+                                                Due {new Date(task.due_date).toLocaleDateString()}
+                                                {/* status indicator */}
+                                                {task.status !== 'completed' && isToday(new Date(task.due_date)) && " • Today"}
+                                                {task.status !== 'completed' && isTomorrow(new Date(task.due_date)) && " • Tomorrow"}
+                                            </span>
+                                        </div>
+                                    ) : (
+                                        '—'
+                                    )}
                                 </td>
                                 {canManageTasks && (
                                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">

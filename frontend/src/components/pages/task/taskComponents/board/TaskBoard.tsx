@@ -16,10 +16,13 @@ import {
     useSensors,
     DragStartEvent,
     DragEndEvent,
+    TouchSensor,
 } from '@dnd-kit/core';
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { updateTaskStatus } from '../../../../../services/taskService';
+import { isPast, isToday, isTomorrow } from 'date-fns';
 
+// status column styles
 const statusLabels: Record<string, { label: string, icon: React.ReactNode, color: string }> = {
     'not-started': {
         label: 'Not Started',
@@ -39,50 +42,79 @@ const statusLabels: Record<string, { label: string, icon: React.ReactNode, color
 };
 
 interface TaskBoardProps {
-    tasks: Task[];
-    onTaskUpdate?: (updatedTask: Task) => void;
-    canManageTasks: boolean;
+    tasks: Task[]; // list of all tasks
+    onTaskUpdate?: (updatedTask: Task) => void; // when a task is moviving update it
+    canManageTasks: boolean; // if the user can manage tasks (admin or owner role) that checked in the TaskManaggerPage
 }
 
+// the main task board
 export const TaskBoard: React.FC<TaskBoardProps> = React.memo(({ tasks, onTaskUpdate, canManageTasks }) => {
     const navigate = useNavigate();
     const { projectId } = useParams<{ projectId: string }>();
     const { authState } = useAuth();
-    const [activeTask, setActiveTask] = useState<Task | null>(null);
+    const [activeTask, setActiveTask] = useState<Task | null>(null); // the task currently being dragged
 
+    // detect when user dragging with mouse, touch or keyboard
     const sensors = useSensors(
-        useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
-        useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+
+        // mouse
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 8 // how many pixels the user needs to drag before the drag operation starts
+            }
+        }),
+
+        // keyboard
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates
+        }),
+
+        // touch
+        useSensor(TouchSensor, {
+            activationConstraint: {
+                delay: 250, // how long the user needs to hold the touch before the drag operation starts
+                tolerance: 5 // how many pixels the user can move before the drag operation starts
+            }
+        }),
     );
 
+    // if the user have permission to add tasks
+    // this will be checked on the StatusColumn component
     const handleAddTask = (statusKey: string) => {
         navigate(`/projects/${projectId}/tasks/new?status=${statusKey}`);
     };
 
+    // when the drag starts save the task being active (dragged)
     const handleDragStart = (event: DragStartEvent) => {
         const task = tasks.find(t => t.id === event.active.id);
         task && setActiveTask(task);
     };
 
+    // when the drag ends
     const handleDragEnd = async (event: DragEndEvent) => {
-        const { over } = event;
+        const { over } = event; // where the task is dropped
+
+        // if there is no task being dragged or there is no place to drop the task
         if (!over || !activeTask) return;
 
+        // ?? -> if the left side is undefinied or null so misssing then use the right side
         const newStatus = over.data.current?.status ?? activeTask.status;
+
+        // if the new status is the same as the old status so stay in the original column then exit
         if (newStatus === activeTask.status) {
             setActiveTask(null);
             return;
         }
 
-        // Save original task for potential rollback
+        // Save original task for potential rollback in case of error
         const originalTask = activeTask;
 
         try {
-            // Optimistic update
+            // update task status on local state first with calling the parent callback to update the local task list for smooth UI (optimistic update)
             const updatedTask: Task = { ...activeTask, status: newStatus };
             onTaskUpdate?.(updatedTask);
 
-            // API call
+            // update task status on backend
             await updateTaskStatus(activeTask.id, projectId!, authState.accessToken!, newStatus);
             toast.success(`${activeTask.title} moved to ${statusLabels[newStatus].label}`);
         } catch (error) {
@@ -91,6 +123,7 @@ export const TaskBoard: React.FC<TaskBoardProps> = React.memo(({ tasks, onTaskUp
             // Revert optimistic update
             onTaskUpdate?.(originalTask);
         } finally {
+            // clean up
             setActiveTask(null);
         }
     };
@@ -109,6 +142,10 @@ export const TaskBoard: React.FC<TaskBoardProps> = React.memo(({ tasks, onTaskUp
         );
     };
 
+    // DnD Context = wraps the whole board in drag and drop context
+    // motion.div = animated layout for the 3 columns
+    // StatusColumn = render each column separately
+    // DragOverlay = when we grab the task this is the preview, the floating card at the cursor
     return (
         <DndContext
             sensors={sensors}
@@ -147,9 +184,23 @@ export const TaskBoard: React.FC<TaskBoardProps> = React.memo(({ tasks, onTaskUp
 
                         <div className="flex items-center justify-between mt-3">
                             {activeTask.due_date && (
-                                <span className="text-xs text-gray-500 dark:text-gray-400">
-                                    Due {new Date(activeTask.due_date).toLocaleDateString()}
-                                </span>
+                                <div className="flex items-center gap-1">
+                                    <span className={
+                                        `inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${activeTask.status !== 'completed'
+                                            ? isPast(new Date(activeTask.due_date)) || isToday(new Date(activeTask.due_date))
+                                                ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200" // Overdue/Today
+                                                : isTomorrow(new Date(activeTask.due_date))
+                                                    ? "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200" // Tomorrow
+                                                    : "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200" // Future
+                                            : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300" // Completed
+                                        }`
+                                    }>
+                                        Due {new Date(activeTask.due_date).toLocaleDateString()}
+                                        {/* status indicator */}
+                                        {activeTask.status !== 'completed' && isToday(new Date(activeTask.due_date)) && " • Today"}
+                                        {activeTask.status !== 'completed' && isTomorrow(new Date(activeTask.due_date)) && " • Tomorrow"}
+                                    </span>
+                                </div>
                             )}
                             {getPriorityBadge(activeTask.priority)}
                         </div>
