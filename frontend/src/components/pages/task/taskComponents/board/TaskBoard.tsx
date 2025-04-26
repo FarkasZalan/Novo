@@ -43,12 +43,13 @@ const statusLabels: Record<string, { label: string, icon: React.ReactNode, color
 
 interface TaskBoardProps {
     tasks: Task[]; // list of all tasks
+    setTasks: React.Dispatch<React.SetStateAction<Task[]>>; // update the list of tasks
     onTaskUpdate?: (updatedTask: Task) => void; // when a task is moviving update it
     canManageTasks: boolean; // if the user can manage tasks (admin or owner role) that checked in the TaskManaggerPage
 }
 
 // the main task board
-export const TaskBoard: React.FC<TaskBoardProps> = React.memo(({ tasks, onTaskUpdate, canManageTasks }) => {
+export const TaskBoard: React.FC<TaskBoardProps> = React.memo(({ tasks, setTasks, onTaskUpdate, canManageTasks }) => {
     const navigate = useNavigate();
     const { projectId } = useParams<{ projectId: string }>();
     const { authState } = useAuth();
@@ -108,19 +109,34 @@ export const TaskBoard: React.FC<TaskBoardProps> = React.memo(({ tasks, onTaskUp
 
         // Save original task for potential rollback in case of error
         const originalTask = activeTask;
+        const updatedTask: Task = { ...activeTask, status: newStatus };
 
         try {
-            // update task status on local state first with calling the parent callback to update the local task list for smooth UI (optimistic update)
-            const updatedTask: Task = { ...activeTask, status: newStatus };
-            onTaskUpdate?.(updatedTask);
+            // update task status on local state first with calling the parent setTasks to update the local task list for smooth UI (optimistic update)
+            setTasks(currentTasks =>
+                currentTasks.map(task =>
+                    task.id === updatedTask.id ? updatedTask : task
+                )
+            );
 
             // update task status on backend
             await updateTaskStatus(activeTask.id, projectId!, authState.accessToken!, newStatus);
             toast.success(`${activeTask.title} moved to ${statusLabels[newStatus].label}`);
+
+            // Notify parent of successful update
+            onTaskUpdate?.(updatedTask);
         } catch (error) {
             console.error("Error updating task status:", error);
             toast.error("Failed to update task status");
+
             // Revert optimistic update
+            setTasks(currentTasks =>
+                currentTasks.map(task =>
+                    task.id === originalTask.id ? originalTask : task
+                )
+            );
+
+            // Notify parent of failed update
             onTaskUpdate?.(originalTask);
         } finally {
             // clean up
