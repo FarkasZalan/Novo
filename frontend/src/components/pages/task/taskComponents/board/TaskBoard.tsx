@@ -28,13 +28,13 @@ const statusLabels: Record<string, { label: string, icon: React.ReactNode, color
     },
     'in-progress': {
         label: 'In Progress',
-        icon: <FaClock className="text-yellow-500" />,
-        color: 'bg-yellow-50 dark:bg-yellow-900/20'
+        icon: <FaClock className="text-yellow-600" />,
+        color: 'bg-yellow-100/60 dark:bg-yellow-900/30'
     },
     'completed': {
         label: 'Completed',
-        icon: <FaCheckCircle className="text-green-500" />,
-        color: 'bg-green-50 dark:bg-green-900/20'
+        icon: <FaCheckCircle className="text-green-600" />,
+        color: 'bg-green-100/60 dark:bg-green-900/30'
     },
 };
 
