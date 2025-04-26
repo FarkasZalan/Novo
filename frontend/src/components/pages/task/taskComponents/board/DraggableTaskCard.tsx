@@ -1,41 +1,31 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useDrag } from 'react-dnd';
+import { useDraggable } from '@dnd-kit/core';
+import { CSS } from '@dnd-kit/utilities';
 import { Task } from '../../../../../types/task';
 
-// Drag item type
-const ITEM_TYPE = 'TASK';
-
-interface Props {
-    task: Task;
-    setDraggedTask: (task: Task | null) => void;
-}
-
-// one task card which is draggable
-// when drop this card on a column, that card's taskId is passed to the column's drop function, which updates the status of the task
-const DraggableTaskCard: React.FC<Props> = React.memo(({ task, setDraggedTask }) => {
+const DraggableTaskCard: React.FC<{ task: Task }> = React.memo(({ task }) => {
     const navigate = useNavigate();
     const { projectId } = useParams<{ projectId: string }>();
 
-    // Create a ref for the drag element
-    const cardRef = useRef<HTMLDivElement>(null);
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        isDragging,
+    } = useDraggable({
+        id: task.id,
+        data: {
+            type: 'task',
+            status: task.status,
+            task: task
+        }
+    });
 
-    // Make this card draggable
-    const [{ isDragging }, dragRef] = useDrag(() => ({
-        type: ITEM_TYPE, // what kind of item it is
-        item: () => {
-            setDraggedTask(task);  // Set the dragged task when drag starts
-            return { taskId: task.id };  // Return the drag data
-        },
-        end: () => {
-            setDraggedTask(null);  // Reset when drag ends
-        },
-        collect: (monitor) => ({
-            isDragging: !!monitor.isDragging(),
-        }),
-    }));
-
-    dragRef(cardRef); // connect drag behavior to this card
+    const style = {
+        transform: isDragging ? undefined : CSS.Translate.toString(transform),
+    };
 
     const getPriorityBadge = (priority: string) => {
         const colors = {
@@ -53,15 +43,23 @@ const DraggableTaskCard: React.FC<Props> = React.memo(({ task, setDraggedTask })
 
     return (
         <div
-            ref={cardRef}
+            ref={setNodeRef}
+            style={style}
+            {...attributes}
+            {...listeners}
             onClick={(e) => {
                 e.stopPropagation();
                 navigate(`/projects/${projectId}/tasks/${task.id}`);
             }}
-            className={`p-4 bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md cursor-pointer transition-all duration-200 border border-gray-100 dark:border-gray-700 hover:border-indigo-200 dark:hover:border-indigo-500/50 ${isDragging ? 'opacity-50' : 'opacity-100'}`}
+            className={`p-4 bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md cursor-grab active:cursor-grabbing transition-all duration-200 border border-gray-100 dark:border-gray-700 hover:border-indigo-200 dark:hover:border-indigo-500/50 ${isDragging ? 'opacity-40' : 'opacity-100'
+                }`}
         >
             <h4 className="font-medium text-gray-900 dark:text-gray-100">{task.title}</h4>
-            {task.description && <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">{task.description}</p>}
+            {task.description && (
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">
+                    {task.description}
+                </p>
+            )}
 
             <div className="flex items-center justify-between mt-3">
                 {task.due_date && (

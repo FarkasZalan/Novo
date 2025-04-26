@@ -1,71 +1,34 @@
-import React, { useRef } from 'react';
-import { useDrop } from 'react-dnd';
-import DraggableTaskCard from './DraggableTaskCard';
+import React from 'react';
 import { FaPlus } from 'react-icons/fa';
 import { Task } from '../../../../../types/task';
 import { motion } from 'framer-motion';
-
-const ITEM_TYPE = 'TASK';
+import { useDroppable } from '@dnd-kit/core';
+import DraggableTaskCard from './DraggableTaskCard';
 
 interface Props {
     statusKey: string;
     statusInfo: { label: string; icon: React.ReactNode; color: string };
     tasks: Task[];
     onAddTask: (status: string) => void;
-    onTaskUpdate: (taskId: string, newStatus: string) => Promise<void>;
-    draggedTask: Task | null;
-    setDraggedTask: (task: Task | null) => void;
     canManageTasks: boolean;
+    activeTask: Task | null;
 }
 
-// Droppable Column Component representing a task status column
 const StatusColumn: React.FC<Props> = React.memo(({
     statusKey,
     statusInfo,
     tasks,
     onAddTask,
-    onTaskUpdate,
-    draggedTask,
-    setDraggedTask,
-    canManageTasks
+    canManageTasks,
+    activeTask
 }) => {
-    // Create a ref for the column element
-    const columnRef = useRef<HTMLDivElement>(null);
-
-    // Enable this column as a drop target
-    const [{ isOver }, dropRef] = useDrop(() => ({
-        // Accept only tasks
-        accept: ITEM_TYPE,
-
-        // called when task is dropped -> it's triggers the task update
-        drop: (item: { taskId: string }) => {
-            onTaskUpdate(item.taskId, statusKey);
-        },
-
-        // just a flag (isOver) so change the style while hovering
-        collect: (monitor) => ({
-            isOver: !!monitor.isOver(),
-        }),
-    }));
-
-    // Apply the drop ref to our element ref
-    dropRef(columnRef);
-
-    const taskCards = React.useMemo(() => {
-        return tasks.map((task) => (
-            <motion.div
-                key={task.id}
-                layout
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.2 }}
-            >
-                <DraggableTaskCard
-                    task={task}
-                    setDraggedTask={setDraggedTask}
-                />
-            </motion.div>
-        ));
-    }, [tasks, onTaskUpdate, setDraggedTask]);
+    const { setNodeRef, isOver } = useDroppable({
+        id: statusKey,
+        data: {
+            type: 'column',
+            status: statusKey
+        }
+    });
 
     return (
         <div className="flex flex-col">
@@ -80,7 +43,7 @@ const StatusColumn: React.FC<Props> = React.memo(({
             </div>
 
             <motion.div
-                ref={columnRef}
+                ref={setNodeRef}
                 className={`flex-1 rounded-xl p-4 ${statusInfo.color} min-h-64 transition-all duration-200`}
                 animate={{
                     scale: isOver ? 1.02 : 1,
@@ -101,15 +64,24 @@ const StatusColumn: React.FC<Props> = React.memo(({
                         </motion.button>
                     )}
 
-                    {taskCards}
-
-                    {isOver && (
+                    {isOver && activeTask?.status !== statusKey && (
                         <div className="rounded-xl bg-white dark:bg-gray-700/50 border-2 border-dashed border-indigo-400 p-4 mb-3">
                             <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
-                                {draggedTask ? `Move "${draggedTask.title}" here` : "Drop here"}
+                                Move "{activeTask?.title}" to {statusInfo.label}
                             </p>
                         </div>
                     )}
+
+                    {tasks.map((task) => (
+                        <motion.div
+                            key={task.id}
+                            layout
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.2 }}
+                        >
+                            <DraggableTaskCard task={task} />
+                        </motion.div>
+                    ))}
                 </div>
             </motion.div>
         </div>
