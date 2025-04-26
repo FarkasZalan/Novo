@@ -130,7 +130,7 @@ export const TaskBoard: React.FC<TaskBoardProps> = React.memo(({ tasks, onTaskUp
                         tasks={tasks.filter(t => t.status === statusKey)}
                         onAddTask={handleAddTask}
                         canManageTasks={canManageTasks}
-                        activeTask={activeTask} // Pass activeTask here
+                        activeTask={activeTask}
                     />
                 ))}
             </motion.div>

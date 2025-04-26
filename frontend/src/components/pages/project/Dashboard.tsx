@@ -37,8 +37,6 @@ export const Dashboard = () => {
                 setLoading(true);
                 const projects: Project[] = await fetchProjects(authState.accessToken!);
 
-                console.log(projects);
-
                 setProjects(projects);
             } catch (err) {
                 setError("Failed to load projects");

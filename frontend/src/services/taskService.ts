@@ -71,7 +71,6 @@ export const updateTask = async (taskId: string, procejt_Id: string, token: stri
 
 export const updateTaskStatus = async (taskId: string, projectId: string, token: string, status: string) => {
     try {
-        console.log(status)
         const response = await axios.put(`${API_URL}/project/${projectId}/task/${taskId}/status`, {
             status
         }, {
