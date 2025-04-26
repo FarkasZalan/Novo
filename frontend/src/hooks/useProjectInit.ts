@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { fetchProjectById } from "../services/projectService";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "./useAuth";
 
 export const useProject = (projectId: string) => {
     const [project, setProject] = useState<Project | null>(null);

@@ -2,7 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
 import { FaUser, FaEnvelope, FaSignInAlt, FaPlus, FaHome } from "react-icons/fa";
 import { DarkModeToggle } from "../utils/DarkModeToggle";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../hooks/useAuth";
 
 export const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);

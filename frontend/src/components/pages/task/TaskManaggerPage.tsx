@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FaArrowLeft, FaFlag, FaList, FaPlus, FaThLarge } from 'react-icons/fa';
-import { useAuth } from '../../../context/AuthContext';
 import { fetchAllTasksForProject } from '../../../services/taskService';
 import { TaskBoard } from './taskComponents/board/TaskBoard';
 import { TaskList } from './taskComponents/TaskList';
 import { fetchProjectById } from '../../../services/projectService';
 import { Milestones } from './taskComponents/Milestones';
 import { getProjectMembers } from '../../../services/projectMemberService';
+import { useAuth } from '../../../hooks/useAuth';
 
 // Define Task interface to improve type safety
 interface Task {

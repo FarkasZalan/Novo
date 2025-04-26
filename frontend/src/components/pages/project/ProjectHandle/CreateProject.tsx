@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaPlus, FaTimes } from "react-icons/fa";
-import { useAuth } from "../../../../context/AuthContext";
 import { createProject } from "../../../../services/projectService";
+import { useAuth } from "../../../../hooks/useAuth";
 
 export const CreateProject = () => {
     const { authState } = useAuth();

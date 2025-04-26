@@ -13,11 +13,11 @@ import {
     FaSignOutAlt
 } from "react-icons/fa";
 import { useEffect, useState } from "react";
-import { useAuth } from "../../../context/AuthContext";
 import { fetchProjects } from "../../../services/projectService";
 import { ConfirmationDialog } from "./ConfirmationDialog";
 import toast from "react-hot-toast";
 import { leaveProject } from "../../../services/projectMemberService";
+import { useAuth } from "../../../hooks/useAuth";
 
 export const Dashboard = () => {
     const { authState } = useAuth();

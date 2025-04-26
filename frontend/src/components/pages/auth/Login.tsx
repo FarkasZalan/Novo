@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FaEnvelope, FaLock, FaGoogle, FaGithub } from "react-icons/fa";
 import { initiateGithubLogin, initiateGoogleLogin, login, resendVerificationEmail } from "../../../services/authService";
-import { useAuth } from "../../../context/AuthContext";
+import { useAuth } from "../../../hooks/useAuth";
 
 export const Login = () => {
     const location = useLocation();

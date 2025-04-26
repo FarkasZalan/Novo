@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { FaClock, FaCheckCircle, FaCircle } from 'react-icons/fa';
-import { useAuth } from '../../../../../context/AuthContext';
 import toast from 'react-hot-toast';
 import { Task } from '../../../../../types/task';
 import StatusColumn from './StatusColumn';
@@ -21,6 +20,7 @@ import {
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { updateTaskStatus } from '../../../../../services/taskService';
 import { isPast, isToday, isTomorrow } from 'date-fns';
+import { useAuth } from '../../../../../hooks/useAuth';
 
 // status column styles
 const statusLabels: Record<string, { label: string, icon: React.ReactNode, color: string }> = {

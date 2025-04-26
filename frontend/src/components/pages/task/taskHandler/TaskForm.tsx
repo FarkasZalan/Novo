@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { useAuth } from '../../../../context/AuthContext';
 import { createTask, deleteTask, fetchAllTasksForProject, updateTask } from '../../../../services/taskService';
 import { FaCalendarAlt, FaArrowLeft, FaSave, FaTimes, FaTrash, FaExclamationTriangle } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 import { ConfirmationDialog } from '../../project/ConfirmationDialog';
+import { useAuth } from '../../../../hooks/useAuth';
 
 export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
     const { projectId, taskId } = useParams<{ projectId: string; taskId: string }>();

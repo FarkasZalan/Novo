@@ -1,8 +1,8 @@
 import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useAuth } from "../../../context/AuthContext";
 import { fetchOAuthState } from "../../../services/authService";
 import { FaSpinner } from "react-icons/fa";
+import { useAuth } from "../../../hooks/useAuth";
 
 // Recive the OAuth state data from the backend and update the auth state and redirect to the home page
 export const OAuthCallback = () => {

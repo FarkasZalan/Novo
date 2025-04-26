@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { FaUser, FaEnvelope, FaLock, FaSave, FaTimes, FaGoogle, FaGithub } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../../context/AuthContext";
+import { useAuth } from "../../../hooks/useAuth";
 import { updateUser } from "../../../services/userService";
 
 export const ProfileSettings = () => {

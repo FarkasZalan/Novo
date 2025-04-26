@@ -9,7 +9,6 @@ import { PrivacyPolicy } from "./components/pages/Privacy";
 import { TermsOfService } from "./components/pages/TermsOfService";
 import { About } from "./components/pages/About";
 import { ScrollToTop } from "./components/utils/ScrollToTop";
-import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ProtectedRoute } from "./components/routes/ProtectedRoute";
 import { PublicRoute } from "./components/routes/PublicRoute";
 import { ProfileSettings } from "./components/pages/user/ProfileSettings";
@@ -29,6 +28,8 @@ import { TasksManagerPage } from "./components/pages/task/TaskManaggerPage";
 import { UpdateTaskPage } from "./components/pages/task/taskHandler/UpdateTaskPage";
 import { TaskDetails } from "./components/pages/task/taskComponents/TaskDetails";
 import { ProtectedProjectForTaskManagement } from "./components/routes/TaskAdminOrOwnerRoute";
+import { useAuth } from "./hooks/useAuth";
+import { AuthProvider } from "./context/AuthProvider";
 
 function RootRedirect() {
   const { isAuthenticated } = useAuth();

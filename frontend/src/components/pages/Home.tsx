@@ -8,7 +8,7 @@ import {
     FaRocket
 } from "react-icons/fa";
 import { useState } from "react";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../hooks/useAuth";
 
 export const Home = () => {
     const [currentWord, setCurrentWord] = useState('');

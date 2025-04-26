@@ -2,10 +2,10 @@ import { useState, useEffect, useRef } from "react";
 import { FaTrash, FaDownload, FaUpload, FaTimes, FaCheck } from "react-icons/fa";
 import { useParams } from "react-router-dom";
 import toast from "react-hot-toast";
-import { useAuth } from "../../../../context/AuthContext";
 import { fetchProjectFiles, uploadProjectFile, deleteProjectFile, downloadProjectFile } from "../../../../services/fileService";
 import { getProjectMembers } from "../../../../services/projectMemberService";
 import { ConfirmationDialog } from "../ConfirmationDialog";
+import { useAuth } from "../../../../hooks/useAuth";
 
 interface ProjectFile {
     id: string;

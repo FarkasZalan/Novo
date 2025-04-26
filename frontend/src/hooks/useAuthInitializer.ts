@@ -1,16 +1,12 @@
 import { useEffect, useState } from 'react';
 import { refreshToken } from '../services/authService';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from './useAuth';
 
-// Custom hook to initialize authentication state when the app loads
-// checks for stored authentication data in localStorage
-// if found, it sets the auth state and tries to refresh the token in the background
-// if not found, it tries to refresh the access token and sets the auth state
-// if refresh fails, it logs out
+// intilaize the user's authentication state when the app first loads, try to restore the user session (use in AuthProvider.tsx)
 export const useAuthInitializer = (
     setAuthState: (authState: AuthState) => void
 ) => {
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(true); // create a loading state until initialization is complete
     const { logout } = useAuth();
 
     useEffect(() => {
@@ -24,11 +20,11 @@ export const useAuthInitializer = (
                     // Set the auth state from localStorage first
                     setAuthState(parsed);
 
-                    // Then try to refresh in background
+                    // Then try to refresh the token on the backend
                     try {
                         const data = await refreshToken();
 
-                        // Update the auth state with the refreshed data
+                        // if refresh succeeds, set the auth state with the refreshed data
                         setAuthState({
                             user: data.user,
                             accessToken: data.accessToken
@@ -41,17 +37,17 @@ export const useAuthInitializer = (
                         }));
                     } catch (refreshError) {
                         console.error('Token refresh failed during initialization:', refreshError);
-                        // Check if the error is due to an expired refresh token
+                        // Check if the error is due to an expired or invalid refresh token
                         if ((refreshError as any).status === 403) {
-                            // If the refresh token is expired, we need to logout
+                            // If the refresh token is expired or invalid, we need to logout
                             await logout();
                         } else {
                             // For other errors, keep using the stored credentials
-                            console.log("Using stored credentials despite refresh failure");
+                            console.error("Network error during initialization:", refreshError);
                         }
                     }
                 } else {
-                    // No stored credentials, try fresh refresh
+                    // No stored credentials in the localStorage, try fresh refresh (maybe user have refresh token in cookies)
                     try {
                         const data = await refreshToken();
 
@@ -83,5 +79,5 @@ export const useAuthInitializer = (
         init();
     }, [setAuthState, logout]);
 
-    return isLoading;
+    return isLoading; // return the loading state (true/false) depending on whether initialization is complete so until display the loading screen
 };

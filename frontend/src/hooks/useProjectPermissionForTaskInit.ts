@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { fetchProjectById } from "../services/projectService";
 import { getProjectMembers } from "../services/projectMemberService";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "./useAuth";
 
 // for task managemenet (create, edit)
 export const useProjectPermissions = (projectId: string) => {

@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { FaUser, FaEnvelope, FaCog, FaCalendarAlt, FaSignOutAlt, FaTasks, FaExclamationTriangle, FaTrash, FaCrown, FaCheck, FaTimes } from "react-icons/fa";
-import { useAuth } from "../../../context/AuthContext";
+import { useAuth } from "../../../hooks/useAuth";
 import { useState } from "react";
 import { deleteAccount } from "../../../services/userService";
 

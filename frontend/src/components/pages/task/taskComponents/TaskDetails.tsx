@@ -14,9 +14,9 @@ import {
     FaPaperclip
 } from 'react-icons/fa';
 import { fetchTask } from '../../../../services/taskService';
-import { useAuth } from '../../../../context/AuthContext';
 import { fetchProjectById } from '../../../../services/projectService';
 import { getProjectMembers } from '../../../../services/projectMemberService';
+import { useAuth } from '../../../../hooks/useAuth';
 
 export const TaskDetails: React.FC = () => {
     const { taskId, projectId } = useParams<{ taskId: string; projectId: string }>();

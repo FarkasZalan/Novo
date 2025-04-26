@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { FaUserPlus, FaExclamationTriangle, FaSearch, FaTimes, FaPlus, FaUser } from "react-icons/fa";
 import { fetchAllRegisteredUsers } from "../../../../../services/userService";
 import { addMembersToProject, getProjectMembers } from "../../../../../services/projectMemberService";
-import { useAuth } from "../../../../../context/AuthContext";
+import { useAuth } from "../../../../../hooks/useAuth";
 
 interface User {
     id: string;

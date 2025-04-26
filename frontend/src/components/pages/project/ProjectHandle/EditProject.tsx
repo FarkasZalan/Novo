@@ -7,8 +7,8 @@ import {
     FaExclamationTriangle,
     FaCheck,
 } from "react-icons/fa";
-import { useAuth } from "../../../../context/AuthContext";
 import { updateProject, deleteProject, fetchProjectById } from "../../../../services/projectService";
+import { useAuth } from "../../../../hooks/useAuth";
 
 interface Project {
     id: string;

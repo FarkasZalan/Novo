@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { FaTasks, FaChevronRight, FaPlus } from "react-icons/fa";
-import { useAuth } from "../../../../context/AuthContext";
 import { fetchAllTasksForProject } from "../../../../services/taskService";
 import { fetchProjectById } from "../../../../services/projectService";
 import { getProjectMembers } from "../../../../services/projectMemberService";
 import { isPast, isToday, isTomorrow } from "date-fns";
+import { useAuth } from "../../../../hooks/useAuth";
 
 export const TasksTab = () => {
     const { projectId } = useParams<{ projectId: string }>();
