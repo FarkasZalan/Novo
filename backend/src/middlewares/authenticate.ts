@@ -41,8 +41,12 @@ export const refreshAccessToken = async (req: Request, res: Response, next: Next
     try {
         const refreshToken = req.cookies.refresh_token; // Get refresh token from cookie
         if (!refreshToken) {
-            console.log('No refresh token found in cookies');
-            res.status(401).json({ message: "Refresh token not found" });
+            console.error('No refresh token found in cookies');
+            res.status(400).json({
+                message: "No refresh token found in cookies",
+                code: "NO_REFRESH_TOKEN" // Add specific error code
+            });
+            return;
             return;
         }
 
@@ -51,9 +55,10 @@ export const refreshAccessToken = async (req: Request, res: Response, next: Next
         try {
             decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET as string);
         } catch (jwtError) {
-            console.error('JWT verification error:', jwtError);
-            res.status(403).json({ message: "Invalid refresh token" });
-            return;
+            res.status(400).json({
+                message: "Invalid refresh token",
+                code: "INVALID_REFRESH_TOKEN"
+            });
         }
 
         // Check if the decoded token has the required properties
@@ -98,7 +103,9 @@ export const refreshAccessToken = async (req: Request, res: Response, next: Next
             user
         });
     } catch (error) {
-        console.error('Refresh token error:', error);
-        res.status(403).json({ message: "Invalid refresh token" });
+        res.status(400).json({
+            message: "Invalid refresh token",
+            code: "INVALID_REFRESH_TOKEN"
+        });
     }
 };

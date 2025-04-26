@@ -226,6 +226,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             async (error) => {
                 const originalRequest = error.config;
 
+                // Check for specific error codes that shouldn't trigger refresh
+                const noRefreshTokenError = error.response?.data?.code === "NO_REFRESH_TOKEN";
+                const invalidRefreshTokenError = error.response?.data?.code === "INVALID_REFRESH_TOKEN";
+
+                // if there are no refresh token or the session id in invalid then don't trigger to try again just log out
+                if (noRefreshTokenError || invalidRefreshTokenError) {
+                    await logout();
+                    return Promise.reject(error);
+                }
+
                 // Check if the error is due to an expired token (401) or invalid token (403)
                 const isTokenError = error.response?.status === 401 || error.response?.status === 403;
                 const hasNotRetried = !originalRequest._retry;

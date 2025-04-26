@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { NextFunction } from "connect";
-import { createFileQuery, deleteFileQuery, downloadFileQuery, getAllFilesQuery, getFileByIdQuery } from "../models/filesModel";
+import { uploadFileForProjectQuery, deleteFileQuery, downloadFileQuery, getAllFilesForTaskQuery, getAllFilesQuery, getFileByIdQuery, uploadFileForTaskQuery } from "../models/filesModel";
 import { getProjectByIdQuery } from "../models/projectModel";
 
 interface File {
@@ -23,6 +23,7 @@ const handleResponse = (res: Response, status: number, message: string, data: an
     });
 };
 
+// project files controller functions
 export const getFilesForProject = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const project = await getProjectByIdQuery(req.params.projectId);
@@ -39,7 +40,7 @@ export const getFilesForProject = async (req: Request, res: Response, next: Next
     }
 };
 
-export const createFile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const uploadProjectFile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const projectId = req.params.projectId;
         const { uploaded_by } = req.body;
@@ -56,7 +57,7 @@ export const createFile = async (req: Request, res: Response, next: NextFunction
             return;
         }
 
-        const newFile = await createFileQuery(projectId, file.originalname, file.mimetype, file.size, uploaded_by, file.buffer);
+        const newFile = await uploadFileForProjectQuery(projectId, file.originalname, file.mimetype, file.size, uploaded_by, file.buffer);
 
         handleResponse(res, 201, "File uploaded and saved to DB", newFile);
     } catch (err) {
@@ -64,6 +65,66 @@ export const createFile = async (req: Request, res: Response, next: NextFunction
     }
 };
 
+// task files controller functions
+export const getAllFilesForTask = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const project = await getProjectByIdQuery(req.params.projectId);
+
+        if (!project) {
+            handleResponse(res, 404, "Project not found", null);
+            return;
+        }
+
+        const task = await getFileByIdQuery(req.params.taskId);
+
+        if (!task) {
+            handleResponse(res, 404, "Task not found", null);
+            return;
+        }
+        const taskId = req.params.taskId;
+        const files = await getAllFilesForTaskQuery(taskId);
+
+        handleResponse(res, 200, "Files fetched successfully", files);
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const uploadTaskFile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const projectId = req.params.projectId;
+        const task_id = req.params.taskId;
+        const { uploaded_by } = req.body;
+        const file = req.file;
+
+        if (!file) {
+            handleResponse(res, 400, "No file uploaded", null);
+            return;
+        }
+
+        const project = await getProjectByIdQuery(projectId);
+        if (!project) {
+            handleResponse(res, 404, "Project not found", null);
+            return;
+        }
+
+        const task = await getFileByIdQuery(task_id);
+
+        if (!task) {
+            handleResponse(res, 404, "Task not found", null);
+            return;
+        }
+
+        const newFile = await uploadFileForTaskQuery(projectId, file.originalname, file.mimetype, file.size, uploaded_by, task_id, file.buffer);
+
+        handleResponse(res, 201, "File uploaded and saved to DB", newFile);
+    } catch (err) {
+        next(err);
+    }
+};
+
+
+// basic file controller functions
 export const downloadFile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const fileId = req.params.fileId;
@@ -85,7 +146,7 @@ export const downloadFile = async (req: Request, res: Response, next: NextFuncti
     }
 }
 
-export const deleteFile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const deleteFileFromProject = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const projectId = req.params.projectId;
         const fileId = req.params.fileId;

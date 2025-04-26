@@ -39,7 +39,6 @@ export const OAuthCallback = () => {
                     console.log("Redirecting to dashboard...");
                 }, 100);
             } catch (err) {
-                console.error("OAuth callback error:", err);
                 navigate("/login", { state: { error: "OAuth authentication failed" } });
             }
         };

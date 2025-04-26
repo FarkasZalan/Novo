@@ -1,6 +1,6 @@
 import { addUsersToProject, getAllProjectMembers, updateProjectMemberRole, removeUserFromProject, leaveProject, resendProjectInvite } from "../controller/projectMembersController";
 import { authenticateToken } from "../middlewares/authenticate";
-import { authorizeProject } from "../middlewares/authorization";
+import { authorizeProject, authorizeProjectForOwnerAndAdmin } from "../middlewares/authorization";
 import express from "express";
 
 const router = express.Router();
@@ -46,16 +46,16 @@ const router = express.Router();
  *       400:
  *         description: Bad request
  */
-router.post("/project/:projectId/add-members", authenticateToken, authorizeProject, addUsersToProject);
+router.post("/project/:projectId/add-members", authenticateToken, authorizeProjectForOwnerAndAdmin, addUsersToProject);
 
 router.get("/project/:projectId/members", authenticateToken, authorizeProject, getAllProjectMembers);
 
-router.put("/project/:projectId/members/", authenticateToken, authorizeProject, updateProjectMemberRole);
+router.put("/project/:projectId/members/", authenticateToken, authorizeProjectForOwnerAndAdmin, updateProjectMemberRole);
 
-router.delete("/project/:projectId/members/", authenticateToken, authorizeProject, removeUserFromProject);
+router.delete("/project/:projectId/members/", authenticateToken, authorizeProjectForOwnerAndAdmin, removeUserFromProject);
 
 router.delete("/project/:projectId/members/leave", authenticateToken, authorizeProject, leaveProject);
 
-router.post("/project/:projectId/members/re-invite", authenticateToken, authorizeProject, resendProjectInvite);
+router.post("/project/:projectId/members/re-invite", authenticateToken, authorizeProjectForOwnerAndAdmin, resendProjectInvite);
 
 export default router;

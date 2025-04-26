@@ -3,7 +3,7 @@ import { FaTrash, FaDownload, FaUpload, FaTimes, FaCheck } from "react-icons/fa"
 import { useParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useAuth } from "../../../../context/AuthContext";
-import { fetchProjectFiles, createProjectFile, deleteProjectFile, downloadProjectFile } from "../../../../services/projectFilesService";
+import { fetchProjectFiles, uploadProjectFile, deleteProjectFile, downloadProjectFile } from "../../../../services/fileService";
 import { getProjectMembers } from "../../../../services/projectMemberService";
 import { ConfirmationDialog } from "../ConfirmationDialog";
 
@@ -152,7 +152,7 @@ export const FilesTab = () => {
 
         // Kick off one upload promise per file
         const uploadPromises = selectedFiles.map(file =>
-            createProjectFile(projectId, authState.accessToken!, file, authState.user!.id)
+            uploadProjectFile(projectId, authState.accessToken!, file, authState.user!.id)
                 .then(res => ({ status: "fulfilled" as const, file, value: res }))
                 .catch(err => ({ status: "rejected" as const, file, reason: err }))
         );
@@ -169,7 +169,7 @@ export const FilesTab = () => {
                 // Axios‑style error; adjust if you use fetch
                 const status = err.response?.status;
                 if (status === 413) {
-                    toast.error(`“${result.file.name}” is too large (max 10 MB).`);
+                    toast.error(`“${result.file.name}” is too large (max 10 MB).`);
                 } else {
                     toast.error(`Failed to upload “${result.file.name}”.`);
                     console.error(err);

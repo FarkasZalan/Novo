@@ -130,7 +130,6 @@ export const fetchOAuthState = async (stateToken: string) => {
         });
         return response.data;
     } catch (error) {
-        console.error("OAuth state fetch error:", error);
         throw error;
     }
 };
