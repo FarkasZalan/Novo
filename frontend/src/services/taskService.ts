@@ -28,7 +28,7 @@ export const createTask = async (projectId: string, token: string, title: string
                 Authorization: `Bearer ${token}`
             }
         });
-        return response.data;
+        return response.data.data;
     } catch (error) {
         console.error("Error creating task:", error);
         throw error;
@@ -62,7 +62,7 @@ export const updateTask = async (taskId: string, procejt_Id: string, token: stri
                 Authorization: `Bearer ${token}`
             }
         });
-        return response.data;
+        return response.data.data;
     } catch (error) {
         console.error("Error updating task:", error);
         throw error;

@@ -1,4 +1,4 @@
-import { getFilesForProject, deleteFileFromProject, uploadProjectFile, downloadFile, getAllFilesForTask, uploadTaskFile } from "../controller/filesController";
+import { getFilesForProject, deleteFileFromProject, uploadProjectFile, downloadFile, getAllFilesForTask, uploadTaskFile, deleteFileFromTask } from "../controller/filesController";
 import { authenticateToken } from "../middlewares/authenticate";
 import { authorizeProject, authorizeProjectForOwnerAndAdmin, authorizeTask, authorizeTaskForOwnerAndAdmin } from "../middlewares/authorization";
 import express from "express";
@@ -22,6 +22,6 @@ router.post("/project/:projectId/task/:taskId/files", authenticateToken, authori
 
 router.get("/project/:projectId/task/:taskId/files/:fileId", authenticateToken, authorizeProject, downloadFile);
 
-router.delete("/project/:projectId/task/:taskId/files/:fileId", authenticateToken, authorizeTaskForOwnerAndAdmin, deleteFileFromProject);
+router.delete("/project/:projectId/task/:taskId/files/:fileId", authenticateToken, authorizeTaskForOwnerAndAdmin, deleteFileFromTask);
 
 export default router;

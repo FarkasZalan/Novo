@@ -5,6 +5,8 @@ import { FaCalendarAlt, FaArrowLeft, FaSave, FaTimes, FaTrash, FaExclamationTria
 import toast from 'react-hot-toast';
 import { ConfirmationDialog } from '../../project/ConfirmationDialog';
 import { useAuth } from '../../../../hooks/useAuth';
+import { TaskFiles } from './TaskFiles';
+import { uploadTaskFile } from '../../../../services/fileService';
 
 export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
     const { projectId, taskId } = useParams<{ projectId: string; taskId: string }>();
@@ -13,6 +15,10 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
     const navigate = useNavigate();
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const taskStatus = statusParam.get('status') || 'not-started';
+
+    // for file upload
+    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes
+    const [hasOversizedFiles, setHasOversizedFiles] = useState(false);
 
     const [formData, setFormData] = useState({
         title: '',
@@ -23,8 +29,11 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
         completed: false
     });
 
-    const [loading, setLoading] = useState(false);
+    const [isLoading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    // files states
+    const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
     useEffect(() => {
         if (isEdit && projectId && taskId) {
@@ -59,8 +68,9 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
 
             const { title, description, dueDate, priority, status } = formData;
 
+            let resultTask;
             if (isEdit && taskId) {
-                await updateTask(
+                resultTask = await updateTask(
                     taskId,
                     projectId!,
                     authState.accessToken!,
@@ -71,9 +81,12 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
                     status
                 );
 
+                if (selectedFiles.length > 0) {
+                    await handleFileUpload(resultTask.id);
+                }
                 toast.success('Task updated successfully');
             } else {
-                await createTask(
+                resultTask = await createTask(
                     projectId!,
                     authState.accessToken!,
                     title,
@@ -83,9 +96,12 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
                     status
                 );
 
+                if (selectedFiles.length > 0) {
+                    await handleFileUpload(resultTask.id);
+                }
                 toast.success('Task created successfully');
             }
-            navigate(`/projects/${projectId}/tasks`, { replace: true });
+            navigate(-1);
         } catch (err) {
             console.error(err);
             setError('Failed to save task. Please try again.');
@@ -93,6 +109,71 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
             setLoading(false);
         }
     };
+
+    const handleFileUpload = async (taskId: string) => {
+        if (hasOversizedFiles) {
+            toast.error("Cannot upload - some files exceed size limit");
+            return;
+        }
+        // Filter out files that are too large
+        const validFiles = selectedFiles.filter(file => file.size <= MAX_FILE_SIZE);
+
+        if (validFiles.length === 0 || !projectId || !taskId || !authState.accessToken) {
+            if (selectedFiles.some(file => file.size > MAX_FILE_SIZE)) {
+                toast.error("Some files exceed the 10MB limit and cannot be uploaded");
+            }
+            return;
+        }
+
+        setLoading(true);
+
+        // Kick off one upload promise per file
+        const uploadPromises = validFiles.map(file =>
+            uploadTaskFile(projectId, taskId, authState.accessToken!, file, authState.user!.id)
+                .then(res => ({ status: "fulfilled" as const, file, value: res }))
+                .catch(err => ({ status: "rejected" as const, file, reason: err }))
+        );
+
+        // Wait for all of them
+        const results = await Promise.all(uploadPromises);
+
+        const successfulUploads: TaskFile[] = [];
+        results.forEach(result => {
+            if (result.status === "fulfilled") {
+                successfulUploads.push(result.value);
+            } else {
+                const err = result.reason;
+                const status = err.response?.status;
+                if (status === 413) {
+                    toast.error(`“${result.file.name}” is too large (max 10 MB).`);
+                } else {
+                    toast.error(`Failed to upload “${result.file.name}”.`);
+                    console.error(err);
+                }
+            }
+        });
+
+        // Update UI
+        if (successfulUploads.length > 0) {
+            toast.success(`${successfulUploads.length} file(s) uploaded successfully!`);
+        }
+
+        // Reset
+        setSelectedFiles([]);
+        setLoading(false);
+    };
+
+    useEffect(() => {
+        const oversized = selectedFiles.some(file => file.size > MAX_FILE_SIZE);
+        setHasOversizedFiles(oversized);
+
+        if (oversized) {
+            toast.error("Some files exceed the 10MB limit", {
+                id: 'oversized-files-warning',
+                duration: 4000
+            });
+        }
+    }, [selectedFiles]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -115,14 +196,6 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
             setLoading(false);
         }
     };
-
-    if (loading && isEdit) {
-        return (
-            <div className="flex justify-center items-center h-64">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 dark:border-indigo-400"></div>
-            </div>
-        );
-    }
 
     return (
         <div className="max-w-3xl mx-auto">
@@ -233,6 +306,14 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
                             </div>
                         )}
                     </div>
+
+                    <div>
+                        <TaskFiles
+                            canManageFiles={true}
+                            selectedFiles={selectedFiles}
+                            setSelectedFiles={setSelectedFiles}
+                        />
+                    </div>
                 </div>
 
                 {/* Action Buttons */}
@@ -240,9 +321,28 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
                     <button type="button" onClick={() => navigate(-1)} className="px-4 cursor-pointer py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center">
                         <FaTimes className="mr-2" /> Cancel
                     </button>
-                    <button type="submit" disabled={loading} className="px-6 cursor-pointer py-2 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white rounded-lg font-medium shadow-sm flex items-center justify-center disabled:opacity-70">
-                        {loading ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div> : <FaSave className="mr-2" />}
-                        {isEdit ? 'Update Task' : 'Create Task'}
+                    <button
+                        type="submit"
+                        disabled={isLoading || hasOversizedFiles}
+                        className={`px-6 py-2 rounded-lg font-medium shadow-sm flex items-center justify-center ${isLoading || hasOversizedFiles ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer'
+                            } ${hasOversizedFiles ?
+                                'bg-gray-500 dark:bg-gray-600 text-white' :
+                                'bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white'
+                            }`}
+                    >
+                        {isLoading ? (
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        ) : hasOversizedFiles ? (
+                            <>
+                                <FaExclamationTriangle className="mr-2 text-yellow-300" />
+                                Remove oversized files to continue
+                            </>
+                        ) : (
+                            <>
+                                <FaSave className="mr-2" />
+                                {isEdit ? 'Update Task' : 'Create Task'}
+                            </>
+                        )}
                     </button>
                 </div>
             </form>
@@ -264,7 +364,7 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
                             <button
                                 onClick={() => setShowDeleteConfirm(true)}
                                 className="px-4 py-2 bg-red-600 hover:bg-red-700 cursor-pointer dark:bg-red-700 dark:hover:bg-red-800 text-white rounded-lg font-medium flex items-center transition-colors"
-                                disabled={loading}
+                                disabled={isLoading}
                             >
                                 <FaTrash className="mr-2" /> Delete Task
                             </button>

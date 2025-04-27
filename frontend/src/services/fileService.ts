@@ -86,6 +86,7 @@ export const uploadTaskFile = async (projectId: string, taskId: string, token: s
         const formData = new FormData();
         formData.append('file', file);
         formData.append('uploaded_by', uploaded_by);
+        formData.append('task_id', taskId);
 
         const response = await axios.post(`${API_URL}/project/${projectId}/task/${taskId}/files`, formData, {
             headers: {
@@ -119,6 +120,7 @@ export const downloadTaskFile = async (fileId: string, procejtId: string, taskId
 
 export const deletetaskFile = async (projectId: string, taskId: string, fileId: string, token: string) => {
     try {
+        console.log(projectId, taskId, fileId, token)
         const response = await axios.delete(`${API_URL}/project/${projectId}/task/${taskId}/files/${fileId}`, {
             headers: {
                 Authorization: `Bearer ${token}`

@@ -1,48 +1,38 @@
-import { useState, useEffect, useRef } from "react";
-import { FaTrash, FaDownload, FaUpload, FaCheck, FaExclamationTriangle } from "react-icons/fa";
+import React, { useState, useEffect, useRef } from "react";
+import { FaTrash, FaDownload, FaUpload, FaPaperclip } from "react-icons/fa";
 import { useParams } from "react-router-dom";
 import toast from "react-hot-toast";
-import { fetchProjectFiles, uploadProjectFile, deleteProjectFile, downloadProjectFile } from "../../../../services/fileService";
-import { getProjectMembers } from "../../../../services/projectMemberService";
-import { ConfirmationDialog } from "../ConfirmationDialog";
+import { fetcTaskFiles, downloadTaskFile, deletetaskFile } from "../../../../services/fileService";
 import { useAuth } from "../../../../hooks/useAuth";
+import { ConfirmationDialog } from "../../project/ConfirmationDialog";
 
-interface ProjectFile {
-    id: string;
-    file_name: string;
-    file_path: string;
-    mime_type: string;
-    size: number;
-    uploaded_by_name: string;
-    uploaded_by_email: string;
-    created_at: string;
+
+interface TaskFilesProps {
+    canManageFiles: boolean;
+    selectedFiles?: File[];
+    setSelectedFiles?: React.Dispatch<React.SetStateAction<File[]>>;
 }
 
-export const FilesTab = () => {
+
+export const TaskFiles: React.FC<TaskFilesProps> = React.memo(({ canManageFiles, selectedFiles, setSelectedFiles }) => {
     const { projectId } = useParams<{ projectId: string }>();
+    const { taskId } = useParams<{ taskId: string }>();
     const { authState } = useAuth();
-    const [files, setFiles] = useState<ProjectFile[]>([]);
+    const [files, setFiles] = useState<TaskFile[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-    const [isUploading, setIsUploading] = useState(false);
     const [isDragging, setIsDragging] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const dropZoneRef = useRef<HTMLDivElement>(null);
-    const [userRole, setUserRole] = useState<string | null>(null);
-    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [showTaskDeleteConfirm, setShowTaskDeleteConfirm] = useState(false);
     const [fileToDelete, setFileToDelete] = useState<string | null>(null);
-
-    // Check if user has permission to manage files (owner or admin)
-    const canManageFiles = userRole === "owner" || userRole === "admin";
     const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes
-    const [hasOversizedFiles, setHasOversizedFiles] = useState(false);
 
     const loadFiles = async () => {
         try {
             setLoading(true);
-            if (projectId && authState.accessToken) {
-                const filesData = await fetchProjectFiles(projectId, authState.accessToken);
+            if (projectId && taskId && authState.accessToken) {
+                const filesData = await fetcTaskFiles(projectId, taskId, authState.accessToken);
                 setFiles(filesData);
             }
         } catch (err) {
@@ -53,38 +43,9 @@ export const FilesTab = () => {
         }
     };
 
-    // Load project members to determine user role
-    const loadMembers = async () => {
-        if (!projectId || !authState.accessToken) return;
-
-        try {
-            const membersData = await getProjectMembers(projectId, authState.accessToken);
-            const [registeredMembers = [], _invitedMembers = []] = membersData;
-
-            // Check if current user is owner or admin
-            const currentUserMember = registeredMembers.find(
-                (member: any) => member.user_id === authState.user?.id
-            );
-
-            if (currentUserMember) {
-                if (currentUserMember.role === "admin") {
-                    setUserRole("admin");
-                } else if (currentUserMember.role === "owner") {
-                    setUserRole("owner");
-                } else {
-                    setUserRole("member");
-                }
-            }
-
-        } catch (err) {
-            console.error("Failed to load members:", err);
-        }
-    };
-
     useEffect(() => {
         loadFiles();
-        loadMembers();
-    }, [projectId, authState.accessToken]);
+    }, [projectId, taskId, authState.accessToken]);
 
     // Enhanced drag and drop handlers
     const handleDragEnter = (e: React.DragEvent) => {
@@ -135,7 +96,7 @@ export const FilesTab = () => {
 
     const handleFileSelection = (files: FileList) => {
         const newFiles = Array.from(files);
-        setSelectedFiles(prev => [...prev, ...newFiles]);
+        setSelectedFiles?.(prev => [...prev, ...newFiles]);
     };
 
     // for selected file list duplication
@@ -164,83 +125,18 @@ export const FilesTab = () => {
     };
 
     const removeSelectedFile = (index: number) => {
-        setSelectedFiles(prev => prev.filter((_, i) => i !== index));
-    };
-
-
-    const handleFileUpload = async () => {
-        if (!canManageFiles) {
-            toast.error("You don't have permission to upload files");
-            return;
-        }
-
-        // Filter out files that are too large
-        const validFiles = selectedFiles.filter(file => file.size <= MAX_FILE_SIZE);
-
-        if (validFiles.length === 0 || !projectId || !authState.accessToken) {
-            if (selectedFiles.some(file => file.size > MAX_FILE_SIZE)) {
-                toast.error("Some files exceed the 10MB limit and cannot be uploaded");
-            }
-            return;
-        }
-
-        setIsUploading(true);
-
-        // Kick off one upload promise per file
-        const uploadPromises = validFiles.map(file =>
-            uploadProjectFile(projectId, authState.accessToken!, file, authState.user!.id)
-                .then(res => ({ status: "fulfilled" as const, file, value: res }))
-                .catch(err => ({ status: "rejected" as const, file, reason: err }))
-        );
-
-        // Wait for all of them
-        const results = await Promise.all(uploadPromises);
-
-        const successfulUploads: ProjectFile[] = [];
-        results.forEach(result => {
-            if (result.status === "fulfilled") {
-                successfulUploads.push(result.value);
-            } else {
-                const err = result.reason;
-                const status = err.response?.status;
-                if (status === 413) {
-                    toast.error(`“${result.file.name}” is too large (max 10 MB).`);
-                } else {
-                    toast.error(`Failed to upload “${result.file.name}”.`);
-                    console.error(err);
-                }
-            }
+        setSelectedFiles?.(prev => {
+            const newFiles = [...prev];
+            newFiles.splice(index, 1);
+            return newFiles;
         });
-
-        // Update UI
-        if (successfulUploads.length > 0) {
-            setFiles(prev => [...successfulUploads, ...prev]);
-            toast.success(`${successfulUploads.length} file(s) uploaded successfully!`);
-        }
-
-        // Reset
-        setSelectedFiles([]);
-        if (fileInputRef.current) fileInputRef.current.value = "";
-        setIsUploading(false);
     };
-
-    useEffect(() => {
-        const oversized = selectedFiles.some(file => file.size > MAX_FILE_SIZE);
-        setHasOversizedFiles(oversized);
-
-        if (oversized) {
-            toast.error("Some files exceed the 10MB limit", {
-                id: 'oversized-files-warning',
-                duration: 4000
-            });
-        }
-    }, [selectedFiles]);
 
     const handleDownloadFile = async (fileId: string) => {
-        if (!projectId || !authState.accessToken) return;
+        if (!projectId || !taskId || !authState.accessToken) return;
 
         try {
-            const blob = await downloadProjectFile(fileId, projectId, authState.accessToken);
+            const blob = await downloadTaskFile(fileId, projectId, taskId, authState.accessToken);
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
@@ -258,24 +154,20 @@ export const FilesTab = () => {
 
     const confirmDeleteFile = (fileId: string) => {
         setFileToDelete(fileId)
-        setShowDeleteConfirm(true)
+        setShowTaskDeleteConfirm(true)
     }
 
     const handleDeleteFile = async () => {
-        if (!canManageFiles || !fileToDelete || !projectId || !authState.accessToken) {
-            setShowDeleteConfirm(false);
-            return;
-        }
-
         try {
-            await deleteProjectFile(projectId, fileToDelete, authState.accessToken);
+            console.log(projectId, taskId, fileToDelete, authState.accessToken);
+            await deletetaskFile(projectId!, taskId!, fileToDelete!, authState.accessToken!);
             setFiles(prevFiles => prevFiles.filter(file => file.id !== fileToDelete));
             toast.success("File deleted successfully!");
         } catch (err) {
             toast.error("Failed to delete file");
             console.error(err);
         } finally {
-            setShowDeleteConfirm(false);
+            setShowTaskDeleteConfirm(false);
             setFileToDelete(null);
         }
     };
@@ -400,7 +292,10 @@ export const FilesTab = () => {
     if (loading) {
         return (
             <div className="p-6">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-6">Files</h2>
+                <div className="flex items-center text-gray-500 dark:text-gray-400 mb-3">
+                    <FaPaperclip className="mr-2" />
+                    <h3 className="font-medium">Files</h3>
+                </div>
                 <div className="flex justify-center items-center h-32">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
                 </div>
@@ -411,15 +306,21 @@ export const FilesTab = () => {
     if (error) {
         return (
             <div className="p-6">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-6">Files</h2>
+                <div className="flex items-center text-gray-500 dark:text-gray-400 mb-3">
+                    <FaPaperclip className="mr-2" />
+                    <h3 className="font-medium">Files</h3>
+                </div>
                 <div className="text-red-500 dark:text-red-400">{error}</div>
             </div>
         );
     }
 
     return (
-        <div className="p-6">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-6">Files</h2>
+        <div>
+            <div className="flex items-center text-gray-500 dark:text-gray-400 mb-3">
+                <FaPaperclip className="mr-2" />
+                <h3 className="font-medium">Files</h3>
+            </div>
 
             {/* Enhanced File Upload Dropzone - Only show if user has permission */}
             {canManageFiles && (
@@ -466,7 +367,7 @@ export const FilesTab = () => {
                     </div>
 
                     {/* Selected Files Preview */}
-                    {selectedFiles.length > 0 && (
+                    {selectedFiles && selectedFiles.length > 0 && (
                         <div className="mt-4 space-y-3">
                             <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Selected files ({selectedFiles.length})
@@ -479,29 +380,29 @@ export const FilesTab = () => {
                                     return (
                                         <div
                                             key={index}
-                                            className={`flex items-center justify-between p-3 rounded-lg border ${isTooLarge ?
-                                                'bg-red-50/50 dark:bg-red-900/10 border-red-200 dark:border-red-900/30' :
-                                                'bg-gray-100 dark:bg-gray-700/50 border-gray-200 dark:border-gray-600'
+                                            className={`flex items-center justify-between p-3 rounded-lg border ${isTooLarge
+                                                ? 'bg-red-50/50 dark:bg-red-900/10 border-red-200 dark:border-red-900/30'
+                                                : 'bg-gray-100 dark:bg-gray-700/50 border-gray-200 dark:border-gray-600'
                                                 }`}
                                         >
                                             <div className="flex items-center space-x-3">
-                                                <div className={`w-8 h-8 flex items-center justify-center rounded text-sm ${isTooLarge ?
-                                                    'bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400' :
-                                                    'bg-white dark:bg-gray-600'
+                                                <div className={`w-8 h-8 flex items-center justify-center rounded text-sm ${isTooLarge
+                                                    ? 'bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400'
+                                                    : 'bg-white dark:bg-gray-600'
                                                     }`}>
                                                     {getFileIcon(file.type)}
                                                 </div>
                                                 <div>
-                                                    <p className={`text-sm font-medium truncate max-w-xs ${isTooLarge ?
-                                                        'text-red-600 dark:text-red-400' :
-                                                        'text-gray-900 dark:text-gray-100'
+                                                    <p className={`text-sm font-medium truncate max-w-xs ${isTooLarge
+                                                        ? 'text-red-600 dark:text-red-400'
+                                                        : 'text-gray-900 dark:text-gray-100'
                                                         }`}>
                                                         {displayName}
                                                     </p>
                                                     <div className="flex items-center gap-2">
-                                                        <span className={`text-xs ${isTooLarge ?
-                                                            'text-red-500 dark:text-red-400' :
-                                                            'text-gray-500 dark:text-gray-400'
+                                                        <span className={`text-xs ${isTooLarge
+                                                            ? 'text-red-500 dark:text-red-400'
+                                                            : 'text-gray-500 dark:text-gray-400'
                                                             }`}>
                                                             {formatFileSize(file.size)}
                                                         </span>
@@ -519,9 +420,9 @@ export const FilesTab = () => {
                                                     e.preventDefault();
                                                     removeSelectedFile(index);
                                                 }}
-                                                className={`p-2 rounded-full cursor-pointer ${isTooLarge ?
-                                                    'text-red-600 hover:bg-red-100 dark:text-red-400 dark:hover:bg-red-900/20' :
-                                                    'text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600 hover:text-red-500 dark:hover:text-red-400'
+                                                className={`p-2 rounded-full cursor-pointer ${isTooLarge
+                                                    ? 'text-red-600 hover:bg-red-100 dark:text-red-400 dark:hover:bg-red-900/20'
+                                                    : 'text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600 hover:text-red-500 dark:hover:text-red-400'
                                                     } transition-colors`}
                                                 title="Remove file"
                                             >
@@ -533,39 +434,10 @@ export const FilesTab = () => {
                             </div>
                             <div className="flex justify-end space-x-3 pt-2">
                                 <button
-                                    onClick={() => setSelectedFiles([])}
+                                    onClick={() => setSelectedFiles?.([])}
                                     className="px-4 py-2 text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg font-medium transition-colors duration-200"
-                                    disabled={isUploading}
                                 >
                                     Clear All
-                                </button>
-                                <button
-                                    onClick={handleFileUpload}
-                                    disabled={isUploading || selectedFiles.length === 0 || hasOversizedFiles}
-                                    className={`px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center space-x-2 ${isUploading || selectedFiles.length === 0 || hasOversizedFiles ?
-                                        'opacity-70 cursor-not-allowed' :
-                                        'cursor-pointer'
-                                        } ${hasOversizedFiles ?
-                                            'bg-gray-500 dark:bg-gray-600 text-white' :
-                                            'bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white'
-                                        }`}
-                                >
-                                    {isUploading ? (
-                                        <>
-                                            <span>Uploading...</span>
-                                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                        </>
-                                    ) : hasOversizedFiles ? (
-                                        <>
-                                            <FaExclamationTriangle className="text-yellow-300" />
-                                            <span>Remove oversized files to upload</span>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <span>Upload All</span>
-                                            <FaCheck />
-                                        </>
-                                    )}
                                 </button>
                             </div>
                         </div>
@@ -612,7 +484,11 @@ export const FilesTab = () => {
                                 </button>
                                 {canManageFiles && (
                                     <button
-                                        onClick={() => confirmDeleteFile(file.id)}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            e.preventDefault();
+                                            confirmDeleteFile(file.id);
+                                        }}
                                         className="p-2 text-gray-400 hover:text-red-600 cursor-pointer dark:hover:text-red-400 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
                                         title="Delete"
                                     >
@@ -627,8 +503,8 @@ export const FilesTab = () => {
 
             {/* Delete Confirmation Dialog */}
             <ConfirmationDialog
-                isOpen={showDeleteConfirm}
-                onClose={() => setShowDeleteConfirm(false)}
+                isOpen={showTaskDeleteConfirm}
+                onClose={() => setShowTaskDeleteConfirm(false)}
                 onConfirm={handleDeleteFile}
                 title="Delete File?"
                 message="Are you sure you want to delete this file? This action cannot be undone."
@@ -637,4 +513,4 @@ export const FilesTab = () => {
             />
         </div>
     );
-};
+});

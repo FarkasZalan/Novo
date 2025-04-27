@@ -10,13 +10,13 @@ import {
     FaArrowLeft,
     FaExclamation,
     FaAlignLeft,
-    FaTag,
-    FaPaperclip
+    FaTag
 } from 'react-icons/fa';
 import { fetchTask } from '../../../../services/taskService';
 import { fetchProjectById } from '../../../../services/projectService';
 import { getProjectMembers } from '../../../../services/projectMemberService';
 import { useAuth } from '../../../../hooks/useAuth';
+import { TaskFiles } from '../taskHandler/TaskFiles';
 
 export const TaskDetails: React.FC = () => {
     const { taskId, projectId } = useParams<{ taskId: string; projectId: string }>();
@@ -134,7 +134,7 @@ export const TaskDetails: React.FC = () => {
                 {/* Header */}
                 <div className="flex items-center justify-between mb-8">
                     <button
-                        onClick={() => navigate(`/projects/${projectId}/tasks`, { replace: true })}
+                        onClick={() => navigate(`/projects/${projectId}/tasks`)}
                         className="flex items-center cursor-pointer text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 transition-colors"
                     >
                         <FaArrowLeft className="mr-2" />
@@ -142,7 +142,7 @@ export const TaskDetails: React.FC = () => {
                     </button>
                     {canManageTasks && (
                         <button
-                            onClick={() => navigate(`/projects/${projectId}/tasks/${taskId}/edit`, { replace: true })}
+                            onClick={() => navigate(`/projects/${projectId}/tasks/${taskId}/edit`)}
                             className="flex items-center cursor-pointer px-4 py-2 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white rounded-xl shadow transition-colors"
                         >
                             <FaEdit className="mr-2" />
@@ -251,27 +251,12 @@ export const TaskDetails: React.FC = () => {
                         )}
 
                         {/* Attachments */}
-                        {task.attachments && task.attachments.length > 0 && (
-                            <div className="bg-gray-50/70 dark:bg-gray-700/60 p-4 rounded-lg backdrop-blur-sm">
-                                <div className="flex items-center text-gray-500 dark:text-gray-400 mb-2">
-                                    <FaPaperclip className="mr-2" />
-                                    <h3 className="font-medium">Attachments</h3>
-                                </div>
-                                <div className="space-y-2">
-                                    {task.attachments.map((att: any) => (
-                                        <a
-                                            key={att.id}
-                                            href={att.url}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="flex items-center text-indigo-600 dark:text-indigo-400 hover:underline"
-                                        >
-                                            {att.name}
-                                        </a>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
+                        <div className="md:col-span-2">
+                            <TaskFiles
+                                canManageFiles={false}
+                            />
+                        </div>
+
                     </div>
 
                     {/* Footer */}
