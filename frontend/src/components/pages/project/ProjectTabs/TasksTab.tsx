@@ -94,7 +94,7 @@ export const TasksTab = () => {
                     <div className="py-12 flex flex-col items-center justify-center text-gray-500 dark:text-gray-400">
                         <FaTasks className="text-4xl mb-3" />
                         <p className="text-lg">No tasks found for this project</p>
-                        <p className="text-sm mt-1">Create your first task to get started</p>
+                        {canManageTasks && <p className="text-sm mt-1">Create a task to get started</p>}
                         {canManageTasks && (
                             <button
                                 onClick={handleNavigateToTaskManager}

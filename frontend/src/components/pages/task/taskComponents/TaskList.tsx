@@ -1,25 +1,26 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { FaEdit, FaCircle, FaClock, FaCheckCircle, FaPlus, FaTasks } from 'react-icons/fa';
+import { FaEdit, FaCircle, FaClock, FaCheckCircle, FaPlus, FaTasks, FaTrash } from 'react-icons/fa';
 import { isPast, isToday, isTomorrow } from 'date-fns';
-
-interface Task {
-    id: string;
-    title: string;
-    status: string;
-    priority: string;
-    due_date?: string;
-    assigned_to?: string;
-}
+import { ConfirmationDialog } from '../../project/ConfirmationDialog';
+import { deleteTask } from '../../../../services/taskService';
+import { useAuth } from '../../../../hooks/useAuth';
+import toast from 'react-hot-toast';
+import { Task } from '../../../../types/task';
 
 interface TaskListProps {
     tasks: Task[];
+    setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
     canManageTasks: boolean;
 }
 
-export const TaskList: React.FC<TaskListProps> = ({ tasks, canManageTasks }) => {
+export const TaskList: React.FC<TaskListProps> = React.memo(({ tasks, setTasks, canManageTasks }) => {
     const navigate = useNavigate();
     const { projectId } = useParams<{ projectId: string }>();
+    const { authState } = useAuth();
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [isLoading, setLoading] = useState(false);
+    const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
 
     const getStatusIcon = (status: string) => {
         switch (status) {
@@ -55,6 +56,41 @@ export const TaskList: React.FC<TaskListProps> = ({ tasks, canManageTasks }) => 
         return statusMap[status] || status;
     };
 
+    const handleDeleteTask = async (taskId: string) => {
+        try {
+            if (!projectId || !authState.accessToken) return;
+
+            setLoading(true);
+            await deleteTask(taskId, projectId, authState.accessToken);
+            setTasks(prevTasks => prevTasks.filter(task => task.id !== taskId));
+            toast.success('Task deleted successfully');
+        } catch (err) {
+            console.error(err);
+            setLoading(false);
+            toast.error('Failed to delete task');
+        }
+        finally {
+            setLoading(false);
+        }
+    };
+
+    const initiateDelete = (e: React.MouseEvent, taskId: string) => {
+        e.stopPropagation();
+        setTaskToDelete(taskId);
+        setShowDeleteConfirm(true);
+    };
+
+    if (isLoading) {
+        return (
+            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50">
+                <div className="text-center p-8 bg-white dark:bg-gray-800 rounded-xl shadow-lg dark:shadow-gray-700/50">
+                    <div className="animate-spin inline-block w-8 h-8 border-[3px] border-current border-t-transparent text-blue-600 rounded-full" role="status" aria-label="loading" />
+                    <p className="mt-4 text-gray-600 dark:text-gray-300">Loading tasks...</p>
+                </div>
+            </div>
+        );
+    }
+
     if (tasks.length === 0) {
         return (
             <div className="mt-8 text-center p-12 bg-white dark:bg-gray-800 rounded-xl shadow-lg dark:shadow-gray-700/50">
@@ -66,7 +102,7 @@ export const TaskList: React.FC<TaskListProps> = ({ tasks, canManageTasks }) => 
                 {canManageTasks && (
                     <button
                         onClick={() => navigate(`/projects/${projectId}/tasks/new`)}
-                        className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white rounded-lg font-medium transition-colors flex items-center mx-auto"
+                        className="px-6 py-2 bg-indigo-600 cursor-pointer hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white rounded-lg font-medium transition-colors flex items-center mx-auto"
                     >
                         <FaPlus className="mr-2" /> Create First Task
                     </button>
@@ -98,7 +134,6 @@ export const TaskList: React.FC<TaskListProps> = ({ tasks, canManageTasks }) => 
                                     Actions
                                 </th>
                             )}
-
                         </tr>
                     </thead>
                     <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
@@ -149,18 +184,25 @@ export const TaskList: React.FC<TaskListProps> = ({ tasks, canManageTasks }) => 
                                 </td>
                                 {canManageTasks && (
                                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                navigate(`/projects/${projectId}/tasks/${task.id}/edit`);
-                                            }}
-                                            className="p-2 rounded-full cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
-                                            title="Edit task"
-                                        >
-                                            <FaEdit />
-                                        </button>
-
+                                        <div className="flex justify-end space-x-2">
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    navigate(`/projects/${projectId}/tasks/${task.id}/edit`);
+                                                }}
+                                                className="p-2 rounded-full cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                                                title="Edit task"
+                                            >
+                                                <FaEdit />
+                                            </button>
+                                            <button
+                                                onClick={(e) => initiateDelete(e, task.id)}
+                                                className="p-2 rounded-full cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+                                                title="Delete task"
+                                            >
+                                                <FaTrash />
+                                            </button>
+                                        </div>
                                     </td>
                                 )}
                             </tr>
@@ -168,6 +210,22 @@ export const TaskList: React.FC<TaskListProps> = ({ tasks, canManageTasks }) => 
                     </tbody>
                 </table>
             </div>
+
+            {/* Delete Confirmation Dialog */}
+            <ConfirmationDialog
+                isOpen={showDeleteConfirm}
+                onClose={() => setShowDeleteConfirm(false)}
+                onConfirm={() => {
+                    if (taskToDelete) {
+                        handleDeleteTask(taskToDelete);
+                    }
+                    setShowDeleteConfirm(false);
+                }}
+                title="Delete Task?"
+                message="Are you sure you want to delete this task? This action cannot be undone."
+                confirmText="Delete Task"
+                confirmColor="red"
+            />
         </div>
     );
-};
+});

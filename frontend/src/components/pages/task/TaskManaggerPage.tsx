@@ -8,16 +8,8 @@ import { fetchProjectById } from '../../../services/projectService';
 import { Milestones } from './taskComponents/Milestones';
 import { getProjectMembers } from '../../../services/projectMemberService';
 import { useAuth } from '../../../hooks/useAuth';
+import { Task } from '../../../types/task';
 
-// Define Task interface to improve type safety
-interface Task {
-    id: string;
-    title: string;
-    description?: string;
-    status: string;
-    priority: 'low' | 'medium' | 'high';
-    due_date?: string;
-}
 
 export const TasksManagerPage: React.FC = () => {
     const { projectId } = useParams<{ projectId: string }>();
@@ -139,7 +131,7 @@ export const TasksManagerPage: React.FC = () => {
                         {view === 'board' ? (
                             <TaskBoard tasks={tasks} setTasks={setTasks} onTaskUpdate={handleTaskUpdate} canManageTasks={canManageTasks} />
                         ) : view === 'list' ? (
-                            <TaskList tasks={tasks} canManageTasks={canManageTasks} />
+                            <TaskList tasks={tasks} setTasks={setTasks} canManageTasks={canManageTasks} />
                         ) : (
                             <Milestones />
                         )}
