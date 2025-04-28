@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
 import { NextFunction } from "connect";
 import { uploadFileForProjectQuery, deleteFileQuery, downloadFileQuery, getAllFilesForTaskQuery, getAllFilesQuery, getFileByIdQuery, uploadFileForTaskQuery } from "../models/filesModel";
-import { getProjectByIdQuery } from "../models/projectModel";
-import { getTaskByIdQuery } from "../models/task.Model";
+import { getProjectByIdQuery, recalculateTaskAttachmentsCountForProjectQuery } from "../models/projectModel";
+import { getTaskByIdQuery, recalculateTaskAttachmentsCountForTaskQuery } from "../models/task.Model";
 
 interface File {
     project_id: string;
@@ -59,6 +59,7 @@ export const uploadProjectFile = async (req: Request, res: Response, next: NextF
         }
 
         const newFile = await uploadFileForProjectQuery(projectId, file.originalname, file.mimetype, file.size, uploaded_by, file.buffer);
+        await recalculateTaskAttachmentsCountForProjectQuery(projectId);
 
         handleResponse(res, 201, "File uploaded and saved to DB", newFile);
     } catch (err) {
@@ -86,6 +87,7 @@ export const deleteFileFromProject = async (req: Request, res: Response, next: N
             return;
         }
         await deleteFileQuery(fileId);
+        await recalculateTaskAttachmentsCountForProjectQuery(projectId);
         handleResponse(res, 200, "File deleted successfully", file);
     } catch (error) {
         next(error);
@@ -143,6 +145,8 @@ export const uploadTaskFile = async (req: Request, res: Response, next: NextFunc
 
         const newFile = await uploadFileForTaskQuery(projectId, file.originalname, file.mimetype, file.size, uploaded_by, task_id, file.buffer);
 
+        await recalculateTaskAttachmentsCountForTaskQuery(task_id);
+
         handleResponse(res, 201, "File uploaded and saved to DB", newFile);
     } catch (err) {
         next(err);
@@ -176,6 +180,7 @@ export const deleteFileFromTask = async (req: Request, res: Response, next: Next
             return;
         }
         await deleteFileQuery(fileId);
+        await recalculateTaskAttachmentsCountForTaskQuery(taskId);
         handleResponse(res, 200, "File deleted successfully", file);
     } catch (error) {
         next(error);

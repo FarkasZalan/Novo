@@ -4,6 +4,7 @@ import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { isPast, isToday, isTomorrow } from 'date-fns';
 import { Task } from '../../../../../types/task';
+import { FaPaperclip } from 'react-icons/fa';
 
 // one task card
 const DraggableTaskCard: React.FC<{ task: Task }> = React.memo(({ task }) => {
@@ -66,6 +67,15 @@ const DraggableTaskCard: React.FC<{ task: Task }> = React.memo(({ task }) => {
                 <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">
                     {task.description}
                 </p>
+            )}
+
+            {task.attachments_count > 0 && (
+                <div className="mt-2">
+                    <span className="inline-flex items-center text-xs bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 px-2 py-1 rounded-full">
+                        <FaPaperclip className="mr-1" />
+                        {task.attachments_count}
+                    </span>
+                </div>
             )}
 
             <div className="flex items-center justify-between mt-3">

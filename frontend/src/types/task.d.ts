@@ -5,4 +5,5 @@ export interface Task {
     status: string;
     priority: 'low' | 'medium' | 'high';
     due_date?: string;
+    attachments_count: number;
 }

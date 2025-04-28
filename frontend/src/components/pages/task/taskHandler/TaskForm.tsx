@@ -153,11 +153,6 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
             }
         });
 
-        // Update UI
-        if (successfulUploads.length > 0) {
-            toast.success(`${successfulUploads.length} file(s) uploaded successfully!`);
-        }
-
         // Reset
         setSelectedFiles([]);
         setLoading(false);

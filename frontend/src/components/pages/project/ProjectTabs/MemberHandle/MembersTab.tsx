@@ -120,7 +120,13 @@ export const MembersTab = ({
     return (
         <div className="p-6">
             <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Team Members</h2>
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+                    Team Members
+
+                    <span className="ml-2 text-sm bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 px-2 py-1 rounded-full">
+                        {members.length} {members.length === 1 ? 'member' : 'members'}
+                    </span>
+                </h2>
                 {canManageMembers && (
                     <button
                         onClick={() => setShowAddMember(true)}

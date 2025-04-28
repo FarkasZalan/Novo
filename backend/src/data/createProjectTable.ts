@@ -11,6 +11,7 @@ const createProjectsTable = async () => {
             status VARCHAR(20) DEFAULT 'not-started' CHECK (status IN ('not-started', 'in-progress', 'completed')),
             progress INTEGER DEFAULT 0 CHECK (progress >= 0 AND progress <= 100),
             total_tasks INTEGER DEFAULT 0,
+            attachments_count INTEGER DEFAULT 0,
             completed_tasks INTEGER DEFAULT 0,
             created_at TIMESTAMP DEFAULT NOW(),
             updated_at TIMESTAMP

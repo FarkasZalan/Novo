@@ -244,12 +244,21 @@ export const FilesTab = () => {
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = files.find(file => file.id === fileId)?.file_name || 'downloaded-file';
+
+            // get the file name
+            const fileName = files.find(file => file.id === fileId)?.file_name || 'downloaded-file';
+            a.download = fileName;
+
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-            toast.success("File downloaded successfully!");
+
+            // Clean up the object URL after a short delay to ensure download starts
+            setTimeout(() => {
+                window.URL.revokeObjectURL(url);
+            }, 1000);
+
+            toast.success(`Download started for "${fileName}"`);
         } catch (err) {
             toast.error("Failed to download file");
             console.error(err);
@@ -419,7 +428,14 @@ export const FilesTab = () => {
 
     return (
         <div className="p-6">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-6">Files</h2>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-6">
+                Files
+                {files.length > 0 && (
+                    <span className="ml-2 text-sm bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 px-2 py-1 rounded-full">
+                        {files.length} {files.length === 1 ? 'file' : 'files'}
+                    </span>
+                )}
+            </h2>
 
             {/* Enhanced File Upload Dropzone - Only show if user has permission */}
             {canManageFiles && (

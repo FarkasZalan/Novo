@@ -10,7 +10,8 @@ import {
     FaClock,
     FaExclamationTriangle,
     FaCog,
-    FaSignOutAlt
+    FaSignOutAlt,
+    FaPaperclip
 } from "react-icons/fa";
 import { useEffect, useState } from "react";
 import { fetchProjects } from "../../../services/projectService";
@@ -174,7 +175,7 @@ export const Dashboard = () => {
                             </p>
                         </div>
                         <Link
-                            to="/projects/new"
+                            to="/new"
                             className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white rounded-lg font-medium transition-colors duration-200 flex items-center"
                         >
                             <FaPlus className="mr-2" />
@@ -320,6 +321,12 @@ export const Dashboard = () => {
                                                     <FaTasks className="mr-1.5" />
                                                     <span>{project.completed_tasks}/{project.total_tasks} tasks</span>
                                                 </div>
+                                                {project.attachments_count > 0 && (
+                                                    <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                                                        <FaPaperclip className="mr-1.5" />
+                                                        <span>{project.attachments_count} files</span>
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
 
@@ -354,7 +361,7 @@ export const Dashboard = () => {
                                 </p>
                                 <div className="mt-6">
                                     <Link
-                                        to="/projects/new"
+                                        to="/new"
                                         className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                                     >
                                         <FaPlus className="-ml-1 mr-2 h-5 w-5" />

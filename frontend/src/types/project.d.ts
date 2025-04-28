@@ -8,4 +8,5 @@ interface Project {
     total_tasks?: number;
     completed_tasks: number = 0;
     progress: number = 0;
+    attachments_count: number;
 }

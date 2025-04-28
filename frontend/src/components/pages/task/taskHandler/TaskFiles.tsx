@@ -140,12 +140,21 @@ export const TaskFiles: React.FC<TaskFilesProps> = React.memo(({ canManageFiles,
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = files.find(file => file.id === fileId)?.file_name || 'downloaded-file';
+
+            // get the file name
+            const fileName = files.find(file => file.id === fileId)?.file_name || 'downloaded-file';
+            a.download = fileName;
+
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-            toast.success("File downloaded successfully!");
+
+            // Clean up the object URL after a short delay to ensure download starts
+            setTimeout(() => {
+                window.URL.revokeObjectURL(url);
+            }, 1000);
+
+            toast.success(`Download started for "${fileName}"`);
         } catch (err) {
             toast.error("Failed to download file");
             console.error(err);
@@ -159,16 +168,19 @@ export const TaskFiles: React.FC<TaskFilesProps> = React.memo(({ canManageFiles,
 
     const handleDeleteFile = async () => {
         try {
-            console.log(projectId, taskId, fileToDelete, authState.accessToken);
+            setLoading(true);
             await deletetaskFile(projectId!, taskId!, fileToDelete!, authState.accessToken!);
             setFiles(prevFiles => prevFiles.filter(file => file.id !== fileToDelete));
             toast.success("File deleted successfully!");
+            setLoading(false);
         } catch (err) {
             toast.error("Failed to delete file");
+            setLoading(false);
             console.error(err);
         } finally {
             setShowTaskDeleteConfirm(false);
             setFileToDelete(null);
+            setLoading(false);
         }
     };
 
@@ -315,11 +327,27 @@ export const TaskFiles: React.FC<TaskFilesProps> = React.memo(({ canManageFiles,
         );
     }
 
+    if (loading) {
+        return (
+            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50">
+                <div className="text-center p-8 bg-white dark:bg-gray-800 rounded-xl shadow-lg dark:shadow-gray-700/50">
+                    <div className="animate-spin inline-block w-8 h-8 border-[3px] border-current border-t-transparent text-blue-600 rounded-full" role="status" aria-label="loading" />
+                    <p className="mt-4 text-gray-600 dark:text-gray-300">Loading...</p>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div>
             <div className="flex items-center text-gray-500 dark:text-gray-400 mb-3">
                 <FaPaperclip className="mr-2" />
                 <h3 className="font-medium">Files</h3>
+                {files.length > 0 && (
+                    <span className="ml-2 text-xs bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 px-2 py-1 rounded-full">
+                        {files.length} {files.length === 1 ? 'attachment' : 'attachments'}
+                    </span>
+                )}
             </div>
 
             {/* Enhanced File Upload Dropzone - Only show if user has permission */}

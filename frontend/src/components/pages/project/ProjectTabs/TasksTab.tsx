@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { FaTasks, FaChevronRight, FaPlus } from "react-icons/fa";
+import { FaTasks, FaChevronRight, FaPlus, FaPaperclip } from "react-icons/fa";
 import { fetchAllTasksForProject } from "../../../../services/taskService";
 import { fetchProjectById } from "../../../../services/projectService";
 import { getProjectMembers } from "../../../../services/projectMemberService";
@@ -66,7 +66,14 @@ export const TasksTab = () => {
     return (
         <div className="p-6">
             <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Recent Tasks</h2>
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+                    Recent Tasks
+                    {tasks.length > 0 && (
+                        <span className="ml-2 text-sm bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 px-2 py-1 rounded-full">
+                            {tasks.length} {tasks.length === 1 ? 'task' : 'tasks'}
+                        </span>
+                    )}
+                </h2>
                 {canManageTasks && (
                     <div className="flex space-x-3">
                         <button
@@ -156,6 +163,13 @@ export const TasksTab = () => {
                                                         {task.status !== 'completed' && isTomorrow(new Date(task.due_date)) && (
                                                             <span className="ml-1">(Tomorrow)</span>
                                                         )}
+                                                    </span>
+                                                )}
+
+                                                {task.attachments_count > 0 && (
+                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                                                        <FaPaperclip className="mr-1" />
+                                                        {task.attachments_count}
                                                     </span>
                                                 )}
                                             </div>

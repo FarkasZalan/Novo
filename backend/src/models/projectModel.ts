@@ -44,6 +44,10 @@ export const recalculateProjectStatus = async (project_id: string) => {
     );
 };
 
+export const recalculateTaskAttachmentsCountForProjectQuery = async (id: string) => {
+    await pool.query("UPDATE projects SET attachments_count = (SELECT COUNT(*) FROM files WHERE project_id = $1 AND task_id IS NULL) WHERE id = $1 RETURNING *", [id]);
+}
+
 export const deleteProjectMemberQuery = async (project_id: string, user_id: string) => {
     const result = await pool.query("DELETE FROM project_members WHERE project_id = $1 AND user_id = $2 RETURNING *", [project_id, user_id]);
     return result.rows[0];

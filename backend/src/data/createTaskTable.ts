@@ -10,6 +10,7 @@ const createTasksTable = async () => {
             description TEXT,
             due_date Timestamp,
             priority VARCHAR(255),
+            attachments_count INTEGER DEFAULT 0,
             completed BOOLEAN,
             status VARCHAR(20) DEFAULT 'not-started' CHECK (status IN ('not-started', 'in-progress', 'completed')),
             created_at TIMESTAMP DEFAULT NOW(),

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { FaEdit, FaCircle, FaClock, FaCheckCircle, FaPlus, FaTasks, FaTrash } from 'react-icons/fa';
+import { FaEdit, FaCircle, FaClock, FaCheckCircle, FaPlus, FaTasks, FaTrash, FaPaperclip } from 'react-icons/fa';
 import { isPast, isToday, isTomorrow } from 'date-fns';
 import { ConfirmationDialog } from '../../project/ConfirmationDialog';
 import { deleteTask } from '../../../../services/taskService';
@@ -129,6 +129,9 @@ export const TaskList: React.FC<TaskListProps> = React.memo(({ tasks, setTasks, 
                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 Due Date
                             </th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                Attachments
+                            </th>
                             {canManageTasks && (
                                 <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                     Actions
@@ -182,6 +185,19 @@ export const TaskList: React.FC<TaskListProps> = React.memo(({ tasks, setTasks, 
                                         '—'
                                     )}
                                 </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                    {task.attachments_count > 0 ? (
+                                        <div className="flex items-center gap-1">
+                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300">
+                                                <FaPaperclip className="mr-1" />
+                                                {task.attachments_count}
+                                            </span>
+                                        </div>
+                                    ) : (
+                                        <span className="text-gray-400 dark:text-gray-500">—</span>
+                                    )}
+                                </td>
+
                                 {canManageTasks && (
                                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <div className="flex justify-end space-x-2">

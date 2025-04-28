@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { FaClock, FaCheckCircle, FaCircle } from 'react-icons/fa';
+import { FaClock, FaCheckCircle, FaCircle, FaPaperclip } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 import { Task } from '../../../../../types/task';
 import StatusColumn from './StatusColumn';
@@ -196,6 +196,15 @@ export const TaskBoard: React.FC<TaskBoardProps> = React.memo(({ tasks, setTasks
                             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">
                                 {activeTask.description}
                             </p>
+                        )}
+
+                        {activeTask.attachments_count > 0 && (
+                            <div className="mt-2">
+                                <span className="inline-flex items-center text-xs bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 px-2 py-1 rounded-full">
+                                    <FaPaperclip className="mr-1" />
+                                    {activeTask.attachments_count}
+                                </span>
+                            </div>
                         )}
 
                         <div className="flex items-center justify-between mt-3">

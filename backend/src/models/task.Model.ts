@@ -55,6 +55,10 @@ export const getInProgressTaskCountForProjectQuery = async (id: string) => {
     return parseInt(result.rows[0].count, 10);
 }
 
+export const recalculateTaskAttachmentsCountForTaskQuery = async (id: string) => {
+    await pool.query("UPDATE tasks SET attachments_count = (SELECT COUNT(*) FROM files WHERE task_id = $1) WHERE id = $1 RETURNING *", [id]);
+}
+
 export const deleteTaskQuery = async (id: string) => {
     const result = await pool.query("DELETE FROM tasks WHERE id = $1 RETURNING *", [id]);
     return result.rows[0];
