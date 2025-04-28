@@ -15,11 +15,10 @@ export const fetcAssignmentsForTask = async (projectId: string, taskId: string, 
     }
 };
 
-export const addAssignmentForMyself = async (projectId: string, taskId: string, user_id: string, token: string, assigned_by: string) => {
+export const addAssignmentForMyself = async (projectId: string, taskId: string, token: string) => {
     try {
         const response = await axios.post(
             `${API_URL}/project/${projectId}/task/${taskId}/assign-myself`,
-            { user_id, assigned_by },
             {
                 headers: {
                     Authorization: `Bearer ${token}`
@@ -34,11 +33,11 @@ export const addAssignmentForMyself = async (projectId: string, taskId: string, 
 };
 
 
-export const addAssignmentForUsers = async (projectId: string, taskId: string, users: Array<{ id: string }>, token: string, assigned_by: string) => {
+export const addAssignmentForUsers = async (projectId: string, taskId: string, users: Array<{ id: string }>, token: string) => {
     try {
         const response = await axios.post(
             `${API_URL}/project/${projectId}/task/${taskId}/assign-users`,
-            { users, assigned_by },
+            { users },
             {
                 headers: {
                     Authorization: `Bearer ${token}`
@@ -53,11 +52,10 @@ export const addAssignmentForUsers = async (projectId: string, taskId: string, u
 };
 
 
-export const deleteAssignmentMyself = async (projectId: string, taskId: string, user_id: string, token: string) => {
+export const deleteAssignmentMyself = async (projectId: string, taskId: string, token: string) => {
     try {
         const response = await axios.delete(`${API_URL}/project/${projectId}/task/${taskId}/assign-myself`,
             {
-                data: { user_id },
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
@@ -71,10 +69,9 @@ export const deleteAssignmentMyself = async (projectId: string, taskId: string, 
 }
 
 // when an admin/owner want to delete other members wo assigned the task from tha assignment
-export const deleteOtherAssignment = async (projectId: string, taskId: string, user_id: string, token: string) => {
+export const deleteOtherAssignment = async (projectId: string, taskId: string, token: string) => {
     try {
         const response = await axios.delete(`${API_URL}/project/${projectId}/task/${taskId}/assign-users`, {
-            data: { user_id },
             headers: {
                 Authorization: `Bearer ${token}`
             }

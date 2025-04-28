@@ -17,7 +17,8 @@ export const createAssignmentMyself = async (req: Request, res: Response, next: 
     try {
         const task_id = req.params.taskId
         const project_id = req.params.projectId
-        const { user_id, assigned_by } = req.body;
+        const user_id = req.user.id
+        const assigned_by = req.user.id;
 
         const currentUser = await getUserByIdQuery(assigned_by);
         if (!currentUser) {
@@ -37,7 +38,8 @@ export const createAssignmentForUsers = async (req: Request, res: Response, next
     try {
         const task_id = req.params.taskId
         const project_id = req.params.projectId
-        const { users, assigned_by } = req.body;
+        const assigned_by = req.user.id;
+        const { users } = req.body;
 
         const currentUser = await getUserByIdQuery(assigned_by);
         if (!currentUser) {
@@ -89,7 +91,7 @@ export const getAllAssignmentsForTask = async (req: Request, res: Response, next
 export const deleteAssignmentsFromTask = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const task_id = req.params.taskId
-        const { user_id } = req.body
+        const user_id = req.user.id
         const deleteAssignment = await deleteAssignmentQuery(task_id, user_id)
         handleResponse(res, 200, "Assignments fetched successfully", deleteAssignment);
     } catch (error: any) {
