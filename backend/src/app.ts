@@ -5,6 +5,7 @@ import pool, { initializeDatabase } from "./config/db";
 import userRoutes from "./routes/userRoutes";
 import authRoutes from "./routes/authRoutes";
 import projectRoutes from "./routes/projectRoutes";
+import assignmentRoutes from "./routes/assignmentRoutes";
 import projectMemberRoutes from "./routes/projectMemberRoutes";
 import fileRoutes from "./routes/filesRoutes";
 import taskRoutes from "./routes/taskRoutes";
@@ -91,6 +92,7 @@ app.use("/api", projectRoutes);
 app.use("/api", projectMemberRoutes);
 app.use("/api", fileRoutes);
 app.use("/api", taskRoutes);
+app.use("/api", assignmentRoutes);
 
 // Error handling middleware
 app.use(errorHandling);

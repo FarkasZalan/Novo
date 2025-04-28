@@ -4,16 +4,6 @@ import { uploadFileForProjectQuery, deleteFileQuery, downloadFileQuery, getAllFi
 import { getProjectByIdQuery, recalculateTaskAttachmentsCountForProjectQuery } from "../models/projectModel";
 import { getTaskByIdQuery, recalculateTaskAttachmentsCountForTaskQuery } from "../models/task.Model";
 
-interface File {
-    project_id: string;
-    filename: string;
-    file_path: string;
-    mimetype: string;
-    size: number;
-    uploaded_by: string;
-    description: string
-}
-
 // Standardized response function
 // it's a function that returns a response to the client when a request is made (CRUD operations)
 const handleResponse = (res: Response, status: number, message: string, data: any) => {
