@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaPlus } from 'react-icons/fa';
+import { FaPlus, FaTasks } from 'react-icons/fa';
 import { Task } from '../../../../../types/task';
 import { motion } from 'framer-motion';
 import { useDroppable } from '@dnd-kit/core';
@@ -58,7 +58,7 @@ const StatusColumn: React.FC<Props> = React.memo(({
             >
                 <div className="space-y-3">
                     {/* add task button if the user have permission */}
-                    {canManageTasks && (
+                    {canManageTasks ? (
                         <motion.button
                             onClick={() => onAddTask(statusKey)}
                             whileHover={{ scale: 1.02 }}
@@ -68,6 +68,26 @@ const StatusColumn: React.FC<Props> = React.memo(({
                             <FaPlus />
                             <span>Add Task</span>
                         </motion.button>
+                    ) : tasks.length === 0 && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.3 }}
+                            className="w-full p-4 text-center rounded-lg mb-3 bg-gray-50/50 dark:bg-gray-800/30 backdrop-blur-sm"
+                        >
+                            <div className="flex flex-col items-center justify-center">
+                                <div className="relative mb-2">
+                                    <FaTasks className="text-2xl text-gray-400 dark:text-gray-500" />
+                                    <div className="absolute -inset-2 rounded-full bg-gray-200/30 dark:bg-gray-700/30 animate-pulse"></div>
+                                </div>
+                                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                                    No tasks here yet
+                                </p>
+                                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                                    Check back later or ask for updates
+                                </p>
+                            </div>
+                        </motion.div>
                     )}
 
                     {isOver && activeTask?.status !== statusKey && (
