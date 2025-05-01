@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { FaUser, FaPlus, FaSpinner, FaTimes, FaUserMinus, FaUserPlus } from 'react-icons/fa'
 import { useAuth } from '../../../../../hooks/useAuth';
 import {
-    fetcAssignmentsForTask,
+    fetchAssignmentsForTask,
     addAssignmentForMyself,
     deleteOtherUserAssignment,
     deleteAssignmentMyself
@@ -18,7 +18,7 @@ interface TaskAssignmentsProps {
     setPendingUsers: (users: ProjectMember[]) => void
     compactMode: boolean
     taskIdFromCompactMode?: string
-    showAssignButtonInCOmpactMode?: boolean
+    showAssignButtonInCompactMode?: boolean
 }
 
 export const TaskAssignments: React.FC<TaskAssignmentsProps> = ({
@@ -27,7 +27,7 @@ export const TaskAssignments: React.FC<TaskAssignmentsProps> = ({
     setPendingUsers,
     compactMode,
     taskIdFromCompactMode,
-    showAssignButtonInCOmpactMode
+    showAssignButtonInCompactMode
 }) => {
     const { projectId, taskId: taskIdFromRoute } = useParams<{ projectId: string; taskId: string }>();
     const taskId = taskIdFromCompactMode ?? taskIdFromRoute;
@@ -43,7 +43,7 @@ export const TaskAssignments: React.FC<TaskAssignmentsProps> = ({
             setLoading(true);
             setError(null);
             if (!projectId || !taskId || !authState.accessToken) return;
-            const users = await fetcAssignmentsForTask(projectId!, taskId!, authState.accessToken!);
+            const users = await fetchAssignmentsForTask(projectId!, taskId!, authState.accessToken!);
 
             const assignedUsers: ProjectMember[] = users.map((user: any) => ({
                 id: user.user_id,
@@ -181,7 +181,7 @@ export const TaskAssignments: React.FC<TaskAssignmentsProps> = ({
                         )}
 
                         {/* Assign button - only shown when enabled and there's a user */}
-                        {showAssignButtonInCOmpactMode && showAssignSelfButton && (
+                        {showAssignButtonInCompactMode && showAssignSelfButton && (
                             <button
                                 type='button'
                                 onClick={(e) => {
@@ -281,9 +281,16 @@ export const TaskAssignments: React.FC<TaskAssignmentsProps> = ({
                                             <div className="h-5 w-5 rounded-full bg-indigo-200 dark:bg-indigo-800 flex items-center justify-center text-indigo-700 dark:text-indigo-300 font-medium text-xs mr-2">
                                                 {getUserInitials(user.name)}
                                             </div>
-                                            <span className="text-gray-800 dark:text-gray-200">
-                                                {user.name}
-                                            </span>
+                                            <div className="group relative">
+                                                <span className="text-gray-800 dark:text-gray-200">
+                                                    {user.name}
+                                                </span>
+                                                {user.email && (
+                                                    <div className="absolute bottom-full left-0 mb-2 hidden group-hover:block px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap z-10">
+                                                        {user.email}
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
                                         <button
                                             type="button"
@@ -324,15 +331,22 @@ export const TaskAssignments: React.FC<TaskAssignmentsProps> = ({
                                                 }`}>
                                                 {getUserInitials(user.name)}
                                             </div>
-                                            <span className={`${user.id === authState.user?.id
-                                                ? 'text-indigo-800 dark:text-indigo-200 font-medium'
-                                                : 'text-gray-800 dark:text-gray-200'
-                                                }`}>
-                                                {user.name}
-                                                {user.id === authState.user?.id && (
-                                                    <span className="ml-1 text-xs text-indigo-600 dark:text-indigo-300">(You)</span>
+                                            <div className="group relative">
+                                                <span className={`${user.id === authState.user?.id
+                                                    ? 'text-indigo-800 dark:text-indigo-200 font-medium'
+                                                    : 'text-gray-800 dark:text-gray-200'
+                                                    }`}>
+                                                    {user.name}
+                                                    {user.id === authState.user?.id && (
+                                                        <span className="ml-1 text-xs text-indigo-600 dark:text-indigo-300">(You)</span>
+                                                    )}
+                                                </span>
+                                                {user.email && (
+                                                    <div className="absolute bottom-full left-0 mb-2 hidden group-hover:block px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap z-10">
+                                                        {user.email}
+                                                    </div>
                                                 )}
-                                            </span>
+                                            </div>
                                         </div>
                                         {(isOpenForm || pendingUsers.some(u => u.id === user.id)) && (
                                             <button

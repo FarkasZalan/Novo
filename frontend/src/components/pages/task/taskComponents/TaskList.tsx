@@ -161,7 +161,7 @@ export const TaskList: React.FC<TaskListProps> = React.memo(({ tasks, setTasks, 
                                 <td className="px-6 py-4">
                                     <div className="flex -space-x-1.5">
                                         <TaskAssignments
-                                            showAssignButtonInCOmpactMode={true}
+                                            showAssignButtonInCompactMode={true}
                                             taskIdFromCompactMode={task.id}
                                             pendingUsers={[]}
                                             setPendingUsers={() => { }}

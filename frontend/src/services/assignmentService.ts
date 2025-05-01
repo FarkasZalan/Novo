@@ -2,7 +2,7 @@ import axios from 'axios';
 import { API_URL } from '../config/apiURL';
 import ProjectMember from '../types/projectMember';
 
-export const fetcAssignmentsForTask = async (projectId: string, taskId: string, token: string) => {
+export const fetchAssignmentsForTask = async (projectId: string, taskId: string, token: string) => {
     try {
         const response = await axios.get(`${API_URL}/project/${projectId}/task/${taskId}/assignments`, {
             headers: {

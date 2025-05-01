@@ -175,7 +175,7 @@ export const TasksTab = () => {
                                                 {/* Assignments - now more compact and better integrated */}
                                                 <div className="flex items-center">
                                                     <TaskAssignments
-                                                        showAssignButtonInCOmpactMode={true}
+                                                        showAssignButtonInCompactMode={true}
                                                         taskIdFromCompactMode={task.id}
                                                         pendingUsers={[]}
                                                         setPendingUsers={() => { }}
