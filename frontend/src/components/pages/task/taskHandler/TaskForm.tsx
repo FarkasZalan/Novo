@@ -7,6 +7,9 @@ import { ConfirmationDialog } from '../../project/ConfirmationDialog';
 import { useAuth } from '../../../../hooks/useAuth';
 import { TaskFiles } from './TaskFiles';
 import { uploadTaskFile } from '../../../../services/fileService';
+import { TaskAssignments } from './assignments/TaskAssignments';
+import ProjectMember from '../../../../types/projectMember';
+import { addAssignmentForUsers } from '../../../../services/assignmentService';
 
 export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
     const { projectId, taskId } = useParams<{ projectId: string; taskId: string }>();
@@ -34,6 +37,9 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
 
     // files states
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+
+    // assignments
+    const [pendingUsers, setPendingUsers] = useState<ProjectMember[]>([]);
 
     useEffect(() => {
         if (isEdit && projectId && taskId) {
@@ -81,6 +87,10 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
                     status
                 );
 
+                if (pendingUsers.length > 0) {
+                    await handleAddAssignments(resultTask.id);
+                }
+
                 if (selectedFiles.length > 0) {
                     await handleFileUpload(resultTask.id);
                 }
@@ -96,6 +106,10 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
                     status
                 );
 
+                if (pendingUsers.length > 0) {
+                    await handleAddAssignments(resultTask.id);
+                }
+
                 if (selectedFiles.length > 0) {
                     await handleFileUpload(resultTask.id);
                 }
@@ -109,6 +123,14 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
             setLoading(false);
         }
     };
+
+    const handleAddAssignments = async (taskId: string) => {
+        try {
+            await addAssignmentForUsers(projectId!, taskId, pendingUsers, authState.accessToken!);
+        } catch (err) {
+            console.error(err);
+        }
+    }
 
     const handleFileUpload = async (taskId: string) => {
         if (hasOversizedFiles) {
@@ -302,6 +324,16 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
                         )}
                     </div>
 
+                    {/* Assignees */}
+                    <div>
+                        <TaskAssignments
+                            isOpenForm={true}
+                            pendingUsers={pendingUsers}
+                            setPendingUsers={setPendingUsers}
+                            compactMode={false} />
+                    </div>
+
+                    {/* Files */}
                     <div>
                         <TaskFiles
                             canManageFiles={true}

@@ -6,6 +6,7 @@ import { fetchProjectById } from "../../../../services/projectService";
 import { getProjectMembers } from "../../../../services/projectMemberService";
 import { isPast, isToday, isTomorrow } from "date-fns";
 import { useAuth } from "../../../../hooks/useAuth";
+import { TaskAssignments } from "../../task/taskHandler/assignments/TaskAssignments";
 
 export const TasksTab = () => {
     const { projectId } = useParams<{ projectId: string }>();
@@ -140,20 +141,17 @@ export const TasksTab = () => {
                                                 {task.title || `Task ${index + 1}`}
                                             </h3>
                                             <div className="flex flex-wrap gap-2 mt-2">
-                                                {task.assigned_to && (
-                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                                                        {task.assigned_to}
-                                                    </span>
-                                                )}
+
+                                                {/* Due date */}
                                                 {task.due_date && (
                                                     <span className={
-                                                        `inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${task.status !== 'completed'
+                                                        `inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${task.status !== 'completed'
                                                             ? isPast(new Date(task.due_date)) || isToday(new Date(task.due_date))
-                                                                ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200" // Overdue/Today
+                                                                ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
                                                                 : isTomorrow(new Date(task.due_date))
-                                                                    ? "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200" // Tomorrow
-                                                                    : "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200" // Future
-                                                            : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300" // Completed
+                                                                    ? "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200"
+                                                                    : "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
+                                                            : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
                                                         }`
                                                     }>
                                                         Due {new Date(task.due_date).toLocaleDateString()}
@@ -166,12 +164,24 @@ export const TasksTab = () => {
                                                     </span>
                                                 )}
 
+                                                {/* Attachments */}
                                                 {task.attachments_count > 0 && (
-                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
                                                         <FaPaperclip className="mr-1" />
                                                         {task.attachments_count}
                                                     </span>
                                                 )}
+
+                                                {/* Assignments - now more compact and better integrated */}
+                                                <div className="flex items-center">
+                                                    <TaskAssignments
+                                                        showAssignButtonInCOmpactMode={true}
+                                                        taskIdFromCompactMode={task.id}
+                                                        pendingUsers={[]}
+                                                        setPendingUsers={() => { }}
+                                                        compactMode={true}
+                                                    />
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

@@ -91,7 +91,7 @@ export const getAllAssignmentsForTask = async (req: Request, res: Response, next
 export const deleteAssignmentsFromTask = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const task_id = req.params.taskId
-        const user_id = req.user.id
+        const user_id = req.body.user_id
         const deleteAssignment = await deleteAssignmentQuery(task_id, user_id)
         handleResponse(res, 200, "Assignments fetched successfully", deleteAssignment);
     } catch (error: any) {

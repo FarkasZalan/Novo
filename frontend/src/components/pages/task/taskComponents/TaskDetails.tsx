@@ -5,7 +5,6 @@ import {
     FaClock,
     FaCircle,
     FaEdit,
-    FaUser,
     FaCalendarAlt,
     FaArrowLeft,
     FaExclamation,
@@ -17,6 +16,7 @@ import { fetchProjectById } from '../../../../services/projectService';
 import { getProjectMembers } from '../../../../services/projectMemberService';
 import { useAuth } from '../../../../hooks/useAuth';
 import { TaskFiles } from '../taskHandler/TaskFiles';
+import { TaskAssignments } from '../taskHandler/assignments/TaskAssignments';
 
 export const TaskDetails: React.FC = () => {
     const { taskId, projectId } = useParams<{ taskId: string; projectId: string }>();
@@ -221,13 +221,12 @@ export const TaskDetails: React.FC = () => {
 
                         {/* Assigned To */}
                         <div className="bg-gray-50/70 dark:bg-gray-700/60 p-4 rounded-lg backdrop-blur-sm">
-                            <div className="flex items-center text-gray-500 dark:text-gray-400 mb-2">
-                                <FaUser className="mr-2" />
-                                <h3 className="font-medium">Assigned To</h3>
-                            </div>
-                            <p className="text-gray-900 dark:text-gray-100">
-                                {task.assigned_to || 'Unassigned'}
-                            </p>
+                            <TaskAssignments
+                                isOpenForm={false}
+                                pendingUsers={[]}
+                                setPendingUsers={() => { }}
+                                compactMode={false}
+                            />
                         </div>
 
                         {/* Tags */}

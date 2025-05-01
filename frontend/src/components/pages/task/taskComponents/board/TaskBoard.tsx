@@ -21,6 +21,7 @@ import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { updateTaskStatus } from '../../../../../services/taskService';
 import { isPast, isToday, isTomorrow } from 'date-fns';
 import { useAuth } from '../../../../../hooks/useAuth';
+import { TaskAssignments } from '../../taskHandler/assignments/TaskAssignments';
 
 // status column styles
 const statusLabels: Record<string, { label: string, icon: React.ReactNode, color: string }> = {
@@ -191,7 +192,22 @@ export const TaskBoard: React.FC<TaskBoardProps> = React.memo(({ tasks, setTasks
             <DragOverlay>
                 {activeTask && (
                     <div className="p-4 bg-white dark:bg-gray-800 rounded-xl shadow-lg cursor-grab border-2 border-indigo-400 opacity-90">
-                        <h4 className="font-medium text-gray-900 dark:text-gray-100">{activeTask.title}</h4>
+                        {/* Task Header with Title and Assignments */}
+                        <div className="flex justify-between items-start gap-2">
+                            <h4 className="font-medium text-gray-900 dark:text-gray-100 flex-1">
+                                {activeTask.title}
+                            </h4>
+
+                            {/* Compact Assignments */}
+                            <div className="flex-shrink-0">
+                                <TaskAssignments
+                                    taskIdFromCompactMode={activeTask.id}
+                                    pendingUsers={[]}
+                                    setPendingUsers={() => { }}
+                                    compactMode={true}
+                                />
+                            </div>
+                        </div>
                         {activeTask.description && (
                             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">
                                 {activeTask.description}

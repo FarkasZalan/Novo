@@ -1,6 +1,12 @@
 import pool from "../config/db";
 
 // project files querys
+
+// left join -> get all the rows from the left table, even if there are no matches in the right table, 
+// if there are no matches, the result will be null for the right table columns
+// the basic inner join -> get only the rows that have a match in both tables
+
+// here need to use left join, because need the all files even if they don't have a uploaded_by user (the user got deleted or something)
 export const getAllFilesQuery = async (procejtId: string) => {
     const result = await pool.query("SELECT files.*, users.name AS uploaded_by_name, users.email AS uploaded_by_email FROM files LEFT JOIN users ON users.id = files.uploaded_by WHERE files.project_id = $1 AND files.task_id IS NULL ORDER BY files.created_at DESC;", [procejtId]); // send a query to the database with one of the open connection from the pool
     return result.rows

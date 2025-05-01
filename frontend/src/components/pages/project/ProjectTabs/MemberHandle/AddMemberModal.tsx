@@ -29,7 +29,7 @@ export const AddMemberDialog = ({ project, onClose, onInvite }: AddMemberModalPr
     const [potentialMembers, setPotentialMembers] = useState<User[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [showSearchResults, setShowSearchResults] = useState(false);
-    // New state: hold the IDs of users already in the project
+    // hold the IDs of users already in the project
     const [projectMemberIds, setProjectMemberIds] = useState<string[]>([]); // for active project members
     const [projectMemberEmails, setProjectMemberEmails] = useState<string[]>([]); // for pending project members
     const { authState } = useAuth();

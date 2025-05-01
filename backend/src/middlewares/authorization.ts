@@ -179,26 +179,6 @@ export const authorizeAssignmentsForOwnerAndAdmin = async (req: Request, res: Re
         return
     }
 
-    for (const user of users) {
-        try {
-            const { id: user_id } = user;
-            if (!user.user_id) {
-                res.status(403).json({ status: 403, message: "User not found" });
-                return
-            }
-
-            const selectedUser = await getUserByIdQuery(user_id)
-
-            if (!selectedUser) {
-                res.status(403).json({ status: 403, message: "User not found" });
-                return
-            }
-
-        } catch (error: any) {
-            next(error)
-        }
-    }
-
     // Task is owned by the user
     next();
 }

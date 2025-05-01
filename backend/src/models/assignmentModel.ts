@@ -1,5 +1,10 @@
 import pool from "../config/db";
 
+// left join -> get all the rows from the left table, even if there are no matches in the right table, 
+// if there are no matches, the result will be null for the right table columns
+// the basic inner join -> get only the rows that have a match in both tables
+
+// here need to use left join, because need the all assignments even if they don't have a assigned_by user or assigned_user (the user got deleted or something)
 export const getAssignmentsForTaskQuery = async (task_id: string) => {
     const result = await pool.query(`
         SELECT 

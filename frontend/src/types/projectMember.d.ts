@@ -4,7 +4,8 @@ interface ProjectMember {
     role: string,
     status: string,
     email: string,
-    joined_at: Date
+    joined_at: Date,
+    user?: User
 };
 
 export default ProjectMember;
