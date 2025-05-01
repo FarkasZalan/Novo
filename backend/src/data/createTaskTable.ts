@@ -7,6 +7,7 @@ const createTasksTable = async () => {
             id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
             title VARCHAR(255) NOT NULL,
             project_id UUID REFERENCES projects(id) ON DELETE CASCADE, -- Foreign key to projects table
+            milestone_id UUID REFERENCES milestones(id) ON DELETE SET NULL, -- Foreign key to milestones table
             description TEXT,
             due_date Timestamp,
             priority VARCHAR(255),

@@ -194,7 +194,7 @@ export const AddMemberDialog = ({ project, onClose, onInvite }: AddMemberModalPr
     const showEmailOption = hasValidEmail && !selectedUsers.some(u => u.email === manualEmail);
 
     return (
-        <div className="fixed inset-0 backdrop-blur-sm bg-black/30 flex items-center justify-center z-50 px-2 sm:px-4 py-4 overflow-y-auto">
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-md flex items-center justify-center z-50 px-2 sm:px-4 py-4 overflow-y-auto">
             <div
                 ref={modalRef}
                 className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-xl sm:max-w-2xl mx-auto"

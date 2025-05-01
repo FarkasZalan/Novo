@@ -30,6 +30,7 @@ import { TaskDetails } from "./components/pages/task/taskComponents/TaskDetails"
 import { ProtectedProjectForTaskManagement } from "./components/routes/TaskAdminOrOwnerRoute";
 import { useAuth } from "./hooks/useAuth";
 import { AuthProvider } from "./context/AuthProvider";
+import { MilestoneDetailsPage } from "./components/pages/task/taskComponents/milestones/MilestoneDetails";
 
 function RootRedirect() {
   const { isAuthenticated } = useAuth();
@@ -87,6 +88,7 @@ function App() {
               <Route path="/new" element={<CreateProject />} />
               <Route path="/projects/:projectId" element={<ProjectPage />} />
               <Route path="/projects/:projectId/files" element={<FilesTab />} />
+              <Route path="/projects/:projectId/milestones/:milestoneId" element={<MilestoneDetailsPage />} />
 
               { /* Task routes */}
               <Route path="/projects/:projectId/tasks" element={<TasksManagerPage />} />

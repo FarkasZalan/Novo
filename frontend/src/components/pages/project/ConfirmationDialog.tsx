@@ -30,7 +30,7 @@ export const ConfirmationDialog = ({
     };
 
     return (
-        <div className="fixed inset-0 backdrop-blur-sm bg-black/30 flex items-center justify-center z-50 px-2 sm:px-4 py-4 overflow-y-auto">
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-md flex items-center justify-center z-50 px-2 sm:px-4 py-4 overflow-y-auto">
             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl max-w-md w-full">
                 {/* Icon at the top - centered */}
                 <div className="flex justify-center mb-4">

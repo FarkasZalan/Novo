@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { NextFunction } from "connect";
 import { createTaskQuery, deleteTaskQuery, getAllTaskForProjectQuery, getCompletedTaskCountForProjectQuery, getInProgressTaskCountForProjectQuery, getTaskByIdQuery, getTaskCountForProjectQuery, updateTaskQuery, updateTaskStatusQuery } from "../models/task.Model";
 import { recalculateProjectStatus } from "../models/projectModel";
+import { recalculateAllTasksInMilestoneQuery, recalculateCompletedTasksInMilestoneQuery } from "../models/milestonesModel";
 
 // Standardized response function
 // it's a function that returns a response to the client when a request is made (CRUD operations)
@@ -19,6 +20,10 @@ export const createTask = async (req: Request, res: Response, next: NextFunction
         const { title, description, due_date, priority, status } = req.body;
         const newTask = await createTaskQuery(title, description, projectId, due_date, priority, status);
 
+        if (newTask.milestone_id) {
+            await recalculateAllTasksInMilestoneQuery(projectId, newTask.milestone_id)
+            await recalculateCompletedTasksInMilestoneQuery(projectId, newTask.milestone_id)
+        }
         await recalculateProjectStatus(projectId);
         handleResponse(res, 201, "Task created successfully", newTask);
     } catch (error: Error | any) {
@@ -71,6 +76,10 @@ export const updateTask = async (req: Request, res: Response, next: NextFunction
             return;
         }
 
+        if (updateTask.milestone_id) {
+            await recalculateAllTasksInMilestoneQuery(projectId, updateTask.milestone_id)
+            await recalculateCompletedTasksInMilestoneQuery(projectId, updateTask.milestone_id)
+        }
         await recalculateProjectStatus(projectId);
         handleResponse(res, 200, "Task updated successfully", updateTask);
     } catch (error) {
@@ -90,6 +99,10 @@ export const updateTaskStatus = async (req: Request, res: Response, next: NextFu
             return;
         }
 
+        if (updateTask.milestone_id) {
+            await recalculateAllTasksInMilestoneQuery(projectId, updateTask.milestone_id)
+            await recalculateCompletedTasksInMilestoneQuery(projectId, updateTask.milestone_id)
+        }
         await recalculateProjectStatus(projectId);
         handleResponse(res, 200, "Task updated successfully", updateTask);
     } catch (error) {
@@ -118,6 +131,11 @@ export const deleteTask = async (req: Request, res: Response, next: NextFunction
         if (!deletedTask) {
             handleResponse(res, 404, "Task not found", null);
             return;
+        }
+
+        if (deletedTask.milestone_id) {
+            await recalculateAllTasksInMilestoneQuery(projectId, deletedTask.milestone_id)
+            await recalculateCompletedTasksInMilestoneQuery(projectId, deletedTask.milestone_id)
         }
 
         await recalculateProjectStatus(projectId);

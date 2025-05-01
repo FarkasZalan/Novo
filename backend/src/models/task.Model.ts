@@ -15,7 +15,7 @@ export const getAllTaskForProjectQuery = async (id: string, order_by: string, or
     } else {
         finalOrderBy = order_by
     }
-    const result = await pool.query("SELECT * FROM tasks WHERE project_id = $1 ORDER BY " + finalOrderBy + " " + order + ", due_date ASC", [id]); // send a query to the database with one of the open connection from the pool
+    const result = await pool.query("SELECT tasks.*, milestones.name AS milestone_name FROM tasks LEFT JOIN milestones ON tasks.milestone_id = milestones.id WHERE tasks.project_id = $1 ORDER BY " + finalOrderBy + " " + order + ", due_date ASC", [id]); // send a query to the database with one of the open connection from the pool
     return result.rows
 }
 

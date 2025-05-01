@@ -7,6 +7,7 @@ import createProjectMembersTable from "../data/createProjectMembersTable";
 import createPendingInvitationsTable from "../data/createProjectPendingInvitationsTable";
 import createFilesTable from "../data/createFilesTable";
 import createAssignmentsTable from "../data/createAssignmentsTable";
+import createMilestoneTable from "../data/createMilestoneTable";
 
 const { Pool } = pkg;
 
@@ -36,11 +37,12 @@ const pool = new Pool({
 export const initializeDatabase = async () => {
     await createUserTable();
     await createProjectsTable();
+    await createMilestoneTable();
     await createTasksTable();
     await createProjectMembersTable();
+    await createAssignmentsTable();
     await createPendingInvitationsTable();
     await createFilesTable();
-    await createAssignmentsTable();
 };
 
 // listens for new connections and when a new connection is requested from the pool it will execute this callback function

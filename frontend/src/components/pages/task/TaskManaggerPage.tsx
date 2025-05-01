@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { FaArrowLeft, FaFlag, FaList, FaPlus, FaThLarge } from 'react-icons/fa';
 import { fetchAllTasksForProject } from '../../../services/taskService';
 import { TaskBoard } from './taskComponents/board/TaskBoard';
 import { TaskList } from './taskComponents/TaskList';
 import { fetchProjectById } from '../../../services/projectService';
-import { Milestones } from './taskComponents/Milestones';
 import { getProjectMembers } from '../../../services/projectMemberService';
 import { useAuth } from '../../../hooks/useAuth';
 import { Task } from '../../../types/task';
-
+import { MilestonesManagerPage } from './taskComponents/milestones/MilestonesManaggerPage';
 
 export const TasksManagerPage: React.FC = () => {
     const { projectId } = useParams<{ projectId: string }>();
+    const location = useLocation();
     const [project, setProject] = useState<any>(null);
     const { authState } = useAuth();
     const navigate = useNavigate();
@@ -21,6 +21,14 @@ export const TasksManagerPage: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [view, setView] = useState<'board' | 'list' | 'milestones'>('board');
     const [canManageTasks, setCanManageTasks] = useState(false);
+
+    useEffect(() => {
+        // Check URL for milestones query parameter
+        const searchParams = new URLSearchParams(location.search);
+        if (searchParams.has('milestones')) {
+            setView('milestones');
+        }
+    }, [location.search]);
 
     useEffect(() => {
         const loadTasks = async () => {
@@ -56,8 +64,6 @@ export const TasksManagerPage: React.FC = () => {
         if (projectId && authState.accessToken) loadTasks();
     }, [projectId, authState.accessToken]);
 
-    // Handler for task updates (used for drag and drop)
-    // so when a task is moved to another column (status) then update the task list in the local state, so the UI shows the new status
     const handleTaskUpdate = (updatedTask: Task) => {
         setTasks(currentTasks =>
             currentTasks.map(task =>
@@ -133,7 +139,7 @@ export const TasksManagerPage: React.FC = () => {
                         ) : view === 'list' ? (
                             <TaskList tasks={tasks} setTasks={setTasks} canManageTasks={canManageTasks} />
                         ) : (
-                            <Milestones />
+                            <MilestonesManagerPage />
                         )}
                     </div>
                 )}
