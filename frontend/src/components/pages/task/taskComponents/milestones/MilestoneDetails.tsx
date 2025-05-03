@@ -17,6 +17,8 @@ import { MilestoneFormModal } from './MilestoneFormModal';
 import { ConfirmationDialog } from '../../../project/ConfirmationDialog';
 import toast from 'react-hot-toast';
 import { MilestoneTasks } from './MilestoneTasks';
+import { getProjectMembers } from '../../../../../services/projectMemberService';
+import { fetchProjectById } from '../../../../../services/projectService';
 
 export const MilestoneDetailsPage: React.FC = () => {
     const { projectId, milestoneId } = useParams<{ projectId: string; milestoneId: string }>();
@@ -52,7 +54,21 @@ export const MilestoneDetailsPage: React.FC = () => {
                 setMilestone(milestoneData);
                 setTasks(allTasks);
                 setMilestoneTasks(mTasks);
-                setCanManage(true); // Implement proper permission check
+
+                // Check permissions
+                const project = await fetchProjectById(projectId!, authState.accessToken!);
+                if (project.owner_id === authState.user?.id) {
+                    setCanManage(true);
+                } else {
+                    const members = await getProjectMembers(projectId!, authState.accessToken!);
+                    const [activeMembers = []] = members;
+                    const currentUserMember = activeMembers.find(
+                        (member: any) => member.user_id === authState.user?.id
+                    );
+                    if (currentUserMember && currentUserMember.role === "admin") {
+                        setCanManage(true);
+                    }
+                }
 
             } catch (err) {
                 console.error(err);
@@ -221,14 +237,14 @@ export const MilestoneDetailsPage: React.FC = () => {
                         <div className="flex space-x-3">
                             <button
                                 onClick={() => setIsEditModalOpen(true)}
-                                className="flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors shadow hover:shadow-md"
+                                className="flex items-center cursor-pointer px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors shadow hover:shadow-md"
                             >
                                 <FaEdit className="mr-2" />
                                 Edit
                             </button>
                             <button
                                 onClick={() => setIsDeleteConfirmOpen(true)}
-                                className="flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors shadow hover:shadow-md"
+                                className="flex items-center px-4 cursor-pointer py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors shadow hover:shadow-md"
                             >
                                 <FaTrash className="mr-2" />
                                 Delete

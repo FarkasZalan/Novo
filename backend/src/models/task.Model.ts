@@ -20,7 +20,7 @@ export const getAllTaskForProjectQuery = async (id: string, order_by: string, or
 }
 
 export const getTaskByIdQuery = async (id: string) => {
-    const result = await pool.query("SELECT * FROM tasks WHERE id = $1", [id]);
+    const result = await pool.query("SELECT tasks.*, milestones.name AS milestone_name FROM tasks LEFT JOIN milestones ON tasks.milestone_id = milestones.id WHERE tasks.id = $1", [id]);
     return result.rows[0];
 }
 

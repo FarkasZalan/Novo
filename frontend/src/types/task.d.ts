@@ -6,4 +6,6 @@ export interface Task {
     priority: 'low' | 'medium' | 'high';
     due_date?: string;
     attachments_count: number;
+    milestone_id?: string;
+    milestone_name?: string;
 }

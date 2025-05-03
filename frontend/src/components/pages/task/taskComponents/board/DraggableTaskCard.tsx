@@ -4,7 +4,7 @@ import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { isPast, isToday, isTomorrow } from 'date-fns';
 import { Task } from '../../../../../types/task';
-import { FaPaperclip } from 'react-icons/fa';
+import { FaFlag, FaPaperclip } from 'react-icons/fa';
 import { TaskAssignments } from '../../taskHandler/assignments/TaskAssignments';
 
 // one task card
@@ -32,6 +32,11 @@ const DraggableTaskCard: React.FC<{ task: Task }> = React.memo(({ task }) => {
         transform: isDragging ? undefined : CSS.Translate.toString(transform),
     };
 
+    const handleMilestoneClick = (e: React.MouseEvent, milestoneId: string) => {
+        e.stopPropagation();
+        navigate(`/projects/${projectId}/milestones/${milestoneId}`);
+    };
+
     const getPriorityBadge = (priority: string) => {
         const colors = {
             low: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
@@ -48,32 +53,22 @@ const DraggableTaskCard: React.FC<{ task: Task }> = React.memo(({ task }) => {
 
     return (
         <div
-
-            // the draggable element setup
             ref={setNodeRef}
             style={style}
             {...attributes}
             {...listeners}
-
-            // the e.stopPropagation() is denying the click event from the parent element
             onClick={(e) => {
                 e.stopPropagation();
                 navigate(`/projects/${projectId}/tasks/${task.id}`);
             }}
-            className={`p-4 bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md cursor-grab active:cursor-grabbing transition-all duration-200 border border-gray-100 dark:border-gray-700 hover:border-indigo-200 dark:hover:border-indigo-500/50 ${isDragging ? 'opacity-40' : 'opacity-100'
-                }`}
+            className={`p-4 bg-white dark:bg-gray-800 rounded-2xl shadow-sm hover:shadow-md cursor-grab active:cursor-grabbing transition-all duration-200 border border-gray-100 dark:border-gray-700 hover:border-indigo-200 dark:hover:border-indigo-500/50 ${isDragging ? 'opacity-40' : 'opacity-100'}`}
         >
-            {/* Task Header with Title and Assignments */}
-            <div className="flex justify-between items-start gap-2">
-                <h4 className="font-medium text-gray-900 dark:text-gray-100 flex-1">
+            {/* Header: Title + Priority */}
+            <div className="flex justify-between items-start gap-3">
+                <h4 className="text-base font-semibold text-gray-900 dark:text-gray-100 flex-1 truncate">
                     {task.title}
                 </h4>
-
-                {/* Compact Assignments */}
-                <div className="flex-shrink-0">
-                    {getPriorityBadge(task.priority)}
-
-                </div>
+                {getPriorityBadge(task.priority)}
             </div>
 
             {/* Description */}
@@ -83,35 +78,41 @@ const DraggableTaskCard: React.FC<{ task: Task }> = React.memo(({ task }) => {
                 </p>
             )}
 
-            {/* Attachments */}
-            {task.attachments_count > 0 && (
-                <div className="mt-2">
-                    <span className="inline-flex items-center text-xs bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 px-2 py-1 rounded-full">
-                        <FaPaperclip className="mr-1" />
+            {/* Row: Milestone & Attachments */}
+            <div className="flex justify-between items-center mt-4 gap-2">
+                {task.milestone_id && (
+                    <button
+                        onClick={(e) => handleMilestoneClick(e, task.milestone_id!)}
+                        className="inline-flex cursor-pointer hover:underline items-center text-xs font-medium bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 px-2.5 py-1 rounded-full hover:bg-indigo-100 dark:hover:bg-indigo-800/30 transition"
+                    >
+                        <FaFlag className="mr-1.5 h-3 w-3" />
+                        {task.milestone_name || 'Milestone'}
+                    </button>
+                )}
+
+                {task.attachments_count > 0 && (
+                    <span className="inline-flex items-center text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 px-2.5 py-1 rounded-full">
+                        <FaPaperclip className="mr-1 h-3 w-3" />
                         {task.attachments_count}
                     </span>
-                </div>
-            )}
+                )}
+            </div>
 
-            <div className="flex items-center justify-between mt-3">
+            {/* Row: Due Date & Assignees */}
+            <div className="flex justify-between items-center mt-4 gap-2">
                 {task.due_date && (
-                    <div className="flex items-center gap-1">
-                        <span className={
-                            `inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${task.status !== 'completed'
-                                ? isPast(new Date(task.due_date)) || isToday(new Date(task.due_date))
-                                    ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200" // Overdue/Today
-                                    : isTomorrow(new Date(task.due_date))
-                                        ? "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200" // Tomorrow
-                                        : "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200" // Future
-                                : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300" // Completed
-                            }`
-                        }>
-                            Due {new Date(task.due_date).toLocaleDateString()}
-                            {/* status indicator */}
-                            {task.status !== 'completed' && isToday(new Date(task.due_date)) && " • Today"}
-                            {task.status !== 'completed' && isTomorrow(new Date(task.due_date)) && " • Tomorrow"}
-                        </span>
-                    </div>
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${task.status !== 'completed'
+                        ? isPast(new Date(task.due_date)) || isToday(new Date(task.due_date))
+                            ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+                            : isTomorrow(new Date(task.due_date))
+                                ? "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200"
+                                : "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
+                        : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
+                        }`}>
+                        Due {new Date(task.due_date).toLocaleDateString()}
+                        {task.status !== 'completed' && isToday(new Date(task.due_date)) && " • Today"}
+                        {task.status !== 'completed' && isTomorrow(new Date(task.due_date)) && " • Tomorrow"}
+                    </span>
                 )}
 
                 <TaskAssignments
@@ -123,6 +124,7 @@ const DraggableTaskCard: React.FC<{ task: Task }> = React.memo(({ task }) => {
             </div>
         </div>
     );
+
 });
 
 export default DraggableTaskCard;

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { FaEdit, FaCircle, FaClock, FaCheckCircle, FaPlus, FaTasks, FaTrash, FaPaperclip } from 'react-icons/fa';
+import { FaEdit, FaCircle, FaClock, FaCheckCircle, FaPlus, FaTasks, FaTrash, FaPaperclip, FaFlag } from 'react-icons/fa';
 import { isPast, isToday, isTomorrow } from 'date-fns';
 import { ConfirmationDialog } from '../../project/ConfirmationDialog';
 import { deleteTask } from '../../../../services/taskService';
@@ -131,6 +131,9 @@ export const TaskList: React.FC<TaskListProps> = React.memo(({ tasks, setTasks, 
                                 Priority
                             </th>
                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                Milestone
+                            </th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 Due Date
                             </th>
                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
@@ -176,6 +179,20 @@ export const TaskList: React.FC<TaskListProps> = React.memo(({ tasks, setTasks, 
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     {getPriorityBadge(task.priority)}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                    {task.milestone_name ? (
+                                        <span className="inline-flex hover:underline items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-300"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                navigate(`/projects/${projectId}/milestones/${task.milestone_id}`)
+                                            }}>
+                                            <FaFlag className="mr-1 text-sky-400" />
+                                            {task.milestone_name}
+                                        </span>
+                                    ) : (
+                                        <span className="text-gray-400 dark:text-gray-500">—</span>
+                                    )}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                     {task.due_date ? (

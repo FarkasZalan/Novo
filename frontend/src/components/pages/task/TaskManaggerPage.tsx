@@ -38,6 +38,7 @@ export const TasksManagerPage: React.FC = () => {
                 const projectData = await fetchProjectById(projectId!, authState.accessToken!);
                 setProject(projectData);
                 setTasks(data);
+                console.log(data);
 
                 // Check if current user is owner or admin
                 if (projectData.owner_id === authState.user?.id) {

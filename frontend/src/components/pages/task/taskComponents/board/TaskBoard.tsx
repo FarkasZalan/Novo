@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { FaClock, FaCheckCircle, FaCircle, FaPaperclip } from 'react-icons/fa';
+import { FaClock, FaCheckCircle, FaCircle, FaPaperclip, FaFlag } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 import { Task } from '../../../../../types/task';
 import StatusColumn from './StatusColumn';
@@ -21,7 +21,6 @@ import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { updateTaskStatus } from '../../../../../services/taskService';
 import { isPast, isToday, isTomorrow } from 'date-fns';
 import { useAuth } from '../../../../../hooks/useAuth';
-import { TaskAssignments } from '../../taskHandler/assignments/TaskAssignments';
 
 // status column styles
 const statusLabels: Record<string, { label: string, icon: React.ReactNode, color: string }> = {
@@ -192,58 +191,56 @@ export const TaskBoard: React.FC<TaskBoardProps> = React.memo(({ tasks, setTasks
             <DragOverlay>
                 {activeTask && (
                     <div className="p-4 bg-white dark:bg-gray-800 rounded-xl shadow-lg cursor-grab border-2 border-indigo-400 opacity-90">
-                        {/* Task Header with Title and Assignments */}
-                        <div className="flex justify-between items-start gap-2">
-                            <h4 className="font-medium text-gray-900 dark:text-gray-100 flex-1">
+                        {/* Header: Title + Priority */}
+                        <div className="flex justify-between items-start gap-3">
+                            <h4 className="text-base font-semibold text-gray-900 dark:text-gray-100 flex-1 truncate">
                                 {activeTask.title}
                             </h4>
-
-                            {/* Compact Assignments */}
-                            <div className="flex-shrink-0">
-                                <TaskAssignments
-                                    taskIdFromCompactMode={activeTask.id}
-                                    pendingUsers={[]}
-                                    setPendingUsers={() => { }}
-                                    compactMode={true}
-                                />
-                            </div>
+                            {getPriorityBadge(activeTask.priority)}
                         </div>
+
+                        {/* Description */}
                         {activeTask.description && (
-                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 line-clamp-2">
                                 {activeTask.description}
                             </p>
                         )}
 
-                        {activeTask.attachments_count > 0 && (
-                            <div className="mt-2">
-                                <span className="inline-flex items-center text-xs bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 px-2 py-1 rounded-full">
-                                    <FaPaperclip className="mr-1" />
+                        {/* Row: Milestone & Attachments */}
+                        <div className="flex justify-between items-center mt-4 gap-2">
+                            {activeTask.milestone_id && (
+                                <button
+                                    className="inline-flex items-center text-xs font-medium bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 px-2.5 py-1 rounded-full hover:bg-indigo-100 dark:hover:bg-indigo-800/30 transition"
+                                >
+                                    <FaFlag className="mr-1.5 h-3 w-3" />
+                                    {activeTask.milestone_name || 'Milestone'}
+                                </button>
+                            )}
+
+                            {activeTask.attachments_count > 0 && (
+                                <span className="inline-flex items-center text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 px-2.5 py-1 rounded-full">
+                                    <FaPaperclip className="mr-1 h-3 w-3" />
                                     {activeTask.attachments_count}
                                 </span>
-                            </div>
-                        )}
-
-                        <div className="flex items-center justify-between mt-3">
-                            {activeTask.due_date && (
-                                <div className="flex items-center gap-1">
-                                    <span className={
-                                        `inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${activeTask.status !== 'completed'
-                                            ? isPast(new Date(activeTask.due_date)) || isToday(new Date(activeTask.due_date))
-                                                ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200" // Overdue/Today
-                                                : isTomorrow(new Date(activeTask.due_date))
-                                                    ? "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200" // Tomorrow
-                                                    : "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200" // Future
-                                            : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300" // Completed
-                                        }`
-                                    }>
-                                        Due {new Date(activeTask.due_date).toLocaleDateString()}
-                                        {/* status indicator */}
-                                        {activeTask.status !== 'completed' && isToday(new Date(activeTask.due_date)) && " • Today"}
-                                        {activeTask.status !== 'completed' && isTomorrow(new Date(activeTask.due_date)) && " • Tomorrow"}
-                                    </span>
-                                </div>
                             )}
-                            {getPriorityBadge(activeTask.priority)}
+                        </div>
+
+                        {/* Row: Due Date & Assignees */}
+                        <div className="flex justify-between items-center mt-4 gap-2">
+                            {activeTask.due_date && (
+                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${activeTask.status !== 'completed'
+                                    ? isPast(new Date(activeTask.due_date)) || isToday(new Date(activeTask.due_date))
+                                        ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+                                        : isTomorrow(new Date(activeTask.due_date))
+                                            ? "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200"
+                                            : "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
+                                    : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
+                                    }`}>
+                                    Due {new Date(activeTask.due_date).toLocaleDateString()}
+                                    {activeTask.status !== 'completed' && isToday(new Date(activeTask.due_date)) && " • Today"}
+                                    {activeTask.status !== 'completed' && isTomorrow(new Date(activeTask.due_date)) && " • Tomorrow"}
+                                </span>
+                            )}
                         </div>
                     </div>
                 )}

@@ -9,7 +9,8 @@ import {
     FaArrowLeft,
     FaExclamation,
     FaAlignLeft,
-    FaTag
+    FaTag,
+    FaFlag
 } from 'react-icons/fa';
 import { fetchTask } from '../../../../services/taskService';
 import { fetchProjectById } from '../../../../services/projectService';
@@ -227,6 +228,32 @@ export const TaskDetails: React.FC = () => {
                                 setPendingUsers={() => { }}
                                 compactMode={false}
                             />
+                        </div>
+
+                        {/* Milestone */}
+                        <div className="bg-gray-50/70 dark:bg-gray-700/60 p-4 rounded-lg backdrop-blur-sm">
+                            <div className="flex items-center text-gray-500 dark:text-gray-400 mb-2">
+                                <FaFlag className="mr-2" />
+                                <h3 className="font-medium">Milestone</h3>
+                            </div>
+
+                            {task.milestone_id ? (
+                                <div className="flex items-center justify-between">
+                                    <span className="inline-flex items-center hover:cursor-pointer hover:text-indigo-800 hover:dark:text-indigo-300 px-3 py-1 bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300 rounded-full text-sm"
+                                        onClick={() =>
+                                            navigate(`/projects/${projectId}/milestones/${task.milestone_id}`)
+                                        }>
+                                        <FaFlag className="mr-2"
+                                        />
+                                        {task.milestone_name || 'View Milestone'}
+                                    </span>
+                                </div>
+                            ) : (
+                                <span className="inline-flex items-center px-3 py-1 bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300 rounded-full text-sm">
+                                    <FaFlag className="mr-2" />
+                                    No milestone
+                                </span>
+                            )}
                         </div>
 
                         {/* Tags */}

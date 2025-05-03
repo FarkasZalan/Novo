@@ -198,9 +198,9 @@ export const TaskAssignments: React.FC<TaskAssignmentsProps> = ({
                                 {isAssigningSelf ? (
                                     <FaSpinner className="animate-spin" size={16} />
                                 ) : isAssignedMyself ? (
-                                    <FaUserMinus size={16} />
+                                    <FaUserMinus size={16} className='hover:text-red-400' />
                                 ) : (
-                                    <FaUserPlus size={16} />
+                                    <FaUserPlus size={16} className='hover:text-indigo-400' />
                                 )}
                             </button>
                         )}
