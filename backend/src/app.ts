@@ -9,6 +9,7 @@ import assignmentRoutes from "./routes/assignmentRoutes";
 import projectMemberRoutes from "./routes/projectMemberRoutes";
 import fileRoutes from "./routes/filesRoutes";
 import taskRoutes from "./routes/taskRoutes";
+import labelRoutes from "./routes/labelRoutes";
 import milestoneRoutes from "./routes/milestonesRoutes";
 import errorHandling from "./middlewares/errorHandler";
 import { setupSwagger } from "./config/swagger";
@@ -95,6 +96,7 @@ app.use("/api", fileRoutes);
 app.use("/api", taskRoutes);
 app.use("/api", assignmentRoutes);
 app.use("/api", milestoneRoutes);
+app.use("/api", labelRoutes);
 
 // Error handling middleware
 app.use(errorHandling);

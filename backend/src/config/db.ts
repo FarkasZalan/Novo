@@ -8,6 +8,8 @@ import createPendingInvitationsTable from "../data/createProjectPendingInvitatio
 import createFilesTable from "../data/createFilesTable";
 import createAssignmentsTable from "../data/createAssignmentsTable";
 import createMilestoneTable from "../data/createMilestoneTable";
+import createLabelTable from "../data/createLabelTable";
+import createTaskLabelTable from "../data/createTaskLabelTable";
 
 const { Pool } = pkg;
 
@@ -39,6 +41,8 @@ export const initializeDatabase = async () => {
     await createProjectsTable();
     await createMilestoneTable();
     await createTasksTable();
+    await createLabelTable();
+    await createTaskLabelTable();
     await createProjectMembersTable();
     await createAssignmentsTable();
     await createPendingInvitationsTable();
