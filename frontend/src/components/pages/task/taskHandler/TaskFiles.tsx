@@ -8,13 +8,14 @@ import { ConfirmationDialog } from "../../project/ConfirmationDialog";
 
 
 interface TaskFilesProps {
+    displayNoFileIfEmpty?: boolean;
     canManageFiles: boolean;
     selectedFiles?: File[];
     setSelectedFiles?: React.Dispatch<React.SetStateAction<File[]>>;
 }
 
 
-export const TaskFiles: React.FC<TaskFilesProps> = React.memo(({ canManageFiles, selectedFiles, setSelectedFiles }) => {
+export const TaskFiles: React.FC<TaskFilesProps> = React.memo(({ canManageFiles, displayNoFileIfEmpty, selectedFiles, setSelectedFiles }) => {
     const { projectId } = useParams<{ projectId: string }>();
     const { taskId } = useParams<{ taskId: string }>();
     const { authState } = useAuth();
@@ -476,9 +477,12 @@ export const TaskFiles: React.FC<TaskFilesProps> = React.memo(({ canManageFiles,
             {/* Files List */}
             <div className="space-y-3">
                 {files.length === 0 ? (
-                    <div className="text-center py-8 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50/70 dark:bg-gray-700/60 p-4 rounded-lg backdrop-blur-sm">
-                        No files uploaded yet
-                    </div>
+                    // No files uploaded
+                    displayNoFileIfEmpty && (
+                        <div className="text-center py-8 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50/70 dark:bg-gray-700/60 p-4 rounded-lg backdrop-blur-sm">
+                            No files uploaded yet
+                        </div>
+                    )
                 ) : (
                     files.map((file) => (
                         <div key={file.id} className="group flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200">

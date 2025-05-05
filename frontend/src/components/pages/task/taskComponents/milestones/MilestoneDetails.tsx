@@ -123,7 +123,7 @@ export const MilestoneDetailsPage: React.FC = () => {
             setLoading(true);
             await deleteMilestone(milestoneId!, projectId!, authState.accessToken!);
             toast.success('Milestone deleted successfully');
-            navigate(`/projects/${projectId}/milestones`);
+            navigate(`/projects/${projectId}/tasks?milestones`, { replace: true });
         } catch (err) {
             console.error(err);
             toast.error('Failed to delete milestone');

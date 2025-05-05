@@ -279,6 +279,7 @@ export const TaskDetails: React.FC = () => {
                         {/* Attachments */}
                         <div className="md:col-span-2">
                             <TaskFiles
+                                displayNoFileIfEmpty={true}
                                 canManageFiles={false}
                             />
                         </div>

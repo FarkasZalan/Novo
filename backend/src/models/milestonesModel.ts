@@ -11,7 +11,7 @@ export const getMilestoneByIdQuery = async (id: string) => {
 }
 
 export const createMilestoneQuery = async (procejt_Id: string, name: string, description: string, due_date: Date) => {
-    const result = await pool.query("INSERT INTO milestones (project_id, name, description, due_date, created_at, all_tasks_count, completed_tasks_count) VALUES ($1, $2, $3, $4, $5, 0, 0);", [procejt_Id, name, description, due_date, new Date()]); // send a query to the database with one of the open connection from the pool
+    const result = await pool.query("INSERT INTO milestones (project_id, name, description, due_date, created_at, all_tasks_count, completed_tasks_count) VALUES ($1, $2, $3, $4, $5, 0, 0) RETURNING *;", [procejt_Id, name, description, due_date, new Date()]); // send a query to the database with one of the open connection from the pool
     return result.rows[0]
 }
 

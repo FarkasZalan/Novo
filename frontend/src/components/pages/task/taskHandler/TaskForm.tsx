@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { createTask, deleteTask, fetchAllTasksForProject, updateTask } from '../../../../services/taskService';
-import { FaCalendarAlt, FaArrowLeft, FaSave, FaTimes, FaTrash, FaExclamationTriangle } from 'react-icons/fa';
+import { FaCalendarAlt, FaArrowLeft, FaSave, FaTimes, FaTrash, FaExclamationTriangle, FaFlag, FaPlus, FaSearch } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 import { ConfirmationDialog } from '../../project/ConfirmationDialog';
 import { useAuth } from '../../../../hooks/useAuth';
@@ -10,6 +10,7 @@ import { uploadTaskFile } from '../../../../services/fileService';
 import { TaskAssignments } from './assignments/TaskAssignments';
 import ProjectMember from '../../../../types/projectMember';
 import { addAssignmentForUsers } from '../../../../services/assignmentService';
+import { addMilestoneToTask, createMilestone, deleteMilestoneFromTask, getAllMilestonesForProject } from '../../../../services/milestonesService';
 
 export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
     const { projectId, taskId } = useParams<{ projectId: string; taskId: string }>();
@@ -41,11 +42,26 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
     // assignments
     const [pendingUsers, setPendingUsers] = useState<ProjectMember[]>([]);
 
+    // Milestone states
+    const [milestones, setMilestones] = useState<Milestone[]>([]);
+    const [selectedMilestone, setSelectedMilestone] = useState<Milestone | null>(null);
+    const [milestoneSearchTerm, setMilestoneSearchTerm] = useState('');
+    const [showSearchResults, setShowSearchResults] = useState(false);
+    const searchRef = useRef<HTMLDivElement>(null);
+
+    // Load milestones and task data
     useEffect(() => {
-        if (isEdit && projectId && taskId) {
-            setLoading(true);
-            fetchAllTasksForProject(projectId, authState.accessToken!, "priority", "asc")
-                .then(tasks => {
+        const loadData = async () => {
+            try {
+                setLoading(true);
+
+                // Load milestones
+                const loadedMilestones = await getAllMilestonesForProject(projectId!, authState.accessToken!);
+                setMilestones(loadedMilestones);
+
+                if (isEdit && taskId) {
+                    // Load task data
+                    const tasks = await fetchAllTasksForProject(projectId!, authState.accessToken!, "priority", "asc");
                     const task = tasks.find((t: any) => t.id === taskId);
                     if (task) {
                         setFormData({
@@ -56,15 +72,73 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
                             status: task.status || 'not-started',
                             completed: task.status === 'completed'
                         });
+
+                        // If task has a milestone, set it as selected
+                        if (task.milestone_id) {
+                            const milestone = loadedMilestones.find((m: Milestone) => m.id === task.milestone_id);
+                            if (milestone) {
+                                setSelectedMilestone(milestone);
+                            }
+                        }
                     }
-                })
-                .catch(err => {
-                    console.error(err);
-                    setError('Failed to load task data');
-                })
-                .finally(() => setLoading(false));
+                }
+            } catch (err) {
+                console.error(err);
+                setError('Failed to load data');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (projectId) {
+            loadData();
         }
     }, [isEdit, projectId, taskId, authState.accessToken]);
+
+    // Filter milestones based on search term
+    const filteredMilestones = milestones.filter((milestone: Milestone) =>
+        milestone.name.toLowerCase().includes(milestoneSearchTerm.toLowerCase())
+    );
+
+    // click outside search results milestone
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+                setShowSearchResults(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
+    const handleCreateMilestone = async () => {
+        if (!milestoneSearchTerm.trim()) { // trim() to remove leading/trailing spaces
+            return;
+        }
+
+        try {
+            setLoading(true);
+            const newMilestone = await createMilestone(
+                projectId!,
+                authState.accessToken!,
+                milestoneSearchTerm.trim(),
+                '', // Empty description
+            );
+
+            setMilestones([...milestones, newMilestone]);
+            setSelectedMilestone(newMilestone);
+            setMilestoneSearchTerm('');
+            toast.success(`Milestone "${milestoneSearchTerm.trim()}" created`);
+        } catch (err) {
+            console.error(err);
+            toast.error('Failed to create milestone');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -87,12 +161,30 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
                     status
                 );
 
+                // Handle assignments
                 if (pendingUsers.length > 0) {
                     await handleAddAssignments(resultTask.id);
                 }
 
+                // Handle file uploads
                 if (selectedFiles.length > 0) {
                     await handleFileUpload(resultTask.id);
+                }
+
+                // Handle milestone assignment if selected
+                if (selectedMilestone) {
+                    await addMilestoneToTask(
+                        selectedMilestone.id,
+                        projectId!,
+                        [resultTask.id],
+                        authState.accessToken!
+                    );
+                } else if (!selectedMilestone && resultTask.milestone_id) {
+                    await deleteMilestoneFromTask(
+                        resultTask.milestone_id,
+                        projectId!,
+                        resultTask.id,
+                        authState.accessToken!)
                 }
                 toast.success('Task updated successfully');
             } else {
@@ -106,12 +198,24 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
                     status
                 );
 
+                // Handle assignments
                 if (pendingUsers.length > 0) {
                     await handleAddAssignments(resultTask.id);
                 }
 
+                // Handle file uploads
                 if (selectedFiles.length > 0) {
                     await handleFileUpload(resultTask.id);
+                }
+
+                // Handle milestone assignment if selected
+                if (selectedMilestone) {
+                    await addMilestoneToTask(
+                        selectedMilestone.id,
+                        projectId!,
+                        [resultTask.id],
+                        authState.accessToken!
+                    );
                 }
                 toast.success('Task created successfully');
             }
@@ -261,7 +365,7 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
                             name="description"
                             value={formData.description}
                             onChange={handleChange}
-                            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent transition-colors"
+                            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent hover:border-gray-400 dark:hover:border-gray-500 transition-colors duration-200"
                             placeholder="Enter task description"
                             rows={4}
                         />
@@ -305,7 +409,7 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
                         </div>
 
                         {isEdit && (
-                            <div>
+                            <div className="md:col-span-2">
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" htmlFor="status">
                                     Status
                                 </label>
@@ -324,6 +428,146 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
                         )}
                     </div>
 
+                    {/* Milestone Selection */}
+                    <div className="space-y-2" ref={searchRef}>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Milestone
+                        </label>
+
+                        {/* Selected milestone display */}
+                        {selectedMilestone ? (
+                            <div className="flex items-center justify-between bg-indigo-50/50 dark:bg-indigo-800/30 rounded-lg px-4 py-3 border border-indigo-100 dark:border-indigo-600 transition-all duration-200 shadow-sm dark:shadow-indigo-900/40">
+                                <div className="flex items-center space-x-3">
+                                    <div className="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-700 shadow-inner">
+                                        <FaFlag className="text-indigo-600 dark:text-indigo-200 text-sm" />
+                                    </div>
+                                    <div>
+                                        <span className="font-medium text-indigo-700 dark:text-indigo-100">
+                                            {selectedMilestone.name}
+                                        </span>
+                                        {selectedMilestone.due_date && (
+                                            <span className="block text-xs text-gray-500 dark:text-gray-300 mt-0.5">
+                                                Due {new Date(selectedMilestone.due_date).toLocaleDateString()}
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => setSelectedMilestone(null)}
+                                    className="p-1.5 -mr-1 cursor-pointer rounded-lg hover:bg-indigo-100/50 dark:hover:bg-indigo-700/70 transition-colors text-indigo-500 dark:text-indigo-200 hover:text-indigo-700 dark:hover:text-indigo-50"
+                                    aria-label="Remove milestone"
+                                >
+                                    <FaTimes className="h-4 w-4" />
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="relative">
+                                {/* Search input */}
+                                <div className="relative">
+                                    <input
+                                        type="text"
+                                        className="block w-full pl-10 pr-3 py-2.5 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-200"
+                                        placeholder="Search or create milestone..."
+                                        value={milestoneSearchTerm}
+                                        onChange={(e) => {
+                                            setMilestoneSearchTerm(e.target.value);
+                                            setShowSearchResults(true);
+                                        }}
+                                        onFocus={() => setShowSearchResults(true)}
+                                    />
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <FaSearch className="text-gray-400 dark:text-gray-500 text-sm" />
+                                    </div>
+
+                                    {/* Clear search button */}
+                                    {milestoneSearchTerm && (
+                                        <button
+                                            onClick={() => {
+                                                setMilestoneSearchTerm('');
+                                                setShowSearchResults(false);
+                                            }}
+                                            className="absolute cursor-pointer inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                                        >
+                                            <FaTimes />
+                                        </button>
+                                    )}
+                                </div>
+
+                                {/* Search Results Dropdown */}
+                                {showSearchResults && (
+                                    <div className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 max-h-60 overflow-y-auto">
+                                        {filteredMilestones.length > 0 ? (
+                                            <>
+                                                <ul className="py-1">
+                                                    {filteredMilestones.map(milestone => (
+                                                        <li
+                                                            key={milestone.id}
+                                                            className="px-3 py-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                                                            onClick={() => {
+                                                                setSelectedMilestone(milestone);
+                                                                setMilestoneSearchTerm('');
+                                                                setShowSearchResults(false);
+                                                            }}
+                                                        >
+                                                            <div className="flex items-center space-x-3">
+                                                                <div className="flex-shrink-0 p-1 rounded-lg bg-indigo-100/70 dark:bg-indigo-900/20">
+                                                                    <FaFlag className="text-indigo-600 dark:text-indigo-400 text-sm" />
+                                                                </div>
+                                                                <div>
+                                                                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                                                        {milestone.name}
+                                                                    </p>
+                                                                    {milestone.due_date && (
+                                                                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                                                            Due {new Date(milestone.due_date).toLocaleDateString()}
+                                                                        </p>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                                {milestoneSearchTerm && !milestones.some(m => m.name.toLowerCase() === milestoneSearchTerm.toLowerCase()) && (
+                                                    <div className="border-t border-gray-100 dark:border-gray-700 px-3 py-2">
+                                                        <button
+                                                            type="button"
+                                                            onClick={handleCreateMilestone}
+                                                            className="w-full cursor-pointer flex items-center justify-between px-2 py-1.5 text-sm text-indigo-600 dark:text-indigo-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded transition-colors"
+                                                        >
+                                                            <span>Create "{milestoneSearchTerm}"</span>
+                                                            <FaPlus className="h-3 w-3" />
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </>
+                                        ) : (
+                                            <div className="p-4 text-center">
+                                                <div className="flex flex-col items-center">
+                                                    <div className="mb-3 rounded-lg bg-gray-100 dark:bg-gray-700 p-2">
+                                                        <FaPlus className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+                                                    </div>
+                                                    <p className="text-gray-700 dark:text-gray-300 font-medium text-sm mb-2">
+                                                        No milestones found
+                                                    </p>
+                                                    {milestoneSearchTerm && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={handleCreateMilestone}
+                                                            className="w-full cursor-pointer py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded transition-colors text-sm"
+                                                        >
+                                                            Create "{milestoneSearchTerm}"
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+
                     {/* Assignees */}
                     <div>
                         <TaskAssignments
@@ -336,6 +580,7 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
                     {/* Files */}
                     <div>
                         <TaskFiles
+                            displayNoFileIfEmpty={isEdit}
                             canManageFiles={true}
                             selectedFiles={selectedFiles}
                             setSelectedFiles={setSelectedFiles}
