@@ -57,12 +57,6 @@ export const addMilestoneToTask = async (req: Request, res: Response, next: Next
 
         const updatedTasks = [];
         for (const taskId of taskIds) {
-            const task = await getTaskByIdQuery(taskId);
-            if (task.milestone_id) {
-                handleResponse(res, 400, "Task already has a milestone", null);
-                return;
-            }
-
             const updateTask = await addMilestoneToTaskQuery(taskId, milestone_id);
             if (!updateTask) {
                 handleResponse(res, 404, "Task not found", null);
