@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { FaArrowLeft, FaFlag, FaList, FaPlus, FaThLarge } from 'react-icons/fa';
+import { FaArrowLeft, FaFlag, FaList, FaPlus, FaTags, FaThLarge } from 'react-icons/fa';
 import { fetchAllTasksForProject } from '../../../services/taskService';
 import { TaskBoard } from './taskComponents/board/TaskBoard';
 import { TaskList } from './taskComponents/TaskList';
@@ -103,22 +103,23 @@ export const TasksManagerPage: React.FC = () => {
                 </div>
 
                 {/* View Toggle */}
-                <div className="inline-flex bg-white dark:bg-gray-800 rounded-xl shadow overflow-hidden mb-8 border border-gray-200 dark:border-gray-700">
+                <div className="flex flex-wrap bg-white dark:bg-gray-800 rounded-xl shadow overflow-hidden mb-8 border border-gray-200 dark:border-gray-700">
                     {[
                         { label: 'Board', icon: <FaThLarge />, key: 'board' },
                         { label: 'List', icon: <FaList />, key: 'list' },
                         { label: 'Milestones', icon: <FaFlag />, key: 'milestones' },
+                        ...(canManageTasks ? [{ label: 'Labels', icon: <FaTags />, key: 'labels' }] : [])
                     ].map(({ label, icon, key }) => (
                         <button
                             key={key}
                             onClick={() => setView(key as typeof view)}
-                            className={`flex items-center px-5 py-2 font-medium transition-all cursor-pointer ${view === key
+                            className={`flex items-center px-3 sm:px-4 py-2 text-sm sm:text-base font-medium transition-all cursor-pointer flex-1 min-w-[100px] sm:min-w-0 justify-center ${view === key
                                 ? 'bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300'
                                 : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                                 }`}
                         >
                             {icon}
-                            <span className="ml-2">{label}</span>
+                            <span className="ml-1 sm:ml-2">{label}</span>
                         </button>
                     ))}
                 </div>
@@ -139,8 +140,10 @@ export const TasksManagerPage: React.FC = () => {
                             <TaskBoard tasks={tasks} setTasks={setTasks} onTaskUpdate={handleTaskUpdate} canManageTasks={canManageTasks} />
                         ) : view === 'list' ? (
                             <TaskList tasks={tasks} setTasks={setTasks} canManageTasks={canManageTasks} />
-                        ) : (
+                        ) : view === 'milestones' ? (
                             <MilestonesManagerPage />
+                        ) : (
+                            <p>labels</p>
                         )}
                     </div>
                 )}
