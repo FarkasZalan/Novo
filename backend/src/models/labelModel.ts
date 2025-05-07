@@ -17,7 +17,7 @@ export const deleteLabelQuery = async (id: string) => {
 }
 
 export const getAllLabelForProjectQuery = async (project_id: string) => {
-    const result = await pool.query(`SELECT * FROM labels  WHERE labels.project_id = $1`, [project_id]);
+    const result = await pool.query(`SELECT labels.*, COUNT(task_labels.task_id) AS task_count FROM labels LEFT JOIN task_labels ON labels.id = task_labels.label_id  WHERE labels.project_id = $1 GROUP BY labels.id`, [project_id]);
     return result.rows;
 }
 
@@ -35,10 +35,5 @@ export const deleteLabelFromTaskQuery = async (task_id: string, label_id: string
 
 export const getLabelsForTaskQuery = async (task_id: string) => {
     const result = await pool.query(`SELECT labels.* FROM labels INNER JOIN task_labels ON labels.id = task_labels.label_id WHERE task_labels.task_id = $1`, [task_id]);
-    return result.rows;
-}
-
-export const getTasksForLabelQuery = async (label_id: string) => {
-    const result = await pool.query(`SELECT tasks.* FROM tasks INNER JOIN task_labels ON tasks.id = task_labels.task_id WHERE task_labels.label_id = $1`, [label_id]);
     return result.rows;
 }

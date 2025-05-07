@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { NextFunction } from "connect";
-import { addLabelToTaskQuery, createLabelQuery, deleteLabelFromTaskQuery, deleteLabelQuery, getAllLabelForProjectQuery, getLabelsForTaskQuery, getTasksForLabelQuery, updateLabelQuery } from "../models/labelModel";
+import { addLabelToTaskQuery, createLabelQuery, deleteLabelFromTaskQuery, deleteLabelQuery, getAllLabelForProjectQuery, getLabelsForTaskQuery, updateLabelQuery } from "../models/labelModel";
 
 // Standardized response function
 // it's a function that returns a response to the client when a request is made (CRUD operations)
@@ -27,7 +27,7 @@ export const updateLabel = async (req: Request, res: Response, next: NextFunctio
     try {
         const label_id = req.params.labelId;
         const { name, description, color } = req.body;
-        const label = await updateLabelQuery(name, description, label_id, color);
+        const label = await updateLabelQuery(name, description, color, label_id);
         handleResponse(res, 200, "Label updated successfully", label);
     } catch (error: any) {
         next(error);
@@ -80,16 +80,6 @@ export const getAllLabelForTask = async (req: Request, res: Response, next: Next
         const task_id = req.params.taskId;
         const labels = await getLabelsForTaskQuery(task_id);
         handleResponse(res, 200, "Labels fetched successfully", labels);
-    } catch (error: any) {
-        next(error);
-    }
-};
-
-export const getAllTasksForLabel = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const label_id = req.params.labelId;
-        const tasks = await getTasksForLabelQuery(label_id);
-        handleResponse(res, 200, "Tasks fetched successfully", tasks);
     } catch (error: any) {
         next(error);
     }

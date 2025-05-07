@@ -79,20 +79,6 @@ export const addLabelsToTask = async (projectId: string, token: string, taskId: 
     }
 }
 
-export const getAllTaskForLabel = async (projectId: string, token: string, labelId: string) => {
-    try {
-        const response = await axios.get(`${API_URL}/project/${projectId}/label/${labelId}/tasks`, {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        });
-        return response.data.data;
-    } catch (error) {
-        console.error("Error getting tasks for label:", error);
-        throw error;
-    }
-}
-
 export const getAllLabelForTask = async (projectId: string, token: string, taskId: string) => {
     try {
         const response = await axios.get(`${API_URL}/project/${projectId}/task/${taskId}/labels`, {

@@ -9,6 +9,7 @@ import { getProjectMembers } from '../../../services/projectMemberService';
 import { useAuth } from '../../../hooks/useAuth';
 import { Task } from '../../../types/task';
 import { MilestonesManagerPage } from './taskComponents/milestones/MilestonesManaggerPage';
+import { LabelsManagerPage } from './taskComponents/labels/LabelsManagger';
 
 export const TasksManagerPage: React.FC = () => {
     const { projectId } = useParams<{ projectId: string }>();
@@ -19,7 +20,7 @@ export const TasksManagerPage: React.FC = () => {
     const [tasks, setTasks] = useState<Task[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-    const [view, setView] = useState<'board' | 'list' | 'milestones'>('board');
+    const [view, setView] = useState<'board' | 'list' | 'milestones' | 'labels'>('board');
     const [canManageTasks, setCanManageTasks] = useState(false);
 
     useEffect(() => {
@@ -27,6 +28,8 @@ export const TasksManagerPage: React.FC = () => {
         const searchParams = new URLSearchParams(location.search);
         if (searchParams.has('milestones')) {
             setView('milestones');
+        } else if (searchParams.has('labels')) {
+            setView('labels');
         }
     }, [location.search]);
 
@@ -108,7 +111,7 @@ export const TasksManagerPage: React.FC = () => {
                         { label: 'Board', icon: <FaThLarge />, key: 'board' },
                         { label: 'List', icon: <FaList />, key: 'list' },
                         { label: 'Milestones', icon: <FaFlag />, key: 'milestones' },
-                        ...(canManageTasks ? [{ label: 'Labels', icon: <FaTags />, key: 'labels' }] : [])
+                        { label: 'Labels', icon: <FaTags />, key: 'labels' }
                     ].map(({ label, icon, key }) => (
                         <button
                             key={key}
@@ -143,7 +146,7 @@ export const TasksManagerPage: React.FC = () => {
                         ) : view === 'milestones' ? (
                             <MilestonesManagerPage />
                         ) : (
-                            <p>labels</p>
+                            <LabelsManagerPage />
                         )}
                     </div>
                 )}
