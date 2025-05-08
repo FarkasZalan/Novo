@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
-import { isPast, isToday, isTomorrow } from 'date-fns';
+import { format, isPast, isToday, isTomorrow } from 'date-fns';
 import { Task } from '../../../../../types/task';
 import { FaFlag, FaPaperclip, FaTag } from 'react-icons/fa';
 import { TaskAssignments } from '../../taskHandler/assignments/TaskAssignments';
@@ -79,58 +79,6 @@ const DraggableTaskCard: React.FC<{ task: Task }> = React.memo(({ task }) => {
                 {getPriorityBadge(task.priority)}
             </div>
 
-            {/* Description */}
-            {task.description && (
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 line-clamp-2">
-                    {task.description}
-                </p>
-            )}
-
-            {/* Row: Milestone & Attachments */}
-            <div className="flex justify-between items-center mt-4 gap-2">
-                {task.milestone_id && (
-                    <button
-                        onClick={(e) => handleMilestoneClick(e, task.milestone_id!)}
-                        className="inline-flex cursor-pointer hover:underline items-center text-xs font-medium bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 px-2.5 py-1 rounded-full hover:bg-indigo-100 dark:hover:bg-indigo-800/30 transition"
-                    >
-                        <FaFlag className="mr-1.5 h-3 w-3" />
-                        {task.milestone_name || 'Milestone'}
-                    </button>
-                )}
-
-                {task.attachments_count > 0 && (
-                    <span className="inline-flex items-center text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 px-2.5 py-1 rounded-full">
-                        <FaPaperclip className="mr-1 h-3 w-3" />
-                        {task.attachments_count}
-                    </span>
-                )}
-            </div>
-
-            {/* Row: Due Date & Assignees */}
-            <div className="flex justify-between items-center mt-4 gap-2">
-                {task.due_date && (
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${task.status !== 'completed'
-                        ? isPast(new Date(task.due_date)) || isToday(new Date(task.due_date))
-                            ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
-                            : isTomorrow(new Date(task.due_date))
-                                ? "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200"
-                                : "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
-                        : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
-                        }`}>
-                        Due {new Date(task.due_date).toLocaleDateString()}
-                        {task.status !== 'completed' && isToday(new Date(task.due_date)) && " • Today"}
-                        {task.status !== 'completed' && isTomorrow(new Date(task.due_date)) && " • Tomorrow"}
-                    </span>
-                )}
-
-                <TaskAssignments
-                    taskIdFromCompactMode={task.id}
-                    pendingUsers={[]}
-                    setPendingUsers={() => { }}
-                    compactMode={true}
-                />
-            </div>
-
             {/* Labels */}
             {task.labels && task.labels.length > 0 && (
                 <div className="mt-3 flex flex-wrap gap-1.5">
@@ -192,6 +140,58 @@ const DraggableTaskCard: React.FC<{ task: Task }> = React.memo(({ task }) => {
                     )}
                 </div>
             )}
+
+            {/* Row: Milestone & Attachments */}
+            <div className="flex justify-between items-center mt-4 gap-2">
+                {task.milestone_id && (
+                    <button
+                        onClick={(e) => handleMilestoneClick(e, task.milestone_id!)}
+                        className="inline-flex cursor-pointer hover:underline items-center text-xs font-medium bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 px-2.5 py-1 rounded-full hover:bg-indigo-100 dark:hover:bg-indigo-800/30 transition"
+                    >
+                        <FaFlag className="mr-1.5 h-3 w-3" />
+                        {task.milestone_name || 'Milestone'}
+                    </button>
+                )}
+
+
+            </div>
+
+            <div className="flex justify-between items-center mt-4 gap-2">
+                {/* Left side - Due date and attachments */}
+                <div className="flex items-center gap-2 flex-wrap">
+                    {/* Due Date */}
+                    {task.due_date && (
+                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${task.status !== 'completed'
+                                ? isPast(new Date(task.due_date)) || isToday(new Date(task.due_date))
+                                    ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+                                    : isTomorrow(new Date(task.due_date))
+                                        ? "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200"
+                                        : "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
+                                : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
+                            }`}>
+                            {format(new Date(task.due_date), 'MMM d')}
+                            {task.status !== 'completed' && isToday(new Date(task.due_date)) && " • Today"}
+                            {task.status !== 'completed' && isTomorrow(new Date(task.due_date)) && " • Tomorrow"}
+                        </span>
+                    )}
+
+                    {/* Attachments */}
+                    {task.attachments_count > 0 && (
+                        <span className="inline-flex items-center text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 px-2.5 py-1 rounded-full">
+                            <FaPaperclip className="mr-1 h-3 w-3" />
+                            {task.attachments_count}
+                        </span>
+                    )}
+                </div>
+
+                {/* Right side - Assignments */}
+                <TaskAssignments
+                    taskIdFromCompactMode={task.id}
+                    pendingUsers={[]}
+                    setPendingUsers={() => { }}
+                    compactMode={true}
+                />
+            </div>
         </div>
     );
 

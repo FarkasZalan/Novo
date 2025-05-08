@@ -51,7 +51,6 @@ const StatusColumn: React.FC<Props> = React.memo(({
                 ref={setNodeRef}
                 className={`flex-1 rounded-xl p-4 ${statusInfo.color} min-h-64 transition-all duration-200`}
                 animate={{
-                    scale: isOver ? 1.02 : 1,
                     border: isOver ? '2px solid #818cf8' : '2px solid transparent'
                 }}
                 transition={{ type: 'spring', stiffness: 500, damping: 30 }}

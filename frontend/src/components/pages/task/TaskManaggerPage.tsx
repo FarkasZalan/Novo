@@ -24,14 +24,17 @@ export const TasksManagerPage: React.FC = () => {
     const [canManageTasks, setCanManageTasks] = useState(false);
 
     useEffect(() => {
-        // Check URL for milestones query parameter
         const searchParams = new URLSearchParams(location.search);
         if (searchParams.has('milestones')) {
             setView('milestones');
+            // Clean the URL by replacing it without the query parameters
+            navigate(location.pathname, { replace: true });
         } else if (searchParams.has('labels')) {
             setView('labels');
+            // Clean the URL by replacing it without the query parameters
+            navigate(location.pathname, { replace: true });
         }
-    }, [location.search]);
+    }, [location.search, location.pathname, navigate]);
 
     useEffect(() => {
         const loadTasks = async () => {

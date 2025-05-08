@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { FaTasks, FaChevronRight, FaPlus, FaPaperclip, FaFlag, FaTag } from "react-icons/fa";
+import { FaTasks, FaChevronRight, FaPlus, FaPaperclip, FaFlag, FaTag, FaBan } from "react-icons/fa";
 import { fetchAllTasksForProject } from "../../../../services/taskService";
 import { fetchProjectById } from "../../../../services/projectService";
 import { getProjectMembers } from "../../../../services/projectMemberService";
@@ -68,12 +68,12 @@ export const TasksTab = () => {
 
     return (
         <div className="p-6">
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex justify-between items-center mb-8"> {/* Increased margin-bottom */}
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
                     Recent Tasks
                     {tasks.length > 0 && (
                         <span className="ml-2 text-sm bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 px-2 py-1 rounded-full">
-                            {tasks.length} {tasks.length === 1 ? 'task in total' : 'tasks in total'}
+                            {tasks.length} {tasks.length === 1 ? 'task' : 'tasks'}
                         </span>
                     )}
                 </h2>
@@ -91,7 +91,7 @@ export const TasksTab = () => {
             </div>
 
             {/* Tasks Preview */}
-            <div className="space-y-3">
+            <div className="space-y-4"> {/* Increased space between items */}
                 {loading ? (
                     <div className="py-8 flex justify-center">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
@@ -121,12 +121,12 @@ export const TasksTab = () => {
                         {tasks.slice(0, 3).map((task, index) => (
                             <div
                                 key={task.id || index}
-                                className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 group p-5 bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 border border-gray-100 dark:border-gray-700 cursor-pointer"
+                                className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 group p-5 bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 border border-gray-100 dark:border-gray-700"
                                 onClick={() => navigate(`/projects/${projectId}/tasks/${task.id}`)}
                             >
-                                <div className="flex items-start justify-between gap-3">
+                                <div className="flex items-start justify-between gap-4"> {/* Increased gap */}
                                     {/* Left section with completion indicator and title */}
-                                    <div className="flex items-start space-x-3 flex-1">
+                                    <div className="flex items-start space-x-4 flex-1"> {/* Increased space-x */}
                                         {/* Enhanced completion status indicator */}
                                         <div
                                             className={`flex-shrink-0 mt-1 h-6 w-6 rounded-md flex items-center justify-center transition-all duration-300 ease-in-out
@@ -152,15 +152,13 @@ export const TasksTab = () => {
                                                 <svg className="h-3.5 w-3.5 text-gray-600 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                 </svg>
-                                            ) : (
-                                                <svg className="h-3.5 w-3.5 text-gray-600 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                </svg>
-                                            )}
+                                            ) : task.status === "blocked" ? (
+                                                <FaBan className="h-3.5 w-3.5 text-red-600 dark:text-red-400" />
+                                            ) : null}
                                         </div>
 
                                         {/* Title and metadata */}
-                                        <div className="flex-1 min-w-0">
+                                        <div className="flex-1 min-w-0 space-y-3"> {/* Added space-y for vertical spacing */}
                                             <div className="flex items-center">
                                                 <h3
                                                     className={`font-medium text-gray-900 dark:text-gray-100 truncate text-base
@@ -171,7 +169,7 @@ export const TasksTab = () => {
                                             </div>
 
                                             {/* Milestone and Labels row */}
-                                            <div className="flex flex-wrap gap-2 mt-2.5">
+                                            <div className="flex flex-wrap gap-2"> {/* Removed mt-2.5 since we have space-y now */}
                                                 {/* Milestone */}
                                                 {task.milestone_id && (
                                                     <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-indigo-50 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/70">
@@ -242,33 +240,20 @@ export const TasksTab = () => {
                                             </div>
 
                                             {/* Second row with due date, attachments, assignments */}
-                                            <div className="flex flex-wrap gap-2 mt-2">
-                                                {/* Due Date */}
+                                            <div className="flex flex-wrap items-center gap-2"> {/* Removed mt-2 since we have space-y now */}
+                                                {/* Due Date - Updated to match task card style */}
                                                 {task.due_date && (
-                                                    <span
-                                                        className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium
-                                                            ${task.status !== 'completed'
-                                                                ? isPast(new Date(task.due_date)) || isToday(new Date(task.due_date))
-                                                                    ? "bg-red-50 text-red-700 dark:bg-red-900/40 dark:text-red-300 border border-red-200 dark:border-red-800/50"
-                                                                    : isTomorrow(new Date(task.due_date))
-                                                                        ? "bg-amber-50 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 border border-amber-200 dark:border-amber-800/50"
-                                                                        : "bg-purple-50 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300 border border-purple-200 dark:border-purple-800/50"
-                                                                : "bg-gray-50 text-gray-700 dark:bg-gray-800 dark:text-gray-400 border border-gray-200 dark:border-gray-700"
-                                                            }`}
-                                                    >
-                                                        <svg className="w-3 h-3 mr-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                            <path d="M8 2V5" stroke="currentColor" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round" />
-                                                            <path d="M16 2V5" stroke="currentColor" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round" />
-                                                            <path d="M3.5 9.09H20.5" stroke="currentColor" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round" />
-                                                            <path d="M21 8.5V17C21 20 19.5 22 16 22H8C4.5 22 3 20 3 17V8.5C3 5.5 4.5 3.5 8 3.5H16C19.5 3.5 21 5.5 21 8.5Z" stroke="currentColor" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round" />
-                                                        </svg>
+                                                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${task.status !== 'completed'
+                                                        ? isPast(new Date(task.due_date)) || isToday(new Date(task.due_date))
+                                                            ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+                                                            : isTomorrow(new Date(task.due_date))
+                                                                ? "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200"
+                                                                : "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
+                                                        : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
+                                                        }`}>
                                                         {new Date(task.due_date).toLocaleDateString()}
-                                                        {task.status !== 'completed' && isToday(new Date(task.due_date)) && (
-                                                            <span className="ml-1 text-xs font-semibold">(Today)</span>
-                                                        )}
-                                                        {task.status !== 'completed' && isTomorrow(new Date(task.due_date)) && (
-                                                            <span className="ml-1 text-xs font-semibold">(Tomorrow)</span>
-                                                        )}
+                                                        {task.status !== 'completed' && isToday(new Date(task.due_date)) && " • Today"}
+                                                        {task.status !== 'completed' && isTomorrow(new Date(task.due_date)) && " • Tomorrow"}
                                                     </span>
                                                 )}
 
@@ -319,7 +304,7 @@ export const TasksTab = () => {
                         ))}
 
                         {/* Enhanced View All section */}
-                        <div className="pt-2 flex justify-between items-center">
+                        <div className="pt-4 flex justify-between items-center"> {/* Increased padding-top */}
                             <span className="text-sm text-gray-500 dark:text-gray-400">
                                 Showing {Math.min(3, tasks.length)} of {tasks.length} tasks
                             </span>

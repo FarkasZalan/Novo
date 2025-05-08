@@ -534,6 +534,7 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
                                 >
                                     <option value="not-started">Not Started</option>
                                     <option value="in-progress">In Progress</option>
+                                    <option value="blocked">Blocked</option>
                                     <option value="completed">Completed</option>
                                 </select>
                             </div>
@@ -711,7 +712,7 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
                                             <button
                                                 type="button"
                                                 onClick={() => setSelectedLabels(selectedLabels.filter(l => l.id !== label.id))}
-                                                className={`${textColor} opacity-80 hover:opacity-100 transition-opacity`}
+                                                className={`${textColor} opacity-80 cursor-pointer hover:opacity-100 transition-opacity`}
                                             >
                                                 <FaTimes className="h-3 w-3" />
                                             </button>
@@ -742,6 +743,7 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
                                 {/* Clear search button */}
                                 {labelSearchTerm && (
                                     <button
+                                        type='button'
                                         onClick={() => {
                                             setLabelSearchTerm('');
                                             setShowLabelSearchResults(false);
@@ -761,30 +763,26 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
                                             <ul className="py-1">
                                                 {filteredLabels.map(label => {
                                                     const hexColor = label.color.startsWith('#') ? label.color : `#${label.color}`;
-                                                    const r = parseInt(hexColor.slice(1, 3)), g = parseInt(hexColor.slice(3, 5)), b = parseInt(hexColor.slice(5, 7));
-                                                    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-                                                    const textColor = brightness > 150 ? 'text-gray-900' : 'text-white';
 
                                                     return (
                                                         <li
                                                             key={label.id}
-                                                            className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 shadow-sm hover:shadow-md ${textColor}`}
-                                                            style={{
-                                                                backgroundColor: hexColor,
-                                                                border: `1px solid ${hexColor}80`
-                                                            }}
+                                                            className="px-3 py-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
                                                             onClick={() => {
                                                                 setSelectedLabels([...selectedLabels, label]);
                                                                 setLabelSearchTerm('');
                                                                 setShowLabelSearchResults(false);
                                                             }}
                                                         >
-                                                            <div className="flex items-center space-x-3">
+                                                            <div className="flex items-center gap-3">
+                                                                {/* Color swatch */}
                                                                 <div
-                                                                    className="w-4 h-4 rounded-full border border-gray-200 dark:border-gray-600 shadow-sm"
+                                                                    className="w-4 h-4 rounded-full border border-gray-200 dark:border-gray-600 flex-shrink-0"
                                                                     style={{ backgroundColor: hexColor }}
                                                                 />
-                                                                <div className="flex-1 min-w-0">
+
+                                                                {/* Label name and description */}
+                                                                <div className="min-w-0">
                                                                     <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
                                                                         {label.name}
                                                                     </p>

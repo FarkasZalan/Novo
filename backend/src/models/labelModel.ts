@@ -17,7 +17,7 @@ export const deleteLabelQuery = async (id: string) => {
 }
 
 export const getAllLabelForProjectQuery = async (project_id: string) => {
-    const result = await pool.query(`SELECT labels.*, COUNT(task_labels.task_id) AS task_count FROM labels LEFT JOIN task_labels ON labels.id = task_labels.label_id  WHERE labels.project_id = $1 GROUP BY labels.id`, [project_id]);
+    const result = await pool.query(`SELECT labels.*, COUNT(task_labels.task_id) AS task_count FROM labels LEFT JOIN task_labels ON labels.id = task_labels.label_id  WHERE labels.project_id = $1 GROUP BY labels.id ORDER BY task_count DESC`, [project_id]);
     return result.rows;
 }
 

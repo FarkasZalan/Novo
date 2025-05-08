@@ -10,7 +10,8 @@ import {
     FaExclamation,
     FaAlignLeft,
     FaTag,
-    FaFlag
+    FaFlag,
+    FaBan
 } from 'react-icons/fa';
 import { fetchTask } from '../../../../services/taskService';
 import { fetchProjectById } from '../../../../services/projectService';
@@ -72,6 +73,12 @@ export const TaskDetails: React.FC = () => {
                     text: 'In Progress',
                     badgeClass: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300'
                 };
+            case 'blocked':
+                return {
+                    icon: <FaBan className="text-red-500" />,
+                    text: 'Blocked',
+                    badgeClass: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
+                }
             default:
                 return {
                     icon: <FaCircle className="text-gray-400" />,

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FaTrash, FaPlus, FaSpinner, FaTimes, FaSearch, FaCheck, FaPaperclip, FaCalendarDay, FaTag, FaChevronRight } from 'react-icons/fa';
+import { FaTrash, FaPlus, FaSpinner, FaTimes, FaSearch, FaCheck, FaPaperclip, FaCalendarDay, FaTag, FaChevronRight, FaBan } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Task } from '../../../../../types/task';
 import { TaskAssignments } from '../../taskHandler/assignments/TaskAssignments';
@@ -191,14 +191,14 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
 
                                                     {/* Status and Priority */}
                                                     <div className="flex flex-wrap gap-2 mt-2.5">
-                                                        <span
-                                                            className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${task.status === "completed"
-                                                                ? "bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-200"
-                                                                : task.status === "in-progress"
-                                                                    ? "bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-200"
+                                                        <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${task.status === "completed"
+                                                            ? "bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-200"
+                                                            : task.status === "in-progress"
+                                                                ? "bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-200"
+                                                                : task.status === "blocked"
+                                                                    ? "bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200"
                                                                     : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
-                                                                }`}
-                                                        >
+                                                            }`}>
                                                             {task.status.replace('-', ' ')}
                                                         </span>
                                                         <span
@@ -388,6 +388,8 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                                             <svg className="h-3.5 w-3.5 text-yellow-600 dark:text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                                             </svg>
+                                        ) : task.status === "blocked" ? (
+                                            <FaBan className="h-3.5 w-3.5 text-red-600 dark:text-red-400" />
                                         ) : (
                                             <svg className="h-3.5 w-3.5 text-gray-600 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -409,8 +411,10 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                                                 <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${task.status === "completed"
                                                     ? "bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-200"
                                                     : task.status === "in-progress"
-                                                        ? "bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-200"
-                                                        : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+                                                        ? "bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-200"
+                                                        : task.status === "blocked"
+                                                            ? "bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200"
+                                                            : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
                                                     }`}>
                                                     {task.status.replace('-', ' ')}
                                                 </span>
