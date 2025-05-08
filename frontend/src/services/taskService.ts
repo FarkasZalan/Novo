@@ -15,14 +15,15 @@ export const fetchAllTasksForProject = async (projectId: string, token: string, 
     }
 };
 
-export const createTask = async (projectId: string, token: string, title: string, description: string, due_date?: Date, priority?: string, status: string = 'not-started') => {
+export const createTask = async (projectId: string, token: string, title: string, description: string, due_date?: Date, priority?: string, status: string = 'not-started', labels: Label[] = []) => {
     try {
         const response = await axios.post(`${API_URL}/project/${projectId}/tasks/new`, {
             title,
             description,
             due_date,
             priority,
-            status
+            status,
+            labels
         }, {
             headers: {
                 Authorization: `Bearer ${token}`
@@ -49,14 +50,15 @@ export const fetchTask = async (taskId: string, projectId: string, token: string
     }
 }
 
-export const updateTask = async (taskId: string, procejt_Id: string, token: string, title: string, description: string, due_date?: Date, priority?: string, status?: string) => {
+export const updateTask = async (taskId: string, procejt_Id: string, token: string, title: string, description: string, due_date?: Date, priority?: string, status?: string, labels?: Label[]) => {
     try {
         const response = await axios.put(`${API_URL}/project/${procejt_Id}/task/${taskId}`, {
             title,
             description,
             due_date,
             priority,
-            status
+            status,
+            labels
         }, {
             headers: {
                 Authorization: `Bearer ${token}`

@@ -8,4 +8,5 @@ export interface Task {
     attachments_count: number;
     milestone_id?: string;
     milestone_name?: string;
+    labels?: Label[];
 }

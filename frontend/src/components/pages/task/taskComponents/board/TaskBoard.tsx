@@ -242,6 +242,39 @@ export const TaskBoard: React.FC<TaskBoardProps> = React.memo(({ tasks, setTasks
                                 </span>
                             )}
                         </div>
+
+                        {activeTask.labels && activeTask.labels.length > 0 && (
+                            <div className="mt-3 flex flex-wrap gap-1.5">
+                                {activeTask.labels.slice(0, 3).map((label: any) => {
+                                    const hexColor = label.color.startsWith('#') ? label.color : `#${label.color}`;
+                                    const r = parseInt(hexColor.slice(1, 3), 16);
+                                    const g = parseInt(hexColor.slice(3, 5), 16);
+                                    const b = parseInt(hexColor.slice(5, 7), 16);
+                                    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+                                    const textColor = brightness > 150 ? 'text-gray-900' : 'text-white';
+                                    const borderColor = `${hexColor}${brightness > 150 ? '80' : 'b3'}`;
+
+                                    return (
+                                        <span
+                                            key={label.id}
+                                            className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium transition-all ${textColor}`}
+                                            style={{
+                                                backgroundColor: hexColor,
+                                                border: `1px solid ${borderColor}`,
+                                                boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                                            }}
+                                        >
+                                            {label.name}
+                                        </span>
+                                    );
+                                })}
+                                {activeTask.labels.length > 3 && (
+                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
+                                        +{activeTask.labels.length - 3}
+                                    </span>
+                                )}
+                            </div>
+                        )}
                     </div>
                 )}
             </DragOverlay>

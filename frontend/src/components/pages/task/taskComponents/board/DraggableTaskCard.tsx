@@ -4,7 +4,7 @@ import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { isPast, isToday, isTomorrow } from 'date-fns';
 import { Task } from '../../../../../types/task';
-import { FaFlag, FaPaperclip } from 'react-icons/fa';
+import { FaFlag, FaPaperclip, FaTag } from 'react-icons/fa';
 import { TaskAssignments } from '../../taskHandler/assignments/TaskAssignments';
 
 // one task card
@@ -49,6 +49,14 @@ const DraggableTaskCard: React.FC<{ task: Task }> = React.memo(({ task }) => {
                 {priority.charAt(0).toUpperCase() + priority.slice(1)}
             </span>
         );
+    };
+
+    const getLabelTextColor = (hexColor: string) => {
+        const r = parseInt(hexColor.slice(1, 3), 16);
+        const g = parseInt(hexColor.slice(3, 5), 16);
+        const b = parseInt(hexColor.slice(5, 7), 16);
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        return brightness > 150 ? 'text-gray-900' : 'text-white';
     };
 
     return (
@@ -122,6 +130,68 @@ const DraggableTaskCard: React.FC<{ task: Task }> = React.memo(({ task }) => {
                     compactMode={true}
                 />
             </div>
+
+            {/* Labels */}
+            {task.labels && task.labels.length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                    {task.labels.slice(0, 3).map((label: any) => {
+                        const hexColor = label.color.startsWith('#') ? label.color : `#${label.color}`;
+                        const textColor = getLabelTextColor(hexColor);
+                        const borderColor = `${hexColor}${textColor === 'text-gray-900' ? '80' : 'b3'}`;
+
+                        return (
+                            <span
+                                key={label.id}
+                                className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${textColor}`}
+                                style={{
+                                    backgroundColor: hexColor,
+                                    border: `1px solid ${borderColor}`,
+                                    boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                                }}
+                            >
+                                <FaTag className="mr-1" size={10} />
+                                {label.name}
+                            </span>
+                        );
+                    })}
+
+                    {/* +X more labels indicator with hover popup */}
+                    {task.labels.length > 3 && (
+                        <div className="relative inline-block">
+                            <span
+                                className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 cursor-default hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors peer"
+                            >
+                                +{task.labels.length - 3}
+                            </span>
+
+                            {/* Hidden labels popup - appears ONLY on +X hover */}
+                            <div className="absolute z-50 hidden peer-hover:block bottom-full mb-2 left-0 min-w-max bg-white dark:bg-gray-800 shadow-lg rounded-md p-2 border border-gray-200 dark:border-gray-700">
+                                <div className="flex flex-wrap gap-1">
+                                    {task.labels.slice(3).map((label: any) => {
+                                        const hexColor = label.color.startsWith('#') ? label.color : `#${label.color}`;
+                                        const textColor = getLabelTextColor(hexColor);
+                                        return (
+                                            <span
+                                                key={label.id}
+                                                className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${textColor}`}
+                                                style={{
+                                                    backgroundColor: hexColor,
+                                                    border: `1px solid ${hexColor}80`
+                                                }}
+                                            >
+                                                <FaTag className="mr-1" size={10} />
+                                                {label.name}
+                                            </span>
+                                        );
+                                    })}
+                                </div>
+                                {/* Tooltip arrow */}
+                                <div className="absolute -bottom-1 left-2 w-3 h-3 bg-white dark:bg-gray-800 border-r border-b border-gray-200 dark:border-gray-700 transform rotate-45 -z-10"></div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
         </div>
     );
 

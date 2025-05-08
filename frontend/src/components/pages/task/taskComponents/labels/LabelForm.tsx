@@ -17,22 +17,31 @@ interface LabelFormModalProps {
 }
 
 const DEFAULT_COLORS = [
-    '#EF4444', // red
-    '#F97316', // orange
-    '#F59E0B', // amber
-    '#EAB308', // yellow
-    '#84CC16', // lime
-    '#10B981', // emerald
-    '#14B8A6', // teal
-    '#06B6D4', // cyan
-    '#0EA5E9', // sky
-    '#3B82F6', // blue
-    '#6366F1', // indigo
-    '#8B5CF6', // violet
-    '#A855F7', // purple
-    '#D946EF', // fuchsia
-    '#EC4899', // pink
-    '#F43F5E', // rose
+    // WARNING COLORS (3) - bugs/urgent
+    '#E06C5E', // Alert coral (high visibility)
+    '#D95C4A', // Danger rust (strong contrast)
+    '#C74E3D', // Critical red (serious issues)
+
+    // GREENS (3) - success/completed
+    '#5CA271', // Healthy green
+    '#6BB38A', // Fresh mint
+    '#5DAA90', // Calm teal
+
+    // BLUES (3) - info/technical
+    '#4E8FD9', // Trusted blue
+    '#5A9AE6', // Friendly azure
+    '#3D88B0', // Stable steel
+
+    // PURPLES (3) - features/enhancements
+    '#8D74C9', // Creative lavender
+    '#A066A0', // Innovative plum
+    '#B584AD', // Soft berry
+
+    // NEUTRALS (4) - in-progress/notes
+    '#D9AE67', // Active mustard
+    '#C0B18D', // Natural khaki
+    '#B0A79D', // Warm gray
+    '#9196A1'  // Cool gray
 ];
 
 export const LabelFormModal: React.FC<LabelFormModalProps> = ({
@@ -68,6 +77,11 @@ export const LabelFormModal: React.FC<LabelFormModalProps> = ({
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         await onSubmit(form);
+        setForm({
+            name: '',
+            description: '',
+            color: DEFAULT_COLORS[0],
+        });
     };
 
     return (

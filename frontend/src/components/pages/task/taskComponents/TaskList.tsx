@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { FaEdit, FaCircle, FaClock, FaCheckCircle, FaPlus, FaTasks, FaTrash, FaPaperclip, FaFlag } from 'react-icons/fa';
+import { FaEdit, FaCircle, FaClock, FaCheckCircle, FaPlus, FaTasks, FaTrash, FaPaperclip, FaFlag, FaTag } from 'react-icons/fa';
 import { isPast, isToday, isTomorrow } from 'date-fns';
 import { ConfirmationDialog } from '../../project/ConfirmationDialog';
 import { deleteTask } from '../../../../services/taskService';
@@ -81,6 +81,15 @@ export const TaskList: React.FC<TaskListProps> = React.memo(({ tasks, setTasks, 
         setShowDeleteConfirm(true);
     };
 
+    const getLabelTextColor = (hexColor: string) => {
+        const r = parseInt(hexColor.slice(1, 3), 16);
+        const g = parseInt(hexColor.slice(3, 5), 16);
+        const b = parseInt(hexColor.slice(5, 7), 16);
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        return brightness > 150 ? 'text-gray-900' : 'text-white';
+    };
+
+
     if (isLoading) {
         return (
             <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50">
@@ -122,6 +131,9 @@ export const TaskList: React.FC<TaskListProps> = React.memo(({ tasks, setTasks, 
                                 Task
                             </th>
                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                Labels
+                            </th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 Assigned to
                             </th>
                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
@@ -153,6 +165,7 @@ export const TaskList: React.FC<TaskListProps> = React.memo(({ tasks, setTasks, 
                                 className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer"
                                 onClick={() => navigate(`/projects/${projectId}/tasks/${task.id}`)}
                             >
+                                {/* Task Name */}
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     <div className="flex items-center">
                                         <div className="flex-shrink-0 mr-3">
@@ -161,6 +174,72 @@ export const TaskList: React.FC<TaskListProps> = React.memo(({ tasks, setTasks, 
                                         <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{task.title}</div>
                                     </div>
                                 </td>
+
+                                {/* Labels */}
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                    {task.labels && task.labels.length > 0 && (
+                                        <div className="mt-3 flex flex-wrap gap-1.5">
+                                            {task.labels.slice(0, 3).map((label: any) => {
+                                                const hexColor = label.color.startsWith('#') ? label.color : `#${label.color}`;
+                                                const textColor = getLabelTextColor(hexColor);
+                                                const borderColor = `${hexColor}${textColor === 'text-gray-900' ? '80' : 'b3'}`;
+
+                                                return (
+                                                    <span
+                                                        key={label.id}
+                                                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${textColor}`}
+                                                        style={{
+                                                            backgroundColor: hexColor,
+                                                            border: `1px solid ${borderColor}`,
+                                                            boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                                                        }}
+                                                    >
+                                                        <FaTag className="mr-1" size={10} />
+                                                        {label.name}
+                                                    </span>
+                                                );
+                                            })}
+
+                                            {/* +X more labels indicator with hover popup */}
+                                            {task.labels.length > 3 && (
+                                                <div className="relative inline-block">
+                                                    <span
+                                                        className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 cursor-default hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors peer"
+                                                    >
+                                                        +{task.labels.length - 3}
+                                                    </span>
+
+                                                    {/* Hidden labels popup - appears ONLY on +X hover */}
+                                                    <div className="absolute z-50 hidden peer-hover:block bottom-full mb-2 left-0 min-w-max bg-white dark:bg-gray-800 shadow-lg rounded-md p-2 border border-gray-200 dark:border-gray-700">
+                                                        <div className="flex flex-wrap gap-1">
+                                                            {task.labels.slice(3).map((label: any) => {
+                                                                const hexColor = label.color.startsWith('#') ? label.color : `#${label.color}`;
+                                                                const textColor = getLabelTextColor(hexColor);
+                                                                return (
+                                                                    <span
+                                                                        key={label.id}
+                                                                        className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${textColor}`}
+                                                                        style={{
+                                                                            backgroundColor: hexColor,
+                                                                            border: `1px solid ${hexColor}80`
+                                                                        }}
+                                                                    >
+                                                                        <FaTag className="mr-1" size={10} />
+                                                                        {label.name}
+                                                                    </span>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                        {/* Tooltip arrow */}
+                                                        <div className="absolute -bottom-1 left-2 w-3 h-3 bg-white dark:bg-gray-800 border-r border-b border-gray-200 dark:border-gray-700 transform rotate-45 -z-10"></div>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </td>
+
+                                {/* Assigned to */}
                                 <td className="px-6 py-4">
                                     <div className="flex -space-x-1.5">
                                         <TaskAssignments
@@ -172,14 +251,20 @@ export const TaskList: React.FC<TaskListProps> = React.memo(({ tasks, setTasks, 
                                         />
                                     </div>
                                 </td>
+
+                                {/* Status */}
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
                                         {getStatusText(task.status)}
                                     </span>
                                 </td>
+
+                                {/* Priority */}
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     {getPriorityBadge(task.priority)}
                                 </td>
+
+                                {/* Milestone */}
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     {task.milestone_name ? (
                                         <span className="inline-flex hover:underline items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-300"
@@ -194,6 +279,8 @@ export const TaskList: React.FC<TaskListProps> = React.memo(({ tasks, setTasks, 
                                         <span className="text-gray-400 dark:text-gray-500">—</span>
                                     )}
                                 </td>
+
+                                {/* Due Date */}
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                     {task.due_date ? (
                                         <div className="flex items-center gap-1">
@@ -217,6 +304,8 @@ export const TaskList: React.FC<TaskListProps> = React.memo(({ tasks, setTasks, 
                                         '—'
                                     )}
                                 </td>
+
+                                {/* Attachments count */}
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     {task.attachments_count > 0 ? (
                                         <div className="flex items-center gap-1">
@@ -230,6 +319,7 @@ export const TaskList: React.FC<TaskListProps> = React.memo(({ tasks, setTasks, 
                                     )}
                                 </td>
 
+                                {/* Actions */}
                                 {canManageTasks && (
                                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <div className="flex justify-end space-x-2">

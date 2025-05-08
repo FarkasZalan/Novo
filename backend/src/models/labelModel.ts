@@ -24,7 +24,7 @@ export const getAllLabelForProjectQuery = async (project_id: string) => {
 // task label querys
 
 export const addLabelToTaskQuery = async (task_id: string, label_id: string) => {
-    const result = await pool.query(`INSERT INTO task_labels (task_id, label_id) VALUES ($1, $2) RETURNING *`, [task_id, label_id]);
+    const result = await pool.query(`INSERT INTO task_labels (task_id, label_id) VALUES ($1, $2) ON CONFLICT DO NOTHING RETURNING *`, [task_id, label_id]);
     return result.rows[0];
 }
 

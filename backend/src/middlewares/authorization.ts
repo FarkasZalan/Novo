@@ -3,7 +3,6 @@ import { getProjectByIdQuery } from '../models/projectModel';
 import { getTaskByIdQuery } from '../models/task.Model';
 import { Project } from '../schemas/projectSchema';
 import { getProjectMembersQuery } from '../models/projectMemberModel';
-import { getUserByIdQuery } from '../models/userModel';
 
 // authorization for projects and tasks
 export const authorizeProject = async (req: Request, res: Response, next: NextFunction): Promise<void> => {

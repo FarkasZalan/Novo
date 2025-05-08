@@ -56,45 +56,11 @@ export const getAllLabelForProject = async (req: Request, res: Response, next: N
 
 // task label related
 
-export const addLabelToTask = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const { labelIds } = req.body;
-        const taskId = req.params.taskId;
-        const updatedTaskLabels = [];
-        for (const label_id of labelIds) {
-            const updateTask = await addLabelToTaskQuery(taskId, label_id);
-            if (!updateTask) {
-                handleResponse(res, 404, "Task not found", null);
-                return;
-            }
-            updatedTaskLabels.push(updateTask);
-        }
-        handleResponse(res, 200, "Task updated successfully", updatedTaskLabels);
-    } catch (error: any) {
-        next(error);
-    }
-};
-
 export const getAllLabelForTask = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const task_id = req.params.taskId;
         const labels = await getLabelsForTaskQuery(task_id);
         handleResponse(res, 200, "Labels fetched successfully", labels);
-    } catch (error: any) {
-        next(error);
-    }
-};
-
-export const deleteLabelFromTask = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const { taskId } = req.body;
-        const label_id = req.params.labelId;
-        const updateTask = await deleteLabelFromTaskQuery(taskId, label_id);
-        if (!updateTask) {
-            handleResponse(res, 404, "Task not found", null);
-            return;
-        }
-        handleResponse(res, 200, "Task updated successfully", updateTask);
     } catch (error: any) {
         next(error);
     }

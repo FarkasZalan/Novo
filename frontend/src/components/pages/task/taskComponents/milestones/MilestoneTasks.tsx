@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { FaTrash, FaPlus, FaSpinner, FaTimes, FaSearch, FaCheck, FaPaperclip, FaCalendarDay } from 'react-icons/fa';
+import { FaTrash, FaPlus, FaSpinner, FaTimes, FaSearch, FaCheck, FaPaperclip, FaCalendarDay, FaTag, FaChevronRight } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Task } from '../../../../../types/task';
 import { TaskAssignments } from '../../taskHandler/assignments/TaskAssignments';
 import toast from 'react-hot-toast';
 import { useNavigate, useParams } from 'react-router-dom';
+import { isPast, isToday, isTomorrow } from 'date-fns';
 
 interface MilestoneTasksProps {
     milestone: Milestone;
@@ -85,32 +86,12 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
         task.description?.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    const statusColors: Record<string, string> = {
-        'not-started': 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200',
-        'in-progress': 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-200',
-        'completed': 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-200'
-    };
-
-    const priorityColors: Record<string, string> = {
-        'low': 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200',
-        'medium': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200',
-        'high': 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-200',
-    };
-
-    const getDueDateColor = (dueDate: string, status: string) => {
-        if (status === 'completed') return "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200";
-
-        const date = new Date(dueDate);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const tomorrow = new Date(today);
-        tomorrow.setDate(tomorrow.getDate() + 1);
-
-        if (date < today) return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-200";
-        if (date.toDateString() === today.toDateString()) return "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-200";
-        if (date.toDateString() === tomorrow.toDateString()) return "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-200";
-
-        return "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200";
+    const getLabelTextColor = (hexColor: string) => {
+        const r = parseInt(hexColor.slice(1, 3), 16);
+        const g = parseInt(hexColor.slice(3, 5), 16);
+        const b = parseInt(hexColor.slice(5, 7), 16);
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        return brightness > 150 ? 'text-gray-900' : 'text-white';
     };
 
     return (
@@ -179,47 +160,151 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                                             key={task.id}
                                             initial={{ opacity: 0, y: 5 }}
                                             animate={{ opacity: 1, y: 0 }}
-                                            className={`p-3 rounded-lg border cursor-pointer transition-colors ${selectedTaskIds.includes(task.id)
-                                                ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20'
-                                                : 'border-gray-200 dark:border-gray-600 hover:border-indigo-300 dark:hover:border-indigo-500'
+                                            className={`p-4 rounded-xl border cursor-pointer transition-all duration-200 ${selectedTaskIds.includes(task.id)
+                                                ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20 shadow-sm'
+                                                : 'border-gray-200 dark:border-gray-600 hover:border-indigo-300 dark:hover:border-indigo-500 hover:shadow-md'
                                                 }`}
                                             onClick={() => toggleTaskSelection(task.id)}
                                         >
-                                            <div className="flex items-start space-x-3">
-                                                <div className="mt-1">
-                                                    <div className={`flex items-center justify-center h-5 w-5 rounded border transition-colors ${selectedTaskIds.includes(task.id)
-                                                        ? 'bg-indigo-600 border-indigo-600'
-                                                        : 'border-gray-300 dark:border-gray-500'
-                                                        }`}>
+                                            <div className="flex items-start gap-3">
+                                                {/* Checkbox */}
+                                                <div className="mt-0.5 flex-shrink-0">
+                                                    <div
+                                                        className={`flex items-center justify-center h-5 w-5 rounded-md border transition-all ${selectedTaskIds.includes(task.id)
+                                                            ? 'bg-indigo-600 border-indigo-600 scale-110'
+                                                            : 'border-gray-300 dark:border-gray-500 group-hover:border-indigo-400'
+                                                            }`}
+                                                    >
                                                         {selectedTaskIds.includes(task.id) && (
                                                             <FaCheck className="h-3 w-3 text-white" />
                                                         )}
                                                     </div>
                                                 </div>
+
+                                                {/* Task Content */}
                                                 <div className="flex-1 min-w-0">
-                                                    <h4 className="font-medium text-gray-900 dark:text-gray-100 truncate">
+                                                    {/* Title */}
+                                                    <h4 className={`font-medium text-gray-900 dark:text-gray-100 ${task.status === "completed" ? "line-through opacity-70" : ""
+                                                        }`}>
                                                         {task.title}
                                                     </h4>
-                                                    <div className="flex flex-wrap items-center gap-2 mt-2">
-                                                        <span className={`text-xs px-2 py-1 rounded-full ${statusColors[task.status]}`}>
+
+                                                    {/* Status and Priority */}
+                                                    <div className="flex flex-wrap gap-2 mt-2.5">
+                                                        <span
+                                                            className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${task.status === "completed"
+                                                                ? "bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-200"
+                                                                : task.status === "in-progress"
+                                                                    ? "bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-200"
+                                                                    : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+                                                                }`}
+                                                        >
                                                             {task.status.replace('-', ' ')}
                                                         </span>
-                                                        <span className={`text-xs px-2 py-1 rounded-full ${priorityColors[task.priority]}`}>
+                                                        <span
+                                                            className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${task.priority === "high"
+                                                                ? "bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200"
+                                                                : task.priority === "medium"
+                                                                    ? "bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-200"
+                                                                    : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+                                                                }`}
+                                                        >
                                                             {task.priority}
                                                         </span>
+                                                    </div>
+
+                                                    {/* Due Date and Attachments */}
+                                                    <div className="flex flex-wrap gap-2 mt-2">
                                                         {task.due_date && (
-                                                            <span className={`text-xs px-2 py-1 rounded-full ${getDueDateColor(task.due_date, task.status)}`}>
-                                                                <FaCalendarDay className="inline mr-1" />
+                                                            <span
+                                                                className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${task.status !== 'completed'
+                                                                    ? isPast(new Date(task.due_date)) || isToday(new Date(task.due_date))
+                                                                        ? "bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200"
+                                                                        : isTomorrow(new Date(task.due_date))
+                                                                            ? "bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200"
+                                                                            : "bg-purple-100 dark:bg-purple-900/40 text-purple-800 dark:text-purple-200"
+                                                                    : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+                                                                    }`}
+                                                            >
+                                                                <FaCalendarDay className="mr-1" size={10} />
                                                                 {formatDate(task.due_date)}
+                                                                {task.status !== 'completed' && isToday(new Date(task.due_date)) && (
+                                                                    <span className="ml-1">(Today)</span>
+                                                                )}
+                                                                {task.status !== 'completed' && isTomorrow(new Date(task.due_date)) && (
+                                                                    <span className="ml-1">(Tomorrow)</span>
+                                                                )}
                                                             </span>
                                                         )}
                                                         {task.attachments_count > 0 && (
-                                                            <span className="text-xs px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
-                                                                <FaPaperclip className="inline mr-1" />
+                                                            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+                                                                <FaPaperclip className="mr-1" size={10} />
                                                                 {task.attachments_count}
                                                             </span>
                                                         )}
                                                     </div>
+
+                                                    {/* Labels */}
+                                                    {task.labels && task.labels.length > 0 && (
+                                                        <div className="mt-3 flex flex-wrap gap-1.5">
+                                                            {task.labels.slice(0, 3).map((label: any) => {
+                                                                const hexColor = label.color.startsWith('#') ? label.color : `#${label.color}`;
+                                                                const textColor = getLabelTextColor(hexColor);
+                                                                const borderColor = `${hexColor}${textColor === 'text-gray-900' ? '80' : 'b3'}`;
+
+                                                                return (
+                                                                    <span
+                                                                        key={label.id}
+                                                                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${textColor}`}
+                                                                        style={{
+                                                                            backgroundColor: hexColor,
+                                                                            border: `1px solid ${borderColor}`,
+                                                                            boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                                                                        }}
+                                                                    >
+                                                                        <FaTag className="mr-1" size={10} />
+                                                                        {label.name}
+                                                                    </span>
+                                                                );
+                                                            })}
+
+                                                            {/* +X more labels indicator with hover popup */}
+                                                            {task.labels.length > 3 && (
+                                                                <div className="relative inline-block">
+                                                                    <span
+                                                                        className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 cursor-default hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors peer"
+                                                                    >
+                                                                        +{task.labels.length - 3}
+                                                                    </span>
+
+                                                                    {/* Hidden labels popup - appears ONLY on +X hover */}
+                                                                    <div className="absolute z-50 hidden peer-hover:block bottom-full mb-2 left-0 min-w-max bg-white dark:bg-gray-800 shadow-lg rounded-md p-2 border border-gray-200 dark:border-gray-700">
+                                                                        <div className="flex flex-wrap gap-1">
+                                                                            {task.labels.slice(3).map((label: any) => {
+                                                                                const hexColor = label.color.startsWith('#') ? label.color : `#${label.color}`;
+                                                                                const textColor = getLabelTextColor(hexColor);
+                                                                                return (
+                                                                                    <span
+                                                                                        key={label.id}
+                                                                                        className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${textColor}`}
+                                                                                        style={{
+                                                                                            backgroundColor: hexColor,
+                                                                                            border: `1px solid ${hexColor}80`
+                                                                                        }}
+                                                                                    >
+                                                                                        <FaTag className="mr-1" size={10} />
+                                                                                        {label.name}
+                                                                                    </span>
+                                                                                );
+                                                                            })}
+                                                                        </div>
+                                                                        {/* Tooltip arrow */}
+                                                                        <div className="absolute -bottom-1 left-2 w-3 h-3 bg-white dark:bg-gray-800 border-r border-b border-gray-200 dark:border-gray-700 transform rotate-45 -z-10"></div>
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
                                         </motion.div>
@@ -274,63 +359,190 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                 </h4>
 
                 {milestoneTasks.length > 0 ? (
-                    <div className="space-y-3">
+                    <div className="space-y-4">
                         {milestoneTasks.map(task => (
                             <motion.div
                                 key={task.id}
                                 initial={{ opacity: 0, y: -5 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 onClick={(e) => handleTaskClick(task.id, e)}
-                                className="group flex items-center justify-between p-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors border border-gray-200 dark:border-gray-600 shadow-sm cursor-pointer"
+                                className="group flex items-start justify-between p-5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors border border-gray-200 dark:border-gray-600 shadow-sm cursor-pointer"
                             >
                                 <div className="flex items-start space-x-4 w-full">
-                                    <div className={`mt-1 h-3 w-3 rounded-full flex-shrink-0 ${task.status === 'completed' ? 'bg-green-500' :
-                                        task.status === 'in-progress' ? 'bg-blue-500' : 'bg-gray-300'
-                                        }`} />
+                                    {/* Status indicator */}
+                                    <div
+                                        className={`flex-shrink-0 mt-1 h-6 w-6 rounded-md flex items-center justify-center transition-all duration-300 ease-in-out
+                                            ${task.status === "completed"
+                                                ? "bg-green-100 dark:bg-green-900/40 border border-green-300 dark:border-green-600"
+                                                : task.status === "in-progress"
+                                                    ? "bg-yellow-100 dark:bg-yellow-900/40 border border-yellow-300 dark:border-yellow-600"
+                                                    : "bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600"
+                                            } 
+                                            `}
+                                    >
+                                        {task.status === "completed" ? (
+                                            <svg className="h-4 w-4 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                                            </svg>
+                                        ) : task.status === "in-progress" ? (
+                                            <svg className="h-3.5 w-3.5 text-yellow-600 dark:text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                            </svg>
+                                        ) : (
+                                            <svg className="h-3.5 w-3.5 text-gray-600 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                        )}
+                                    </div>
+
                                     <div className="flex-1 min-w-0">
-                                        <h4 className="font-medium text-gray-900 dark:text-gray-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
-                                            {task.title}
-                                        </h4>
-                                        <div className="flex flex-wrap items-center gap-2 mt-2">
-                                            <span className={`text-xs px-2 py-1 rounded-full ${statusColors[task.status]}`}>
-                                                {task.status.replace('-', ' ')}
-                                            </span>
-                                            <span className={`text-xs px-2 py-1 rounded-full ${priorityColors[task.priority]}`}>
-                                                {task.priority}
-                                            </span>
-                                            {task.due_date && (
-                                                <span className={`text-xs px-2 py-1 rounded-full ${getDueDateColor(task.due_date, task.status)}`}>
-                                                    <FaCalendarDay className="inline mr-1" />
-                                                    {formatDate(task.due_date)}
+                                        <div className="flex flex-col space-y-2">
+                                            <h3
+                                                className={`font-medium text-gray-900 dark:text-gray-100 truncate text-base
+                                                ${task.status === "completed" ? "line-through opacity-70" : ""}`}
+                                            >
+                                                {task.title}
+                                            </h3>
+
+                                            {/* First row of metadata */}
+                                            <div className="flex flex-wrap items-center gap-2">
+                                                <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${task.status === "completed"
+                                                    ? "bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-200"
+                                                    : task.status === "in-progress"
+                                                        ? "bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-200"
+                                                        : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+                                                    }`}>
+                                                    {task.status.replace('-', ' ')}
                                                 </span>
-                                            )}
-                                            {task.attachments_count > 0 && (
-                                                <span className="text-xs px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
-                                                    <FaPaperclip className="inline mr-1" />
-                                                    {task.attachments_count}
+                                                <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${task.priority === "high"
+                                                    ? "bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200"
+                                                    : task.priority === "medium"
+                                                        ? "bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-200"
+                                                        : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+                                                    }`}>
+                                                    {task.priority}
                                                 </span>
+                                            </div>
+
+                                            {/* Second row of metadata */}
+                                            <div className="flex flex-wrap items-center gap-2">
+                                                {task.due_date && (
+                                                    <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${task.status !== 'completed'
+                                                        ? isPast(new Date(task.due_date)) || isToday(new Date(task.due_date))
+                                                            ? "bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200"
+                                                            : isTomorrow(new Date(task.due_date))
+                                                                ? "bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200"
+                                                                : "bg-purple-100 dark:bg-purple-900/40 text-purple-800 dark:text-purple-200"
+                                                        : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+                                                        }`}>
+                                                        <FaCalendarDay className="mr-1" size={10} />
+                                                        {formatDate(task.due_date)}
+                                                        {task.status !== 'completed' && isToday(new Date(task.due_date)) && (
+                                                            <span className="ml-1">(Today)</span>
+                                                        )}
+                                                        {task.status !== 'completed' && isTomorrow(new Date(task.due_date)) && (
+                                                            <span className="ml-1">(Tomorrow)</span>
+                                                        )}
+                                                    </span>
+                                                )}
+                                                {task.attachments_count > 0 && (
+                                                    <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+                                                        <FaPaperclip className="mr-1" size={10} />
+                                                        {task.attachments_count}
+                                                    </span>
+                                                )}
+                                                <TaskAssignments
+                                                    compactMode={true}
+                                                    taskIdFromCompactMode={task.id}
+                                                    showAssignButtonInCompactMode={false}
+                                                    pendingUsers={[]}
+                                                    setPendingUsers={() => { }}
+                                                />
+                                            </div>
+
+                                            {/* Labels row */}
+                                            {task.labels && task.labels.length > 0 && (
+                                                <div className="mt-3 flex flex-wrap gap-1.5">
+                                                    {task.labels.slice(0, 3).map((label: any) => {
+                                                        const hexColor = label.color.startsWith('#') ? label.color : `#${label.color}`;
+                                                        const textColor = getLabelTextColor(hexColor);
+                                                        const borderColor = `${hexColor}${textColor === 'text-gray-900' ? '80' : 'b3'}`;
+
+                                                        return (
+                                                            <span
+                                                                key={label.id}
+                                                                className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${textColor}`}
+                                                                style={{
+                                                                    backgroundColor: hexColor,
+                                                                    border: `1px solid ${borderColor}`,
+                                                                    boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                                                                }}
+                                                            >
+                                                                <FaTag className="mr-1" size={10} />
+                                                                {label.name}
+                                                            </span>
+                                                        );
+                                                    })}
+
+                                                    {/* +X more labels indicator with hover popup */}
+                                                    {task.labels.length > 3 && (
+                                                        <div className="relative inline-block">
+                                                            <span
+                                                                className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 cursor-default hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors peer"
+                                                            >
+                                                                +{task.labels.length - 3}
+                                                            </span>
+
+                                                            {/* Hidden labels popup - appears ONLY on +X hover */}
+                                                            <div className="absolute z-50 hidden peer-hover:block bottom-full mb-2 left-0 min-w-max bg-white dark:bg-gray-800 shadow-lg rounded-md p-2 border border-gray-200 dark:border-gray-700">
+                                                                <div className="flex flex-wrap gap-1">
+                                                                    {task.labels.slice(3).map((label: any) => {
+                                                                        const hexColor = label.color.startsWith('#') ? label.color : `#${label.color}`;
+                                                                        const textColor = getLabelTextColor(hexColor);
+                                                                        return (
+                                                                            <span
+                                                                                key={label.id}
+                                                                                className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${textColor}`}
+                                                                                style={{
+                                                                                    backgroundColor: hexColor,
+                                                                                    border: `1px solid ${hexColor}80`
+                                                                                }}
+                                                                            >
+                                                                                <FaTag className="mr-1" size={10} />
+                                                                                {label.name}
+                                                                            </span>
+                                                                        );
+                                                                    })}
+                                                                </div>
+                                                                {/* Tooltip arrow */}
+                                                                <div className="absolute -bottom-1 left-2 w-3 h-3 bg-white dark:bg-gray-800 border-r border-b border-gray-200 dark:border-gray-700 transform rotate-45 -z-10"></div>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
                                             )}
-                                            <TaskAssignments
-                                                compactMode={true}
-                                                taskIdFromCompactMode={task.id}
-                                                showAssignButtonInCompactMode={false}
-                                                pendingUsers={[]}
-                                                setPendingUsers={() => { }}
-                                            />
                                         </div>
                                     </div>
-                                    {canManage && (
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                onRemoveTask(task.id);
-                                            }}
-                                            className="p-2 cursor-pointer text-gray-400 hover:text-red-500 dark:hover:text-red-400 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                                            title="Remove from milestone"
-                                        >
-                                            <FaTrash className="w-4 h-4" />
-                                        </button>
-                                    )}
+
+                                    {/* Right section with delete button and arrow */}
+                                    <div className="flex items-center space-x-2">
+                                        {canManage && (
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    onRemoveTask(task.id);
+                                                }}
+                                                className="p-2 cursor-pointer text-gray-400 hover:text-red-500 dark:hover:text-red-400 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                                                title="Remove from milestone"
+                                            >
+                                                <FaTrash className="w-4 h-4" />
+                                            </button>
+                                        )}
+
+                                        <div className="h-8 w-8 rounded-full bg-gray-50 dark:bg-gray-700 flex items-center justify-center group-hover:bg-indigo-100 dark:group-hover:bg-indigo-900/50 transition-colors">
+                                            <FaChevronRight className="text-gray-400 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 transition-colors" size={12} />
+                                        </div>
+                                    </div>
                                 </div>
                             </motion.div>
                         ))}

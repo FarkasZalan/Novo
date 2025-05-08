@@ -3,6 +3,7 @@ import { NextFunction } from "connect";
 import { addMilestoneToTaskQuery, createMilestoneQuery, deleteMilestoneFromTaskQuery, deleteMilestoneQuery, getAllMilestonesForProjectQuery, getAllTaskForMilestoneQuery, getAllUnassignedTaskForMilestoneQuery, getMilestoneByIdQuery, recalculateAllTasksInMilestoneQuery, recalculateCompletedTasksInMilestoneQuery, updateMilestoneQuery } from "../models/milestonesModel";
 import { getTaskById } from "./taskController";
 import { getTaskByIdQuery } from "../models/task.Model";
+import { getLabelsForTaskQuery } from "../models/labelModel";
 
 // Standardized response function
 // it's a function that returns a response to the client when a request is made (CRUD operations)
@@ -78,6 +79,11 @@ export const addMilestoneToTask = async (req: Request, res: Response, next: Next
 export const getAllTaskForMilestone = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const tasks = await getAllTaskForMilestoneQuery(req.params.milestoneId);
+
+        for (const task of tasks) {
+            const taskLabels = await getLabelsForTaskQuery(task.id);
+            task.labels = taskLabels;
+        }
         handleResponse(res, 200, "Tasks fetched successfully", tasks);
     } catch (error) {
         next(error);
@@ -87,6 +93,11 @@ export const getAllTaskForMilestone = async (req: Request, res: Response, next: 
 export const getAllUnassignedTaskForMilestone = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const tasks = await getAllUnassignedTaskForMilestoneQuery(req.params.projectId);
+
+        for (const task of tasks) {
+            const taskLabels = await getLabelsForTaskQuery(task.id);
+            task.labels = taskLabels;
+        }
         handleResponse(res, 200, "Tasks fetched successfully", tasks);
     } catch (error) {
         next(error);
@@ -113,6 +124,8 @@ export const updateMilestone = async (req: Request, res: Response, next: NextFun
         const milestone_id = req.params.milestoneId;
         const { name, description, due_date } = req.body;
         const updatedMilestone = await updateMilestoneQuery(milestone_id, name, description, due_date);
+
+        updatedMilestone.labels = await getLabelsForTaskQuery(updatedMilestone.id)
         handleResponse(res, 200, "Milestone updated successfully", updatedMilestone);
 
     } catch (error) {

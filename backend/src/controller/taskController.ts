@@ -3,6 +3,8 @@ import { NextFunction } from "connect";
 import { createTaskQuery, deleteTaskQuery, getAllTaskForProjectQuery, getCompletedTaskCountForProjectQuery, getInProgressTaskCountForProjectQuery, getTaskByIdQuery, getTaskCountForProjectQuery, updateTaskQuery, updateTaskStatusQuery } from "../models/task.Model";
 import { recalculateProjectStatus } from "../models/projectModel";
 import { recalculateAllTasksInMilestoneQuery, recalculateCompletedTasksInMilestoneQuery } from "../models/milestonesModel";
+import { addLabelToTaskQuery, deleteLabelFromTaskQuery, getLabelsForTaskQuery } from "../models/labelModel";
+import { Label } from "../schemas/labelSchema";
 
 // Standardized response function
 // it's a function that returns a response to the client when a request is made (CRUD operations)
@@ -17,12 +19,16 @@ const handleResponse = (res: Response, status: number, message: string, data: an
 export const createTask = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const projectId = req.params.projectId;
-        const { title, description, due_date, priority, status } = req.body;
+        const { title, description, due_date, priority, status, labels } = req.body;
         const newTask = await createTaskQuery(title, description, projectId, due_date, priority, status);
 
         if (newTask.milestone_id) {
             await recalculateAllTasksInMilestoneQuery(projectId, newTask.milestone_id)
             await recalculateCompletedTasksInMilestoneQuery(projectId, newTask.milestone_id)
+        }
+
+        for (const label of labels) {
+            await addLabelToTaskQuery(newTask.id, label.id);
         }
         await recalculateProjectStatus(projectId);
         handleResponse(res, 201, "Task created successfully", newTask);
@@ -43,6 +49,11 @@ export const getAllTasks = async (req: Request, res: Response, next: NextFunctio
         const orderBy = typeof req.query.order_by === 'string' ? req.query.order_by : "updated_at";
         const order = typeof req.query.order === 'string' ? req.query.order : "desc";
         const tasks = await getAllTaskForProjectQuery(projectId, orderBy, order); // get all tasks for the project;
+
+        for (const task of tasks) {
+            const taskLabels = await getLabelsForTaskQuery(task.id);
+            task.labels = taskLabels;
+        }
         handleResponse(res, 200, "Tasks fetched successfully", tasks);
     } catch (error) {
         next(error);
@@ -56,6 +67,9 @@ export const getTaskById = async (req: Request, res: Response, next: NextFunctio
             handleResponse(res, 404, "Task not found", null);
             return;
         }
+
+        const taskLabels = await getLabelsForTaskQuery(task.id);
+        task.labels = taskLabels;
         handleResponse(res, 200, "Task fetched successfully", task);
     } catch (error) {
         next(error);
@@ -65,7 +79,7 @@ export const getTaskById = async (req: Request, res: Response, next: NextFunctio
 export const updateTask = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const projectId = req.params.projectId;
-        const { title, description, due_date, priority, status } = req.body;
+        const { title, description, due_date, priority, status, labels } = req.body;
         const taskId = req.params.taskId;
 
         const updateTask = await updateTaskQuery(title, description, projectId, due_date, priority, taskId, status);
@@ -80,7 +94,29 @@ export const updateTask = async (req: Request, res: Response, next: NextFunction
             await recalculateAllTasksInMilestoneQuery(projectId, updateTask.milestone_id)
             await recalculateCompletedTasksInMilestoneQuery(projectId, updateTask.milestone_id)
         }
+
+        // check if there are any labels to remove or add based on the new and existing labels
+        const existingLabels = await getLabelsForTaskQuery(updateTask.id);
+        const existingLabelIds = existingLabels.map((label) => label.id);
+        const newLabelsIds = labels.map((label: Label) => label.id);
+
+        // remove labels if they are not in the new labels array
+        for (const existingLabelId of existingLabelIds) {
+            if (!newLabelsIds.includes(existingLabelId)) {
+                await deleteLabelFromTaskQuery(updateTask.id, existingLabelId);
+            }
+        }
+
+        // add labels if they are not in the existing labels array
+        for (const newLabelId of newLabelsIds) {
+            if (!existingLabelIds.includes(newLabelId)) {
+                await addLabelToTaskQuery(updateTask.id, newLabelId);
+            }
+        }
         await recalculateProjectStatus(projectId);
+
+        const taskLabels = await getLabelsForTaskQuery(updateTask.id);
+        updateTask.labels = taskLabels;
         handleResponse(res, 200, "Task updated successfully", updateTask);
     } catch (error) {
         next(error);

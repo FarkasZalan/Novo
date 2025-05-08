@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { createTask, deleteTask, fetchAllTasksForProject, updateTask } from '../../../../services/taskService';
-import { FaCalendarAlt, FaArrowLeft, FaSave, FaTimes, FaTrash, FaExclamationTriangle, FaFlag, FaPlus, FaSearch } from 'react-icons/fa';
+import { FaCalendarAlt, FaArrowLeft, FaSave, FaTimes, FaTrash, FaExclamationTriangle, FaFlag, FaPlus, FaSearch, FaTag } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 import { ConfirmationDialog } from '../../project/ConfirmationDialog';
 import { useAuth } from '../../../../hooks/useAuth';
@@ -11,6 +11,7 @@ import { TaskAssignments } from './assignments/TaskAssignments';
 import ProjectMember from '../../../../types/projectMember';
 import { addAssignmentForUsers } from '../../../../services/assignmentService';
 import { addMilestoneToTask, createMilestone, deleteMilestoneFromTask, getAllMilestonesForProject } from '../../../../services/milestonesService';
+import { createLabel, getAllLabelForProject } from '../../../../services/labelService';
 
 export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
     const { projectId, taskId } = useParams<{ projectId: string; taskId: string }>();
@@ -49,6 +50,13 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
     const [showSearchResults, setShowSearchResults] = useState(false);
     const searchRef = useRef<HTMLDivElement>(null);
 
+    // Label states
+    const [labels, setLabels] = useState<Label[]>([]);
+    const [selectedLabels, setSelectedLabels] = useState<Label[]>([]);
+    const [labelSearchTerm, setLabelSearchTerm] = useState('');
+    const [showLabelSearchResults, setShowLabelSearchResults] = useState(false);
+    const labelSearchRef = useRef<HTMLDivElement>(null);
+
     // Load milestones and task data
     useEffect(() => {
         const loadData = async () => {
@@ -58,6 +66,10 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
                 // Load milestones
                 const loadedMilestones = await getAllMilestonesForProject(projectId!, authState.accessToken!);
                 setMilestones(loadedMilestones);
+
+                // Load labels
+                const loadedLabels = await getAllLabelForProject(projectId!, authState.accessToken!);
+                setLabels(loadedLabels);
 
                 if (isEdit && taskId) {
                     // Load task data
@@ -80,6 +92,8 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
                                 setSelectedMilestone(milestone);
                             }
                         }
+
+                        setSelectedLabels(task.labels || []);
                     }
                 }
             } catch (err) {
@@ -158,7 +172,8 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
                     description,
                     dueDate ? new Date(dueDate) : undefined,
                     priority,
-                    status
+                    status,
+                    selectedLabels
                 );
 
                 // Handle assignments
@@ -195,7 +210,8 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
                     description,
                     dueDate ? new Date(dueDate) : undefined,
                     priority,
-                    status
+                    status,
+                    selectedLabels
                 );
 
                 // Handle assignments
@@ -317,6 +333,102 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
             setLoading(false);
         }
     };
+
+
+
+
+
+    // Filter labels based on search term
+    const filteredLabels = labels.filter(label =>
+        label.name.toLowerCase().includes(labelSearchTerm.toLowerCase()) &&
+        !selectedLabels.some(selected => selected.id === label.id)
+    );
+
+    // Generate a random color that's not already used
+    const getRandomUnusedColor = (): string => {
+        // Modern, accessible color palette that works in both light/dark modes
+        const DEFAULT_COLORS = [
+            // WARNING COLORS (3) - bugs/urgent
+            '#E06C5E', // Alert coral (high visibility)
+            '#D95C4A', // Danger rust (strong contrast)
+            '#C74E3D', // Critical red (serious issues)
+
+            // GREENS (3) - success/completed
+            '#5CA271', // Healthy green
+            '#6BB38A', // Fresh mint
+            '#5DAA90', // Calm teal
+
+            // BLUES (3) - info/technical
+            '#4E8FD9', // Trusted blue
+            '#5A9AE6', // Friendly azure
+            '#3D88B0', // Stable steel
+
+            // PURPLES (3) - features/enhancements
+            '#8D74C9', // Creative lavender
+            '#A066A0', // Innovative plum
+            '#B584AD', // Soft berry
+
+            // NEUTRALS (4) - in-progress/notes
+            '#D9AE67', // Active mustard
+            '#C0B18D', // Natural khaki
+            '#B0A79D', // Warm gray
+            '#9196A1'  // Cool gray
+        ];
+
+        // Get all colors currently in use
+        const usedColors = new Set(labels.map(label => label.color));
+
+        // Find first default color not in use
+        const availableColor = DEFAULT_COLORS.find(color => !usedColors.has(color));
+        if (availableColor) return availableColor;
+
+        // If all colors are used, generate a random one with good contrast
+        const randomHue = Math.floor(Math.random() * 360);
+        const randomSaturation = 70 + Math.floor(Math.random() * 25); // 70-100%
+        const randomLightness = 40 + Math.floor(Math.random() * 15); // 40-70%
+
+        return `hsl(${randomHue}, ${randomSaturation}%, ${randomLightness}%)`;
+    };
+
+    const handleCreateLabel = async () => {
+        if (!labelSearchTerm.trim()) return;
+
+        try {
+            setLoading(true);
+            const newLabel = await createLabel(
+                projectId!,
+                authState.accessToken!,
+                labelSearchTerm.trim(),
+                '', // Empty description
+                getRandomUnusedColor() // Auto-select a unique color
+            );
+
+            setLabels([...labels, newLabel]);
+            setSelectedLabels([...selectedLabels, newLabel]);
+            setLabelSearchTerm('');
+            toast.success(`Label "${labelSearchTerm.trim()}" created`);
+        } catch (err) {
+            console.error(err);
+            toast.error('Failed to create label');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Click outside label search results
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (labelSearchRef.current && !labelSearchRef.current.contains(event.target as Node)) {
+                setShowLabelSearchResults(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
 
     return (
         <div className="max-w-3xl mx-auto">
@@ -566,6 +678,164 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
                                 )}
                             </div>
                         )}
+                    </div>
+
+                    {/* Labels Selection */}
+                    <div className="space-y-2" ref={labelSearchRef}>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Labels
+                        </label>
+
+                        {/* Selected labels display */}
+                        {selectedLabels.length > 0 && (
+                            <div className="flex flex-wrap gap-2 mb-3">
+                                {selectedLabels.map(label => {
+                                    // Calculate text color based on label color brightness
+                                    const hexColor = label.color.startsWith('#') ? label.color : `#${label.color}`;
+                                    const r = parseInt(hexColor.slice(1, 3), 16);
+                                    const g = parseInt(hexColor.slice(3, 5), 16);
+                                    const b = parseInt(hexColor.slice(5, 7), 16);
+                                    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+                                    const textColor = brightness > 150 ? 'text-gray-900' : 'text-white';
+
+                                    return (
+                                        <div
+                                            key={label.id}
+                                            className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 shadow-sm hover:shadow-md ${textColor}`}
+                                            style={{
+                                                backgroundColor: hexColor,
+                                                border: `1px solid ${hexColor}80`
+                                            }}
+                                        >
+                                            {label.name}
+                                            <button
+                                                type="button"
+                                                onClick={() => setSelectedLabels(selectedLabels.filter(l => l.id !== label.id))}
+                                                className={`${textColor} opacity-80 hover:opacity-100 transition-opacity`}
+                                            >
+                                                <FaTimes className="h-3 w-3" />
+                                            </button>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+
+                        {/* Label search and selection */}
+                        <div className="relative">
+                            <div className="relative">
+                                <input
+                                    type="text"
+                                    className="block w-full pl-10 pr-3 py-2.5 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-200"
+                                    placeholder="Search or create label..."
+                                    value={labelSearchTerm}
+                                    onChange={(e) => {
+                                        setLabelSearchTerm(e.target.value);
+                                        setShowLabelSearchResults(true);
+                                    }}
+                                    onFocus={() => setShowLabelSearchResults(true)}
+                                />
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <FaSearch className="text-gray-400 dark:text-gray-500 text-sm" />
+                                </div>
+
+                                {/* Clear search button */}
+                                {labelSearchTerm && (
+                                    <button
+                                        onClick={() => {
+                                            setLabelSearchTerm('');
+                                            setShowLabelSearchResults(false);
+                                        }}
+                                        className="absolute cursor-pointer inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                                    >
+                                        <FaTimes />
+                                    </button>
+                                )}
+                            </div>
+
+                            {/* Search Results Dropdown */}
+                            {showLabelSearchResults && (
+                                <div className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 max-h-60 overflow-y-auto">
+                                    {filteredLabels.length > 0 ? (
+                                        <>
+                                            <ul className="py-1">
+                                                {filteredLabels.map(label => {
+                                                    const hexColor = label.color.startsWith('#') ? label.color : `#${label.color}`;
+                                                    const r = parseInt(hexColor.slice(1, 3)), g = parseInt(hexColor.slice(3, 5)), b = parseInt(hexColor.slice(5, 7));
+                                                    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+                                                    const textColor = brightness > 150 ? 'text-gray-900' : 'text-white';
+
+                                                    return (
+                                                        <li
+                                                            key={label.id}
+                                                            className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 shadow-sm hover:shadow-md ${textColor}`}
+                                                            style={{
+                                                                backgroundColor: hexColor,
+                                                                border: `1px solid ${hexColor}80`
+                                                            }}
+                                                            onClick={() => {
+                                                                setSelectedLabels([...selectedLabels, label]);
+                                                                setLabelSearchTerm('');
+                                                                setShowLabelSearchResults(false);
+                                                            }}
+                                                        >
+                                                            <div className="flex items-center space-x-3">
+                                                                <div
+                                                                    className="w-4 h-4 rounded-full border border-gray-200 dark:border-gray-600 shadow-sm"
+                                                                    style={{ backgroundColor: hexColor }}
+                                                                />
+                                                                <div className="flex-1 min-w-0">
+                                                                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                                                                        {label.name}
+                                                                    </p>
+                                                                    {label.description && (
+                                                                        <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                                                                            {label.description}
+                                                                        </p>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        </li>
+                                                    );
+                                                })}
+                                            </ul>
+                                            {labelSearchTerm && !labels.some(l => l.name.toLowerCase() === labelSearchTerm.toLowerCase()) && (
+                                                <div className="border-t border-gray-100 dark:border-gray-700 px-3 py-2">
+                                                    <button
+                                                        type="button"
+                                                        onClick={handleCreateLabel}
+                                                        className="w-full cursor-pointer flex items-center justify-between px-2 py-1.5 text-sm text-indigo-600 dark:text-indigo-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded transition-colors"
+                                                    >
+                                                        <span>Create "{labelSearchTerm}"</span>
+                                                        <FaPlus className="h-3 w-3" />
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </>
+                                    ) : (
+                                        <div className="p-4 text-center">
+                                            <div className="flex flex-col items-center">
+                                                <div className="mb-3 rounded-lg bg-gray-100 dark:bg-gray-700 p-2">
+                                                    <FaTag className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+                                                </div>
+                                                <p className="text-gray-700 dark:text-gray-300 font-medium text-sm mb-2">
+                                                    {labels.length > 0 ? 'No matching labels' : 'No labels found'}
+                                                </p>
+                                                {labelSearchTerm && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={handleCreateLabel}
+                                                        className="w-full cursor-pointer py-2 px-4 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white rounded transition-colors text-sm"
+                                                    >
+                                                        Create "{labelSearchTerm}"
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     {/* Assignees */}
