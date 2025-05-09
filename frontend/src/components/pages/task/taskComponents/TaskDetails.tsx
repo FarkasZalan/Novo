@@ -19,6 +19,7 @@ import { getProjectMembers } from '../../../../services/projectMemberService';
 import { useAuth } from '../../../../hooks/useAuth';
 import { TaskFiles } from '../taskHandler/TaskFiles';
 import { TaskAssignments } from '../taskHandler/assignments/TaskAssignments';
+import { SubtaskList } from './subtasks/SubtaskList';
 
 export const TaskDetails: React.FC = () => {
     const { taskId, projectId } = useParams<{ taskId: string; projectId: string }>();
@@ -215,6 +216,20 @@ export const TaskDetails: React.FC = () => {
                                     </p>
                                 )}
                             </div>
+                        </div>
+
+                        <div className="md:col-span-2">
+                            <SubtaskList
+                                subtasks={task.subtasks || []}
+                                parentTaskId={task.id}
+                                onSubtaskUpdated={async () => {
+                                    // Refetch task data
+                                    const updatedTask = await fetchTask(taskId!, projectId!, authState.accessToken!);
+                                    setTask(updatedTask);
+                                }}
+                                canManageTasks={canManageTasks}
+                                projectId={projectId!}
+                            />
                         </div>
 
                         {/* Due Date */}

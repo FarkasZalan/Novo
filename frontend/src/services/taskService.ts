@@ -15,7 +15,7 @@ export const fetchAllTasksForProject = async (projectId: string, token: string, 
     }
 };
 
-export const createTask = async (projectId: string, token: string, title: string, description: string, due_date?: Date, priority?: string, status: string = 'not-started', labels: Label[] = []) => {
+export const createTask = async (projectId: string, token: string, title: string, description: string, due_date?: Date, priority?: string, status: string = 'not-started', labels: Label[] = [], parent_task_id?: string) => {
     try {
         const response = await axios.post(`${API_URL}/project/${projectId}/tasks/new`, {
             title,
@@ -23,12 +23,14 @@ export const createTask = async (projectId: string, token: string, title: string
             due_date,
             priority,
             status,
-            labels
+            labels,
+            parent_task_id
         }, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
         });
+
         return response.data.data;
     } catch (error) {
         console.error("Error creating task:", error);
@@ -50,7 +52,7 @@ export const fetchTask = async (taskId: string, projectId: string, token: string
     }
 }
 
-export const updateTask = async (taskId: string, procejt_Id: string, token: string, title: string, description: string, due_date?: Date, priority?: string, status?: string, labels?: Label[]) => {
+export const updateTask = async (taskId: string, procejt_Id: string, token: string, title: string, description: string, due_date?: Date, priority?: string, status?: string, labels?: Label[], parent_task_id?: string) => {
     try {
         const response = await axios.put(`${API_URL}/project/${procejt_Id}/task/${taskId}`, {
             title,
@@ -58,12 +60,14 @@ export const updateTask = async (taskId: string, procejt_Id: string, token: stri
             due_date,
             priority,
             status,
-            labels
+            labels,
+            parent_task_id
         }, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
         });
+
         return response.data.data;
     } catch (error) {
         console.error("Error updating task:", error);

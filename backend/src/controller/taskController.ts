@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { NextFunction } from "connect";
-import { createTaskQuery, deleteTaskQuery, getAllTaskForProjectQuery, getCompletedTaskCountForProjectQuery, getInProgressTaskCountForProjectQuery, getTaskByIdQuery, getTaskCountForProjectQuery, updateTaskQuery, updateTaskStatusQuery } from "../models/task.Model";
+import { addSubtaskToTaskQuery, createTaskQuery, deleteTaskQuery, getAllTaskForProjectQuery, getCompletedTaskCountForProjectQuery, getInProgressTaskCountForProjectQuery, getTaskByIdQuery, getTaskCountForProjectQuery, updateTaskQuery, updateTaskStatusQuery } from "../models/task.Model";
 import { recalculateProjectStatus } from "../models/projectModel";
 import { recalculateAllTasksInMilestoneQuery, recalculateCompletedTasksInMilestoneQuery } from "../models/milestonesModel";
 import { addLabelToTaskQuery, deleteLabelFromTaskQuery, getLabelsForTaskQuery } from "../models/labelModel";
@@ -19,7 +19,7 @@ const handleResponse = (res: Response, status: number, message: string, data: an
 export const createTask = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const projectId = req.params.projectId;
-        const { title, description, due_date, priority, status, labels } = req.body;
+        const { title, description, due_date, priority, status, labels, parent_task_id } = req.body;
         const newTask = await createTaskQuery(title, description, projectId, due_date, priority, status);
 
         if (newTask.milestone_id) {
@@ -29,6 +29,10 @@ export const createTask = async (req: Request, res: Response, next: NextFunction
 
         for (const label of labels) {
             await addLabelToTaskQuery(newTask.id, label.id);
+        }
+
+        if (parent_task_id) {
+            await addSubtaskToTaskQuery(parent_task_id, newTask.id);
         }
         await recalculateProjectStatus(projectId);
         handleResponse(res, 201, "Task created successfully", newTask);
@@ -79,7 +83,7 @@ export const getTaskById = async (req: Request, res: Response, next: NextFunctio
 export const updateTask = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const projectId = req.params.projectId;
-        const { title, description, due_date, priority, status, labels } = req.body;
+        const { title, description, due_date, priority, status, labels, parent_task_id } = req.body;
         const taskId = req.params.taskId;
 
         const updateTask = await updateTaskQuery(title, description, projectId, due_date, priority, taskId, status);
@@ -112,6 +116,10 @@ export const updateTask = async (req: Request, res: Response, next: NextFunction
             if (!existingLabelIds.includes(newLabelId)) {
                 await addLabelToTaskQuery(updateTask.id, newLabelId);
             }
+        }
+
+        if (parent_task_id && !updateTask.parent_task_id) {
+            await addSubtaskToTaskQuery(parent_task_id, updateTask.id);
         }
         await recalculateProjectStatus(projectId);
 

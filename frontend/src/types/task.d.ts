@@ -9,4 +9,5 @@ export interface Task {
     milestone_id?: string;
     milestone_name?: string;
     labels?: Label[];
+    subtasks?: Task[];
 }

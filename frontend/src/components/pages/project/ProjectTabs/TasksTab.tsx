@@ -169,7 +169,7 @@ export const TasksTab = () => {
                                             </div>
 
                                             {/* Milestone and Labels row */}
-                                            <div className="flex flex-wrap gap-2"> {/* Removed mt-2.5 since we have space-y now */}
+                                            <div className="flex flex-wrap gap-2">
                                                 {/* Milestone */}
                                                 {task.milestone_id && (
                                                     <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-indigo-50 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/70">

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { createTask, deleteTask, fetchAllTasksForProject, updateTask } from '../../../../services/taskService';
+import { createTask, deleteTask, fetchAllTasksForProject, fetchTask, updateTask } from '../../../../services/taskService';
 import { FaCalendarAlt, FaArrowLeft, FaSave, FaTimes, FaTrash, FaExclamationTriangle, FaFlag, FaPlus, FaSearch, FaTag } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 import { ConfirmationDialog } from '../../project/ConfirmationDialog';
@@ -12,6 +12,7 @@ import ProjectMember from '../../../../types/projectMember';
 import { addAssignmentForUsers } from '../../../../services/assignmentService';
 import { addMilestoneToTask, createMilestone, deleteMilestoneFromTask, getAllMilestonesForProject } from '../../../../services/milestonesService';
 import { createLabel, getAllLabelForProject } from '../../../../services/labelService';
+import { SubtaskList } from '../taskComponents/subtasks/SubtaskList';
 
 export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
     const { projectId, taskId } = useParams<{ projectId: string; taskId: string }>();
@@ -30,8 +31,9 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
         description: '',
         dueDate: '',
         priority: 'low' as 'low' | 'medium' | 'high',
-        status: taskStatus as 'not-started' | 'in-progress' | 'completed',
-        completed: false
+        status: taskStatus as 'not-started' | 'in-progress' | 'blocked' | 'completed',
+        completed: false,
+        subtasks: []
     });
 
     const [isLoading, setLoading] = useState(false);
@@ -82,7 +84,8 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
                             dueDate: task.due_date ? new Date(task.due_date).toISOString().slice(0, 10) : '',
                             priority: task.priority || 'low',
                             status: task.status || 'not-started',
-                            completed: task.status === 'completed'
+                            completed: task.status === 'completed',
+                            subtasks: task.subtasks
                         });
 
                         // If task has a milestone, set it as selected
@@ -854,6 +857,23 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
                             setSelectedFiles={setSelectedFiles}
                         />
                     </div>
+
+                    {isEdit && (
+                        <SubtaskList
+                            subtasks={formData.subtasks || []}
+                            parentTaskId={taskId!}
+                            onSubtaskUpdated={async () => {
+                                // Refetch task data to update subtasks
+                                const updatedTask = await fetchTask(taskId!, projectId!, authState.accessToken!);
+                                setFormData(prev => ({
+                                    ...prev,
+                                    subtasks: updatedTask.subtasks || []
+                                }));
+                            }}
+                            canManageTasks={true}
+                            projectId={projectId!}
+                        />
+                    )}
                 </div>
 
                 {/* Action Buttons */}
