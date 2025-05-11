@@ -1,4 +1,13 @@
+import { addDays, endOfDay } from "date-fns";
 import pool from "../config/db";
+
+export const getAllMilestoneForReminderQuery = async () => {
+
+    const today = new Date();
+    const tomorrowEnd = endOfDay(addDays(today, 1));
+    const result = await pool.query("SELECT * FROM milestones WHERE due_date < $1", [tomorrowEnd]);
+    return result.rows;
+}
 
 export const getAllMilestonesForProjectQuery = async (procejt_Id: string) => {
     const result = await pool.query("SELECT * FROM milestones WHERE project_id = $1;", [procejt_Id]); // send a query to the database with one of the open connection from the pool
@@ -23,6 +32,15 @@ export const addMilestoneToTaskQuery = async (task_id: string, milestone_id: str
 export const getAllTaskForMilestoneQuery = async (milestone_id: string) => {
     const result = await pool.query("SELECT tasks.* FROM tasks WHERE milestone_id = $1;", [milestone_id]); // send a query to the database with one of the open connection from the pool
     return result.rows
+}
+
+export const getAllTaskCountForMilestoneQuery = async (milestone_id: string) => {
+    const result = await pool.query("SELECT COUNT(*) FROM tasks WHERE milestone_id = $1;", [milestone_id]); // send a query to the database with one of the open connection from the pool
+    return parseInt(result.rows[0].count, 10);
+}
+export const getAllCOmpletedTaskCountForMilestoneQuery = async (milestone_id: string) => {
+    const result = await pool.query("SELECT COUNT(*) FROM tasks WHERE milestone_id = $1 AND status = 'completed';", [milestone_id]); // send a query to the database with one of the open connection from the pool
+    return parseInt(result.rows[0].count, 10);
 }
 
 export const getAllUnassignedTaskForMilestoneQuery = async (projectId: string) => {

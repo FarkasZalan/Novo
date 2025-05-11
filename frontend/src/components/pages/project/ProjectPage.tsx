@@ -291,7 +291,7 @@ export const ProjectPage = () => {
                 <div className="text-center text-red-500 dark:text-red-400">
                     <p>{error}</p>
                     <button
-                        onClick={() => navigate(-1)}
+                        onClick={() => navigate("/dashboard", { replace: true })}
                         className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
                     >
                         Go Back

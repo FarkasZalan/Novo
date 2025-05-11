@@ -12,6 +12,8 @@ import createLabelTable from "../data/createLabelTable";
 import createTaskLabelTable from "../data/createTaskLabelTable";
 import createSubtaskTable from "../data/createSubtaskTable";
 import createCommentTable from "../data/createCommentsTable";
+import cron from 'node-cron';
+import { checkDueMilestonesAndSendReminders, checkDueTasksAndSendReminders } from "../services/taskReminder";
 
 const { Pool } = pkg;
 
@@ -57,5 +59,35 @@ export const initializeDatabase = async () => {
 pool.on("connect", () => {
     console.log("Connected to database");
 })
+
+// daily tasks due date check every day at 9AM
+cron.schedule(
+    '0 9 * * *',
+    async () => {
+        console.log('Running daily task reminder check...');
+        try {
+            await checkDueTasksAndSendReminders();
+            console.log('Daily task reminder check completed.');
+        } catch (error) {
+            console.error('Error running daily task reminder check:', error);
+        }
+    },
+    { timezone: 'UTC' }
+);
+
+// daily milestones due date check every day at 9AM
+cron.schedule(
+    '0 9 * * *',
+    async () => {
+        console.log('Running daily milestone reminder check...');
+        try {
+            await checkDueMilestonesAndSendReminders();
+            console.log('Daily milestone reminder check completed.');
+        } catch (error) {
+            console.error('Error running daily milestone reminder check:', error);
+        }
+    },
+    { timezone: 'UTC' }
+);
 
 export default pool

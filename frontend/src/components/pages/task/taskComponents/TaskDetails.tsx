@@ -139,7 +139,7 @@ export const TaskDetails: React.FC = () => {
             <div className="text-center flex flex-col py-8 min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
                 <div className="text-red-500 dark:text-red-400 text-lg mb-4">{error}</div>
                 <button
-                    onClick={() => navigate(`/projects/${projectId}/tasks`)}
+                    onClick={() => navigate("/dashboard", { replace: true })}
                     className="px-4 cursor-pointer py-2 cursor-pointer bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white rounded-lg transition-colors"
                 >
                     Go Back

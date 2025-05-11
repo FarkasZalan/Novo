@@ -1,5 +1,13 @@
+import { addDays, endOfDay } from "date-fns";
 import pool from "../config/db";
 import { getLabelsForTaskQuery } from "../models/labelModel";
+
+export const getAllTaskForReminderQuery = async () => {
+    const today = new Date();
+    const tomorrowEnd = endOfDay(addDays(today, 1));
+    const result = await pool.query("SELECT * FROM tasks WHERE status != 'completed' AND due_date < $1", [tomorrowEnd]);
+    return result.rows;
+}
 
 export const getAllTaskForProjectQuery = async (id: string, order_by: string, order: string) => {
     let finalOrderBy = "";

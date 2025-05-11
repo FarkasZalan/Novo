@@ -1,10 +1,13 @@
 import { Request, Response } from "express";
 import { NextFunction } from "connect";
 import { addSubtaskToTaskQuery, createTaskQuery, deleteTaskQuery, getAllTaskForProjectQuery, getCompletedTaskCountForProjectQuery, getInProgressTaskCountForProjectQuery, getParentTaskForSubtaskQuery, getSubtasksForTaskQuery, getTaskByIdQuery, getTaskCountForProjectQuery, updateTaskQuery, updateTaskStatusQuery } from "../models/task.Model";
-import { recalculateProjectStatus } from "../models/projectModel";
+import { getProjectByIdQuery, recalculateProjectStatus } from "../models/projectModel";
 import { addMilestoneToTaskQuery, recalculateAllTasksInMilestoneQuery, recalculateCompletedTasksInMilestoneQuery } from "../models/milestonesModel";
 import { addLabelToTaskQuery, deleteLabelFromTaskQuery, getLabelsForTaskQuery } from "../models/labelModel";
 import { Label } from "../schemas/labelSchema";
+import { sendTaskStatusChangeEmail } from "../services/emailService";
+import { getAssignmentsForTaskQuery } from "../models/assignmentModel";
+import { getUserByIdQuery } from "../models/userModel";
 
 // Standardized response function
 // it's a function that returns a response to the client when a request is made (CRUD operations)
@@ -102,8 +105,23 @@ export const updateTask = async (req: Request, res: Response, next: NextFunction
         const { title, description, due_date, priority, status, labels } = req.body;
         const taskId = req.params.taskId;
 
+        const task = await getTaskByIdQuery(taskId);
+        if (!task) {
+            handleResponse(res, 404, "Task not found", null);
+            return;
+        }
+
         const updateTask = await updateTaskQuery(title, description, projectId, due_date, priority, taskId, status);
 
+        if (status !== task.status) {
+            const projectData = await getProjectByIdQuery(projectId);
+            const assignedUsers = await getAssignmentsForTaskQuery(taskId);
+            const currentUser = await getUserByIdQuery(req.user.id);
+            for (const user of assignedUsers) {
+                if (user.user_id === req.user.id) continue;
+                sendTaskStatusChangeEmail(user.user_email, currentUser.name, currentUser.email, task.title, projectData.name, task.status, status, taskId, projectId);
+            }
+        }
 
         if (!updateTask) {
             handleResponse(res, 404, "Task not found", null);
@@ -168,6 +186,14 @@ export const updateTaskStatus = async (req: Request, res: Response, next: NextFu
             for (const subtask of subtasks) {
                 await updateTaskStatusQuery("completed", subtask.subtask_id);
             }
+        }
+
+        const projectData = await getProjectByIdQuery(projectId);
+        const assignedUsers = await getAssignmentsForTaskQuery(taskId);
+        const currentUser = await getUserByIdQuery(req.user.id);
+        for (const user of assignedUsers) {
+            if (user.user_id === req.user.id) continue;
+            sendTaskStatusChangeEmail(user.user_email, currentUser.name, currentUser.email, updateTask.title, projectData.name, updateTask.status, status, taskId, projectId);
         }
 
         if (updateTask.milestone_id) {

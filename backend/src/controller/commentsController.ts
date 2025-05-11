@@ -1,6 +1,11 @@
 import { Request, Response } from "express";
 import { NextFunction } from "connect";
 import { createCommentQuery, deleteCommentQuery, getAllCommentsForTaskQuery, getCommentByIdQuery, updateCommentQuery } from "../models/commentModel";
+import { getAllAssignmentsForTask } from "./assignmentsController";
+import { getAssignmentsForTaskQuery } from "../models/assignmentModel";
+import { sendTaskCommentEmail } from "../services/emailService";
+import { getTaskByIdQuery } from "../models/task.Model";
+import { getProjectByIdQuery } from "../models/projectModel";
 
 // Standardized response function
 // it's a function that returns a response to the client when a request is made (CRUD operations)
@@ -15,9 +20,18 @@ const handleResponse = (res: Response, status: number, message: string, data: an
 export const createComment = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const taskId = req.params.taskId;
+        const projectId = req.params.projectId;
         const { author_id, comment } = req.body;
         const createdComment = await createCommentQuery(comment, taskId, author_id);
         const newComment = await getCommentByIdQuery(createdComment.id);
+
+        const taskData = await getTaskByIdQuery(taskId);
+        const projectData = await getProjectByIdQuery(projectId);
+        const assignedUsers = await getAssignmentsForTaskQuery(taskId);
+        for (const user of assignedUsers) {
+            if (user.user_id === author_id) continue;
+            sendTaskCommentEmail(user.user_email, newComment.author_name, newComment.author_email, taskData.title, projectData.name, newComment.comment, taskId, projectId);
+        }
         handleResponse(res, 200, "Comment created successfully", newComment);
     } catch (error: any) {
         next(error);

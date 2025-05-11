@@ -28,6 +28,7 @@ export const CommentComponent: React.FC<CommentProps> = ({ projectId, taskId, ca
     useEffect(() => {
         const fetchComments = async () => {
             try {
+                setLoading(true);
                 if (projectId && taskId && authState.accessToken) {
                     const commentsData = await getAllCommentsForTask(projectId, taskId, authState.accessToken);
                     setComments(commentsData);
@@ -44,6 +45,7 @@ export const CommentComponent: React.FC<CommentProps> = ({ projectId, taskId, ca
     }, [projectId, taskId, authState.accessToken]);
 
     const handleSubmitComment = async (e: React.FormEvent) => {
+        setLoading(true);
         e.preventDefault();
         if (!newComment.trim()) return;
 
@@ -72,10 +74,13 @@ export const CommentComponent: React.FC<CommentProps> = ({ projectId, taskId, ca
         } catch (err) {
             toast.error('Failed to add comment');
             console.error(err);
+        } finally {
+            setLoading(false);
         }
     };
 
     const handleUpdateComment = async (commentId: string) => {
+        setLoading(true);
         if (!editedComment.trim()) return;
 
         try {
@@ -95,6 +100,8 @@ export const CommentComponent: React.FC<CommentProps> = ({ projectId, taskId, ca
         } catch (err) {
             toast.error('Failed to update comment');
             console.error(err);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -115,6 +122,7 @@ export const CommentComponent: React.FC<CommentProps> = ({ projectId, taskId, ca
 
     const handleDeleteComment = async () => {
         try {
+            setLoading(true);
             if (projectId && taskId && authState.accessToken) {
                 await deleteComment(projectId, taskId, commentToDelete!, authState.accessToken);
                 setComments(prev => prev.filter(comment => comment.id !== commentToDelete!));
@@ -123,6 +131,10 @@ export const CommentComponent: React.FC<CommentProps> = ({ projectId, taskId, ca
         } catch (err) {
             toast.error('Failed to delete comment');
             console.error(err);
+        } finally {
+            setLoading(false);
+            setShowTaskDeleteConfirm(false);
+            setCommentToDelete(null);
         }
     };
 
@@ -177,18 +189,53 @@ export const CommentComponent: React.FC<CommentProps> = ({ projectId, taskId, ca
                 <div className="flex items-center text-gray-500 dark:text-gray-400 mb-4">
                     <FaComment className="mr-2" />
                     <h3 className="font-medium">Comments</h3>
-                    <div className="ml-2 w-6 h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                    <div className="ml-2 w-6 h-4 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 rounded-full animate-pulse"></div>
                 </div>
-                <div className="space-y-4">
-                    {[1, 2].map((i) => (
-                        <div key={i} className="flex gap-3">
-                            <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
-                            <div className="flex-1">
-                                <div className="h-4 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-2"></div>
-                                <div className="h-3 w-full bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-1"></div>
-                                <div className="h-3 w-3/4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+
+                {/* Comment Form Skeleton */}
+                <div className="mb-8 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                    <div className="flex gap-3">
+                        <div className="flex-shrink-0">
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 animate-pulse"></div>
+                        </div>
+                        <div className="flex-1 space-y-3">
+                            <div className="h-20 w-full rounded-lg bg-gradient-to-r from-gray-100 via-gray-50 to-gray-100 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 animate-pulse"></div>
+                            <div className="flex justify-end">
+                                <div className="h-9 w-24 rounded-lg bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 animate-pulse"></div>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                {/* Comments List Skeleton */}
+                <div className="space-y-6">
+                    {[...Array(2)].map((_, i) => (
+                        <motion.div
+                            key={i}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: i * 0.1, duration: 0.3 }}
+                            className="flex gap-3"
+                        >
+                            <div className="flex-shrink-0">
+                                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 animate-pulse"></div>
+                            </div>
+                            <div className="flex-1 space-y-2">
+                                <div className="flex justify-between">
+                                    <div className="h-4 w-32 rounded-full bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 animate-pulse"></div>
+                                    <div className="h-4 w-16 rounded-full bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 animate-pulse"></div>
+                                </div>
+                                <div className="space-y-1">
+                                    <div className="h-3 w-full rounded-full bg-gradient-to-r from-gray-100 via-gray-50 to-gray-100 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 animate-pulse"></div>
+                                    <div className="h-3 w-5/6 rounded-full bg-gradient-to-r from-gray-100 via-gray-50 to-gray-100 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 animate-pulse"></div>
+                                    <div className="h-3 w-3/4 rounded-full bg-gradient-to-r from-gray-100 via-gray-50 to-gray-100 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 animate-pulse"></div>
+                                </div>
+                                <div className="flex justify-end gap-2 pt-1">
+                                    <div className="h-6 w-6 rounded-full bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 animate-pulse"></div>
+                                    <div className="h-6 w-6 rounded-full bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 animate-pulse"></div>
+                                </div>
+                            </div>
+                        </motion.div>
                     ))}
                 </div>
             </div>

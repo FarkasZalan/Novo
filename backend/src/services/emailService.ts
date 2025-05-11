@@ -1,4 +1,5 @@
 import { sendEmail } from '../config/emailConfig';
+import { format } from 'date-fns';
 
 // Email templates
 const getPasswordResetTemplate = (resetLink: string) => `
@@ -258,6 +259,432 @@ const getWelcomeTemplate = (userName: string) => `
   </div>
 `;
 
+const getTaskCommentTemplate = (
+  commenterName: string,
+  commenterEmail: string,
+  taskName: string,
+  projectName: string,
+  commentContent: string,
+  taskLink: string
+) => `
+  <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+    <!-- Email Header -->
+    <div style="background-color: #4F46E5; padding: 24px; text-align: center;">
+      <h1 style="color: white; font-size: 24px; font-weight: 700; margin: 0;">New Comment on Task</h1>
+    </div>
+    
+    <!-- Email Content -->
+    <div style="padding: 32px;">
+      <h2 style="color: #111827; font-size: 20px; font-weight: 700; margin-bottom: 16px;">
+        ${commenterName} commented on "${taskName}" in ${projectName}
+      </h2>
+      
+      <!-- Commenter Info with Table-based Layout -->
+      <table cellpadding="0" cellspacing="0" role="presentation" style="margin-bottom: 16px;">
+        <tr>
+          <!-- Avatar cell -->
+          <td width="40" height="40" align="center" valign="middle"
+              style="
+                background-color: #e0e7ff;
+                border-radius: 50%;
+                font-size: 16px;
+                font-weight: 600;
+                color: #4F46E5;
+              ">
+            ${getUserInitials(commenterName)}
+          </td>
+          <!-- Name + email cell -->
+          <td style="padding-left: 12px; vertical-align: middle;">
+            <p style="margin: 0; font-weight: 600; color: #111827;">${commenterName}</p>
+            <p style="margin: 0; font-size: 14px; color: #6B7280;">${commenterEmail}</p>
+          </td>
+        </tr>
+      </table>
+      
+      <!-- Comment Content -->
+      <div style="background-color: #F9FAFB; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+        <p style="color: #4B5563; font-size: 16px; line-height: 1.5; margin: 0; white-space: pre-wrap;">${commentContent}</p>
+      </div>
+      
+      <!-- Action Button -->
+      <div style="text-align: center; margin: 32px 0;">
+        <a href="${taskLink}" 
+           style="background-color: #4F46E5; color: white; padding: 12px 24px; 
+                  font-size: 16px; font-weight: 600; text-decoration: none; 
+                  border-radius: 8px; display: inline-block; transition: all 0.2s ease;
+                  box-shadow: 0 4px 6px rgba(79, 70, 229, 0.2);">
+          View Task
+        </a>
+      </div>
+      
+      <div style="border-top: 1px solid #E5E7EB; padding-top: 24px; margin-top: 24px;">
+        <p style="color: #9CA3AF; font-size: 12px; line-height: 1.5; margin: 0;">
+          You're receiving this notification because you're involved with this task.<br>
+        </p>
+      </div>
+    </div>
+    
+    <!-- Email Footer -->
+    <div style="background-color: #F9FAFB; padding: 16px; text-align: center;">
+      <p style="color: #6B7280; font-size: 12px; margin: 0;">
+        © ${new Date().getFullYear()} Novo. All rights reserved.
+      </p>
+    </div>
+  </div>
+`;
+
+const getTaskStatusChangeTemplate = (
+  changerName: string,
+  changerEmail: string,
+  taskName: string,
+  projectName: string,
+  oldStatus: string,
+  newStatus: string,
+  taskLink: string
+) => `
+  <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+    <!-- Email Header -->
+    <div style="background-color: #4F46E5; padding: 24px; text-align: center;">
+      <h1 style="color: white; font-size: 24px; font-weight: 700; margin: 0;">Task Status Updated</h1>
+    </div>
+    
+    <!-- Email Content -->
+    <div style="padding: 32px;">
+      <h2 style="color: #111827; font-size: 20px; font-weight: 700; margin-bottom: 16px;">
+        ${changerName} updated the status of "${taskName}" in ${projectName}
+      </h2>
+      
+      <!-- Changer Info -->
+      <table cellpadding="0" cellspacing="0" role="presentation" style="margin-bottom: 16px;">
+        <tr>
+          <td width="40" height="40" align="center" valign="middle"
+              style="
+                background-color: #e0e7ff;
+                border-radius: 50%;
+                font-size: 16px;
+                font-weight: 600;
+                color: #4F46E5;
+              ">
+            ${getUserInitials(changerName)}
+          </td>
+          <td style="padding-left: 12px; vertical-align: middle;">
+            <p style="margin: 0; font-weight: 600; color: #111827;">${changerName}</p>
+            <p style="margin: 0; font-size: 14px; color: #6B7280;">${changerEmail}</p>
+          </td>
+        </tr>
+      </table>
+      
+      <!-- Status Change Highlight -->
+      <div style="background-color: #F5F3FF; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+        <table cellpadding="0" cellspacing="0" width="100%">
+          <tr>
+            <td width="50%" style="padding-right: 8px;">
+              <p style="color: #6B7280; font-size: 14px; margin: 0 0 4px 0;">Previous Status</p>
+              <div style="background-color: #E5E7EB; border-radius: 4px; padding: 8px 12px;">
+                <p style="color: #4B5563; font-weight: 600; margin: 0;">${oldStatus}</p>
+              </div>
+            </td>
+            <td width="50%" style="padding-left: 8px;">
+              <p style="color: #6B7280; font-size: 14px; margin: 0 0 4px 0;">New Status</p>
+              <div style="background-color: #E0E7FF; border-radius: 4px; padding: 8px 12px;">
+                <p style="color: #4F46E5; font-weight: 600; margin: 0;">${newStatus}</p>
+              </div>
+            </td>
+          </tr>
+        </table>
+      </div>
+      
+      <!-- Action Button -->
+      <div style="text-align: center; margin: 32px 0;">
+        <a href="${taskLink}" 
+           style="background-color: #4F46E5; color: white; padding: 12px 24px; 
+                  font-size: 16px; font-weight: 600; text-decoration: none; 
+                  border-radius: 8px; display: inline-block; transition: all 0.2s ease;
+                  box-shadow: 0 4px 6px rgba(79, 70, 229, 0.2);">
+          View Task
+        </a>
+      </div>
+      
+      <div style="border-top: 1px solid #E5E7EB; padding-top: 24px; margin-top: 24px;">
+        <p style="color: #9CA3AF; font-size: 12px; line-height: 1.5; margin: 0;">
+          You're receiving this notification because you're involved with this task.<br>
+          This is an automated message - please do not reply directly to this email.
+        </p>
+      </div>
+    </div>
+    
+    <!-- Email Footer -->
+    <div style="background-color: #F9FAFB; padding: 16px; text-align: center;">
+      <p style="color: #6B7280; font-size: 12px; margin: 0;">
+        © ${new Date().getFullYear()} Novo. All rights reserved.
+      </p>
+    </div>
+  </div>
+`;
+
+const getTaskAssignmentTemplate = (
+  assignerName: string,
+  assignerEmail: string,
+  taskName: string,
+  projectName: string,
+  taskLink: string,
+  dueDate?: string
+) => `
+  <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+    <!-- Email Header -->
+    <div style="background-color: #4F46E5; padding: 24px; text-align: center;">
+      <h1 style="color: white; font-size: 24px; font-weight: 700; margin: 0;">You've Been Assigned a Task</h1>
+    </div>
+    
+    <!-- Email Content -->
+    <div style="padding: 32px;">
+      <h2 style="color: #111827; font-size: 20px; font-weight: 700; margin-bottom: 16px;">
+        ${assignerName} assigned you to "${taskName}" in ${projectName}
+      </h2>
+      
+      <!-- Assigner Info -->
+      <table cellpadding="0" cellspacing="0" role="presentation" style="margin-bottom: 16px;">
+        <tr>
+          <td width="40" height="40" align="center" valign="middle"
+              style="background-color: #e0e7ff; border-radius: 50%; font-size: 16px; font-weight: 600; color: #4F46E5;">
+            ${getUserInitials(assignerName)}
+          </td>
+          <td style="padding-left: 12px; vertical-align: middle;">
+            <p style="margin: 0; font-weight: 600; color: #111827;">${assignerName}</p>
+            <p style="margin: 0; font-size: 14px; color: #6B7280;">${assignerEmail}</p>
+          </td>
+        </tr>
+      </table>
+      
+      <!-- Task Details -->
+      <div style="background-color: #F9FAFB; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+        <table cellpadding="0" cellspacing="0" width="100%">
+          <tr>
+            <td style="padding-bottom: 8px;">
+              <p style="color: #6B7280; font-size: 14px; margin: 0 0 4px 0;">Task</p>
+              <p style="color: #111827; font-weight: 600; margin: 0;">${taskName}</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding-bottom: 8px;">
+              <p style="color: #6B7280; font-size: 14px; margin: 0 0 4px 0;">Project</p>
+              <p style="color: #111827; font-weight: 600; margin: 0;">${projectName}</p>
+            </td>
+          </tr>
+          ${dueDate ? `
+            <tr>
+              <td>
+                <p style="color: #6B7280; font-size: 14px; margin: 0 0 4px 0;">Due Date</p>
+                <p style="color: #111827; font-weight: 600; margin: 0;">${format(new Date(dueDate), 'MMM d')}</p>
+              </td>
+            </tr>
+          ` : ''}
+        </table>
+      </div>
+      
+      <!-- Action Button -->
+      <div style="text-align: center; margin: 32px 0;">
+        <a href="${taskLink}" 
+           style="background-color: #4F46E5; color: white; padding: 12px 24px; 
+                  font-size: 16px; font-weight: 600; text-decoration: none; 
+                  border-radius: 8px; display: inline-block; transition: all 0.2s ease;
+                  box-shadow: 0 4px 6px rgba(79, 70, 229, 0.2);">
+          View Task
+        </a>
+      </div>
+      
+      <div style="border-top: 1px solid #E5E7EB; padding-top: 24px; margin-top: 24px;">
+        <p style="color: #9CA3AF; font-size: 12px; line-height: 1.5; margin: 0;">
+          You're receiving this notification because you were assigned to this task.<br>
+          This is an automated message - please do not reply directly to this email.
+        </p>
+      </div>
+    </div>
+    
+    <!-- Email Footer -->
+    <div style="background-color: #F9FAFB; padding: 16px; text-align: center;">
+      <p style="color: #6B7280; font-size: 12px; margin: 0;">
+        © ${new Date().getFullYear()} Novo. All rights reserved.
+      </p>
+    </div>
+  </div>
+`;
+
+const getTaskDueSoonTemplate = (
+  taskName: string,
+  projectName: string,
+  dueDate: string,
+  taskLink: string,
+  isToday: boolean
+) => `
+  <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+    <!-- Email Header -->
+    <div style="background-color: ${isToday ? '#DC2626' : '#F59E0B'}; padding: 24px; text-align: center;">
+      <h1 style="color: white; font-size: 24px; font-weight: 700; margin: 0;">
+        ${isToday ? 'Task Due Today!' : 'Task Due Tomorrow!'}
+      </h1>
+    </div>
+    
+    <!-- Email Content -->
+    <div style="padding: 32px;">
+      <h2 style="color: #111827; font-size: 20px; font-weight: 700; margin-bottom: 16px;">
+        "${taskName}" in ${projectName} is due ${isToday ? 'today' : 'tomorrow'}
+      </h2>
+      
+      <!-- Task Details -->
+      <div style="background-color: #F9FAFB; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+        <table cellpadding="0" cellspacing="0" width="100%">
+          <tr>
+            <td style="padding-bottom: 8px;">
+              <p style="color: #6B7280; font-size: 14px; margin: 0 0 4px 0;">Task</p>
+              <p style="color: #111827; font-weight: 600; margin: 0;">${taskName}</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding-bottom: 8px;">
+              <p style="color: #6B7280; font-size: 14px; margin: 0 0 4px 0;">Project</p>
+              <p style="color: #111827; font-weight: 600; margin: 0;">${projectName}</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p style="color: #6B7280; font-size: 14px; margin: 0 0 4px 0;">Due Date</p>
+              <p style="color: ${isToday ? '#DC2626' : '#F59E0B'}; font-weight: 600; margin: 0;">
+                ${dueDate} ${isToday ? '(Today)' : '(Tomorrow)'}
+              </p>
+            </td>
+          </tr>
+        </table>
+      </div>
+      
+      <!-- Action Button -->
+      <div style="text-align: center; margin: 32px 0;">
+        <a href="${taskLink}" 
+           style="background-color: ${isToday ? '#DC2626' : '#F59E0B'}; color: white; padding: 12px 24px; 
+                  font-size: 16px; font-weight: 600; text-decoration: none; 
+                  border-radius: 8px; display: inline-block; transition: all 0.2s ease;
+                  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+          View Task
+        </a>
+      </div>
+      
+      <div style="border-top: 1px solid #E5E7EB; padding-top: 24px; margin-top: 24px;">
+        <p style="color: #9CA3AF; font-size: 12px; line-height: 1.5; margin: 0;">
+          You're receiving this notification because you're assigned to this task.<br>
+          This is an automated message - please do not reply directly to this email.
+        </p>
+      </div>
+    </div>
+    
+    <!-- Email Footer -->
+    <div style="background-color: #F9FAFB; padding: 16px; text-align: center;">
+      <p style="color: #6B7280; font-size: 12px; margin: 0;">
+        © ${new Date().getFullYear()} Novo. All rights reserved.
+      </p>
+    </div>
+  </div>
+`;
+
+const getMilestoneDueSoonTemplate = (
+  milestoneName: string,
+  projectName: string,
+  dueDate: string,
+  milestoneLink: string,
+  isToday: boolean,
+  progressPercentage: number,
+  completedTasks: number,
+  totalTasks: number
+) => `
+  <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+    <!-- Email Header -->
+    <div style="background-color: ${isToday ? '#DC2626' : '#F59E0B'}; padding: 24px; text-align: center;">
+      <h1 style="color: white; font-size: 24px; font-weight: 700; margin: 0;">
+        ${isToday ? 'Milestone Due Today!' : 'Milestone Due Soon!'}
+      </h1>
+    </div>
+    
+    <!-- Email Content -->
+    <div style="padding: 32px;">
+      <h2 style="color: #111827; font-size: 20px; font-weight: 700; margin-bottom: 16px;">
+        "${milestoneName}" in ${projectName} is due ${isToday ? 'today' : 'soon'}
+      </h2>
+      
+      <!-- Progress Bar -->
+      <div style="margin-bottom: 24px;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+          <span style="font-size: 14px; margin-right: 8px; color: #4B5563;">Progress:</span>
+          <span style="font-size: 14px; font-weight: 600; color: ${progressPercentage >= 100 ? '#10B981' : '#4B5563'}">
+            ${progressPercentage}% Complete
+          </span>
+        </div>
+        <div style="height: 8px; background-color: #E5E7EB; border-radius: 4px; overflow: hidden;">
+          <div style="width: ${Math.min(progressPercentage, 100)}%; height: 100%; background-color: ${progressPercentage >= 100 ? '#10B981' : (isToday ? '#DC2626' : '#F59E0B')};"></div>
+        </div>
+        <div style="text-align: center; margin-top: 4px; font-size: 12px; color: #6B7280;">
+          ${completedTasks} of ${totalTasks} tasks completed
+        </div>
+      </div>
+      
+      <!-- Milestone Details -->
+      <div style="background-color: #F9FAFB; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+        <table cellpadding="0" cellspacing="0" width="100%">
+          <tr>
+            <td style="padding-bottom: 8px;">
+              <p style="color: #6B7280; font-size: 14px; margin: 0 0 4px 0;">Milestone</p>
+              <p style="color: #111827; font-weight: 600; margin: 0;">${milestoneName}</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding-bottom: 8px;">
+              <p style="color: #6B7280; font-size: 14px; margin: 0 0 4px 0;">Project</p>
+              <p style="color: #111827; font-weight: 600; margin: 0;">${projectName}</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p style="color: #6B7280; font-size: 14px; margin: 0 0 4px 0;">Due Date</p>
+              <p style="color: ${isToday ? '#DC2626' : '#F59E0B'}; font-weight: 600; margin: 0;">
+                ${dueDate} ${isToday ? '(Today)' : ''}
+              </p>
+            </td>
+          </tr>
+        </table>
+      </div>
+      
+      <!-- Action Button -->
+      <div style="text-align: center; margin: 32px 0;">
+        <a href="${milestoneLink}" 
+           style="background-color: ${isToday ? '#DC2626' : '#F59E0B'}; color: white; padding: 12px 24px; 
+                  font-size: 16px; font-weight: 600; text-decoration: none; 
+                  border-radius: 8px; display: inline-block; transition: all 0.2s ease;
+                  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+          View Milestone
+        </a>
+      </div>
+      
+      <div style="border-top: 1px solid #E5E7EB; padding-top: 24px; margin-top: 24px;">
+        <p style="color: #9CA3AF; font-size: 12px; line-height: 1.5; margin: 0;">
+          You're receiving this notification because you're a member of this project.<br>
+          This is an automated message - please do not reply directly to this email.
+        </p>
+      </div>
+    </div>
+    
+    <!-- Email Footer -->
+    <div style="background-color: #F9FAFB; padding: 16px; text-align: center;">
+      <p style="color: #6B7280; font-size: 12px; margin: 0;">
+        © ${new Date().getFullYear()} Novo. All rights reserved.
+      </p>
+    </div>
+  </div>
+`;
+
+// for email user avatar
+
+const getUserInitials = (name: string) => {
+  return name.split(' ').map(n => n[0]).join('').toUpperCase();
+};
+
 // Email service functions
 export const sendPasswordResetEmail = async (email: string, resetToken: string) => {
   const resetLink = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
@@ -294,5 +721,123 @@ export const sendProjectInviteExistingUserEmail = async (email: string, inviterN
 export const sendWelcomeEmail = async (email: string, userName: string) => {
   const subject = `Welcome to Novo, ${userName}!`;
   const html = getWelcomeTemplate(userName);
+  return await sendEmail(email, subject, html);
+};
+
+export const sendTaskCommentEmail = async (email: string, commenterName: string, commenterEmail: string, taskName: string, projectName: string, commentContent: string, taskId: string, projectId: string
+) => {
+  const taskLink = `${process.env.FRONTEND_URL}/projects/${projectId}/tasks/${taskId}`;
+  const subject = `New comment on "${taskName}" from ${commenterName}`;
+  const html = getTaskCommentTemplate(
+    commenterName,
+    commenterEmail,
+    taskName,
+    projectName,
+    commentContent,
+    taskLink
+  );
+
+  return await sendEmail(email, subject, html);
+};
+
+export const sendTaskStatusChangeEmail = async (
+  email: string,
+  changerName: string,
+  changerEmail: string,
+  taskName: string,
+  projectName: string,
+  oldStatus: string,
+  newStatus: string,
+  taskId: string,
+  projectId: string
+) => {
+  const taskLink = `${process.env.FRONTEND_URL}/projects/${projectId}/tasks/${taskId}`;
+  const subject = `Status changed for "${taskName}" in ${projectName}`;
+  const html = getTaskStatusChangeTemplate(
+    changerName,
+    changerEmail,
+    taskName,
+    projectName,
+    oldStatus,
+    newStatus,
+    taskLink
+  );
+
+  return await sendEmail(email, subject, html);
+};
+
+export const sendTaskAssignmentEmail = async (
+  email: string,
+  assignerName: string,
+  assignerEmail: string,
+  taskName: string,
+  projectName: string,
+  taskId: string,
+  projectId: string,
+  dueDate?: string
+) => {
+  const taskLink = `${process.env.FRONTEND_URL}/projects/${projectId}/tasks/${taskId}`;
+  const subject = `You've been assigned to "${taskName}" in ${projectName}`;
+  const html = getTaskAssignmentTemplate(
+    assignerName,
+    assignerEmail,
+    taskName,
+    projectName,
+    taskLink,
+    dueDate
+  );
+
+  return await sendEmail(email, subject, html);
+};
+
+export const sendTaskDueSoonEmail = async (
+  email: string,
+  taskName: string,
+  projectName: string,
+  dueDate: Date,
+  taskId: string,
+  projectId: string,
+  isToday: boolean
+) => {
+  const taskLink = `${process.env.FRONTEND_URL}/projects/${projectId}/tasks/${taskId}`;
+  const formattedDate = format(dueDate, 'MMM d, yyyy');
+  const subject = `Urgent: "${taskName}" due ${isToday ? 'today' : 'tomorrow'}`;
+  const html = getTaskDueSoonTemplate(
+    taskName,
+    projectName,
+    formattedDate,
+    taskLink,
+    isToday
+  );
+
+  return await sendEmail(email, subject, html);
+};
+
+export const sendMilestoneDueSoonEmail = async (
+  email: string,
+  milestoneName: string,
+  projectName: string,
+  dueDate: Date,
+  milestoneId: string,
+  projectId: string,
+  isToday: boolean,
+  progressPercentage: number,
+  completedTasks: number,
+  totalTasks: number
+) => {
+  const milestoneLink = `${process.env.FRONTEND_URL}/projects/${projectId}/milestones/${milestoneId}`;
+  const formattedDate = format(dueDate, 'MMM d, yyyy');
+  const subject = `Milestone "${milestoneName}" due ${isToday ? 'today' : 'soon'}`;
+  const html = getMilestoneDueSoonTemplate(
+    milestoneName,
+    projectName,
+    formattedDate,
+    milestoneLink,
+    isToday,
+    progressPercentage,
+    completedTasks,
+    totalTasks
+  );
+
   return await sendEmail(email, subject, html);
 };

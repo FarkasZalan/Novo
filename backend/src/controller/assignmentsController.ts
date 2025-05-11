@@ -2,6 +2,10 @@ import { Request, Response } from "express";
 import { NextFunction } from "connect";
 import { createAssignmentQuery, deleteAssignmentQuery, getAssignmentsForTaskQuery } from "../models/assignmentModel";
 import { getUserByIdQuery } from "../models/userModel";
+import { sendTaskAssignmentEmail } from "../services/emailService";
+import { getTaskByIdQuery } from "../models/task.Model";
+import { getProjectById } from "./projectController";
+import { getProjectByIdQuery } from "../models/projectModel";
 
 // Standardized response function
 // it's a function that returns a response to the client when a request is made (CRUD operations)
@@ -52,6 +56,8 @@ export const createAssignmentForUsers = async (req: Request, res: Response, next
         }
 
         const addedUsers = [];
+        const task = await getTaskByIdQuery(task_id);
+        const project = await getProjectByIdQuery(project_id);
 
         for (const user of users) {
             const { id: user_id } = user;
@@ -63,6 +69,10 @@ export const createAssignmentForUsers = async (req: Request, res: Response, next
                 }
 
                 const newAssignment = await createAssignmentQuery(task_id, user_id, project_id, assigned_by);
+                if (user_id !== assigned_by) {
+                    sendTaskAssignmentEmail(user.email, currentUser.name, currentUser.email, task.title, project.name, task_id, project_id, task.due_date);
+                }
+
                 addedUsers.push({ newAssignment, status: 'success' });
             } catch (error: any) {
                 if (error.code === "23505") {
