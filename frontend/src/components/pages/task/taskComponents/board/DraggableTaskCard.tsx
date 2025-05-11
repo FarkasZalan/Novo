@@ -9,7 +9,7 @@ import { TaskAssignments } from '../../taskHandler/assignments/TaskAssignments';
 import { SubtaskListOnBoard } from './SubtaskListOnBoard';
 
 // one task card
-const DraggableTaskCard: React.FC<{ task: Task, onTaskUpdate?: (updatedTask: Task) => void }> = React.memo(({ task, onTaskUpdate }) => {
+const DraggableTaskCard: React.FC<{ task: Task, onTaskUpdate?: (updatedTask: Task) => void, canManageTasks: boolean }> = React.memo(({ task, onTaskUpdate, canManageTasks }) => {
     const navigate = useNavigate();
     const { projectId } = useParams<{ projectId: string }>();
 
@@ -147,6 +147,7 @@ const DraggableTaskCard: React.FC<{ task: Task, onTaskUpdate?: (updatedTask: Tas
                 task={task}
                 onTaskUpdate={onTaskUpdate}
                 projectId={projectId!}
+                canManageTasks={canManageTasks}
             />
 
             {/* Row: Milestone & Attachments */}

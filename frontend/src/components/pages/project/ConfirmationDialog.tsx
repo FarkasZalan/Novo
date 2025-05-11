@@ -1,3 +1,4 @@
+import ReactDOM from "react-dom";
 import { FaExclamationTriangle } from "react-icons/fa";
 
 interface ConfirmationDialogProps {
@@ -8,7 +9,7 @@ interface ConfirmationDialogProps {
     message: string;
     confirmText?: string;
     cancelText?: string;
-    confirmColor?: "red" | "indigo" | "green"; // Add more colors as needed
+    confirmColor?: "red" | "indigo" | "green";
 }
 
 export const ConfirmationDialog = ({
@@ -29,7 +30,7 @@ export const ConfirmationDialog = ({
         green: "bg-green-600 hover:bg-green-700",
     };
 
-    return (
+    return ReactDOM.createPortal(
         <div className="fixed inset-0 bg-black/30 backdrop-blur-md flex items-center justify-center z-50 px-2 sm:px-4 py-4 overflow-y-auto">
             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl max-w-md w-full">
                 {/* Icon at the top - centered */}
@@ -68,6 +69,7 @@ export const ConfirmationDialog = ({
                     </button>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };

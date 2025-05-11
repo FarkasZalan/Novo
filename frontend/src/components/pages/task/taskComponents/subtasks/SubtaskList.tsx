@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../../../hooks/useAuth';
 import { Task } from '../../../../../types/task';
 import { SubtaskItem } from './SubtaskItem';
+import toast from 'react-hot-toast';
 
 interface SubtaskListProps {
     subtasks: Task[];
@@ -52,7 +53,9 @@ export const SubtaskList: React.FC<SubtaskListProps> = ({
             setNewSubtaskTitle('');
             setIsAdding(false);
             onSubtaskUpdated();
+            toast.success('Subtask added successfully');
         } catch (error) {
+            toast.error('Failed to add subtask');
             console.error('Error adding subtask:', error);
         } finally {
             setIsLoading(false);
@@ -191,7 +194,14 @@ export const SubtaskList: React.FC<SubtaskListProps> = ({
                                     ).then(onSubtaskUpdated);
                                 }}
                                 onDelete={(id) => {
-                                    deleteTask(id, projectId, authState.accessToken!).then(onSubtaskUpdated);
+                                    try {
+                                        deleteTask(id, projectId, authState.accessToken!).then(onSubtaskUpdated);
+                                        toast.success('Subtask deleted successfully');
+                                    } catch (err) {
+                                        console.error(err);
+                                        toast.error('Failed to delete subtask');
+                                    }
+
                                 }}
                                 onEdit={(id) => navigate(`/projects/${projectId}/tasks/${id}/edit`)}
                                 onUpdate={async (updates) => {

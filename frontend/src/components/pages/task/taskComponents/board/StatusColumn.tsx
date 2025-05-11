@@ -108,7 +108,7 @@ const StatusColumn: React.FC<Props> = React.memo(({
                             transition={{ duration: 0.2 }}
                         >
                             {/* one task card */}
-                            <DraggableTaskCard task={task} onTaskUpdate={onTaskUpdate} />
+                            <DraggableTaskCard task={task} onTaskUpdate={onTaskUpdate} canManageTasks={canManageTasks} />
                         </motion.div>
                     ))}
                 </div>
