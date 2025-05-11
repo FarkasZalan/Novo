@@ -5,7 +5,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { format, isPast, isToday, isTomorrow } from 'date-fns';
 import { Task } from '../../../../../types/task';
 import { FaFlag, FaPaperclip, FaTag } from 'react-icons/fa';
-import { TaskAssignments } from '../../taskHandler/assignments/TaskAssignments';
+import { TaskAssignments } from '../assignments/TaskAssignments';
 import { SubtaskListOnBoard } from './SubtaskListOnBoard';
 
 // one task card

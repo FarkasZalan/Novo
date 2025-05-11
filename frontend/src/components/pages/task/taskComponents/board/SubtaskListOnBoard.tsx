@@ -5,7 +5,7 @@ import { updateTaskStatus, createTask } from '../../../../../services/taskServic
 import { useAuth } from '../../../../../hooks/useAuth';
 import { Task } from '../../../../../types/task';
 import { useNavigate } from 'react-router-dom';
-import { TaskAssignments } from '../../taskHandler/assignments/TaskAssignments';
+import { TaskAssignments } from '../assignments/TaskAssignments';
 import { format, isPast, isToday, isTomorrow } from 'date-fns';
 import toast from 'react-hot-toast';
 

@@ -11,6 +11,7 @@ import createMilestoneTable from "../data/createMilestoneTable";
 import createLabelTable from "../data/createLabelTable";
 import createTaskLabelTable from "../data/createTaskLabelTable";
 import createSubtaskTable from "../data/createSubtaskTable";
+import createCommentTable from "../data/createCommentsTable";
 
 const { Pool } = pkg;
 
@@ -45,6 +46,7 @@ export const initializeDatabase = async () => {
     await createLabelTable();
     await createTaskLabelTable();
     await createSubtaskTable();
+    await createCommentTable();
     await createProjectMembersTable();
     await createAssignmentsTable();
     await createPendingInvitationsTable();

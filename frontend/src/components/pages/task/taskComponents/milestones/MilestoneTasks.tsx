@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { FaTrash, FaPlus, FaSpinner, FaTimes, FaSearch, FaCheck, FaPaperclip, FaCalendarDay, FaTag, FaChevronRight, FaBan } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Task } from '../../../../../types/task';
-import { TaskAssignments } from '../../taskHandler/assignments/TaskAssignments';
+import { TaskAssignments } from '../assignments/TaskAssignments';
 import toast from 'react-hot-toast';
 import { useNavigate, useParams } from 'react-router-dom';
 import { format, isPast, isToday, isTomorrow } from 'date-fns';
@@ -220,8 +220,8 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                                             initial={{ opacity: 0, y: 5 }}
                                             animate={{ opacity: 1, y: 0 }}
                                             className={`p-4 rounded-xl border cursor-pointer transition-all duration-200 ${selectedTaskIds.includes(task.id)
-                                                    ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20 shadow-sm'
-                                                    : 'border-gray-200 dark:border-gray-600 hover:border-indigo-300 dark:hover:border-indigo-500 hover:shadow-md'
+                                                ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20 shadow-sm'
+                                                : 'border-gray-200 dark:border-gray-600 hover:border-indigo-300 dark:hover:border-indigo-500 hover:shadow-md'
                                                 }`}
                                             onClick={() => toggleTaskSelection(task.id)}
                                         >
@@ -230,8 +230,8 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                                                 <div className="mt-0.5 flex-shrink-0">
                                                     <div
                                                         className={`flex items-center justify-center h-5 w-5 rounded-md border transition-all ${selectedTaskIds.includes(task.id)
-                                                                ? 'bg-indigo-600 border-indigo-600 scale-110'
-                                                                : 'border-gray-300 dark:border-gray-500 group-hover:border-indigo-400'
+                                                            ? 'bg-indigo-600 border-indigo-600 scale-110'
+                                                            : 'border-gray-300 dark:border-gray-500 group-hover:border-indigo-400'
                                                             }`}
                                                     >
                                                         {selectedTaskIds.includes(task.id) && (
@@ -252,20 +252,20 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                                                         {/* First row - status and priority */}
                                                         <div className="flex flex-wrap items-center gap-2">
                                                             <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${task.status === "completed"
-                                                                    ? "bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-200"
-                                                                    : task.status === "in-progress"
-                                                                        ? "bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-200"
-                                                                        : task.status === "blocked"
-                                                                            ? "bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200"
-                                                                            : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+                                                                ? "bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-200"
+                                                                : task.status === "in-progress"
+                                                                    ? "bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-200"
+                                                                    : task.status === "blocked"
+                                                                        ? "bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200"
+                                                                        : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
                                                                 }`}>
                                                                 {task.status.replace('-', ' ')}
                                                             </span>
                                                             <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${task.priority === "high"
-                                                                    ? "bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200"
-                                                                    : task.priority === "medium"
-                                                                        ? "bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-200"
-                                                                        : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+                                                                ? "bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200"
+                                                                : task.priority === "medium"
+                                                                    ? "bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-200"
+                                                                    : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
                                                                 }`}>
                                                                 {task.priority}
                                                             </span>
@@ -275,12 +275,12 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                                                         <div className="flex flex-wrap items-center gap-2">
                                                             {task.due_date && (
                                                                 <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${task.status !== 'completed'
-                                                                        ? isPast(new Date(task.due_date)) || isToday(new Date(task.due_date))
-                                                                            ? "bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200"
-                                                                            : isTomorrow(new Date(task.due_date))
-                                                                                ? "bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200"
-                                                                                : "bg-purple-100 dark:bg-purple-900/40 text-purple-800 dark:text-purple-200"
-                                                                        : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+                                                                    ? isPast(new Date(task.due_date)) || isToday(new Date(task.due_date))
+                                                                        ? "bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200"
+                                                                        : isTomorrow(new Date(task.due_date))
+                                                                            ? "bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200"
+                                                                            : "bg-purple-100 dark:bg-purple-900/40 text-purple-800 dark:text-purple-200"
+                                                                    : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
                                                                     }`}>
                                                                     <FaCalendarDay className="mr-1" size={10} />
                                                                     {format(new Date(task.due_date), 'MMM d')}

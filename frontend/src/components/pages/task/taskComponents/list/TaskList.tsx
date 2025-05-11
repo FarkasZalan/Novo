@@ -7,7 +7,7 @@ import { deleteTask } from '../../../../../services/taskService';
 import { useAuth } from '../../../../../hooks/useAuth';
 import toast from 'react-hot-toast';
 import { Task } from '../../../../../types/task';
-import { TaskAssignments } from '../../taskHandler/assignments/TaskAssignments';
+import { TaskAssignments } from '../assignments/TaskAssignments';
 import { SubtaskList } from './SubtaskSectionForList';
 
 interface TaskListProps {

@@ -20,11 +20,12 @@ import { fetchTask } from '../../../../services/taskService';
 import { fetchProjectById } from '../../../../services/projectService';
 import { getProjectMembers } from '../../../../services/projectMemberService';
 import { useAuth } from '../../../../hooks/useAuth';
-import { TaskFiles } from '../taskHandler/TaskFiles';
-import { TaskAssignments } from '../taskHandler/assignments/TaskAssignments';
+import { TaskFiles } from './TaskFiles';
+import { TaskAssignments } from './assignments/TaskAssignments';
 import { SubtaskList } from './subtasks/SubtaskList';
 import { Task } from '../../../../types/task';
 import { isPast, isToday, isTomorrow, format } from 'date-fns';
+import { CommentComponent } from './Comments';
 
 export const TaskDetails: React.FC = () => {
     const { taskId, projectId } = useParams<{ taskId: string; projectId: string }>();
@@ -441,6 +442,15 @@ export const TaskDetails: React.FC = () => {
                             <TaskFiles
                                 displayNoFileIfEmpty={true}
                                 canManageFiles={false}
+                            />
+                        </div>
+
+                        {/* Comments */}
+                        <div className="md:col-span-2">
+                            <CommentComponent
+                                projectId={projectId!}
+                                taskId={taskId!}
+                                canManageTasks={canManageTasks}
                             />
                         </div>
 

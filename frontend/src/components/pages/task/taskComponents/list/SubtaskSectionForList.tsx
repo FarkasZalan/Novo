@@ -6,7 +6,7 @@ import { useParams } from 'react-router-dom';
 import { useAuth } from '../../../../../hooks/useAuth';
 import { updateTaskStatus, createTask } from '../../../../../services/taskService';
 import { Task } from '../../../../../types/task';
-import { TaskAssignments } from '../../taskHandler/assignments/TaskAssignments';
+import { TaskAssignments } from '../assignments/TaskAssignments';
 import { ConfirmationDialog } from '../../../project/ConfirmationDialog';
 import toast from 'react-hot-toast';
 import { isPast, isToday, isTomorrow, format } from 'date-fns';

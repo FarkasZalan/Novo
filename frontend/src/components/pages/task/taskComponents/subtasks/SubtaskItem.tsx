@@ -10,7 +10,7 @@ import {
     FaFlag
 } from 'react-icons/fa';
 import { isToday, isTomorrow, isPast, format } from 'date-fns';
-import { TaskAssignments } from '../../taskHandler/assignments/TaskAssignments';
+import { TaskAssignments } from '../assignments/TaskAssignments';
 import { Task } from '../../../../../types/task';
 import { ConfirmationDialog } from '../../../project/ConfirmationDialog';
 

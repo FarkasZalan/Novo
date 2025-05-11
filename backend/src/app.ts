@@ -11,6 +11,7 @@ import fileRoutes from "./routes/filesRoutes";
 import taskRoutes from "./routes/taskRoutes";
 import labelRoutes from "./routes/labelRoutes";
 import milestoneRoutes from "./routes/milestonesRoutes";
+import commentRoutes from "./routes/commentRoutes";
 import errorHandling from "./middlewares/errorHandler";
 import { setupSwagger } from "./config/swagger";
 import passport from 'passport';
@@ -97,6 +98,7 @@ app.use("/api", taskRoutes);
 app.use("/api", assignmentRoutes);
 app.use("/api", milestoneRoutes);
 app.use("/api", labelRoutes);
+app.use("/api", commentRoutes);
 
 // Error handling middleware
 app.use(errorHandling);

@@ -6,7 +6,7 @@ import { fetchProjectById } from "../../../../services/projectService";
 import { getProjectMembers } from "../../../../services/projectMemberService";
 import { format, isPast, isToday, isTomorrow } from "date-fns";
 import { useAuth } from "../../../../hooks/useAuth";
-import { TaskAssignments } from "../../task/taskHandler/assignments/TaskAssignments";
+import { TaskAssignments } from "../../task/taskComponents/assignments/TaskAssignments";
 import { Task } from "../../../../types/task";
 
 export const TasksTab = () => {

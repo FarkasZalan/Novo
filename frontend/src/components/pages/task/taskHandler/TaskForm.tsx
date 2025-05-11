@@ -5,9 +5,9 @@ import { FaCalendarAlt, FaArrowLeft, FaSave, FaTimes, FaTrash, FaExclamationTria
 import toast from 'react-hot-toast';
 import { ConfirmationDialog } from '../../project/ConfirmationDialog';
 import { useAuth } from '../../../../hooks/useAuth';
-import { TaskFiles } from './TaskFiles';
+import { TaskFiles } from '../taskComponents/TaskFiles';
 import { uploadTaskFile } from '../../../../services/fileService';
-import { TaskAssignments } from './assignments/TaskAssignments';
+import { TaskAssignments } from '../taskComponents/assignments/TaskAssignments';
 import ProjectMember from '../../../../types/projectMember';
 import { addAssignmentForUsers } from '../../../../services/assignmentService';
 import { addMilestoneToTask, createMilestone, deleteMilestoneFromTask, getAllMilestonesForProject } from '../../../../services/milestonesService';
