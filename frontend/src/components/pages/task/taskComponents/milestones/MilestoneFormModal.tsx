@@ -125,8 +125,8 @@ export const MilestoneFormModal: React.FC<MilestoneFormModalProps> = ({
                                 type="submit"
                                 disabled={!form.name || isSubmitting}
                                 className={`inline-flex justify-center rounded-lg px-4 py-2.5 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors ${!form.name || isSubmitting
-                                        ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed'
-                                        : 'bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 cursor-pointer'
+                                    ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed'
+                                    : 'bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 cursor-pointer'
                                     }`}
                             >
                                 {isSubmitting ? (

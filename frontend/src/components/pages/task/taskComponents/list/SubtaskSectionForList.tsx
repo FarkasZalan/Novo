@@ -10,6 +10,7 @@ import { TaskAssignments } from '../assignments/TaskAssignments';
 import { ConfirmationDialog } from '../../../project/ConfirmationDialog';
 import toast from 'react-hot-toast';
 import { isPast, isToday, isTomorrow, format } from 'date-fns';
+import { CommentComponent } from '../Comments';
 
 interface SubtaskListProps {
     task: Task;
@@ -357,6 +358,14 @@ export const SubtaskList: React.FC<SubtaskListProps> = React.memo(({
                                                                     {subtask.attachments_count}
                                                                 </span>
                                                             )}
+
+                                                            {/* Comments */}
+                                                            <CommentComponent
+                                                                projectId={projectId!}
+                                                                taskId={subtask.id}
+                                                                compactMode={true}
+                                                                canManageTasks={canManageTasks}
+                                                            />
                                                         </div>
                                                     )}
 

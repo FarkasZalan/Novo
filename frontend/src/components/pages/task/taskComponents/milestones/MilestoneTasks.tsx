@@ -6,6 +6,7 @@ import { TaskAssignments } from '../assignments/TaskAssignments';
 import toast from 'react-hot-toast';
 import { useNavigate, useParams } from 'react-router-dom';
 import { format, isPast, isToday, isTomorrow } from 'date-fns';
+import { CommentComponent } from '../Comments';
 
 interface MilestoneTasksProps {
     milestone: Milestone;
@@ -249,57 +250,9 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                                                             {task.title}
                                                         </h4>
 
-                                                        {/* First row - status and priority */}
+                                                        {/* First row - labels */}
                                                         <div className="flex flex-wrap items-center gap-2">
-                                                            <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${task.status === "completed"
-                                                                ? "bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-200"
-                                                                : task.status === "in-progress"
-                                                                    ? "bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-200"
-                                                                    : task.status === "blocked"
-                                                                        ? "bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200"
-                                                                        : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
-                                                                }`}>
-                                                                {task.status.replace('-', ' ')}
-                                                            </span>
-                                                            <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${task.priority === "high"
-                                                                ? "bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200"
-                                                                : task.priority === "medium"
-                                                                    ? "bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-200"
-                                                                    : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
-                                                                }`}>
-                                                                {task.priority}
-                                                            </span>
-                                                        </div>
-
-                                                        {/* Second row - due date, attachments, and labels */}
-                                                        <div className="flex flex-wrap items-center gap-2">
-                                                            {task.due_date && (
-                                                                <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${task.status !== 'completed'
-                                                                    ? isPast(new Date(task.due_date)) || isToday(new Date(task.due_date))
-                                                                        ? "bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200"
-                                                                        : isTomorrow(new Date(task.due_date))
-                                                                            ? "bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200"
-                                                                            : "bg-purple-100 dark:bg-purple-900/40 text-purple-800 dark:text-purple-200"
-                                                                    : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
-                                                                    }`}>
-                                                                    <FaCalendarDay className="mr-1" size={10} />
-                                                                    {format(new Date(task.due_date), 'MMM d')}
-                                                                    {task.status !== 'completed' && isToday(new Date(task.due_date)) && (
-                                                                        <span className="ml-1">(Today)</span>
-                                                                    )}
-                                                                    {task.status !== 'completed' && isTomorrow(new Date(task.due_date)) && (
-                                                                        <span className="ml-1">(Tomorrow)</span>
-                                                                    )}
-                                                                </span>
-                                                            )}
-                                                            {task.attachments_count > 0 && (
-                                                                <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
-                                                                    <FaPaperclip className="mr-1" size={10} />
-                                                                    {task.attachments_count}
-                                                                </span>
-                                                            )}
-
-                                                            {/* Labels - now inline with other elements */}
+                                                            {/* Labels */}
                                                             {task.labels && task.labels.length > 0 && (
                                                                 <div className="flex flex-wrap items-center gap-1.5">
                                                                     {task.labels.slice(0, 2).map((label: any) => {
@@ -354,6 +307,65 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                                                                     )}
                                                                 </div>
                                                             )}
+                                                        </div>
+
+                                                        {/* Second row - status and priority */}
+                                                        <div className="flex flex-wrap items-center gap-2">
+                                                            <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${task.status === "completed"
+                                                                ? "bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-200"
+                                                                : task.status === "in-progress"
+                                                                    ? "bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-200"
+                                                                    : task.status === "blocked"
+                                                                        ? "bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200"
+                                                                        : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+                                                                }`}>
+                                                                {task.status.replace('-', ' ')}
+                                                            </span>
+                                                            <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${task.priority === "high"
+                                                                ? "bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200"
+                                                                : task.priority === "medium"
+                                                                    ? "bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-200"
+                                                                    : "bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300"
+                                                                }`}>
+                                                                {task.priority}
+                                                            </span>
+                                                        </div>
+
+                                                        {/* Third row - due date, attachments */}
+                                                        <div className="flex flex-wrap items-center gap-2">
+                                                            {task.due_date && (
+                                                                <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${task.status !== 'completed'
+                                                                    ? isPast(new Date(task.due_date)) || isToday(new Date(task.due_date))
+                                                                        ? "bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200"
+                                                                        : isTomorrow(new Date(task.due_date))
+                                                                            ? "bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200"
+                                                                            : "bg-purple-100 dark:bg-purple-900/40 text-purple-800 dark:text-purple-200"
+                                                                    : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+                                                                    }`}>
+                                                                    <FaCalendarDay className="mr-1" size={10} />
+                                                                    {format(new Date(task.due_date), 'MMM d')}
+                                                                    {task.status !== 'completed' && isToday(new Date(task.due_date)) && (
+                                                                        <span className="ml-1">(Today)</span>
+                                                                    )}
+                                                                    {task.status !== 'completed' && isTomorrow(new Date(task.due_date)) && (
+                                                                        <span className="ml-1">(Tomorrow)</span>
+                                                                    )}
+                                                                </span>
+                                                            )}
+                                                            {task.attachments_count > 0 && (
+                                                                <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+                                                                    <FaPaperclip className="mr-1" size={10} />
+                                                                    {task.attachments_count}
+                                                                </span>
+                                                            )}
+
+                                                            {/* Comments */}
+                                                            <CommentComponent
+                                                                taskId={task.id}
+                                                                projectId={projectId!}
+                                                                canManageTasks={false}
+                                                                compactMode={true}
+                                                            />
                                                         </div>
 
                                                         {renderParentTaskInfo(task)}
@@ -457,67 +469,9 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                                                 {task.title}
                                             </h3>
 
-                                            {/* First row - status, priority, and due date */}
+                                            {/* First row - labels */}
                                             <div className="flex flex-wrap items-center gap-2">
-                                                <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${task.status === "completed"
-                                                    ? "bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-200"
-                                                    : task.status === "in-progress"
-                                                        ? "bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-200"
-                                                        : task.status === "blocked"
-                                                            ? "bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200"
-                                                            : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
-                                                    }`}>
-                                                    {task.status.replace('-', ' ')}
-                                                </span>
-
-                                                <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${task.priority === "high"
-                                                    ? "bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200"
-                                                    : task.priority === "medium"
-                                                        ? "bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-200"
-                                                        : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
-                                                    }`}>
-                                                    {task.priority}
-                                                </span>
-
-                                                {task.due_date && (
-                                                    <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${task.status !== 'completed'
-                                                        ? isPast(new Date(task.due_date)) || isToday(new Date(task.due_date))
-                                                            ? "bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200"
-                                                            : isTomorrow(new Date(task.due_date))
-                                                                ? "bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200"
-                                                                : "bg-purple-100 dark:bg-purple-900/40 text-purple-800 dark:text-purple-200"
-                                                        : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
-                                                        }`}>
-                                                        <FaCalendarDay className="mr-1" size={10} />
-                                                        {format(new Date(task.due_date), 'MMM d')}
-                                                        {task.status !== 'completed' && isToday(new Date(task.due_date)) && (
-                                                            <span className="ml-1">(Today)</span>
-                                                        )}
-                                                        {task.status !== 'completed' && isTomorrow(new Date(task.due_date)) && (
-                                                            <span className="ml-1">(Tomorrow)</span>
-                                                        )}
-                                                    </span>
-                                                )}
-                                            </div>
-
-                                            {/* Second row - attachments, assignments, and labels */}
-                                            <div className="flex flex-wrap items-center gap-2">
-                                                {task.attachments_count > 0 && (
-                                                    <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
-                                                        <FaPaperclip className="mr-1" size={10} />
-                                                        {task.attachments_count}
-                                                    </span>
-                                                )}
-
-                                                <TaskAssignments
-                                                    compactMode={true}
-                                                    taskIdFromCompactMode={task.id}
-                                                    showAssignButtonInCompactMode={false}
-                                                    pendingUsers={[]}
-                                                    setPendingUsers={() => { }}
-                                                />
-
-                                                {/* Labels - now inline with other elements */}
+                                                {/* Labels */}
                                                 {task.labels && task.labels.length > 0 && (
                                                     <div className="flex flex-wrap items-center gap-1.5">
                                                         {task.labels.slice(0, 2).map((label: any) => {
@@ -572,6 +526,77 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                                                         )}
                                                     </div>
                                                 )}
+                                            </div>
+
+                                            {/* Second row - status, priority, and due date */}
+                                            <div className="flex flex-wrap items-center gap-2">
+                                                <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${task.status === "completed"
+                                                    ? "bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-200"
+                                                    : task.status === "in-progress"
+                                                        ? "bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-200"
+                                                        : task.status === "blocked"
+                                                            ? "bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200"
+                                                            : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+                                                    }`}>
+                                                    {task.status.replace('-', ' ')}
+                                                </span>
+
+                                                <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${task.priority === "high"
+                                                    ? "bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200"
+                                                    : task.priority === "medium"
+                                                        ? "bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-200"
+                                                        : "bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300"
+                                                    }`}>
+                                                    {task.priority}
+                                                </span>
+
+                                                {task.due_date && (
+                                                    <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${task.status !== 'completed'
+                                                        ? isPast(new Date(task.due_date)) || isToday(new Date(task.due_date))
+                                                            ? "bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200"
+                                                            : isTomorrow(new Date(task.due_date))
+                                                                ? "bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200"
+                                                                : "bg-purple-100 dark:bg-purple-900/40 text-purple-800 dark:text-purple-200"
+                                                        : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+                                                        }`}>
+                                                        <FaCalendarDay className="mr-1" size={10} />
+                                                        {format(new Date(task.due_date), 'MMM d')}
+                                                        {task.status !== 'completed' && isToday(new Date(task.due_date)) && (
+                                                            <span className="ml-1">(Today)</span>
+                                                        )}
+                                                        {task.status !== 'completed' && isTomorrow(new Date(task.due_date)) && (
+                                                            <span className="ml-1">(Tomorrow)</span>
+                                                        )}
+                                                    </span>
+                                                )}
+                                            </div>
+
+                                            {/* Third row - attachments, assignments */}
+                                            <div className="flex flex-wrap items-center gap-2">
+
+                                                {/* Attachments */}
+                                                {task.attachments_count > 0 && (
+                                                    <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+                                                        <FaPaperclip className="mr-1" size={10} />
+                                                        {task.attachments_count}
+                                                    </span>
+                                                )}
+
+                                                {/* Comments */}
+                                                <CommentComponent
+                                                    taskId={task.id}
+                                                    projectId={projectId!}
+                                                    canManageTasks={false}
+                                                    compactMode={true}
+                                                />
+
+                                                <TaskAssignments
+                                                    compactMode={true}
+                                                    taskIdFromCompactMode={task.id}
+                                                    showAssignButtonInCompactMode={false}
+                                                    pendingUsers={[]}
+                                                    setPendingUsers={() => { }}
+                                                />
                                             </div>
 
                                             {renderParentTaskInfo(task)}

@@ -9,6 +9,7 @@ import toast from 'react-hot-toast';
 import { Task } from '../../../../../types/task';
 import { TaskAssignments } from '../assignments/TaskAssignments';
 import { SubtaskList } from './SubtaskSectionForList';
+import { CommentComponent } from '../Comments';
 
 interface TaskListProps {
     tasks: Task[];
@@ -239,6 +240,9 @@ export const TaskList: React.FC<TaskListProps> = React.memo(({ tasks, setTasks, 
                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 Attachments
                             </th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                Comments
+                            </th>
                             {canManageTasks && (
                                 <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                     Actions
@@ -406,6 +410,17 @@ export const TaskList: React.FC<TaskListProps> = React.memo(({ tasks, setTasks, 
                                             <span className="text-gray-400 dark:text-gray-500">—</span>
                                         )}
                                     </td>
+
+                                    {/* Comments */}
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <CommentComponent
+                                            projectId={projectId!}
+                                            taskId={task.id}
+                                            canManageTasks={canManageTasks}
+                                            listCompactMode={true}
+                                        />
+                                    </td>
+
 
                                     {/* Actions */}
                                     {canManageTasks && (

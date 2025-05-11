@@ -1,7 +1,7 @@
 import express from "express";
 import { authenticateToken } from "../middlewares/authenticate";
-import { authorizeProject, authorizeProjectForOwnerAndAdmin, authorizeTaskForOwnerAndAdmin } from "../middlewares/authorization";
-import { getAllMilestonesForProject, createMilestone, addMilestoneToTask, updateMilestone, deleteMilestone, deleteMilestoneFromTask, getAllTaskForMilestone, getAllUnassignedTaskForMilestone, getMilestoneById } from "../controller/milestonesCOntroller";
+import { authorizeProject, authorizeProjectForOwnerAndAdmin } from "../middlewares/authorization";
+import { getAllMilestonesForProject, getMilestoneById, getAllTaskForMilestone, getAllUnassignedTaskForMilestone, createMilestone, addMilestoneToTask, deleteMilestoneFromTask, updateMilestone, deleteMilestone } from "../controller/milestonesController";
 
 const router = express.Router();
 

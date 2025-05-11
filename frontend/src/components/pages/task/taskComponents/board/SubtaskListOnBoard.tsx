@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FaChevronDown, FaCheckCircle, FaCircle, FaTasks, FaFlag, FaTag, FaPlus } from 'react-icons/fa';
+import { FaChevronDown, FaCheckCircle, FaCircle, FaTasks, FaFlag, FaTag, FaPlus, FaPaperclip } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 import { updateTaskStatus, createTask } from '../../../../../services/taskService';
 import { useAuth } from '../../../../../hooks/useAuth';
@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { TaskAssignments } from '../assignments/TaskAssignments';
 import { format, isPast, isToday, isTomorrow } from 'date-fns';
 import toast from 'react-hot-toast';
+import { CommentComponent } from '../Comments';
 
 interface SubtaskListProps {
     task: Task;
@@ -335,7 +336,8 @@ export const SubtaskListOnBoard: React.FC<SubtaskListProps> = ({
                                             )}
 
                                             {/* Bottom row - Milestone, due date, and assignments */}
-                                            <div className="flex justify-between items-center ml-8">
+                                            <div className="flex flex-col gap-2 ml-8">
+                                                {/* First row - Milestone and due date */}
                                                 <div className="flex flex-wrap items-center gap-2">
                                                     {subtask.milestone_id && (
                                                         <button
@@ -363,14 +365,35 @@ export const SubtaskListOnBoard: React.FC<SubtaskListProps> = ({
                                                     )}
                                                 </div>
 
-                                                {/* Assignments moved to bottom right */}
-                                                <div className="flex-shrink-0">
-                                                    <TaskAssignments
-                                                        taskIdFromCompactMode={subtask.id}
-                                                        pendingUsers={[]}
-                                                        setPendingUsers={() => { }}
-                                                        compactMode={true}
-                                                    />
+                                                {/* Second row - Attachments, comments, and assignments */}
+                                                <div className="flex justify-between items-center">
+                                                    <div className="flex flex-wrap items-center gap-2">
+                                                        {/* Attachments */}
+                                                        {subtask.attachments_count > 0 && (
+                                                            <span className="inline-flex items-center text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 px-2 py-0.5 rounded-full">
+                                                                <FaPaperclip className="mr-1 h-3 w-3" />
+                                                                {subtask.attachments_count}
+                                                            </span>
+                                                        )}
+
+                                                        {/* Comments */}
+                                                        <CommentComponent
+                                                            taskId={subtask.id}
+                                                            projectId={projectId!}
+                                                            canManageTasks={canManageTasks}
+                                                            compactMode={true}
+                                                        />
+                                                    </div>
+
+                                                    {/* Assignments */}
+                                                    <div className="flex-shrink-0">
+                                                        <TaskAssignments
+                                                            taskIdFromCompactMode={subtask.id}
+                                                            pendingUsers={[]}
+                                                            setPendingUsers={() => { }}
+                                                            compactMode={true}
+                                                        />
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>

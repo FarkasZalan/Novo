@@ -36,7 +36,7 @@ export const deleteMilestoneFromTaskQuery = async (task_id: string) => {
 }
 
 export const updateMilestoneQuery = async (id: string, name: string, description: string, due_date: Date) => {
-    const result = await pool.query("UPDATE milestones SET name = $1, description = $2, due_date = $3 WHERE id = $4;", [name, description, due_date, id]); // send a query to the database with one of the open connection from the pool
+    const result = await pool.query("UPDATE milestones SET name = $1, description = $2, due_date = $3 WHERE id = $4 RETURNING *", [name, description, due_date, id]); // send a query to the database with one of the open connection from the pool
     return result.rows[0]
 }
 

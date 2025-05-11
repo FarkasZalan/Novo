@@ -8,6 +8,7 @@ import { format, isPast, isToday, isTomorrow } from "date-fns";
 import { useAuth } from "../../../../hooks/useAuth";
 import { TaskAssignments } from "../../task/taskComponents/assignments/TaskAssignments";
 import { Task } from "../../../../types/task";
+import { CommentComponent } from "../../task/taskComponents/Comments";
 
 export const TasksTab = () => {
     const { projectId } = useParams<{ projectId: string }>();
@@ -328,11 +329,19 @@ export const TasksTab = () => {
 
                                                 {/* Attachments */}
                                                 {task.attachments_count > 0 && (
-                                                    <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-gray-50 text-gray-700 dark:bg-gray-800 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
-                                                        <FaPaperclip className="mr-1" size={10} />
+                                                    <span className="inline-flex items-center text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 px-2 py-0.5 rounded-full">
+                                                        <FaPaperclip className="mr-1 h-3 w-3" />
                                                         {task.attachments_count}
                                                     </span>
                                                 )}
+
+                                                {/* Comments */}
+                                                <CommentComponent
+                                                    taskId={task.id}
+                                                    projectId={projectId!}
+                                                    canManageTasks={canManageTasks}
+                                                    compactMode={true}
+                                                />
 
                                                 {/* Assignments */}
                                                 <div className="flex items-center">

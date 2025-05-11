@@ -7,6 +7,7 @@ import { Task } from '../../../../../types/task';
 import { FaFlag, FaPaperclip, FaTag } from 'react-icons/fa';
 import { TaskAssignments } from '../assignments/TaskAssignments';
 import { SubtaskListOnBoard } from './SubtaskListOnBoard';
+import { CommentComponent } from '../Comments';
 
 // one task card
 const DraggableTaskCard: React.FC<{ task: Task, onTaskUpdate?: (updatedTask: Task) => void, canManageTasks: boolean }> = React.memo(({ task, onTaskUpdate, canManageTasks }) => {
@@ -167,8 +168,8 @@ const DraggableTaskCard: React.FC<{ task: Task, onTaskUpdate?: (updatedTask: Tas
 
             </div>
 
-            <div className="flex justify-between items-center mt-4 gap-2">
-                {/* Left side - Due date and attachments */}
+            <div className="flex justify-between items-center mt-3 gap-2">
+                {/* Left side - Metadata */}
                 <div className="flex items-center gap-2 flex-wrap">
                     {/* Due Date */}
                     {task.due_date && (
@@ -188,11 +189,19 @@ const DraggableTaskCard: React.FC<{ task: Task, onTaskUpdate?: (updatedTask: Tas
 
                     {/* Attachments */}
                     {task.attachments_count > 0 && (
-                        <span className="inline-flex items-center text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 px-2.5 py-1 rounded-full">
+                        <span className="inline-flex items-center text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 px-2 py-0.5 rounded-full">
                             <FaPaperclip className="mr-1 h-3 w-3" />
                             {task.attachments_count}
                         </span>
                     )}
+
+                    {/* Comments */}
+                    <CommentComponent
+                        taskId={task.id}
+                        projectId={projectId!}
+                        canManageTasks={canManageTasks}
+                        compactMode={true}
+                    />
                 </div>
 
                 {/* Right side - Assignments */}
