@@ -16,7 +16,7 @@ export const getAllTaskForProjectQuery = async (id: string, order_by: string, or
     } else {
         finalOrderBy = order_by
     }
-    const tasksResult = await pool.query("SELECT tasks.*, milestones.name AS milestone_name FROM tasks LEFT JOIN milestones ON tasks.milestone_id = milestones.id WHERE tasks.project_id = $1 ORDER BY " + finalOrderBy + " " + order + ", due_date ASC", [id]); // send a query to the database with one of the open connection from the pool
+    const tasksResult = await pool.query("SELECT tasks.*, milestones.name AS milestone_name FROM tasks LEFT JOIN milestones ON tasks.milestone_id = milestones.id  WHERE tasks.project_id = $1 ORDER BY " + finalOrderBy + " " + order + ", due_date ASC", [id]); // send a query to the database with one of the open connection from the pool
 
     const subtasksResult = await pool.query(
         `SELECT subtasks.*, t.id AS id, t.title AS title, t.description AS description,
@@ -80,6 +80,11 @@ export const getTaskByIdQuery = async (id: string) => {
     return tasksWithSubtasks[0];
 }
 
+export const getSubtasksForTaskQuery = async (id: string) => {
+    const result = await pool.query("SELECT * FROM subtasks WHERE task_id = $1", [id]);
+    return result.rows;
+}
+
 // Returning * = return all rows that was affected by the query e.g if one user was created, updated or deleted then it will return with that row from the database
 export const createTaskQuery = async (title: string, description: string, project_id: string, due_date: Date, priority: string, status: string) => {
     const result = await pool.query("INSERT INTO tasks (title, description, project_id, due_date, priority, updated_at, status) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *", [title, description, project_id, due_date, priority, new Date(), status]);
@@ -99,6 +104,11 @@ export const updateTaskStatusQuery = async (status: string, id: string) => {
 export const addSubtaskToTaskQuery = async (task_id: string, subtask_id: string) => {
     const result = await pool.query("INSERT INTO subtasks (task_id, subtask_id) VALUES ($1, $2) RETURNING *", [task_id, subtask_id]);
     return result.rows[0];
+}
+
+export const getParentTaskForSubtaskQuery = async (subtask_id: string) => {
+    const result = await pool.query("SELECT task_id FROM subtasks WHERE subtask_id = $1", [subtask_id]);
+    return result.rows[0]?.task_id.toString();
 }
 
 export const removeSubtaskFromTaskQuery = async (task_id: string, subtask_id: string) => {

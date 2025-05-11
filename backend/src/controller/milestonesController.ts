@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { NextFunction } from "connect";
 import { addMilestoneToTaskQuery, createMilestoneQuery, deleteMilestoneFromTaskQuery, deleteMilestoneQuery, getAllMilestonesForProjectQuery, getAllTaskForMilestoneQuery, getAllUnassignedTaskForMilestoneQuery, getMilestoneByIdQuery, recalculateAllTasksInMilestoneQuery, recalculateCompletedTasksInMilestoneQuery, updateMilestoneQuery } from "../models/milestonesModel";
 import { getTaskById } from "./taskController";
-import { getTaskByIdQuery } from "../models/task.Model";
+import { getParentTaskForSubtaskQuery, getTaskByIdQuery } from "../models/task.Model";
 import { getLabelsForTaskQuery } from "../models/labelModel";
 
 // Standardized response function
@@ -83,6 +83,12 @@ export const getAllTaskForMilestone = async (req: Request, res: Response, next: 
         for (const task of tasks) {
             const taskLabels = await getLabelsForTaskQuery(task.id);
             task.labels = taskLabels;
+
+            task.parent_task_id = await getParentTaskForSubtaskQuery(task.id) || null;
+            if (task.parent_task_id) {
+                const parentTask = await getTaskByIdQuery(task.parent_task_id) || null;
+                task.parent_task_name = parentTask.title || null;
+            }
         }
         handleResponse(res, 200, "Tasks fetched successfully", tasks);
     } catch (error) {
@@ -97,6 +103,12 @@ export const getAllUnassignedTaskForMilestone = async (req: Request, res: Respon
         for (const task of tasks) {
             const taskLabels = await getLabelsForTaskQuery(task.id);
             task.labels = taskLabels;
+
+            task.parent_task_id = await getParentTaskForSubtaskQuery(task.id) || null;
+            if (task.parent_task_id) {
+                const parentTask = await getTaskByIdQuery(task.parent_task_id) || null;
+                task.parent_task_name = parentTask.title || null;
+            }
         }
         handleResponse(res, 200, "Tasks fetched successfully", tasks);
     } catch (error) {

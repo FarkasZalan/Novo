@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { FaTasks, FaChevronRight, FaPlus, FaPaperclip, FaFlag, FaTag, FaBan } from "react-icons/fa";
+import { FaTasks, FaChevronRight, FaPlus, FaPaperclip, FaFlag, FaTag, FaBan, FaCalendarDay } from "react-icons/fa";
 import { fetchAllTasksForProject } from "../../../../services/taskService";
 import { fetchProjectById } from "../../../../services/projectService";
 import { getProjectMembers } from "../../../../services/projectMemberService";
-import { isPast, isToday, isTomorrow } from "date-fns";
+import { format, isPast, isToday, isTomorrow } from "date-fns";
 import { useAuth } from "../../../../hooks/useAuth";
 import { TaskAssignments } from "../../task/taskHandler/assignments/TaskAssignments";
+import { Task } from "../../../../types/task";
 
 export const TasksTab = () => {
     const { projectId } = useParams<{ projectId: string }>();
@@ -66,6 +67,65 @@ export const TasksTab = () => {
         return brightness > 150 ? 'text-gray-900' : 'text-white';
     };
 
+    const renderParentTaskInfo = (task: Task) => {
+        if (!task.parent_task_id) return null;
+
+        return (
+            <div className="mt-2.5 group/parent relative">
+                <div
+                    className="flex items-center gap-1.5 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors rounded-lg p-1.5 max-w-fit"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/projects/${projectId}/tasks/${task.parent_task_id}`);
+                    }}
+                >
+                    {/* Connection line */}
+                    <div className="h-4 w-4 flex items-center justify-center relative">
+                        <div className="absolute left-0 top-0 h-3 w-4 border-l-2 border-b-2 border-indigo-300 dark:border-indigo-600 rounded-bl-md"></div>
+                    </div>
+
+                    {/* Parent task icon & info */}
+                    <div className="flex items-center gap-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                        <div className="bg-indigo-50 dark:bg-indigo-900/30 p-1 rounded-md">
+                            <svg
+                                className="h-3.5 w-3.5 text-indigo-500 dark:text-indigo-400"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"
+                                />
+                            </svg>
+                        </div>
+                        <span>Part of:</span>
+                        <span className="font-semibold text-gray-700 dark:text-gray-300 truncate max-w-[150px]">
+                            {task.parent_task_name || 'Parent Task'}
+                        </span>
+                        <div className="opacity-0 group-hover/parent:opacity-100 transition-opacity">
+                            <svg
+                                className="h-3.5 w-3.5 text-indigo-500 dark:text-indigo-400"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                                />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     return (
         <div className="p-6">
             <div className="flex justify-between items-center mb-8"> {/* Increased margin-bottom */}
@@ -121,7 +181,7 @@ export const TasksTab = () => {
                         {tasks.slice(0, 3).map((task, index) => (
                             <div
                                 key={task.id || index}
-                                className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 group p-5 bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 border border-gray-100 dark:border-gray-700"
+                                className="cursor-pointer group p-5 bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 border border-gray-100 dark:border-gray-700 hover:border-indigo-200 dark:hover:border-indigo-500 hover:bg-gray-50 dark:hover:bg-gray-700/30"
                                 onClick={() => navigate(`/projects/${projectId}/tasks/${task.id}`)}
                             >
                                 <div className="flex items-start justify-between gap-4"> {/* Increased gap */}
@@ -134,11 +194,10 @@ export const TasksTab = () => {
                                                     ? "bg-green-100 dark:bg-green-900/40 border border-green-300 dark:border-green-600"
                                                     : task.status === "in-progress"
                                                         ? "bg-yellow-100 dark:bg-yellow-900/40 border border-yellow-300 dark:border-yellow-600"
-                                                        : task.status === "not-started"
-                                                            ? "bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600"
+                                                        : task.status === "blocked"
+                                                            ? "bg-red-100 dark:bg-red-900/40 border border-red-300 dark:border-red-600"
                                                             : "bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600"
-                                                } 
-                                               `}
+                                                }`}
                                         >
                                             {task.status === "completed" ? (
                                                 <svg className="h-4 w-4 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -172,7 +231,11 @@ export const TasksTab = () => {
                                             <div className="flex flex-wrap gap-2">
                                                 {/* Milestone */}
                                                 {task.milestone_id && (
-                                                    <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-indigo-50 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/70">
+                                                    <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-indigo-50 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/70 hover:bg-indigo-100 hover:text-indigo-900 dark:hover:bg-indigo-900 dark:hover:text-indigo-200 cursor-pointer"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            navigate(`/projects/${projectId}/milestones/${task.milestone_id}`)
+                                                        }}>
                                                         <FaFlag className="mr-1.5" size={10} />
                                                         {task.milestone_name || "Milestone"}
                                                     </span>
@@ -237,21 +300,27 @@ export const TasksTab = () => {
                                                         )}
                                                     </div>
                                                 )}
+
+
                                             </div>
+                                            {renderParentTaskInfo(task)}
 
                                             {/* Second row with due date, attachments, assignments */}
                                             <div className="flex flex-wrap items-center gap-2"> {/* Removed mt-2 since we have space-y now */}
                                                 {/* Due Date - Updated to match task card style */}
                                                 {task.due_date && (
-                                                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${task.status !== 'completed'
-                                                        ? isPast(new Date(task.due_date)) || isToday(new Date(task.due_date))
-                                                            ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
-                                                            : isTomorrow(new Date(task.due_date))
-                                                                ? "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200"
-                                                                : "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
-                                                        : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
-                                                        }`}>
-                                                        {new Date(task.due_date).toLocaleDateString()}
+                                                    <span
+                                                        className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${task.status !== 'completed'
+                                                            ? isPast(new Date(task.due_date)) || isToday(new Date(task.due_date))
+                                                                ? "bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200"
+                                                                : isTomorrow(new Date(task.due_date))
+                                                                    ? "bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200"
+                                                                    : "bg-purple-100 dark:bg-purple-900/40 text-purple-800 dark:text-purple-200"
+                                                            : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+                                                            }`}
+                                                    >
+                                                        <FaCalendarDay className="mr-1" size={10} />
+                                                        {format(new Date(task.due_date), 'MMM d')}
                                                         {task.status !== 'completed' && isToday(new Date(task.due_date)) && " • Today"}
                                                         {task.status !== 'completed' && isTomorrow(new Date(task.due_date)) && " • Tomorrow"}
                                                     </span>

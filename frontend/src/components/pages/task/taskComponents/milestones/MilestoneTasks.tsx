@@ -5,7 +5,7 @@ import { Task } from '../../../../../types/task';
 import { TaskAssignments } from '../../taskHandler/assignments/TaskAssignments';
 import toast from 'react-hot-toast';
 import { useNavigate, useParams } from 'react-router-dom';
-import { isPast, isToday, isTomorrow } from 'date-fns';
+import { format, isPast, isToday, isTomorrow } from 'date-fns';
 
 interface MilestoneTasksProps {
     milestone: Milestone;
@@ -30,16 +30,6 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
     const [showTaskSelector, setShowTaskSelector] = useState(false);
     const navigate = useNavigate();
     const { projectId } = useParams<{ projectId: string }>();
-
-    const formatDate = (dateString: string) => {
-        if (!dateString) return 'No due date';
-        const date = new Date(dateString);
-        return date.toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric',
-        });
-    };
 
     const handleAddTasks = async () => {
         if (selectedTaskIds.length === 0) {
@@ -94,6 +84,65 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
         return brightness > 150 ? 'text-gray-900' : 'text-white';
     };
 
+    const renderParentTaskInfo = (task: Task) => {
+        if (!task.parent_task_id) return null;
+
+        return (
+            <div className="mt-2.5 group/parent relative">
+                <div
+                    className="flex items-center gap-1.5 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors rounded-lg p-1.5 max-w-fit"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/projects/${projectId}/tasks/${task.parent_task_id}`);
+                    }}
+                >
+                    {/* Connection line */}
+                    <div className="h-4 w-4 flex items-center justify-center relative">
+                        <div className="absolute left-0 top-0 h-3 w-4 border-l-2 border-b-2 border-indigo-300 dark:border-indigo-600 rounded-bl-md"></div>
+                    </div>
+
+                    {/* Parent task icon & info */}
+                    <div className="flex items-center gap-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                        <div className="bg-indigo-50 dark:bg-indigo-900/30 p-1 rounded-md">
+                            <svg
+                                className="h-3.5 w-3.5 text-indigo-500 dark:text-indigo-400"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"
+                                />
+                            </svg>
+                        </div>
+                        <span>Part of:</span>
+                        <span className="font-semibold text-gray-700 dark:text-gray-300 truncate max-w-[150px]">
+                            {task.parent_task_name || 'Parent Task'}
+                        </span>
+                        <div className="opacity-0 group-hover/parent:opacity-100 transition-opacity">
+                            <svg
+                                className="h-3.5 w-3.5 text-indigo-500 dark:text-indigo-400"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                                />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     return (
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
             {/* Header */}
@@ -113,8 +162,18 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                             onClick={() => setShowTaskSelector(!showTaskSelector)}
                             className="flex items-center px-4 py-2.5 cursor-pointer bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors shadow-sm hover:shadow-md"
                         >
-                            <FaPlus className="mr-2" />
-                            Add Tasks
+                            {showTaskSelector ? (
+                                <>
+                                    <FaTimes className="mr-2" />
+                                    Cancel
+                                </>
+                            ) : (
+                                <>
+                                    <FaPlus className="mr-2" />
+                                    Add Tasks
+                                </>
+                            )}
+
                         </button>
                     )}
                 </div>
@@ -161,8 +220,8 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                                             initial={{ opacity: 0, y: 5 }}
                                             animate={{ opacity: 1, y: 0 }}
                                             className={`p-4 rounded-xl border cursor-pointer transition-all duration-200 ${selectedTaskIds.includes(task.id)
-                                                ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20 shadow-sm'
-                                                : 'border-gray-200 dark:border-gray-600 hover:border-indigo-300 dark:hover:border-indigo-500 hover:shadow-md'
+                                                    ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20 shadow-sm'
+                                                    : 'border-gray-200 dark:border-gray-600 hover:border-indigo-300 dark:hover:border-indigo-500 hover:shadow-md'
                                                 }`}
                                             onClick={() => toggleTaskSelection(task.id)}
                                         >
@@ -171,8 +230,8 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                                                 <div className="mt-0.5 flex-shrink-0">
                                                     <div
                                                         className={`flex items-center justify-center h-5 w-5 rounded-md border transition-all ${selectedTaskIds.includes(task.id)
-                                                            ? 'bg-indigo-600 border-indigo-600 scale-110'
-                                                            : 'border-gray-300 dark:border-gray-500 group-hover:border-indigo-400'
+                                                                ? 'bg-indigo-600 border-indigo-600 scale-110'
+                                                                : 'border-gray-300 dark:border-gray-500 group-hover:border-indigo-400'
                                                             }`}
                                                     >
                                                         {selectedTaskIds.includes(task.id) && (
@@ -183,128 +242,122 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
 
                                                 {/* Task Content */}
                                                 <div className="flex-1 min-w-0">
-                                                    {/* Title */}
-                                                    <h4 className={`font-medium text-gray-900 dark:text-gray-100 ${task.status === "completed" ? "line-through opacity-70" : ""
-                                                        }`}>
-                                                        {task.title}
-                                                    </h4>
-
-                                                    {/* Status and Priority */}
-                                                    <div className="flex flex-wrap gap-2 mt-2.5">
-                                                        <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${task.status === "completed"
-                                                            ? "bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-200"
-                                                            : task.status === "in-progress"
-                                                                ? "bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-200"
-                                                                : task.status === "blocked"
-                                                                    ? "bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200"
-                                                                    : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+                                                    <div className="flex flex-col space-y-2">
+                                                        {/* Title */}
+                                                        <h4 className={`font-medium text-gray-900 dark:text-gray-100 ${task.status === "completed" ? "line-through opacity-70" : ""
                                                             }`}>
-                                                            {task.status.replace('-', ' ')}
-                                                        </span>
-                                                        <span
-                                                            className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${task.priority === "high"
-                                                                ? "bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200"
-                                                                : task.priority === "medium"
-                                                                    ? "bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-200"
-                                                                    : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
-                                                                }`}
-                                                        >
-                                                            {task.priority}
-                                                        </span>
-                                                    </div>
+                                                            {task.title}
+                                                        </h4>
 
-                                                    {/* Due Date and Attachments */}
-                                                    <div className="flex flex-wrap gap-2 mt-2">
-                                                        {task.due_date && (
-                                                            <span
-                                                                className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${task.status !== 'completed'
-                                                                    ? isPast(new Date(task.due_date)) || isToday(new Date(task.due_date))
-                                                                        ? "bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200"
-                                                                        : isTomorrow(new Date(task.due_date))
-                                                                            ? "bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200"
-                                                                            : "bg-purple-100 dark:bg-purple-900/40 text-purple-800 dark:text-purple-200"
-                                                                    : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
-                                                                    }`}
-                                                            >
-                                                                <FaCalendarDay className="mr-1" size={10} />
-                                                                {formatDate(task.due_date)}
-                                                                {task.status !== 'completed' && isToday(new Date(task.due_date)) && (
-                                                                    <span className="ml-1">(Today)</span>
-                                                                )}
-                                                                {task.status !== 'completed' && isTomorrow(new Date(task.due_date)) && (
-                                                                    <span className="ml-1">(Tomorrow)</span>
-                                                                )}
+                                                        {/* First row - status and priority */}
+                                                        <div className="flex flex-wrap items-center gap-2">
+                                                            <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${task.status === "completed"
+                                                                    ? "bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-200"
+                                                                    : task.status === "in-progress"
+                                                                        ? "bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-200"
+                                                                        : task.status === "blocked"
+                                                                            ? "bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200"
+                                                                            : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+                                                                }`}>
+                                                                {task.status.replace('-', ' ')}
                                                             </span>
-                                                        )}
-                                                        {task.attachments_count > 0 && (
-                                                            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
-                                                                <FaPaperclip className="mr-1" size={10} />
-                                                                {task.attachments_count}
+                                                            <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${task.priority === "high"
+                                                                    ? "bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200"
+                                                                    : task.priority === "medium"
+                                                                        ? "bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-200"
+                                                                        : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+                                                                }`}>
+                                                                {task.priority}
                                                             </span>
-                                                        )}
-                                                    </div>
+                                                        </div>
 
-                                                    {/* Labels */}
-                                                    {task.labels && task.labels.length > 0 && (
-                                                        <div className="mt-3 flex flex-wrap gap-1.5">
-                                                            {task.labels.slice(0, 3).map((label: any) => {
-                                                                const hexColor = label.color.startsWith('#') ? label.color : `#${label.color}`;
-                                                                const textColor = getLabelTextColor(hexColor);
-                                                                const borderColor = `${hexColor}${textColor === 'text-gray-900' ? '80' : 'b3'}`;
+                                                        {/* Second row - due date, attachments, and labels */}
+                                                        <div className="flex flex-wrap items-center gap-2">
+                                                            {task.due_date && (
+                                                                <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${task.status !== 'completed'
+                                                                        ? isPast(new Date(task.due_date)) || isToday(new Date(task.due_date))
+                                                                            ? "bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200"
+                                                                            : isTomorrow(new Date(task.due_date))
+                                                                                ? "bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200"
+                                                                                : "bg-purple-100 dark:bg-purple-900/40 text-purple-800 dark:text-purple-200"
+                                                                        : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+                                                                    }`}>
+                                                                    <FaCalendarDay className="mr-1" size={10} />
+                                                                    {format(new Date(task.due_date), 'MMM d')}
+                                                                    {task.status !== 'completed' && isToday(new Date(task.due_date)) && (
+                                                                        <span className="ml-1">(Today)</span>
+                                                                    )}
+                                                                    {task.status !== 'completed' && isTomorrow(new Date(task.due_date)) && (
+                                                                        <span className="ml-1">(Tomorrow)</span>
+                                                                    )}
+                                                                </span>
+                                                            )}
+                                                            {task.attachments_count > 0 && (
+                                                                <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+                                                                    <FaPaperclip className="mr-1" size={10} />
+                                                                    {task.attachments_count}
+                                                                </span>
+                                                            )}
 
-                                                                return (
-                                                                    <span
-                                                                        key={label.id}
-                                                                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${textColor}`}
-                                                                        style={{
-                                                                            backgroundColor: hexColor,
-                                                                            border: `1px solid ${borderColor}`,
-                                                                            boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
-                                                                        }}
-                                                                    >
-                                                                        <FaTag className="mr-1" size={10} />
-                                                                        {label.name}
-                                                                    </span>
-                                                                );
-                                                            })}
+                                                            {/* Labels - now inline with other elements */}
+                                                            {task.labels && task.labels.length > 0 && (
+                                                                <div className="flex flex-wrap items-center gap-1.5">
+                                                                    {task.labels.slice(0, 2).map((label: any) => {
+                                                                        const hexColor = label.color.startsWith('#') ? label.color : `#${label.color}`;
+                                                                        const textColor = getLabelTextColor(hexColor);
+                                                                        const borderColor = `${hexColor}${textColor === 'text-gray-900' ? '80' : 'b3'}`;
 
-                                                            {/* +X more labels indicator with hover popup */}
-                                                            {task.labels.length > 3 && (
-                                                                <div className="relative inline-block">
-                                                                    <span
-                                                                        className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 cursor-default hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors peer"
-                                                                    >
-                                                                        +{task.labels.length - 3}
-                                                                    </span>
+                                                                        return (
+                                                                            <span
+                                                                                key={label.id}
+                                                                                className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${textColor}`}
+                                                                                style={{
+                                                                                    backgroundColor: hexColor,
+                                                                                    border: `1px solid ${borderColor}`,
+                                                                                    boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                                                                                }}
+                                                                            >
+                                                                                <FaTag className="mr-1" size={10} />
+                                                                                {label.name}
+                                                                            </span>
+                                                                        );
+                                                                    })}
 
-                                                                    {/* Hidden labels popup - appears ONLY on +X hover */}
-                                                                    <div className="absolute z-50 hidden peer-hover:block bottom-full mb-2 left-0 min-w-max bg-white dark:bg-gray-800 shadow-lg rounded-md p-2 border border-gray-200 dark:border-gray-700">
-                                                                        <div className="flex flex-wrap gap-1">
-                                                                            {task.labels.slice(3).map((label: any) => {
-                                                                                const hexColor = label.color.startsWith('#') ? label.color : `#${label.color}`;
-                                                                                const textColor = getLabelTextColor(hexColor);
-                                                                                return (
-                                                                                    <span
-                                                                                        key={label.id}
-                                                                                        className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${textColor}`}
-                                                                                        style={{
-                                                                                            backgroundColor: hexColor,
-                                                                                            border: `1px solid ${hexColor}80`
-                                                                                        }}
-                                                                                    >
-                                                                                        <FaTag className="mr-1" size={10} />
-                                                                                        {label.name}
-                                                                                    </span>
-                                                                                );
-                                                                            })}
+                                                                    {task.labels.length > 2 && (
+                                                                        <div className="relative inline-block">
+                                                                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 cursor-default hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors peer">
+                                                                                +{task.labels.length - 2}
+                                                                            </span>
+                                                                            <div className="absolute z-50 hidden peer-hover:block bottom-full mb-2 left-0 min-w-max bg-white dark:bg-gray-800 shadow-lg rounded-md p-2 border border-gray-200 dark:border-gray-700">
+                                                                                <div className="flex flex-wrap gap-1">
+                                                                                    {task.labels.slice(2).map((label: any) => {
+                                                                                        const hexColor = label.color.startsWith('#') ? label.color : `#${label.color}`;
+                                                                                        const textColor = getLabelTextColor(hexColor);
+                                                                                        return (
+                                                                                            <span
+                                                                                                key={label.id}
+                                                                                                className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${textColor}`}
+                                                                                                style={{
+                                                                                                    backgroundColor: hexColor,
+                                                                                                    border: `1px solid ${hexColor}80`
+                                                                                                }}
+                                                                                            >
+                                                                                                <FaTag className="mr-1" size={10} />
+                                                                                                {label.name}
+                                                                                            </span>
+                                                                                        );
+                                                                                    })}
+                                                                                </div>
+                                                                                <div className="absolute -bottom-1 left-2 w-3 h-3 bg-white dark:bg-gray-800 border-r border-b border-gray-200 dark:border-gray-700 transform rotate-45 -z-10"></div>
+                                                                            </div>
                                                                         </div>
-                                                                        {/* Tooltip arrow */}
-                                                                        <div className="absolute -bottom-1 left-2 w-3 h-3 bg-white dark:bg-gray-800 border-r border-b border-gray-200 dark:border-gray-700 transform rotate-45 -z-10"></div>
-                                                                    </div>
+                                                                    )}
                                                                 </div>
                                                             )}
                                                         </div>
-                                                    )}
+
+                                                        {renderParentTaskInfo(task)}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </motion.div>
@@ -399,14 +452,12 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
 
                                     <div className="flex-1 min-w-0">
                                         <div className="flex flex-col space-y-2">
-                                            <h3
-                                                className={`font-medium text-gray-900 dark:text-gray-100 truncate text-base
-                                                ${task.status === "completed" ? "line-through opacity-70" : ""}`}
-                                            >
+                                            <h3 className={`font-medium text-gray-900 dark:text-gray-100 truncate text-base ${task.status === "completed" ? "line-through opacity-70" : ""
+                                                }`}>
                                                 {task.title}
                                             </h3>
 
-                                            {/* First row of metadata */}
+                                            {/* First row - status, priority, and due date */}
                                             <div className="flex flex-wrap items-center gap-2">
                                                 <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${task.status === "completed"
                                                     ? "bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-200"
@@ -418,6 +469,7 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                                                     }`}>
                                                     {task.status.replace('-', ' ')}
                                                 </span>
+
                                                 <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${task.priority === "high"
                                                     ? "bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200"
                                                     : task.priority === "medium"
@@ -426,10 +478,7 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                                                     }`}>
                                                     {task.priority}
                                                 </span>
-                                            </div>
 
-                                            {/* Second row of metadata */}
-                                            <div className="flex flex-wrap items-center gap-2">
                                                 {task.due_date && (
                                                     <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${task.status !== 'completed'
                                                         ? isPast(new Date(task.due_date)) || isToday(new Date(task.due_date))
@@ -440,7 +489,7 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                                                         : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
                                                         }`}>
                                                         <FaCalendarDay className="mr-1" size={10} />
-                                                        {formatDate(task.due_date)}
+                                                        {format(new Date(task.due_date), 'MMM d')}
                                                         {task.status !== 'completed' && isToday(new Date(task.due_date)) && (
                                                             <span className="ml-1">(Today)</span>
                                                         )}
@@ -449,12 +498,17 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                                                         )}
                                                     </span>
                                                 )}
+                                            </div>
+
+                                            {/* Second row - attachments, assignments, and labels */}
+                                            <div className="flex flex-wrap items-center gap-2">
                                                 {task.attachments_count > 0 && (
                                                     <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
                                                         <FaPaperclip className="mr-1" size={10} />
                                                         {task.attachments_count}
                                                     </span>
                                                 )}
+
                                                 <TaskAssignments
                                                     compactMode={true}
                                                     taskIdFromCompactMode={task.id}
@@ -462,74 +516,70 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                                                     pendingUsers={[]}
                                                     setPendingUsers={() => { }}
                                                 />
+
+                                                {/* Labels - now inline with other elements */}
+                                                {task.labels && task.labels.length > 0 && (
+                                                    <div className="flex flex-wrap items-center gap-1.5">
+                                                        {task.labels.slice(0, 2).map((label: any) => {
+                                                            const hexColor = label.color.startsWith('#') ? label.color : `#${label.color}`;
+                                                            const textColor = getLabelTextColor(hexColor);
+                                                            const borderColor = `${hexColor}${textColor === 'text-gray-900' ? '80' : 'b3'}`;
+
+                                                            return (
+                                                                <span
+                                                                    key={label.id}
+                                                                    className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${textColor}`}
+                                                                    style={{
+                                                                        backgroundColor: hexColor,
+                                                                        border: `1px solid ${borderColor}`,
+                                                                        boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                                                                    }}
+                                                                >
+                                                                    <FaTag className="mr-1" size={10} />
+                                                                    {label.name}
+                                                                </span>
+                                                            );
+                                                        })}
+
+                                                        {task.labels.length > 2 && (
+                                                            <div className="relative inline-block">
+                                                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 cursor-default hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors peer">
+                                                                    +{task.labels.length - 2}
+                                                                </span>
+                                                                <div className="absolute z-50 hidden peer-hover:block bottom-full mb-2 left-0 min-w-max bg-white dark:bg-gray-800 shadow-lg rounded-md p-2 border border-gray-200 dark:border-gray-700">
+                                                                    <div className="flex flex-wrap gap-1">
+                                                                        {task.labels.slice(2).map((label: any) => {
+                                                                            const hexColor = label.color.startsWith('#') ? label.color : `#${label.color}`;
+                                                                            const textColor = getLabelTextColor(hexColor);
+                                                                            return (
+                                                                                <span
+                                                                                    key={label.id}
+                                                                                    className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${textColor}`}
+                                                                                    style={{
+                                                                                        backgroundColor: hexColor,
+                                                                                        border: `1px solid ${hexColor}80`
+                                                                                    }}
+                                                                                >
+                                                                                    <FaTag className="mr-1" size={10} />
+                                                                                    {label.name}
+                                                                                </span>
+                                                                            );
+                                                                        })}
+                                                                    </div>
+                                                                    <div className="absolute -bottom-1 left-2 w-3 h-3 bg-white dark:bg-gray-800 border-r border-b border-gray-200 dark:border-gray-700 transform rotate-45 -z-10"></div>
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
                                             </div>
 
-                                            {/* Labels row */}
-                                            {task.labels && task.labels.length > 0 && (
-                                                <div className="mt-3 flex flex-wrap gap-1.5">
-                                                    {task.labels.slice(0, 3).map((label: any) => {
-                                                        const hexColor = label.color.startsWith('#') ? label.color : `#${label.color}`;
-                                                        const textColor = getLabelTextColor(hexColor);
-                                                        const borderColor = `${hexColor}${textColor === 'text-gray-900' ? '80' : 'b3'}`;
-
-                                                        return (
-                                                            <span
-                                                                key={label.id}
-                                                                className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${textColor}`}
-                                                                style={{
-                                                                    backgroundColor: hexColor,
-                                                                    border: `1px solid ${borderColor}`,
-                                                                    boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
-                                                                }}
-                                                            >
-                                                                <FaTag className="mr-1" size={10} />
-                                                                {label.name}
-                                                            </span>
-                                                        );
-                                                    })}
-
-                                                    {/* +X more labels indicator with hover popup */}
-                                                    {task.labels.length > 3 && (
-                                                        <div className="relative inline-block">
-                                                            <span
-                                                                className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 cursor-default hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors peer"
-                                                            >
-                                                                +{task.labels.length - 3}
-                                                            </span>
-
-                                                            {/* Hidden labels popup - appears ONLY on +X hover */}
-                                                            <div className="absolute z-50 hidden peer-hover:block bottom-full mb-2 left-0 min-w-max bg-white dark:bg-gray-800 shadow-lg rounded-md p-2 border border-gray-200 dark:border-gray-700">
-                                                                <div className="flex flex-wrap gap-1">
-                                                                    {task.labels.slice(3).map((label: any) => {
-                                                                        const hexColor = label.color.startsWith('#') ? label.color : `#${label.color}`;
-                                                                        const textColor = getLabelTextColor(hexColor);
-                                                                        return (
-                                                                            <span
-                                                                                key={label.id}
-                                                                                className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${textColor}`}
-                                                                                style={{
-                                                                                    backgroundColor: hexColor,
-                                                                                    border: `1px solid ${hexColor}80`
-                                                                                }}
-                                                                            >
-                                                                                <FaTag className="mr-1" size={10} />
-                                                                                {label.name}
-                                                                            </span>
-                                                                        );
-                                                                    })}
-                                                                </div>
-                                                                {/* Tooltip arrow */}
-                                                                <div className="absolute -bottom-1 left-2 w-3 h-3 bg-white dark:bg-gray-800 border-r border-b border-gray-200 dark:border-gray-700 transform rotate-45 -z-10"></div>
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            )}
+                                            {renderParentTaskInfo(task)}
                                         </div>
                                     </div>
 
                                     {/* Right section with delete button and arrow */}
-                                    <div className="flex items-center space-x-2">
+                                    <div className="flex items-center space-x-2 self-center">
                                         {canManage && (
                                             <button
                                                 onClick={(e) => {
@@ -543,8 +593,10 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                                             </button>
                                         )}
 
-                                        <div className="h-8 w-8 rounded-full bg-gray-50 dark:bg-gray-700 flex items-center justify-center group-hover:bg-indigo-100 dark:group-hover:bg-indigo-900/50 transition-colors">
-                                            <FaChevronRight className="text-gray-400 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 transition-colors" size={12} />
+                                        <div className="flex items-center h-full">
+                                            <div className="h-8 w-8 rounded-full bg-gray-50 dark:bg-gray-700 flex items-center justify-center group-hover:bg-indigo-100 dark:group-hover:bg-indigo-900/50 transition-colors">
+                                                <FaChevronRight className="text-gray-400 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 transition-colors" size={12} />
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

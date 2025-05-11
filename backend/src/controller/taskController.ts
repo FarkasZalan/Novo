@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { NextFunction } from "connect";
-import { addSubtaskToTaskQuery, createTaskQuery, deleteTaskQuery, getAllTaskForProjectQuery, getCompletedTaskCountForProjectQuery, getInProgressTaskCountForProjectQuery, getTaskByIdQuery, getTaskCountForProjectQuery, updateTaskQuery, updateTaskStatusQuery } from "../models/task.Model";
+import { addSubtaskToTaskQuery, createTaskQuery, deleteTaskQuery, getAllTaskForProjectQuery, getCompletedTaskCountForProjectQuery, getInProgressTaskCountForProjectQuery, getParentTaskForSubtaskQuery, getSubtasksForTaskQuery, getTaskByIdQuery, getTaskCountForProjectQuery, updateTaskQuery, updateTaskStatusQuery } from "../models/task.Model";
 import { recalculateProjectStatus } from "../models/projectModel";
 import { recalculateAllTasksInMilestoneQuery, recalculateCompletedTasksInMilestoneQuery } from "../models/milestonesModel";
 import { addLabelToTaskQuery, deleteLabelFromTaskQuery, getLabelsForTaskQuery } from "../models/labelModel";
@@ -57,6 +57,12 @@ export const getAllTasks = async (req: Request, res: Response, next: NextFunctio
         for (const task of tasks) {
             const taskLabels = await getLabelsForTaskQuery(task.id);
             task.labels = taskLabels;
+
+            task.parent_task_id = await getParentTaskForSubtaskQuery(task.id) || null;
+            if (task.parent_task_id) {
+                const parentTask = await getTaskByIdQuery(task.parent_task_id) || null;
+                task.parent_task_name = parentTask.title || null;
+            }
         }
         handleResponse(res, 200, "Tasks fetched successfully", tasks);
     } catch (error) {
@@ -74,6 +80,14 @@ export const getTaskById = async (req: Request, res: Response, next: NextFunctio
 
         const taskLabels = await getLabelsForTaskQuery(task.id);
         task.labels = taskLabels;
+
+        task.parent_task_id = await getParentTaskForSubtaskQuery(task.id) || null;
+        if (task.parent_task_id) {
+            const parentTask = await getTaskByIdQuery(task.parent_task_id) || null;
+            task.parent_task_name = parentTask.title || null;
+            task.parent_due_date = parentTask.due_date || null;
+            task.parent_status = parentTask.status || null;
+        }
         handleResponse(res, 200, "Task fetched successfully", task);
     } catch (error) {
         next(error);
@@ -118,6 +132,17 @@ export const updateTask = async (req: Request, res: Response, next: NextFunction
             }
         }
 
+        if (status === "completed") {
+            const subtasks = await getSubtasksForTaskQuery(taskId);
+            for (const subtask of subtasks) {
+                await updateTaskStatusQuery("completed", subtask.subtask_id);
+            }
+        }
+
+        if (parent_task_id && updateTask.parent_task_id) {
+            handleResponse(res, 400, "Task already has a parent task", null);
+            return;
+        }
         if (parent_task_id && !updateTask.parent_task_id) {
             await addSubtaskToTaskQuery(parent_task_id, updateTask.id);
         }
@@ -141,6 +166,13 @@ export const updateTaskStatus = async (req: Request, res: Response, next: NextFu
         if (!updateTask) {
             handleResponse(res, 404, "Task not found", null);
             return;
+        }
+
+        if (status === "completed") {
+            const subtasks = await getSubtasksForTaskQuery(taskId);
+            for (const subtask of subtasks) {
+                await updateTaskStatusQuery("completed", subtask.subtask_id);
+            }
         }
 
         if (updateTask.milestone_id) {

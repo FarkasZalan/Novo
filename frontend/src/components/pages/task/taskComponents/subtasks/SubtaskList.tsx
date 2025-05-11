@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FaPlus, FaTasks } from 'react-icons/fa';
+import { FaInfoCircle, FaPlus, FaTasks } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createTask, deleteTask, updateTask, updateTaskStatus } from '../../../../../services/taskService';
 import { useNavigate } from 'react-router-dom';
@@ -13,6 +13,8 @@ interface SubtaskListProps {
     onSubtaskUpdated: () => void;
     canManageTasks: boolean;
     projectId: string;
+    isParentTask: boolean;
+    openFromEdit?: boolean;
 }
 
 export const SubtaskList: React.FC<SubtaskListProps> = ({
@@ -20,7 +22,9 @@ export const SubtaskList: React.FC<SubtaskListProps> = ({
     parentTaskId,
     onSubtaskUpdated,
     canManageTasks,
-    projectId
+    projectId,
+    isParentTask,
+    openFromEdit
 }) => {
     const [newSubtaskTitle, setNewSubtaskTitle] = useState('');
     const [isAdding, setIsAdding] = useState(false);
@@ -60,6 +64,8 @@ export const SubtaskList: React.FC<SubtaskListProps> = ({
         ? Math.round((completedCount / subtasks.length) * 100)
         : 0;
 
+    const canAddSubtasks = isParentTask && canManageTasks;
+
     return (
         <div className="mt-8">
             <div className="flex items-center justify-between mb-4">
@@ -72,7 +78,7 @@ export const SubtaskList: React.FC<SubtaskListProps> = ({
                     )}
                 </div>
 
-                {canManageTasks && !isAdding && (
+                {canAddSubtasks && !isAdding && (
                     <motion.button
                         whileHover={{ scale: 1.03 }}
                         whileTap={{ scale: 0.98 }}
@@ -203,6 +209,7 @@ export const SubtaskList: React.FC<SubtaskListProps> = ({
                                 }}
                                 canManageTasks={canManageTasks}
                                 onNavigateToTask={() => navigate(`/projects/${projectId}/tasks/${subtask.id}`)}
+                                openFromEdit={openFromEdit}
                             />
                         ))
                     ) : (
@@ -217,12 +224,14 @@ export const SubtaskList: React.FC<SubtaskListProps> = ({
                                     <FaTasks size={20} />
                                 </div>
                                 <h4 className="text-lg font-medium text-gray-700 dark:text-gray-300">
-                                    No subtasks yet
+                                    {isParentTask ? 'No subtasks yet' : 'No nested subtasks allowed'}
                                 </h4>
                                 <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xs">
-                                    Break this task down into smaller, manageable steps
+                                    {isParentTask
+                                        ? 'Break this task down into smaller, manageable steps'
+                                        : 'Subtasks cannot have their own subtasks to keep things simple'}
                                 </p>
-                                {canManageTasks && (
+                                {canAddSubtasks && (
                                     <motion.button
                                         whileHover={{ scale: 1.03 }}
                                         whileTap={{ scale: 0.98 }}
@@ -232,6 +241,12 @@ export const SubtaskList: React.FC<SubtaskListProps> = ({
                                         <FaPlus size={12} />
                                         <span>Create your first subtask</span>
                                     </motion.button>
+                                )}
+                                {!isParentTask && (
+                                    <div className="flex items-center text-sm text-amber-600 dark:text-amber-400 mt-2">
+                                        <FaInfoCircle className="mr-2" />
+                                        <span>Only parent tasks can have subtasks</span>
+                                    </div>
                                 )}
                             </div>
                         </motion.div>

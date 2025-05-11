@@ -33,7 +33,8 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
         priority: 'low' as 'low' | 'medium' | 'high',
         status: taskStatus as 'not-started' | 'in-progress' | 'blocked' | 'completed',
         completed: false,
-        subtasks: []
+        subtasks: [],
+        parentTaskId: ''
     });
 
     const [isLoading, setLoading] = useState(false);
@@ -58,6 +59,11 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
     const [labelSearchTerm, setLabelSearchTerm] = useState('');
     const [showLabelSearchResults, setShowLabelSearchResults] = useState(false);
     const labelSearchRef = useRef<HTMLDivElement>(null);
+
+    // for subtask status confirm
+    const [showStatusConfirm, setShowStatusConfirm] = useState(false);
+    const [pendingStatusChange, setPendingStatusChange] = useState<'not-started' | 'in-progress' | 'blocked' | 'completed'>('not-started');
+
 
     // Load milestones and task data
     useEffect(() => {
@@ -85,7 +91,8 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
                             priority: task.priority || 'low',
                             status: task.status || 'not-started',
                             completed: task.status === 'completed',
-                            subtasks: task.subtasks
+                            subtasks: task.subtasks,
+                            parentTaskId: task.parent_task_id
                         });
 
                         // If task has a milestone, set it as selected
@@ -317,10 +324,34 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
+
+        if (name === 'status') {
+            const newStatus = value as 'not-started' | 'in-progress' | 'blocked' | 'completed';
+
+            // Check if changing to completed with incomplete subtasks
+            if (newStatus === 'completed' && formData.subtasks?.length > 0) {
+                const incompleteSubtasks = formData.subtasks.filter((subtask: any) => subtask.status !== 'completed');
+
+                if (incompleteSubtasks.length > 0) {
+                    setPendingStatusChange(newStatus);
+                    setShowStatusConfirm(true);
+                    return; // Don't update status yet
+                }
+            }
+        }
+
         setFormData(prev => ({
             ...prev,
             [name]: value
         }));
+    };
+
+    const handleConfirmStatusChange = () => {
+        setFormData(prev => ({
+            ...prev,
+            status: pendingStatusChange
+        }));
+        setShowStatusConfirm(false);
     };
 
     const handleDeleteTask = async () => {
@@ -523,7 +554,7 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
                             </select>
                         </div>
 
-                        {isEdit && (
+                        {!isLoading && !formData.parentTaskId && isEdit && (
                             <div className="md:col-span-2">
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" htmlFor="status">
                                     Status
@@ -872,6 +903,8 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
                             }}
                             canManageTasks={true}
                             projectId={projectId!}
+                            isParentTask={!formData.parentTaskId}
+                            openFromEdit={true}
                         />
                     )}
                 </div>
@@ -945,6 +978,17 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
                 message="Are you sure you want to delete this task? This action cannot be undone."
                 confirmText="Delete Task"
                 confirmColor="red"
+            />
+
+            {/* Confirmation Dialog for completed status if there are incomplete subtasks */}
+            <ConfirmationDialog
+                isOpen={showStatusConfirm}
+                onClose={() => setShowStatusConfirm(false)}
+                onConfirm={handleConfirmStatusChange}
+                title="Incomplete Subtasks"
+                message="This task has incomplete subtasks. Are you sure you want to mark it as completed?"
+                confirmText="Mark as Completed"
+                confirmColor="indigo"
             />
         </div>
     );

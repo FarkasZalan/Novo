@@ -79,6 +79,12 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+.ReactModal__Overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 9999 !important;
+}
+
 .scroll-container {
   overflow-x: auto;
   overflow-y: hidden;

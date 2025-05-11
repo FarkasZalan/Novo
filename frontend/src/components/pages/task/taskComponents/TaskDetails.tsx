@@ -11,7 +11,10 @@ import {
     FaAlignLeft,
     FaTag,
     FaFlag,
-    FaBan
+    FaBan,
+    FaChevronRight,
+    FaTasks,
+    FaCalendarDay
 } from 'react-icons/fa';
 import { fetchTask } from '../../../../services/taskService';
 import { fetchProjectById } from '../../../../services/projectService';
@@ -20,10 +23,12 @@ import { useAuth } from '../../../../hooks/useAuth';
 import { TaskFiles } from '../taskHandler/TaskFiles';
 import { TaskAssignments } from '../taskHandler/assignments/TaskAssignments';
 import { SubtaskList } from './subtasks/SubtaskList';
+import { Task } from '../../../../types/task';
+import { isPast, isToday, isTomorrow, format } from 'date-fns';
 
 export const TaskDetails: React.FC = () => {
     const { taskId, projectId } = useParams<{ taskId: string; projectId: string }>();
-    const [task, setTask] = useState<any>(null);
+    const [task, setTask] = useState<Task>();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const navigate = useNavigate();
@@ -218,6 +223,74 @@ export const TaskDetails: React.FC = () => {
                             </div>
                         </div>
 
+                        {task.parent_task_id && (
+                            <div className="md:col-span-2">
+                                <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 mb-3">
+                                    <div className="p-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-900/30">
+                                        <FaTasks className="mr-2" />
+                                    </div>
+                                    <h3 className="font-medium text-sm">Parent Task</h3>
+                                </div>
+
+                                <div
+                                    onClick={() => navigate(`/projects/${projectId}/tasks/${task.parent_task_id}`)}
+                                    className="group relative p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 hover:border-indigo-200 dark:hover:border-indigo-500 hover:bg-gray-50 dark:hover:bg-gray-700/30 shadow-xs hover:shadow-sm transition-all cursor-pointer"
+                                >
+                                    <div className="flex items-start gap-3">
+                                        {/* Status indicator */}
+                                        <div className={`mt-0.5 flex-shrink-0 h-4 w-4 rounded-full ${task.parent_status === "completed"
+                                            ? "bg-green-500 dark:bg-green-400"
+                                            : task.parent_status === "in-progress"
+                                                ? "bg-yellow-500 dark:bg-yellow-400"
+                                                : task.parent_status === "blocked"
+                                                    ? "bg-red-500 dark:bg-red-400"
+                                                    : "bg-gray-300 dark:bg-gray-500"
+                                            }`} />
+
+                                        <div className="flex-1 min-w-0 flex items-center justify-between gap-2">
+                                            <div className="flex-1 min-w-0">
+                                                <h4 className="text-base font-medium text-gray-900 dark:text-gray-100 truncate">
+                                                    {task.parent_task_name || 'Parent Task'}
+                                                </h4>
+                                                <div className="flex flex-wrap items-center gap-2 mt-2">
+                                                    <span className={`text-xs px-2 py-1 rounded-md ${task.parent_status === "completed"
+                                                        ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300"
+                                                        : task.parent_status === "in-progress"
+                                                            ? "bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300"
+                                                            : task.parent_status === "blocked"
+                                                                ? "bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300"
+                                                                : "bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+                                                        }`}>
+                                                        {task.parent_status?.replace('-', ' ') || 'Not started'}
+                                                    </span>
+
+                                                    {task.parent_due_date && (
+                                                        <span className={`text-xs px-2 py-1 rounded-md flex items-center gap-1 ${task.parent_status !== 'completed'
+                                                            ? isPast(new Date(task.parent_due_date)) || isToday(new Date(task.parent_due_date))
+                                                                ? "bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300"
+                                                                : isTomorrow(new Date(task.parent_due_date))
+                                                                    ? "bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300"
+                                                                    : "bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300"
+                                                            : "bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+                                                            }`}>
+                                                            <FaCalendarDay size={10} />
+                                                            {format(new Date(task.parent_due_date), 'MMM d')}
+                                                            {task.parent_status !== 'completed' && isToday(new Date(task.parent_due_date)) && ' • Today'}
+                                                            {task.parent_status !== 'completed' && isTomorrow(new Date(task.parent_due_date)) && ' • Tomorrow'}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <FaChevronRight className="flex-shrink-0 text-gray-400 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 transition-colors" size={12} />
+                                        </div>
+                                    </div>
+
+                                    {/* Subtle hover effect */}
+                                    <div className="absolute inset-0 rounded-xl border-2 border-transparent group-hover:border-indigo-100 dark:group-hover:border-indigo-900/30 transition-all pointer-events-none" />
+                                </div>
+                            </div>
+                        )}
+
                         <div className="md:col-span-2">
                             <SubtaskList
                                 subtasks={task.subtasks || []}
@@ -229,6 +302,7 @@ export const TaskDetails: React.FC = () => {
                                 }}
                                 canManageTasks={canManageTasks}
                                 projectId={projectId!}
+                                isParentTask={!task.parent_task_id}
                             />
                         </div>
 

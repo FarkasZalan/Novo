@@ -6,9 +6,10 @@ import { format, isPast, isToday, isTomorrow } from 'date-fns';
 import { Task } from '../../../../../types/task';
 import { FaFlag, FaPaperclip, FaTag } from 'react-icons/fa';
 import { TaskAssignments } from '../../taskHandler/assignments/TaskAssignments';
+import { SubtaskListOnBoard } from './SubtaskListOnBoard';
 
 // one task card
-const DraggableTaskCard: React.FC<{ task: Task }> = React.memo(({ task }) => {
+const DraggableTaskCard: React.FC<{ task: Task, onTaskUpdate?: (updatedTask: Task) => void }> = React.memo(({ task, onTaskUpdate }) => {
     const navigate = useNavigate();
     const { projectId } = useParams<{ projectId: string }>();
 
@@ -141,6 +142,13 @@ const DraggableTaskCard: React.FC<{ task: Task }> = React.memo(({ task }) => {
                 </div>
             )}
 
+            {/* Subtask list */}
+            <SubtaskListOnBoard
+                task={task}
+                onTaskUpdate={onTaskUpdate}
+                projectId={projectId!}
+            />
+
             {/* Row: Milestone & Attachments */}
             <div className="flex justify-between items-center mt-4 gap-2">
                 {task.milestone_id && (
@@ -162,12 +170,12 @@ const DraggableTaskCard: React.FC<{ task: Task }> = React.memo(({ task }) => {
                     {/* Due Date */}
                     {task.due_date && (
                         <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${task.status !== 'completed'
-                                ? isPast(new Date(task.due_date)) || isToday(new Date(task.due_date))
-                                    ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
-                                    : isTomorrow(new Date(task.due_date))
-                                        ? "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200"
-                                        : "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
-                                : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
+                            ? isPast(new Date(task.due_date)) || isToday(new Date(task.due_date))
+                                ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+                                : isTomorrow(new Date(task.due_date))
+                                    ? "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200"
+                                    : "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
+                            : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
                             }`}>
                             {format(new Date(task.due_date), 'MMM d')}
                             {task.status !== 'completed' && isToday(new Date(task.due_date)) && " • Today"}
