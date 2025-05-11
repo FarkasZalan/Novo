@@ -20,7 +20,7 @@ export const createTask = async (req: Request, res: Response, next: NextFunction
     try {
         const projectId = req.params.projectId;
         const { title, description, due_date, priority, status, labels, parent_task_id } = req.body;
-        const newTask = await createTaskQuery(title, description, projectId, due_date, priority, status);
+        const newTask = await createTaskQuery(title, description, projectId, due_date, priority, status, parent_task_id);
 
         if (newTask.milestone_id) {
             await recalculateAllTasksInMilestoneQuery(projectId, newTask.milestone_id)
@@ -34,7 +34,7 @@ export const createTask = async (req: Request, res: Response, next: NextFunction
         if (parent_task_id) {
             const parentTask = await getTaskByIdQuery(parent_task_id);
             await addSubtaskToTaskQuery(parent_task_id, newTask.id);
-            const milestoneId = await addMilestoneToTaskQuery(newTask.id, parentTask.milestone_id);
+            await addMilestoneToTaskQuery(newTask.id, parentTask.milestone_id);
         }
         await recalculateProjectStatus(projectId);
         handleResponse(res, 201, "Task created successfully", newTask);

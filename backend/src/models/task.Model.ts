@@ -86,8 +86,8 @@ export const getSubtasksForTaskQuery = async (id: string) => {
 }
 
 // Returning * = return all rows that was affected by the query e.g if one user was created, updated or deleted then it will return with that row from the database
-export const createTaskQuery = async (title: string, description: string, project_id: string, due_date: Date, priority: string, status: string) => {
-    const result = await pool.query("INSERT INTO tasks (title, description, project_id, due_date, priority, updated_at, status) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *", [title, description, project_id, due_date, priority, new Date(), status]);
+export const createTaskQuery = async (title: string, description: string, project_id: string, due_date: Date, priority: string, status: string, parent_task_id?: string) => {
+    const result = await pool.query("INSERT INTO tasks (title, description, project_id, due_date, priority, updated_at, status, parent_task_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *", [title, description, project_id, due_date, priority, new Date(), status, parent_task_id]);
     return result.rows[0];
 }
 
