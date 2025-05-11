@@ -450,7 +450,7 @@ export const TaskList: React.FC<TaskListProps> = React.memo(({ tasks, setTasks, 
                                 {/* Subtasks row */}
                                 {task.subtasks && task.subtasks.length > 0 && (
                                     <tr className="bg-transparent">
-                                        <td colSpan={canManageTasks ? 9 : 8} className="px-2 py-1">
+                                        <td colSpan={canManageTasks ? 12 : 11} className="px-2 py-1">
                                             <SubtaskList
                                                 task={task}
                                                 expanded={expandedTasks[task.id]}

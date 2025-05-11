@@ -224,6 +224,38 @@ export const TaskDetails: React.FC = () => {
                             </div>
                         </div>
 
+                        {/* Due Date */}
+                        <div className="bg-gray-50/70 dark:bg-gray-700/60 p-4 rounded-lg backdrop-blur-sm">
+                            <div className="flex items-center text-gray-500 dark:text-gray-400 mb-2">
+                                <FaCalendarAlt className="mr-2" />
+                                <h3 className="font-medium">Due Date</h3>
+                            </div>
+                            <p className="text-gray-900 dark:text-gray-100">
+                                {task.due_date && new Date(task.due_date).toLocaleDateString('en-US', {
+                                    weekday: 'long',
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric'
+                                })}
+                            </p>
+
+                            {!task.due_date && (
+                                <div className="text-gray-500 mt-5 dark:text-gray-400 italic">
+                                    No due date set
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Assigned To */}
+                        <div className="bg-gray-50/70 dark:bg-gray-700/60 p-4 rounded-lg backdrop-blur-sm">
+                            <TaskAssignments
+                                isOpenForm={false}
+                                pendingUsers={[]}
+                                setPendingUsers={() => { }}
+                                compactMode={false}
+                            />
+                        </div>
+
                         {task.parent_task_id && (
                             <div className="md:col-span-2">
                                 <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 mb-3">
@@ -307,37 +339,7 @@ export const TaskDetails: React.FC = () => {
                             />
                         </div>
 
-                        {/* Due Date */}
-                        <div className="bg-gray-50/70 dark:bg-gray-700/60 p-4 rounded-lg backdrop-blur-sm">
-                            <div className="flex items-center text-gray-500 dark:text-gray-400 mb-2">
-                                <FaCalendarAlt className="mr-2" />
-                                <h3 className="font-medium">Due Date</h3>
-                            </div>
-                            <p className="text-gray-900 dark:text-gray-100">
-                                {task.due_date && new Date(task.due_date).toLocaleDateString('en-US', {
-                                    weekday: 'long',
-                                    year: 'numeric',
-                                    month: 'long',
-                                    day: 'numeric'
-                                })}
-                            </p>
 
-                            {!task.due_date && (
-                                <div className="text-gray-500 mt-5 dark:text-gray-400 italic">
-                                    No due date set
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Assigned To */}
-                        <div className="bg-gray-50/70 dark:bg-gray-700/60 p-4 rounded-lg backdrop-blur-sm">
-                            <TaskAssignments
-                                isOpenForm={false}
-                                pendingUsers={[]}
-                                setPendingUsers={() => { }}
-                                compactMode={false}
-                            />
-                        </div>
 
                         {/* Milestone */}
                         <div className="bg-gray-50/70 dark:bg-gray-700/60 p-4 rounded-lg backdrop-blur-sm">

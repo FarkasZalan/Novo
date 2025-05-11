@@ -149,7 +149,7 @@ export const SubtaskList: React.FC<SubtaskListProps> = React.memo(({
             <div className="mx-4 bg-white dark:bg-gray-800/50 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
                 <button
                     onClick={onToggleExpand}
-                    className="w-full flex cursor-pointer items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors"
+                    className="w-full cursor-pointer flex cursor-pointer items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors"
                 >
                     <div className="flex items-center gap-2">
                         <div className="w-6 h-6 flex items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/30">
@@ -223,14 +223,15 @@ export const SubtaskList: React.FC<SubtaskListProps> = React.memo(({
                                                     setIsAdding(false);
                                                     setNewSubtaskTitle('');
                                                 }}
-                                                className="px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
+                                                className="px-3 py-1.5 cursor-pointer text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
                                             >
                                                 Cancel
                                             </button>
                                             <button
                                                 onClick={handleAddSubtask}
                                                 disabled={isLoading || !newSubtaskTitle.trim()}
-                                                className="px-3 py-1.5 text-sm bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white rounded-md disabled:opacity-50 flex items-center"
+                                                className={`px-3 py-1.5 text-sm bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white rounded-md disabled:opacity-50 flex items-center ${isLoading || !newSubtaskTitle.trim() ? 'cursor-not-allowed' : 'cursor-pointer'
+                                                    }`}
                                             >
                                                 {isLoading ? 'Adding...' : 'Add Subtask'}
                                             </button>
