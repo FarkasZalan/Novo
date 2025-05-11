@@ -1,6 +1,6 @@
 import pool from "../config/db";
 import { addUserToProjectQuery } from "./projectMemberModel";
-import { getCompletedTaskCountForProjectQuery, getInProgressTaskCountForProjectQuery, getTaskCountForProjectQuery } from "./task.Model";
+import { getBlockedTaskCountForProjectQuery, getCompletedTaskCountForProjectQuery, getInProgressTaskCountForProjectQuery, getTaskCountForProjectQuery } from "./task.Model";
 
 export const getAllProjectForUsersQuery = async (userId: string) => {
     const result = await pool.query(`SELECT * FROM projects JOIN project_members ON projects.id = project_members.project_id WHERE project_members.user_id = $1 ORDER BY projects.updated_at DESC`, [userId]);
@@ -28,11 +28,12 @@ export const recalculateProjectStatus = async (project_id: string) => {
     const total = await getTaskCountForProjectQuery(project_id);
     const completed = await getCompletedTaskCountForProjectQuery(project_id);
     const inProgressTaskCount = await getInProgressTaskCountForProjectQuery(project_id);
+    const blockedTaskCount = await getBlockedTaskCountForProjectQuery(project_id);
 
     let status = 'not-started';
     if (completed === total && total > 0) {
         status = 'completed';
-    } else if (inProgressTaskCount > 0) {
+    } else if (inProgressTaskCount > 0 || blockedTaskCount > 0 || (completed > 0 && total > completed)) {
         status = 'in-progress';
     }
 

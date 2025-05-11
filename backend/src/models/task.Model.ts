@@ -131,6 +131,11 @@ export const getInProgressTaskCountForProjectQuery = async (id: string) => {
     return parseInt(result.rows[0].count, 10);
 }
 
+export const getBlockedTaskCountForProjectQuery = async (id: string) => {
+    const result = await pool.query("SELECT COUNT(*) FROM tasks WHERE project_id = $1 AND status = 'blocked'", [id]);
+    return parseInt(result.rows[0].count, 10);
+}
+
 export const recalculateTaskAttachmentsCountForTaskQuery = async (id: string) => {
     await pool.query("UPDATE tasks SET attachments_count = (SELECT COUNT(*) FROM files WHERE task_id = $1) WHERE id = $1 RETURNING *", [id]);
 }
