@@ -3,7 +3,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { FaArrowLeft, FaFlag, FaList, FaPlus, FaTags, FaThLarge } from 'react-icons/fa';
 import { fetchAllTasksForProject } from '../../../services/taskService';
 import { TaskBoard } from './taskComponents/board/TaskBoard';
-import { TaskList } from './taskComponents/TaskList';
+import { TaskList } from './taskComponents/list/TaskList';
 import { fetchProjectById } from '../../../services/projectService';
 import { getProjectMembers } from '../../../services/projectMemberService';
 import { useAuth } from '../../../hooks/useAuth';

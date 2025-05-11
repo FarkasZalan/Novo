@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { FaEdit, FaCircle, FaClock, FaCheckCircle, FaPlus, FaTasks, FaTrash, FaPaperclip, FaFlag, FaTag, FaChevronDown } from 'react-icons/fa';
+import { FaEdit, FaCircle, FaClock, FaCheckCircle, FaPlus, FaTasks, FaTrash, FaPaperclip, FaFlag, FaTag } from 'react-icons/fa';
 import { isPast, isToday, isTomorrow } from 'date-fns';
-import { ConfirmationDialog } from '../../project/ConfirmationDialog';
-import { deleteTask, updateTaskStatus } from '../../../../services/taskService';
-import { useAuth } from '../../../../hooks/useAuth';
+import { ConfirmationDialog } from '../../../project/ConfirmationDialog';
+import { deleteTask } from '../../../../../services/taskService';
+import { useAuth } from '../../../../../hooks/useAuth';
 import toast from 'react-hot-toast';
-import { Task } from '../../../../types/task';
-import { TaskAssignments } from '../taskHandler/assignments/TaskAssignments';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Task } from '../../../../../types/task';
+import { TaskAssignments } from '../../taskHandler/assignments/TaskAssignments';
+import { SubtaskList } from './SubtaskSectionForList';
 
 interface TaskListProps {
     tasks: Task[];
@@ -98,170 +98,38 @@ export const TaskList: React.FC<TaskListProps> = React.memo(({ tasks, setTasks, 
         return brightness > 150 ? 'text-gray-900' : 'text-white';
     };
 
-    const handleToggleSubtaskComplete = async (taskId: string, subtaskId: string, currentStatus: string) => {
-        if (!projectId || !authState.accessToken) return;
+    const handleSubtaskStatusChange = (taskId: string, subtaskId: string, newStatus: string) => {
+        setTasks(prevTasks => prevTasks.map(task => {
+            if (task.id === taskId) {
+                const updatedSubtasks = task.subtasks?.map(subtask =>
+                    subtask.id === subtaskId ? { ...subtask, status: newStatus } : subtask
+                ) || [];
+                return { ...task, subtasks: updatedSubtasks };
+            }
+            return task;
+        }));
+    };
 
-        const newStatus = currentStatus === 'completed' ? 'not-started' : 'completed';
+    const handleDeleteSubtask = async (taskId: string, subtaskId: string) => {
         try {
-            // Optimistic update
+            if (!projectId || !authState.accessToken) return;
+
+            await deleteTask(subtaskId, projectId, authState.accessToken);
+
+            // Update the tasks state to remove the subtask
             setTasks(prevTasks => prevTasks.map(task => {
                 if (task.id === taskId) {
-                    const updatedSubtasks = task.subtasks?.map(subtask =>
-                        subtask.id === subtaskId ? { ...subtask, status: newStatus } : subtask
-                    ) || [];
+                    const updatedSubtasks = task.subtasks?.filter(subtask => subtask.id !== subtaskId) || [];
                     return { ...task, subtasks: updatedSubtasks };
                 }
                 return task;
             }));
 
-            await updateTaskStatus(subtaskId, projectId, authState.accessToken, newStatus);
-        } catch (error) {
-            console.error('Error updating subtask:', error);
-            toast.error('Failed to update subtask');
+            toast.success('Subtask deleted successfully');
+        } catch (err) {
+            console.error(err);
+            toast.error('Failed to delete subtask');
         }
-    };
-
-    const renderSubtasks = (task: Task) => {
-        const completedSubtasks = task.subtasks?.filter(s => s.status === 'completed').length || 0;
-        const totalSubtasks = task.subtasks?.length || 0;
-
-        if (!task.subtasks || task.subtasks.length === 0) {
-            return null;
-        }
-
-        return (
-            <div className="py-2">
-                <div className="mx-4 bg-white dark:bg-gray-800/50 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-                    {/* Header with toggle button */}
-                    <button
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            toggleTaskExpansion(task.id);
-                        }}
-                        className="w-full flex cursor-pointer items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors"
-                    >
-                        <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 flex items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/30">
-                                <FaTasks className="text-indigo-500 dark:text-indigo-400" size={12} />
-                            </div>
-                            <span className="font-medium text-gray-700 dark:text-gray-300">
-                                Subtasks ({completedSubtasks}/{totalSubtasks})
-                            </span>
-                        </div>
-
-                        <div className="flex items-center gap-3">
-                            {/* Progress bar */}
-                            <div className="w-32 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full hidden sm:block">
-                                <motion.div
-                                    initial={{ width: 0 }}
-                                    animate={{ width: `${(completedSubtasks / totalSubtasks) * 100}%` }}
-                                    transition={{ duration: 0.6 }}
-                                    className={`h-full rounded-full ${completedSubtasks === totalSubtasks
-                                        ? 'bg-green-500'
-                                        : 'bg-indigo-500'
-                                        }`}
-                                />
-                            </div>
-
-                            {/* Chevron icon that rotates */}
-                            <motion.div
-                                animate={{ rotate: expandedTasks[task.id] ? 180 : 0 }}
-                                transition={{ duration: 0.3 }}
-                                className="w-5 h-5 flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700"
-                            >
-                                <FaChevronDown size={10} className="text-gray-500 dark:text-gray-400" />
-                            </motion.div>
-                        </div>
-                    </button>
-
-                    {/* Subtasks list - animated */}
-                    <AnimatePresence>
-                        {expandedTasks[task.id] && (
-                            <motion.div
-                                initial={{ opacity: 0, height: 0 }}
-                                animate={{ opacity: 1, height: 'auto' }}
-                                exit={{ opacity: 0, height: 0 }}
-                                transition={{ duration: 0.2 }}
-                                className="overflow-hidden border-t border-gray-100 dark:border-gray-700"
-                            >
-                                <ul className="divide-y divide-gray-100 dark:divide-gray-700">
-                                    {task.subtasks.map(subtask => (
-                                        <motion.li
-                                            key={subtask.id}
-                                            layout
-                                            className="px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors"
-                                        >
-                                            <div className="flex items-center gap-3">
-                                                <button
-                                                    onClick={e => {
-                                                        e.stopPropagation();
-                                                        handleToggleSubtaskComplete(task.id, subtask.id, subtask.status);
-                                                    }}
-                                                    className={`flex-shrink-0 cursor-pointer h-5 w-5 rounded-md flex items-center justify-center transition-all ${subtask.status === 'completed'
-                                                        ? 'bg-green-100 dark:bg-green-900/40 border border-green-400 dark:border-green-600'
-                                                        : 'bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600'
-                                                        }`}
-                                                >
-                                                    {subtask.status === 'completed' ? (
-                                                        <FaCheckCircle className="text-green-600 dark:text-green-400" size={12} />
-                                                    ) : (
-                                                        <FaCircle className="text-gray-400 dark:text-gray-500" size={8} />
-                                                    )}
-                                                </button>
-
-                                                <div
-                                                    className={`flex-1 cursor-pointer ${subtask.status === 'completed'
-                                                        ? 'text-gray-500 dark:text-gray-500 line-through'
-                                                        : 'text-gray-700 dark:text-gray-300'
-                                                        }`}
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        navigate(`/projects/${projectId}/tasks/${subtask.id}`);
-                                                    }}
-                                                >
-                                                    <div className="font-medium text-sm">
-                                                        {subtask.title}
-                                                    </div>
-                                                    {subtask.due_date && (
-                                                        <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                                                            Due: {new Date(subtask.due_date).toLocaleDateString()}
-                                                        </div>
-                                                    )}
-                                                </div>
-
-                                                <div className="flex -space-x-1.5">
-                                                    <TaskAssignments
-                                                        showAssignButtonInCompactMode={true}
-                                                        taskIdFromCompactMode={subtask.id}
-                                                        pendingUsers={[]}
-                                                        setPendingUsers={() => { }}
-                                                        compactMode={true}
-                                                    />
-                                                </div>
-
-                                                <div className="flex-shrink-0">
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            navigate(`/projects/${projectId}/tasks/${subtask.id}`);
-                                                        }}
-                                                        className="p-1.5 rounded-full text-gray-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 dark:hover:text-indigo-400 transition-colors"
-                                                    >
-                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                                                            <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                                                        </svg>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </motion.li>
-                                    ))}
-                                </ul>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                </div>
-            </div>
-        );
     };
 
     if (isLoading) {
@@ -568,7 +436,17 @@ export const TaskList: React.FC<TaskListProps> = React.memo(({ tasks, setTasks, 
                                 {task.subtasks && task.subtasks.length > 0 && (
                                     <tr className="bg-transparent">
                                         <td colSpan={canManageTasks ? 9 : 8} className="px-2 py-1">
-                                            {renderSubtasks(task)}
+                                            <SubtaskList
+                                                task={task}
+                                                expanded={expandedTasks[task.id]}
+                                                onToggleExpand={() => toggleTaskExpansion(task.id)}
+                                                onSubtaskStatusChange={handleSubtaskStatusChange}
+                                                canManageTasks={canManageTasks}
+                                                onDeleteSubtask={handleDeleteSubtask}
+                                                onTaskUpdate={(updatedTask) => {
+                                                    setTasks(prevTasks => prevTasks.map(t => t.id === updatedTask.id ? updatedTask : t));
+                                                }}
+                                            />
                                         </td>
                                     </tr>
                                 )}

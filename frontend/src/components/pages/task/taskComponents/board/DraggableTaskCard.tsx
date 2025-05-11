@@ -143,12 +143,14 @@ const DraggableTaskCard: React.FC<{ task: Task, onTaskUpdate?: (updatedTask: Tas
             )}
 
             {/* Subtask list */}
-            <SubtaskListOnBoard
-                task={task}
-                onTaskUpdate={onTaskUpdate}
-                projectId={projectId!}
-                canManageTasks={canManageTasks}
-            />
+            {task.subtasks && task.subtasks.length > 0 && (
+                <SubtaskListOnBoard
+                    task={task}
+                    onTaskUpdate={onTaskUpdate}
+                    projectId={projectId!}
+                    canManageTasks={canManageTasks}
+                />
+            )}
 
             {/* Row: Milestone & Attachments */}
             <div className="flex justify-between items-center mt-4 gap-2">
