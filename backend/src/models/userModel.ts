@@ -15,6 +15,11 @@ export const updateUserQuery = async (id: string, email: string, name: string, u
     return result.rows[0];
 }
 
+export const updateUserPremiumStatusQuery = async (id: string, is_premium: boolean) => {
+    const result = await pool.query("UPDATE users SET is_premium = $1, updated_at = $2 WHERE id = $3 RETURNING *", [is_premium, new Date(), id]);
+    return result.rows[0];
+}
+
 export const deleteUserQuery = async (id: string) => {
     const result = await pool.query("DELETE FROM users WHERE id = $1 RETURNING *", [id]);
     return result.rows[0];

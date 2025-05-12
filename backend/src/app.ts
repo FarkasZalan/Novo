@@ -11,6 +11,7 @@ import fileRoutes from "./routes/filesRoutes";
 import taskRoutes from "./routes/taskRoutes";
 import labelRoutes from "./routes/labelRoutes";
 import milestoneRoutes from "./routes/milestonesRoutes";
+import paymentRoutes from "./routes/paymentRoutes";
 import commentRoutes from "./routes/commentRoutes";
 import errorHandling from "./middlewares/errorHandler";
 import { setupSwagger } from "./config/swagger";
@@ -86,8 +87,6 @@ app.use(cookieParser());
 // swagger config
 setupSwagger(app);
 
-app.use(express.json()); // if the request has json data (body), it will be parsed to Javascript object and made available in req.body
-
 // Routes
 app.use("/api", authRoutes);
 app.use("/api", userRoutes); // Prefix all routes with /api to avoid conflicts so now all routes start with /api
@@ -99,6 +98,9 @@ app.use("/api", assignmentRoutes);
 app.use("/api", milestoneRoutes);
 app.use("/api", labelRoutes);
 app.use("/api", commentRoutes);
+app.use("/api", paymentRoutes);
+
+app.use(express.json()); // if the request has json data (body), it will be parsed to Javascript object and made available in req.body
 
 // Error handling middleware
 app.use(errorHandling);

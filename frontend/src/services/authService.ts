@@ -1,6 +1,7 @@
 // handle auth API requests
 import axios from 'axios';
-import { API_URL } from '../config/apiURL';
+
+const API_URL = import.meta.env.VITE_BACKEND_URL;
 
 // basic auth functions
 export const register = async (name: string, email: string, password: string) => {

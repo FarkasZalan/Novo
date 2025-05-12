@@ -1,5 +1,7 @@
 import axios from "axios";
-import { API_URL } from "../config/apiURL";
+
+const API_URL = import.meta.env.VITE_BACKEND_URL;
+
 
 export const deleteAccount = async (accessToken: string) => {
     await axios.delete(`${API_URL}/user/delete`, {
@@ -38,6 +40,24 @@ export const fetchAllRegisteredUsers = async () => {
         return response.data.data;
     } catch (error) {
         console.error("Error fetching registered users:", error);
+        throw error;
+    }
+}
+
+export const createPayment = async (token: string, userId: string, email: string, name: string) => {
+    try {
+        const response = await axios.post(`${API_URL}/payment/create-checkout-session`, {
+            userId,
+            email,
+            name
+        }, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return response.data.data.sessionId;
+    } catch (error) {
+        console.error("Error creating checkout session:", error);
         throw error;
     }
 }

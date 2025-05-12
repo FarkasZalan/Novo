@@ -1,5 +1,6 @@
 import axios from 'axios';
-import { API_URL } from '../config/apiURL';
+
+const API_URL = import.meta.env.VITE_BACKEND_URL;
 
 // project files services
 export const fetchProjectFiles = async (projectId: string, token: string) => {

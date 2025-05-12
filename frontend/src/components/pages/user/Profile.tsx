@@ -1,8 +1,10 @@
 import { Link } from "react-router-dom";
 import { FaUser, FaEnvelope, FaCog, FaCalendarAlt, FaSignOutAlt, FaTasks, FaExclamationTriangle, FaTrash, FaCrown, FaCheck, FaTimes } from "react-icons/fa";
 import { useAuth } from "../../../hooks/useAuth";
-import { useState } from "react";
-import { deleteAccount } from "../../../services/userService";
+import { useEffect, useState } from "react";
+import { createPayment, deleteAccount } from "../../../services/userService";
+import { loadStripe } from '@stripe/stripe-js';
+import toast from "react-hot-toast";
 
 export const Profile = () => {
     const { authState, logout } = useAuth();
@@ -11,6 +13,10 @@ export const Profile = () => {
     const [deleteConfirmation, setDeleteConfirmation] = useState("");
     const [deleteError, setDeleteError] = useState("");
     const [deleteLoading, setDeleteLoading] = useState(false);
+
+    //stripe
+    const [paymentLoading, setPaymentLoading] = useState(false);
+    const [paymentError, setPaymentError] = useState("");
 
     const handleLogout = async () => {
         await logout();
@@ -44,6 +50,57 @@ export const Profile = () => {
             setDeleteLoading(false);
         }
     };
+
+
+    const handleUpgradeToPremium = async () => {
+        if (!authState.user || !authState.accessToken) return;
+
+        setPaymentLoading(true);
+        setPaymentError("");
+
+        try {
+            const sessionId = await createPayment(
+                authState.accessToken,
+                authState.user.id,
+                authState.user.email,
+                authState.user.name
+            );
+
+            const stripe = await loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY!);
+            if (!stripe) {
+                console.log("Stripe failed to initialize");
+            };
+
+            if (stripe) {
+                const { error } = await stripe.redirectToCheckout({
+                    sessionId: sessionId
+                });
+
+                if (error) {
+                    console.error("Error:", error);
+                    toast.error("Failed to initiate payment");
+                }
+            }
+        } catch (err: any) {
+            console.error("Payment error:", err);
+            setPaymentError(err.message || "Failed to initiate payment");
+        } finally {
+            setPaymentLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        const query = new URLSearchParams(window.location.search);
+
+        if (query.get("payment_status") === "success") {
+            toast.success("Payment successful!");
+            // Optionally refresh user data to check if is_premium changed
+        }
+
+        if (query.get("payment_status") === "cancelled") {
+            toast.error("Payment cancelled.");
+        }
+    }, []);
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
@@ -191,7 +248,7 @@ export const Profile = () => {
                                     {user?.is_premium ? (
                                         <button
                                             className="w-full mt-4 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white font-medium rounded-lg transition-colors duration-200 flex items-center justify-center cursor-pointer"
-                                            onClick={() => {/* Add manage subscription handler */ }}
+                                            onClick={() => { /* handleManageMembership */ }}
                                         >
                                             <FaCog className="mr-2" />
                                             Manage Membership
@@ -199,10 +256,10 @@ export const Profile = () => {
                                     ) : (
                                         <button
                                             className="w-full mt-4 px-6 py-3 bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-600 dark:hover:bg-yellow-700 text-white font-medium rounded-lg transition-colors duration-200 flex items-center justify-center cursor-pointer"
-                                            onClick={() => {/* Add upgrade handler */ }}
+                                            onClick={handleUpgradeToPremium}
                                         >
                                             <FaCrown className="mr-2" />
-                                            Upgrade to Premium - $9.99/month
+                                            Upgrade to Premium - 2499 Huf/month
                                         </button>
                                     )}
                                 </div>

@@ -1,5 +1,6 @@
 import axios from 'axios';
-import { API_URL } from '../config/apiURL';
+
+const API_URL = import.meta.env.VITE_BACKEND_URL;
 
 
 export const createComment = async (comment: string, taskId: string, projectId: string, author_id: string, token: string) => {

@@ -1,6 +1,7 @@
 import axios from 'axios';
-import { API_URL } from '../config/apiURL';
 import ProjectMember from '../types/projectMember';
+
+const API_URL = import.meta.env.VITE_BACKEND_URL;
 
 export const fetchAssignmentsForTask = async (projectId: string, taskId: string, token: string) => {
     try {
