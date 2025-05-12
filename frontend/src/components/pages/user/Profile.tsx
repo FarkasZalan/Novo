@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { createPayment, deleteAccount } from "../../../services/userService";
 import { loadStripe } from '@stripe/stripe-js';
 import toast from "react-hot-toast";
+import { PremiumInfoDialog } from "./PremiumInfoDialog";
 
 export const Profile = () => {
     const { authState, logout } = useAuth();
@@ -16,7 +17,8 @@ export const Profile = () => {
 
     //stripe
     const [paymentLoading, setPaymentLoading] = useState(false);
-    const [paymentError, setPaymentError] = useState("");
+
+    const [showPremiumDialog, setShowPremiumDialog] = useState(false);
 
     const handleLogout = async () => {
         await logout();
@@ -54,9 +56,9 @@ export const Profile = () => {
 
     const handleUpgradeToPremium = async () => {
         if (!authState.user || !authState.accessToken) return;
-
+        setShowPremiumDialog(false);
         setPaymentLoading(true);
-        setPaymentError("");
+
 
         try {
             const sessionId = await createPayment(
@@ -83,7 +85,7 @@ export const Profile = () => {
             }
         } catch (err: any) {
             console.error("Payment error:", err);
-            setPaymentError(err.message || "Failed to initiate payment");
+            toast.error("Failed to initiate payment");
         } finally {
             setPaymentLoading(false);
         }
@@ -104,6 +106,65 @@ export const Profile = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+            {/* Payment Loading Overlay */}
+            {paymentLoading && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-50 dark:bg-gray-900 bg-opacity-80 dark:bg-opacity-80 backdrop-blur-sm">
+                    <div className="w-full max-w-sm text-center">
+                        <div className="bg-white dark:bg-gray-800 shadow-xl rounded-xl p-8">
+                            <div className="flex flex-col items-center space-y-4">
+                                {/* Animated spinner */}
+                                <div className="relative">
+                                    <div className="w-12 h-12 rounded-full bg-indigo-100 dark:bg-indigo-900/20 flex items-center justify-center">
+                                        <svg
+                                            className="animate-spin h-6 w-6 text-indigo-600 dark:text-indigo-400"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <circle
+                                                className="opacity-25"
+                                                cx="12"
+                                                cy="12"
+                                                r="10"
+                                                stroke="currentColor"
+                                                strokeWidth="4"
+                                            ></circle>
+                                            <path
+                                                className="opacity-75"
+                                                fill="currentColor"
+                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                            ></path>
+                                        </svg>
+                                    </div>
+                                    <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-indigo-600 dark:border-t-indigo-400 animate-spin"></div>
+                                </div>
+
+                                {/* Loading text */}
+                                <div>
+                                    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+                                        Processing Payment
+                                    </h3>
+                                    <p className="text-gray-600 dark:text-gray-400 text-center">
+                                        Please wait while we redirect you to the payment gateway...
+                                    </p>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-4 text-center">
+                                        Do not close or refresh this page.
+                                    </p>
+                                </div>
+
+                                {/* Progress bar */}
+                                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 mt-4">
+                                    <div
+                                        className="bg-indigo-600 dark:bg-indigo-400 h-1.5 rounded-full animate-pulse"
+                                        style={{ width: '70%' }}
+                                    ></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Profile Header */}
             <section className="py-16 bg-indigo-600 dark:bg-indigo-800 text-white">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -256,7 +317,7 @@ export const Profile = () => {
                                     ) : (
                                         <button
                                             className="w-full mt-4 px-6 py-3 bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-600 dark:hover:bg-yellow-700 text-white font-medium rounded-lg transition-colors duration-200 flex items-center justify-center cursor-pointer"
-                                            onClick={handleUpgradeToPremium}
+                                            onClick={() => setShowPremiumDialog(true)}
                                         >
                                             <FaCrown className="mr-2" />
                                             Upgrade to Premium - 2499 Huf/month
@@ -409,6 +470,12 @@ export const Profile = () => {
                     </div>
                 </div>
             </section>
+
+            <PremiumInfoDialog
+                isOpen={showPremiumDialog}
+                onClose={() => setShowPremiumDialog(false)}
+                onContinue={handleUpgradeToPremium}
+            />
         </div>
     );
 };
