@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "start": "node dist/app.js",
-    "build": "tsc",
+    "build": "npm install --include=dev && tsc",
     "dev": "nodemon src/app.ts",
     "lint": "eslint src --ext .ts",
     "format": "prettier --write src/**/*.ts"
