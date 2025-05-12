@@ -87,6 +87,8 @@ app.use(cookieParser());
 // swagger config
 setupSwagger(app);
 
+app.use(express.json()); // if the request has json data (body), it will be parsed to Javascript object and made available in req.body
+
 // Routes
 app.use("/api", authRoutes);
 app.use("/api", userRoutes); // Prefix all routes with /api to avoid conflicts so now all routes start with /api
@@ -99,8 +101,6 @@ app.use("/api", milestoneRoutes);
 app.use("/api", labelRoutes);
 app.use("/api", commentRoutes);
 app.use("/api", paymentRoutes);
-
-app.use(express.json()); // if the request has json data (body), it will be parsed to Javascript object and made available in req.body
 
 // Error handling middleware
 app.use(errorHandling);
