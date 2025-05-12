@@ -679,6 +679,163 @@ const getMilestoneDueSoonTemplate = (
   </div>
 `;
 
+const getPremiumActivationTemplate = (userName: string) => `
+  <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+    <!-- Email Header -->
+    <div style="background-color: #4F46E5; padding: 24px; text-align: center;">
+      <h1 style="color: white; font-size: 24px; font-weight: 700; margin: 0;">Premium Plan Activated</h1>
+    </div>
+    
+    <!-- Email Content -->
+    <div style="padding: 32px;">
+      <h2 style="color: #111827; font-size: 24px; font-weight: 700; margin-bottom: 16px;">Welcome to Novo Premium, ${userName}!</h2>
+      <p style="color: #4B5563; font-size: 16px; line-height: 1.5; margin-bottom: 24px;">
+        Thank you for upgrading to Novo Premium! Your subscription is now active and you have full access to all premium features.
+      </p>
+      
+      <!-- Premium Benefits -->
+      <div style="background-color: #EEF2FF; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+        <h3 style="color: #111827; font-size: 18px; font-weight: 600; margin-top: 0; margin-bottom: 12px;">Your Premium Benefits:</h3>
+        <ul style="color: #4B5563; font-size: 16px; line-height: 1.5; padding-left: 20px; margin: 0;">
+          <li style="margin-bottom: 8px;"><strong>Unlimited team members</strong> - Add as many collaborators as you need to each project</li>
+          <li style="margin-bottom: 8px;"><strong>Project branding</strong> - Customize projects with your own logos</li>
+          <li style="margin-bottom: 8px;"><strong>Priority support</strong> - Get faster responses from our support team</li>
+          <li><strong>Premium features</strong> - Access to all current and future premium capabilities</li>
+        </ul>
+      </div>
+      
+      <!-- Action Button -->
+      <div style="text-align: center; margin: 32px 0;">
+        <a href="${process.env.FRONTEND_URL}/dashboard" 
+           style="background-color: #4F46E5; color: white; padding: 12px 24px; 
+                  font-size: 16px; font-weight: 600; text-decoration: none; 
+                  border-radius: 8px; display: inline-block; transition: all 0.2s ease;
+                  box-shadow: 0 4px 6px rgba(79, 70, 229, 0.2);">
+          Start Using Premium Features
+        </a>
+      </div>
+      
+      <div style="border-top: 1px solid #E5E7EB; padding-top: 24px; margin-top: 24px;">
+        <p style="color: #9CA3AF; font-size: 12px; line-height: 1.5; margin: 0;">
+          Need help with your premium account? Contact our <a href="${process.env.FRONTEND_URL}/contact" style="color: #4F46E5; text-decoration: none;">support team</a>.<br>
+          This is an automated message - please do not reply directly to this email.
+        </p>
+      </div>
+    </div>
+    
+    <!-- Email Footer -->
+    <div style="background-color: #F9FAFB; padding: 16px; text-align: center;">
+      <p style="color: #6B7280; font-size: 12px; margin: 0;">
+        © ${new Date().getFullYear()} Novo. All rights reserved.
+      </p>
+    </div>
+  </div>
+`;
+
+const getPremiumCancellationTemplate = (userName: string) => `
+  <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+    <!-- Email Header -->
+    <div style="background-color: #4F46E5; padding: 24px; text-align: center;">
+      <h1 style="color: white; font-size: 24px; font-weight: 700; margin: 0;">Premium Plan Cancelled</h1>
+    </div>
+    
+    <!-- Email Content -->
+    <div style="padding: 32px;">
+      <h2 style="color: #111827; font-size: 24px; font-weight: 700; margin-bottom: 16px;">We're sorry to see you go, ${userName}</h2>
+      <p style="color: #4B5563; font-size: 16px; line-height: 1.5; margin-bottom: 24px;">
+        Your Novo Premium subscription has been cancelled as requested. You'll continue to have access to all premium features until the end of your current billing period.
+      </p>
+      
+      <!-- Downgrade Impact -->
+      <div style="background-color: #EEF2FF; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+        <h3 style="color: #111827; font-size: 18px; font-weight: 600; margin-top: 0; margin-bottom: 12px;">Free Plan Limitations:</h3>
+        <ul style="color: #4B5563; font-size: 16px; line-height: 1.5; padding-left: 20px; margin: 0;">
+          <li style="margin-bottom: 8px;">Limited to 5 team members per project</li>
+          <li style="margin-bottom: 8px;">No project logo customization</li>
+          <li>Standard support response times</li>
+        </ul>
+      </div>
+      
+      <!-- Action Button -->
+      <div style="text-align: center; margin: 32px 0;">
+        <a href="${process.env.FRONTEND_URL}/profile" 
+           style="background-color: #4F46E5; color: white; padding: 12px 24px; 
+                  font-size: 16px; font-weight: 600; text-decoration: none; 
+                  border-radius: 8px; display: inline-block; transition: all 0.2s ease;
+                  box-shadow: 0 4px 6px rgba(79, 70, 229, 0.2);">
+          Reactivate Premium
+        </a>
+      </div>
+      
+      <div style="border-top: 1px solid #E5E7EB; padding-top: 24px; margin-top: 24px;">
+        <p style="color: #9CA3AF; font-size: 12px; line-height: 1.5; margin: 0;">
+          Changed your mind? You can reactivate your premium subscription at any time.<br>
+          This is an automated message - please do not reply directly to this email.
+        </p>
+      </div>
+    </div>
+    
+    <!-- Email Footer -->
+    <div style="background-color: #F9FAFB; padding: 16px; text-align: center;">
+      <p style="color: #6B7280; font-size: 12px; margin: 0;">
+        © ${new Date().getFullYear()} Novo. All rights reserved.
+      </p>
+    </div>
+  </div>
+`;
+
+const getPremiumReactivatedTemplate = (userName: string) => `
+  <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+    <!-- Email Header -->
+    <div style="background-color: #4F46E5; padding: 24px; text-align: center;">
+      <h1 style="color: white; font-size: 24px; font-weight: 700; margin: 0;">Premium Plan Reactivated</h1>
+    </div>
+    
+    <!-- Email Content -->
+    <div style="padding: 32px;">
+      <h2 style="color: #111827; font-size: 24px; font-weight: 700; margin-bottom: 16px;">Welcome back to Novo Premium, ${userName}!</h2>
+      <p style="color: #4B5563; font-size: 16px; line-height: 1.5; margin-bottom: 24px;">
+        We're thrilled to have you back! Your premium subscription has been successfully reactivated and all your premium features are now available again.
+      </p>
+      
+      <!-- Reactivation Benefits -->
+      <div style="background-color: #EEF2FF; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+        <h3 style="color: #111827; font-size: 18px; font-weight: 600; margin-top: 0; margin-bottom: 12px;">Your Premium Benefits:</h3>
+        <ul style="color: #4B5563; font-size: 16px; line-height: 1.5; padding-left: 20px; margin: 0;">
+          <li style="margin-bottom: 8px;"><strong>Unlimited collaborators</strong> - Add as many team members as you need to each project</li>
+          <li style="margin-bottom: 8px;"><strong>Custom project branding</strong> - Upload logos to personalize your projects</li>
+          <li><strong>Priority support</strong> - Get faster answers to your questions</li>
+        </ul>
+      </div>
+      
+      <!-- Action Button -->
+      <div style="text-align: center; margin: 32px 0;">
+        <a href="${process.env.FRONTEND_URL}/dashboard" 
+           style="background-color: #4F46E5; color: white; padding: 12px 24px; 
+                  font-size: 16px; font-weight: 600; text-decoration: none; 
+                  border-radius: 8px; display: inline-block; transition: all 0.2s ease;
+                  box-shadow: 0 4px 6px rgba(79, 70, 229, 0.2);">
+          Access Your Projects
+        </a>
+      </div>
+      
+      <div style="border-top: 1px solid #E5E7EB; padding-top: 24px; margin-top: 24px;">
+        <p style="color: #9CA3AF; font-size: 12px; line-height: 1.5; margin: 0;">
+          Need help getting started again? Check out our <a href="${process.env.FRONTEND_URL}/about" style="color: #4F46E5; text-decoration: none;">help center</a>.<br>
+          This is an automated message - please do not reply directly to this email.
+        </p>
+      </div>
+    </div>
+    
+    <!-- Email Footer -->
+    <div style="background-color: #F9FAFB; padding: 16px; text-align: center;">
+      <p style="color: #6B7280; font-size: 12px; margin: 0;">
+        © ${new Date().getFullYear()} Novo. All rights reserved.
+      </p>
+    </div>
+  </div>
+`;
+
 // for email user avatar
 
 const getUserInitials = (name: string) => {
@@ -766,15 +923,7 @@ export const sendTaskStatusChangeEmail = async (
   return await sendEmail(email, subject, html);
 };
 
-export const sendTaskAssignmentEmail = async (
-  email: string,
-  assignerName: string,
-  assignerEmail: string,
-  taskName: string,
-  projectName: string,
-  taskId: string,
-  projectId: string,
-  dueDate?: string
+export const sendTaskAssignmentEmail = async (email: string, assignerName: string, assignerEmail: string, taskName: string, projectName: string, taskId: string, projectId: string, dueDate?: string
 ) => {
   const taskLink = `${process.env.FRONTEND_URL}/projects/${projectId}/tasks/${taskId}`;
   const subject = `You've been assigned to "${taskName}" in ${projectName}`;
@@ -790,14 +939,7 @@ export const sendTaskAssignmentEmail = async (
   return await sendEmail(email, subject, html);
 };
 
-export const sendTaskDueSoonEmail = async (
-  email: string,
-  taskName: string,
-  projectName: string,
-  dueDate: Date,
-  taskId: string,
-  projectId: string,
-  isToday: boolean
+export const sendTaskDueSoonEmail = async (email: string, taskName: string, projectName: string, dueDate: Date, taskId: string, projectId: string, isToday: boolean
 ) => {
   const taskLink = `${process.env.FRONTEND_URL}/projects/${projectId}/tasks/${taskId}`;
   const formattedDate = format(dueDate, 'MMM d, yyyy');
@@ -813,17 +955,7 @@ export const sendTaskDueSoonEmail = async (
   return await sendEmail(email, subject, html);
 };
 
-export const sendMilestoneDueSoonEmail = async (
-  email: string,
-  milestoneName: string,
-  projectName: string,
-  dueDate: Date,
-  milestoneId: string,
-  projectId: string,
-  isToday: boolean,
-  progressPercentage: number,
-  completedTasks: number,
-  totalTasks: number
+export const sendMilestoneDueSoonEmail = async (email: string, milestoneName: string, projectName: string, dueDate: Date, milestoneId: string, projectId: string, isToday: boolean, progressPercentage: number, completedTasks: number, totalTasks: number
 ) => {
   const milestoneLink = `${process.env.FRONTEND_URL}/projects/${projectId}/milestones/${milestoneId}`;
   const formattedDate = format(dueDate, 'MMM d, yyyy');
@@ -839,5 +971,24 @@ export const sendMilestoneDueSoonEmail = async (
     totalTasks
   );
 
+  return await sendEmail(email, subject, html);
+};
+
+// Email service functions for premium plans
+export const sendPremiumActivationEmail = async (email: string, userName: string) => {
+  const subject = `Welcome to Novo Premium!`;
+  const html = getPremiumActivationTemplate(userName);
+  return await sendEmail(email, subject, html);
+};
+
+export const sendPremiumCancellationEmail = async (email: string, userName: string) => {
+  const subject = `Your Novo Premium Subscription Has Been Cancelled`;
+  const html = getPremiumCancellationTemplate(userName);
+  return await sendEmail(email, subject, html);
+};
+
+export const sendPremiumReactivatedEmail = async (email: string, userName: string) => {
+  const subject = `Your Novo Premium Subscription Has Been Reactivated`;
+  const html = getPremiumReactivatedTemplate(userName);
   return await sendEmail(email, subject, html);
 };

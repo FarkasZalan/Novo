@@ -61,3 +61,35 @@ export const createPayment = async (token: string, userId: string, email: string
         throw error;
     }
 }
+
+export const cancelPremiumPlan = async (token: string, sessionId: string) => {
+    try {
+        const response = await axios.post(`${API_URL}/payment/cancel-premium-plan`, {
+            sessionId
+        }, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return response.data.data;
+    } catch (error) {
+        console.error("Error canceling premium plan:", error);
+        throw error;
+    }
+}
+
+export const reactivatePremiumPlan = async (token: string, subscriptionId: string) => {
+    try {
+        const response = await axios.post(`${API_URL}/payment/reactivate-premium-plan`, {
+            subscriptionId
+        }, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return response.data.data;
+    } catch (error) {
+        console.error("Error reactivating premium plan:", error);
+        throw error;
+    }
+}

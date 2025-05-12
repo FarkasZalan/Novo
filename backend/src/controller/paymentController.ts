@@ -2,7 +2,8 @@ import { Request, Response } from "express";
 import { NextFunction } from "connect";
 import Stripe from "stripe";
 import dotenv from "dotenv";
-import { updateUserPremiumStatusQuery } from "../models/userModel";
+import { premiumPlanCancelDateQuery, updateUserPremiumStatusQuery } from "../models/userModel";
+import { sendPremiumActivationEmail, sendPremiumCancellationEmail, sendPremiumReactivatedEmail } from "../services/emailService";
 
 dotenv.config();
 
@@ -36,6 +37,13 @@ export const createPayment = async (req: Request, res: Response, next: NextFunct
             success_url: `${process.env.FRONTEND_URL}/profile?payment_status=success`,
             cancel_url: `${process.env.FRONTEND_URL}/profile?payment_status=cancelled`,
             customer_email: email,
+            subscription_data: {
+                metadata: {
+                    userId: userId,
+                    userEmail: email,
+                    userName: name,
+                }
+            },
             metadata: {
                 userId: userId,
                 userEmail: email,
@@ -44,6 +52,52 @@ export const createPayment = async (req: Request, res: Response, next: NextFunct
         });
 
         handleResponse(res, 200, "Payment created successfully", { sessionId: session.id });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const cancelPremiumPlan = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const { sessionId } = req.body;
+        const userId = req.user.id;
+
+        if (!sessionId) {
+            handleResponse(res, 400, "Session ID is required", null);
+            return;
+        }
+
+        const updatedSubscription = await stripe.subscriptions.update(sessionId, {
+            cancel_at_period_end: true
+        })
+
+        await premiumPlanCancelDateQuery(userId)
+        sendPremiumCancellationEmail(updatedSubscription.metadata!.userEmail!, updatedSubscription.metadata!.userName);
+        handleResponse(res, 200, "Premium plan cancelled successfully", updatedSubscription);
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const reactivatePremiumPlan = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const { subscriptionId } = req.body;
+        const userId = req.user.id;
+
+        if (!subscriptionId) {
+            handleResponse(res, 400, "Subscription ID is required", null);
+            return;
+        }
+
+        const subscription = await stripe.subscriptions.update(subscriptionId, {
+            cancel_at_period_end: false
+        });
+
+        // Update the user's status in DB
+        await updateUserPremiumStatusQuery(userId, true, subscriptionId);
+        sendPremiumReactivatedEmail(subscription.metadata!.userEmail!, subscription.metadata!.userName);
+
+        handleResponse(res, 200, "Subscription reactivated successfully", subscription);
     } catch (error) {
         next(error);
     }
@@ -91,6 +145,15 @@ export const handleStripeWebhook = async (req: Request, res: Response, next: Nex
             await handleFailedPayment(failedSession);
             break;
 
+        case 'customer.subscription.deleted':
+            const subscription = event.data.object as Stripe.Subscription;
+            const userId = subscription.metadata?.userId;
+            if (userId) {
+                await updateUserPremiumStatusQuery(userId, false, subscription.id);
+                sendPremiumReactivatedEmail(subscription.metadata!.userEmail!, subscription.metadata!.userName);
+            }
+            break;
+
         // Add more event types as needed
     }
 
@@ -99,10 +162,16 @@ export const handleStripeWebhook = async (req: Request, res: Response, next: Nex
 
 async function fulfillOrder(session: Stripe.Checkout.Session): Promise<void> {
     const userId = session.metadata!.userId;
-    await updateUserPremiumStatusQuery(userId, true);
+    const subscriptionId = session.subscription as string;
+    await updateUserPremiumStatusQuery(userId, true, subscriptionId);
+
+    const subscription: Stripe.Subscription = await stripe.subscriptions.retrieve(subscriptionId);
+
+    sendPremiumActivationEmail(session.customer_email!, session.metadata!.userName);
 }
 
 async function handleFailedPayment(session: Stripe.Checkout.Session): Promise<void> {
     const userId = session.metadata!.userId;
-    // Log or handle failed payment however needed
+    const sessionId = session.subscription as string;
+    await updateUserPremiumStatusQuery(userId, false, sessionId);
 }

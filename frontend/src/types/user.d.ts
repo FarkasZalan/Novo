@@ -6,5 +6,9 @@ interface User {
     updated_at: string;
     is_premium: boolean;
     is_verified: boolean;
-    provider?: string;
+    premium_start_date: string;
+    premium_end_date: string;
+    premium_session_id: string;
+    user_cancelled_premiunm: boolean;
+    provider: string;
 }

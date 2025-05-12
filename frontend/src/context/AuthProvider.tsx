@@ -115,6 +115,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
     }, [authState]); // that's the dependency, that's detect when authState changes and run the useEffect
 
+    const refreshUserData = async () => {
+        try {
+            const data = await refreshToken();
+            setAuthState({
+                user: data.user,
+                accessToken: data.accessToken
+            });
+        } catch (refreshError) {
+            console.error('Token refresh failed:', refreshError);
+        }
+    };
+
 
     // every time when authState token is changes run this
     // interceptor = every HTTP request before it is sent and every HTTP response after it is received
@@ -284,7 +296,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAuthenticated,
         logout,
         darkMode,
-        toggleDarkMode
+        toggleDarkMode,
+        refreshUserData
     };
 
     // AuthCOntext.Provider is a React component that makes the context available to its children components that wrap inside the Provider component

@@ -14,6 +14,7 @@ export interface AuthContextType {
     logout: () => Promise<void>;
     darkMode: boolean | null;
     toggleDarkMode: () => void;
+    refreshUserData: () => Promise<void>;
 }
 
 // that's the context skeleton what will use the useAuth hook
@@ -23,5 +24,6 @@ export const AuthContext = createContext<AuthContextType>({
     isAuthenticated: false,
     logout: async () => { },
     darkMode: null,
-    toggleDarkMode: () => { }
+    toggleDarkMode: () => { },
+    refreshUserData: async () => { }
 });

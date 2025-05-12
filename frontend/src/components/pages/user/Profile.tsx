@@ -1,14 +1,15 @@
 import { Link, useNavigate } from "react-router-dom";
-import { FaUser, FaEnvelope, FaCog, FaCalendarAlt, FaSignOutAlt, FaTasks, FaExclamationTriangle, FaTrash, FaCrown, FaCheck, FaTimes } from "react-icons/fa";
+import { FaUser, FaEnvelope, FaCog, FaCalendarAlt, FaSignOutAlt, FaTasks, FaExclamationTriangle, FaTrash, FaCrown, FaCheck, FaTimes, FaChevronLeft } from "react-icons/fa";
 import { useAuth } from "../../../hooks/useAuth";
 import { useEffect, useState } from "react";
-import { createPayment, deleteAccount } from "../../../services/userService";
+import { cancelPremiumPlan, createPayment, deleteAccount, reactivatePremiumPlan } from "../../../services/userService";
 import { loadStripe } from '@stripe/stripe-js';
 import toast from "react-hot-toast";
 import { PremiumInfoDialog } from "./PremiumInfoDialog";
+import { PremiumManagementModal } from "./PremiumManagementDialog";
 
 export const Profile = () => {
-    const { authState, logout } = useAuth();
+    const { authState, logout, refreshUserData } = useAuth();
     const user = authState.user;
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [deleteConfirmation, setDeleteConfirmation] = useState("");
@@ -16,13 +17,24 @@ export const Profile = () => {
     const [deleteLoading, setDeleteLoading] = useState(false);
     const navigate = useNavigate();
 
-    //stripe
+    //stripe checkout open loading
     const [paymentLoading, setPaymentLoading] = useState(false);
 
+    // payment info dialog
     const [showPremiumDialog, setShowPremiumDialog] = useState(false);
+
+    // premium management
+    const [showPremiumManagement, setShowPremiumManagement] = useState(false);
+
+    // reactivate payment payment info dialog
+    const [showReActivatePremiumDialog, setShowReActivatePremiumDialog] = useState(false);
 
     const handleLogout = async () => {
         await logout();
+    };
+
+    const getUserInitials = (name: string) => {
+        return name.split(' ').map(n => n[0]).join('').toUpperCase();
     };
 
     const handleDeleteAccount = async () => {
@@ -36,7 +48,6 @@ export const Profile = () => {
 
         try {
             await deleteAccount(authState.accessToken!);
-
             await logout();
         } catch (err: any) {
             console.error("Delete account error:", err);
@@ -54,12 +65,10 @@ export const Profile = () => {
         }
     };
 
-
     const handleUpgradeToPremium = async () => {
         if (!authState.user || !authState.accessToken) return;
         setShowPremiumDialog(false);
         setPaymentLoading(true);
-
 
         try {
             const sessionId = await createPayment(
@@ -92,15 +101,45 @@ export const Profile = () => {
         }
     };
 
-
     useEffect(() => {
         const query = new URLSearchParams(window.location.search);
 
         if (query.get("payment_status") === "success") {
-            toast.success("Xou have successfully upgraded to premium!");
+            toast.success("You have successfully upgraded to premium!");
         }
         navigate(location.pathname, { replace: true });
     }, []);
+
+    const handleDowngradeSubscription = async () => {
+        try {
+            setPaymentLoading(true);
+            await cancelPremiumPlan(authState.accessToken!, authState.user!.premium_session_id!);
+            await refreshUserData();
+            setShowPremiumManagement(false);
+            toast.success("You have successfully downgraded your subscription");
+        } catch (err) {
+            toast.error("Failed to downgrade subscription");
+            console.error(err);
+        } finally {
+            setPaymentLoading(false);
+        }
+    };
+
+    const handleReActivatePremiumPlan = async () => {
+        try {
+            setShowPremiumManagement(false);
+            setPaymentLoading(true);
+            await reactivatePremiumPlan(authState.accessToken!, authState.user!.premium_session_id!);
+            await refreshUserData();
+            setShowPremiumManagement(false);
+            toast.success("You have successfully reactivated your subscription");
+        } catch (err) {
+            toast.error("Failed to reactivate subscription");
+            console.error(err);
+        } finally {
+            setPaymentLoading(false);
+        }
+    }
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
@@ -110,7 +149,6 @@ export const Profile = () => {
                     <div className="w-full max-w-sm text-center">
                         <div className="bg-white dark:bg-gray-800 shadow-xl rounded-xl p-8">
                             <div className="flex flex-col items-center space-y-4">
-                                {/* Animated spinner */}
                                 <div className="relative">
                                     <div className="w-12 h-12 rounded-full bg-indigo-100 dark:bg-indigo-900/20 flex items-center justify-center">
                                         <svg
@@ -137,20 +175,12 @@ export const Profile = () => {
                                     <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-indigo-600 dark:border-t-indigo-400 animate-spin"></div>
                                 </div>
 
-                                {/* Loading text */}
                                 <div>
                                     <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-                                        Processing Payment
+                                        Just a moment...
                                     </h3>
-                                    <p className="text-gray-600 dark:text-gray-400 text-center">
-                                        Please wait while we redirect you to the payment gateway...
-                                    </p>
-                                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-4 text-center">
-                                        Do not close or refresh this page.
-                                    </p>
                                 </div>
 
-                                {/* Progress bar */}
                                 <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 mt-4">
                                     <div
                                         className="bg-indigo-600 dark:bg-indigo-400 h-1.5 rounded-full animate-pulse"
@@ -167,22 +197,37 @@ export const Profile = () => {
             <section className="py-16 bg-indigo-600 dark:bg-indigo-800 text-white">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex flex-col md:flex-row items-center justify-between">
-                        <div className="flex items-center space-x-6">
-                            <div className="h-24 w-24 rounded-full bg-indigo-500 dark:bg-indigo-700 flex items-center justify-center text-4xl font-bold">
-                                {user?.name?.charAt(0).toUpperCase() || 'U'}
+                        <div className="flex items-center space-x-4 md:space-x-6">
+                            {/* Left arrow - hidden on mobile, visible on md and up */}
+                            <div
+                                className="hidden md:flex h-10 w-10 cursor-pointer rounded-full bg-indigo-500 dark:bg-indigo-700 items-center justify-center text-white shadow-md hover:bg-indigo-400 dark:hover:bg-indigo-600 transition-colors duration-200"
+                                onClick={() => navigate('/', { replace: true })}
+                            >
+                                <FaChevronLeft className="text-xl" />
                             </div>
+
+                            {/* Profile avatar */}
+                            <div className="h-20 w-20 md:h-24 md:w-24 rounded-full bg-indigo-500 dark:bg-indigo-700 flex items-center justify-center text-3xl md:text-4xl font-bold">
+                                {getUserInitials(user?.name || user?.email.split('@')[0] || 'U')}
+                            </div>
+
+                            {/* User info */}
                             <div>
-                                <h1 className="text-3xl font-bold">{user?.name || 'User'}</h1>
-                                <p className="text-indigo-100 dark:text-indigo-200 mt-1">{user?.email || 'user@example.com'}</p>
-                                <div className="flex items-center mt-2 text-indigo-200 dark:text-indigo-300">
+                                <h1 className="text-2xl md:text-3xl font-bold">{user?.name || 'User'}</h1>
+                                <p className="text-indigo-100 dark:text-indigo-200 mt-1 text-sm md:text-base">
+                                    {user?.email || 'user@example.com'}
+                                </p>
+                                <div className="flex items-center mt-2 text-indigo-200 dark:text-indigo-300 text-sm md:text-base">
                                     <FaCalendarAlt className="mr-1" />
                                     <span>Member since {new Date(user?.created_at || Date.now()).toLocaleDateString()}</span>
                                 </div>
                             </div>
                         </div>
+
+                        {/* Edit Profile button */}
                         <Link
                             to="/profile-settings"
-                            className="mt-4 md:mt-0 px-6 py-3 bg-white dark:bg-gray-100 text-indigo-600 dark:text-indigo-800 rounded-lg font-medium hover:bg-gray-100 dark:hover:bg-gray-200 transition-colors flex items-center"
+                            className="mt-4 md:mt-0 px-5 py-3 md:px-6 md:py-3 bg-white dark:bg-gray-100 text-indigo-600 dark:text-indigo-800 rounded-lg font-medium hover:bg-gray-100 dark:hover:bg-gray-200 transition-colors flex items-center text-md md:text-base"
                         >
                             <FaCog className="mr-2" />
                             Edit Profile
@@ -216,7 +261,8 @@ export const Profile = () => {
                                         <p className="text-gray-800 dark:text-gray-100 font-medium">
                                             {user?.is_premium ? (
                                                 <span className="flex items-center text-yellow-500 dark:text-yellow-400">
-                                                    <FaCrown className="mr-1" /> Premium Member
+                                                    <FaCrown className="mr-1" />
+                                                    {user.user_cancelled_premiunm ? 'Premium (Ending Soon)' : 'Premium Member'}
                                                 </span>
                                             ) : (
                                                 "Free Member"
@@ -236,7 +282,32 @@ export const Profile = () => {
                                     Membership Status
                                 </h2>
                                 <div className="space-y-4">
+                                    {/* Premium Cancellation Notice */}
+                                    {user?.user_cancelled_premiunm && (
+                                        <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 dark:border-yellow-500 p-4 rounded-lg">
+                                            <div className="flex">
+                                                <div className="flex-shrink-0">
+                                                    <svg className="h-5 w-5 text-yellow-400 dark:text-yellow-300" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                                    </svg>
+                                                </div>
+                                                <div className="ml-3">
+                                                    <h3 className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
+                                                        Premium Membership Ending Soon
+                                                    </h3>
+                                                    <div className="mt-2 text-sm text-yellow-700 dark:text-yellow-300">
+                                                        <p>
+                                                            Your premium access will continue until {new Date(user.premium_end_date).toLocaleDateString()}.
+                                                            After this date, you'll revert to the free plan.
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {/* Free Plan */}
                                         <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-gray-50 dark:bg-gray-700 transition-colors duration-200">
                                             <h3 className="font-bold text-lg mb-2 text-gray-800 dark:text-gray-200">Free Plan</h3>
                                             <ul className="space-y-2">
@@ -246,7 +317,7 @@ export const Profile = () => {
                                                     ) : (
                                                         <FaCheck className="text-green-500 dark:text-green-400 mr-2" />
                                                     )}
-                                                    <span>3 projects max</span>
+                                                    <span>Max 5 team members per project</span>
                                                 </li>
                                                 <li className="flex items-center text-gray-700 dark:text-gray-300">
                                                     {user?.is_premium ? (
@@ -254,7 +325,7 @@ export const Profile = () => {
                                                     ) : (
                                                         <FaCheck className="text-green-500 dark:text-green-400 mr-2" />
                                                     )}
-                                                    <span>5 members per project</span>
+                                                    <span>Basic task management</span>
                                                 </li>
                                                 <li className="flex items-center text-gray-700 dark:text-gray-300">
                                                     {user?.is_premium ? (
@@ -262,55 +333,52 @@ export const Profile = () => {
                                                     ) : (
                                                         <FaCheck className="text-green-500 dark:text-green-400 mr-2" />
                                                     )}
-                                                    <span>Basic features</span>
+                                                    <span>Standard support</span>
                                                 </li>
                                             </ul>
                                         </div>
-                                        <div className="border border-yellow-500 dark:border-yellow-400 rounded-lg p-4 bg-yellow-50 dark:bg-gray-700 transition-colors duration-200">
-                                            <h3 className="font-bold text-lg mb-2 text-yellow-600 dark:text-yellow-400">Premium Plan</h3>
+
+                                        {/* Premium Plan */}
+                                        <div className={`border rounded-lg p-4 transition-colors duration-200 ${user?.user_cancelled_premiunm
+                                            ? 'border-yellow-400 dark:border-yellow-500 bg-yellow-50/50 dark:bg-gray-700'
+                                            : 'border-yellow-500 dark:border-yellow-400 bg-yellow-50 dark:bg-gray-700'
+                                            }`}>
+                                            <div className="flex justify-between items-start">
+                                                <h3 className="font-bold text-lg mb-2 text-yellow-600 dark:text-yellow-400">Premium Plan</h3>
+                                                {user?.user_cancelled_premiunm && (
+                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200">
+                                                        Ending Soon
+                                                    </span>
+                                                )}
+                                            </div>
                                             <ul className="space-y-2">
                                                 <li className="flex items-center text-gray-700 dark:text-gray-300">
-                                                    {user?.is_premium ? (
-                                                        <FaCheck className="text-green-500 dark:text-green-400 mr-2" />
-                                                    ) : (
-                                                        <span className="text-gray-500 dark:text-gray-400 mr-2">✓</span>
-                                                    )}
-                                                    <span>Unlimited projects</span>
+                                                    <FaCheck className="text-green-500 dark:text-green-400 mr-2" />
+                                                    <span>Unlimited team members</span>
                                                 </li>
                                                 <li className="flex items-center text-gray-700 dark:text-gray-300">
-                                                    {user?.is_premium ? (
-                                                        <FaCheck className="text-green-500 dark:text-green-400 mr-2" />
-                                                    ) : (
-                                                        <span className="text-gray-500 dark:text-gray-400 mr-2">✓</span>
-                                                    )}
-                                                    <span>Unlimited members</span>
+                                                    <FaCheck className="text-green-500 dark:text-green-400 mr-2" />
+                                                    <span>Advanced task management</span>
                                                 </li>
                                                 <li className="flex items-center text-gray-700 dark:text-gray-300">
-                                                    {user?.is_premium ? (
-                                                        <FaCheck className="text-green-500 dark:text-green-400 mr-2" />
-                                                    ) : (
-                                                        <span className="text-gray-500 dark:text-gray-400 mr-2">✓</span>
-                                                    )}
-                                                    <span>Advanced features</span>
+                                                    <FaCheck className="text-green-500 dark:text-green-400 mr-2" />
+                                                    <span>Custom project branding</span>
                                                 </li>
                                                 <li className="flex items-center text-gray-700 dark:text-gray-300">
-                                                    {user?.is_premium ? (
-                                                        <FaCheck className="text-green-500 dark:text-green-400 mr-2" />
-                                                    ) : (
-                                                        <span className="text-gray-500 dark:text-gray-400 mr-2">✓</span>
-                                                    )}
+                                                    <FaCheck className="text-green-500 dark:text-green-400 mr-2" />
                                                     <span>Priority support</span>
                                                 </li>
                                             </ul>
                                         </div>
                                     </div>
+
                                     {user?.is_premium ? (
                                         <button
                                             className="w-full mt-4 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white font-medium rounded-lg transition-colors duration-200 flex items-center justify-center cursor-pointer"
-                                            onClick={() => { /* handleManageMembership */ }}
+                                            onClick={() => setShowPremiumManagement(true)}
                                         >
                                             <FaCog className="mr-2" />
-                                            Manage Membership
+                                            {user.user_cancelled_premiunm ? 'Membership Ending Soon' : 'Manage Membership'}
                                         </button>
                                     ) : (
                                         <button
@@ -368,7 +436,7 @@ export const Profile = () => {
                                     {/* Manage Membership */}
                                     <button
                                         className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200 text-left cursor-pointer"
-                                        onClick={() => {/* Add subscription management logic */ }}
+                                        onClick={() => user?.is_premium ? setShowPremiumManagement(true) : setShowPremiumDialog(true)}
                                     >
                                         <div className="flex items-center text-indigo-600 dark:text-indigo-400">
                                             <FaCrown className="mr-2" />
@@ -474,6 +542,24 @@ export const Profile = () => {
                 onClose={() => setShowPremiumDialog(false)}
                 onContinue={handleUpgradeToPremium}
             />
+
+            <PremiumInfoDialog
+                isOpen={showReActivatePremiumDialog}
+                onClose={() => setShowReActivatePremiumDialog(false)}
+                onContinue={handleReActivatePremiumPlan}
+            />
+
+            {user?.is_premium && (
+                <PremiumManagementModal
+                    isOpen={showPremiumManagement}
+                    onClose={() => setShowPremiumManagement(false)}
+                    user={user}
+                    onDowngrade={handleDowngradeSubscription}
+                    onReActivateShow={() => {
+                        handleReActivatePremiumPlan();
+                    }}
+                />
+            )}
         </div>
     );
 };

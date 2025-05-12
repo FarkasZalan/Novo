@@ -1,4 +1,4 @@
 interface AuthState {
-    user: any;
+    user: User;
     accessToken: string | null;
 }

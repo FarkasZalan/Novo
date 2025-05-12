@@ -5,7 +5,7 @@ const createCommentTable = async () => {
     const queryText = `
     CREATE TABLE IF NOT EXISTS comments (
       id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-      author_id UUID NOT NULL REFERENCES users(id) ON DELETE SET NULL DEFAULT NULL,
+      author_id UUID REFERENCES users(id) ON DELETE SET NULL DEFAULT NULL,
       task_id UUID NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
       comment TEXT NOT NULL,
       created_at TIMESTAMP DEFAULT NOW(),
