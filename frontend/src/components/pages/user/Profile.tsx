@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FaUser, FaEnvelope, FaCog, FaCalendarAlt, FaSignOutAlt, FaTasks, FaExclamationTriangle, FaTrash, FaCrown, FaCheck, FaTimes } from "react-icons/fa";
 import { useAuth } from "../../../hooks/useAuth";
 import { useEffect, useState } from "react";
@@ -14,6 +14,7 @@ export const Profile = () => {
     const [deleteConfirmation, setDeleteConfirmation] = useState("");
     const [deleteError, setDeleteError] = useState("");
     const [deleteLoading, setDeleteLoading] = useState(false);
+    const navigate = useNavigate();
 
     //stripe
     const [paymentLoading, setPaymentLoading] = useState(false);
@@ -91,17 +92,14 @@ export const Profile = () => {
         }
     };
 
+
     useEffect(() => {
         const query = new URLSearchParams(window.location.search);
 
         if (query.get("payment_status") === "success") {
-            toast.success("Payment successful!");
-            // Optionally refresh user data to check if is_premium changed
+            toast.success("Xou have successfully upgraded to premium!");
         }
-
-        if (query.get("payment_status") === "cancelled") {
-            toast.error("Payment cancelled.");
-        }
+        navigate(location.pathname, { replace: true });
     }, []);
 
     return (

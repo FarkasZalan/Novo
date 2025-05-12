@@ -75,7 +75,7 @@ export const handleStripeWebhook = async (req: Request, res: Response, next: Nex
 
         // Only fulfill the order if the payment is successful
         if (session.payment_status === 'paid') {
-            await fulfillOrder(session, res, next);
+            await fulfillOrder(session);
         }
     }
 
@@ -83,38 +83,26 @@ export const handleStripeWebhook = async (req: Request, res: Response, next: Nex
     switch (event.type) {
         case 'checkout.session.async_payment_succeeded':
             const succeededSession = event.data.object as Stripe.Checkout.Session;
-            await fulfillOrder(succeededSession, res, next);
+            await fulfillOrder(succeededSession);
             break;
 
         case 'checkout.session.async_payment_failed':
             const failedSession = event.data.object as Stripe.Checkout.Session;
-            await handleFailedPayment(failedSession, res, next);
+            await handleFailedPayment(failedSession);
             break;
 
         // Add more event types as needed
     }
 
-    res.status(200).json({ received: true });
+    handleResponse(res, 200, "Payment webhook handled successfully", {});
 };
 
-async function fulfillOrder(session: Stripe.Checkout.Session, res: Response, next: NextFunction) {
-    // Extract user ID from metadata
+async function fulfillOrder(session: Stripe.Checkout.Session): Promise<void> {
     const userId = session.metadata!.userId;
-
-    try {
-        // Update user premium status in your database
-        await updateUserPremiumStatusQuery(userId, true);
-
-        handleResponse(res, 200, "Order fulfilled successfully", null);
-        return;
-    } catch (error) {
-        next(error);
-    }
+    await updateUserPremiumStatusQuery(userId, true);
 }
 
-async function handleFailedPayment(session: Stripe.Checkout.Session, res: Response, next: NextFunction) {
+async function handleFailedPayment(session: Stripe.Checkout.Session): Promise<void> {
     const userId = session.metadata!.userId;
-
-    handleResponse(res, 400, "Payment failed", null);
-    return;
+    // Log or handle failed payment however needed
 }

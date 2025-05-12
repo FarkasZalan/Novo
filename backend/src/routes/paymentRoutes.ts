@@ -6,6 +6,4 @@ const router = express.Router();
 
 router.post("/payment/create-checkout-session", authenticateToken, createPayment);
 
-router.post('/webhook', express.raw({ type: 'application/json' }), handleStripeWebhook);
-
 export default router;

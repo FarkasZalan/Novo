@@ -12,6 +12,7 @@ import taskRoutes from "./routes/taskRoutes";
 import labelRoutes from "./routes/labelRoutes";
 import milestoneRoutes from "./routes/milestonesRoutes";
 import paymentRoutes from "./routes/paymentRoutes";
+import webhookForPaymentRoute from "./routes/webhookForPaymentRoute";
 import commentRoutes from "./routes/commentRoutes";
 import errorHandling from "./middlewares/errorHandler";
 import { setupSwagger } from "./config/swagger";
@@ -86,6 +87,9 @@ app.use(cookieParser());
 
 // swagger config
 setupSwagger(app);
+
+
+app.use("/api", webhookForPaymentRoute);
 
 app.use(express.json()); // if the request has json data (body), it will be parsed to Javascript object and made available in req.body
 
