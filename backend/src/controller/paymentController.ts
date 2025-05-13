@@ -3,7 +3,7 @@ import { NextFunction } from "connect";
 import Stripe from "stripe";
 import dotenv from "dotenv";
 import { premiumPlanCancelDateQuery, updateUserPremiumStatusQuery } from "../models/userModel";
-import { sendPremiumActivationEmail, sendPremiumCancellationEmail, sendPremiumReactivatedEmail } from "../services/emailService";
+import { sendPremiumActivationEmail, sendPremiumCancellationEmail, sendPremiumReactivatedEmail, sendPremiumRenewalFailedEmail } from "../services/emailService";
 
 dotenv.config();
 
@@ -174,4 +174,5 @@ async function handleFailedPayment(session: Stripe.Checkout.Session): Promise<vo
     const userId = session.metadata!.userId;
     const sessionId = session.subscription as string;
     await updateUserPremiumStatusQuery(userId, false, sessionId);
+    sendPremiumRenewalFailedEmail(session.customer_email!, session.metadata!.userName);
 }

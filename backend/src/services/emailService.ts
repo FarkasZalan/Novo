@@ -836,6 +836,72 @@ const getPremiumReactivatedTemplate = (userName: string) => `
   </div>
 `;
 
+const getPremiumRenewalFailedTemplate = (userName: string, retryLink: string) => `
+  <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+    <!-- Email Header -->
+    <div style="background-color: #DC2626; padding: 24px; text-align: center;">
+      <h1 style="color: white; font-size: 24px; font-weight: 700; margin: 0;">Premium Renewal Failed</h1>
+    </div>
+    
+    <!-- Email Content -->
+    <div style="padding: 32px;">
+      <h2 style="color: #111827; font-size: 24px; font-weight: 700; margin-bottom: 16px;">Action Required, ${userName}</h2>
+      <p style="color: #4B5563; font-size: 16px; line-height: 1.5; margin-bottom: 24px;">
+        We were unable to process the renewal payment for your Novo Premium subscription. Your access to premium features will be discontinued unless you update your payment information.
+      </p>
+      
+      <!-- Important Notice -->
+      <div style="background-color: #FEE2E2; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+        <h3 style="color: #B91C1C; font-size: 18px; font-weight: 600; margin-top: 0; margin-bottom: 12px;">What happens next:</h3>
+        <ul style="color: #4B5563; font-size: 16px; line-height: 1.5; padding-left: 20px; margin: 0;">
+          <li style="margin-bottom: 8px;">You'll retain premium access for <strong>7 more days</strong> to resolve this issue</li>
+          <li style="margin-bottom: 8px;">After this period, your account will revert to the Free plan</li>
+          <li>All your data will remain intact, but premium features will be disabled</li>
+        </ul>
+      </div>
+      
+      <!-- Action Button -->
+      <div style="text-align: center; margin: 32px 0;">
+        <a href="${retryLink}" 
+           style="background-color: #DC2626; color: white; padding: 12px 24px; 
+                  font-size: 16px; font-weight: 600; text-decoration: none; 
+                  border-radius: 8px; display: inline-block; transition: all 0.2s ease;
+                  box-shadow: 0 4px 6px rgba(220, 38, 38, 0.2);">
+          Update Payment Method
+        </a>
+      </div>
+      
+      <p style="color: #4B5563; font-size: 16px; line-height: 1.5; margin-bottom: 24px;">
+        If you believe this is an error, or if you need assistance, please contact our support team immediately.
+      </p>
+      
+      <div style="text-align: center; margin: 32px 0;">
+        <a href="${process.env.FRONTEND_URL}/contact" 
+           style="background-color: #4F46E5; color: white; padding: 12px 24px; 
+                  font-size: 16px; font-weight: 600; text-decoration: none; 
+                  border-radius: 8px; display: inline-block; transition: all 0.2s ease;
+                  box-shadow: 0 4px 6px rgba(79, 70, 229, 0.2);">
+          Contact Support
+        </a>
+      </div>
+      
+      <div style="border-top: 1px solid #E5E7EB; padding-top: 24px; margin-top: 24px;">
+        <p style="color: #9CA3AF; font-size: 12px; line-height: 1.5; margin: 0;">
+          This email was sent because your payment method failed for your Novo Premium subscription.<br>
+          This is an automated message - please do not reply directly to this email.
+        </p>
+      </div>
+    </div>
+    
+    <!-- Email Footer -->
+    <div style="background-color: #F9FAFB; padding: 16px; text-align: center;">
+      <p style="color: #6B7280; font-size: 12px; margin: 0;">
+        © ${new Date().getFullYear()} Novo. All rights reserved.
+      </p>
+    </div>
+  </div>
+`;
+
 // for email user avatar
 
 const getUserInitials = (name: string) => {
@@ -990,5 +1056,12 @@ export const sendPremiumCancellationEmail = async (email: string, userName: stri
 export const sendPremiumReactivatedEmail = async (email: string, userName: string) => {
   const subject = `Your Novo Premium Subscription Has Been Reactivated`;
   const html = getPremiumReactivatedTemplate(userName);
+  return await sendEmail(email, subject, html);
+};
+
+export const sendPremiumRenewalFailedEmail = async (email: string, userName: string) => {
+  const retryLink = `${process.env.FRONTEND_URL}/profile`;
+  const subject = `Action Required: Premium Renewal Failed`;
+  const html = getPremiumRenewalFailedTemplate(userName, retryLink);
   return await sendEmail(email, subject, html);
 };
