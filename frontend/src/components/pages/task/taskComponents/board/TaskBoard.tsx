@@ -117,10 +117,16 @@ export const TaskBoard: React.FC<TaskBoardProps> = React.memo(({ tasks, setTasks
         }
 
         if (newStatus === 'completed' && activeTask.subtasks && activeTask.subtasks.length > 0) {
-            setPendingTaskUpdate({ task: activeTask, newStatus });
-            setShowCompleteConfirm(true);
-            setActiveTask(null);
-            return;
+            for (const subtask of activeTask.subtasks) {
+
+                if (subtask.status !== 'completed') {
+                    setPendingTaskUpdate({ task: activeTask, newStatus });
+                    setShowCompleteConfirm(true);
+                    setActiveTask(null);
+                    return;
+                }
+            }
+
         }
 
         // update the task status if the status is not completed and no subtasks
@@ -133,7 +139,6 @@ export const TaskBoard: React.FC<TaskBoardProps> = React.memo(({ tasks, setTasks
 
         // If moving to completed, mark all subtasks as completed too
         if (newStatus === 'completed' && activeTask.subtasks && activeTask.subtasks.length > 0) {
-            setShowCompleteConfirm(true);
             updatedTask = {
                 ...updatedTask,
                 subtasks: activeTask.subtasks.map(subtask => ({
@@ -150,7 +155,6 @@ export const TaskBoard: React.FC<TaskBoardProps> = React.memo(({ tasks, setTasks
                     task.id === updatedTask.id ? updatedTask : task
                 )
             );
-
 
 
             // update task status on backend
