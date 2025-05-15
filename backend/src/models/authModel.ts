@@ -1,5 +1,5 @@
 import pool from "../config/db";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import crypto from 'crypto';
 import { sendWelcomeEmail } from "../services/emailService";
 

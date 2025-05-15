@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { deleteUserQuery, getAllUsersQuery, getUserByIdQuery, updateUserQuery } from "../models/userModel";
 import { NextFunction } from "connect";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 
 // Standardized response function
 // it's a function that returns a response to the client when a request is made (CRUD operations)

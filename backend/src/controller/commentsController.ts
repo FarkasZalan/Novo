@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import { NextFunction } from "connect";
 import { createCommentQuery, deleteCommentQuery, getAllCommentsForTaskQuery, getCommentByIdQuery, updateCommentQuery } from "../models/commentModel";
-import { getAllAssignmentsForTask } from "./assignmentsController";
 import { getAssignmentsForTaskQuery } from "../models/assignmentModel";
 import { sendTaskCommentEmail } from "../services/emailService";
 import { getTaskByIdQuery } from "../models/task.Model";

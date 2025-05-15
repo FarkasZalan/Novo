@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import { NextFunction } from "connect";
 import { addMilestoneToTaskQuery, createMilestoneQuery, deleteMilestoneFromTaskQuery, deleteMilestoneQuery, getAllMilestonesForProjectQuery, getAllTaskForMilestoneQuery, getAllUnassignedTaskForMilestoneQuery, getMilestoneByIdQuery, recalculateAllTasksInMilestoneQuery, recalculateCompletedTasksInMilestoneQuery, updateMilestoneQuery } from "../models/milestonesModel";
-import { getTaskById } from "./taskController";
 import { getParentTaskForSubtaskQuery, getTaskByIdQuery } from "../models/task.Model";
 import { getLabelsForTaskQuery } from "../models/labelModel";
 

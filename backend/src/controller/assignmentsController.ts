@@ -4,7 +4,6 @@ import { createAssignmentQuery, deleteAssignmentQuery, getAssignmentsForTaskQuer
 import { getUserByIdQuery } from "../models/userModel";
 import { sendTaskAssignmentEmail } from "../services/emailService";
 import { getTaskByIdQuery } from "../models/task.Model";
-import { getProjectById } from "./projectController";
 import { getProjectByIdQuery } from "../models/projectModel";
 
 // Standardized response function

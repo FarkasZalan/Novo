@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { NextFunction } from "connect";
-import { addLabelToTaskQuery, createLabelQuery, deleteLabelFromTaskQuery, deleteLabelQuery, getAllLabelForProjectQuery, getLabelsForTaskQuery, updateLabelQuery } from "../models/labelModel";
+import { createLabelQuery, deleteLabelQuery, getAllLabelForProjectQuery, getLabelsForTaskQuery, updateLabelQuery } from "../models/labelModel";
 
 // Standardized response function
 // it's a function that returns a response to the client when a request is made (CRUD operations)

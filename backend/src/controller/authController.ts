@@ -1,6 +1,6 @@
 import { NextFunction } from "express";
 import { Request, Response } from "express";
-import bcrypt from "bcrypt";
+import bcryptjs from "bcryptjs";
 import {
     clearRefreshTokenInDB,
     createUserQuery,
@@ -36,7 +36,7 @@ const handleResponse = (res: Response, status: number, message: string, data: an
 export const createUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const { email, name } = req.body;
-        const userHashedPassword = await bcrypt.hash(req.body.password, 10);
+        const userHashedPassword = await bcryptjs.hash(req.body.password, 10);
         const newUser = await createUserQuery(email, name, userHashedPassword);
 
         // Generate verification token and send email
@@ -80,7 +80,7 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
         }
 
         // check if password is correct
-        const validPassword = await bcrypt.compare(password, user.password);
+        const validPassword = await bcryptjs.compare(password, user.password);
         if (!validPassword) {
             handleResponse(res, 400, "Invalid password", null);
             return;

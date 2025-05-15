@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { generateAccessToken } from '../utils/token-utils';
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { getUserByIdQuery } from '../models/userModel';
 
 
