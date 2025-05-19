@@ -16,6 +16,7 @@ interface SubtaskListProps {
     projectId: string;
     isParentTask: boolean;
     openFromEdit?: boolean;
+    project: Project | null
 }
 
 export const SubtaskList: React.FC<SubtaskListProps> = ({
@@ -25,7 +26,8 @@ export const SubtaskList: React.FC<SubtaskListProps> = ({
     canManageTasks,
     projectId,
     isParentTask,
-    openFromEdit
+    openFromEdit,
+    project
 }) => {
     const [newSubtaskTitle, setNewSubtaskTitle] = useState('');
     const [isAdding, setIsAdding] = useState(false);
@@ -81,7 +83,7 @@ export const SubtaskList: React.FC<SubtaskListProps> = ({
                     )}
                 </div>
 
-                {canAddSubtasks && !isAdding && (
+                {canAddSubtasks && !project?.read_only && !isAdding && (
                     <motion.button
                         whileHover={{ scale: 1.03 }}
                         whileTap={{ scale: 0.98 }}
@@ -220,6 +222,7 @@ export const SubtaskList: React.FC<SubtaskListProps> = ({
                                 canManageTasks={canManageTasks}
                                 onNavigateToTask={() => navigate(`/projects/${projectId}/tasks/${subtask.id}`)}
                                 openFromEdit={openFromEdit}
+                                project={project}
                             />
                         ))
                     ) : (
@@ -241,8 +244,9 @@ export const SubtaskList: React.FC<SubtaskListProps> = ({
                                         ? 'Break this task down into smaller, manageable steps'
                                         : 'Subtasks cannot have their own subtasks to keep things simple'}
                                 </p>
-                                {canAddSubtasks && (
+                                {canAddSubtasks && !project?.read_only && (
                                     <motion.button
+                                        type='button'
                                         whileHover={{ scale: 1.03 }}
                                         whileTap={{ scale: 0.98 }}
                                         onClick={() => setIsAdding(true)}

@@ -14,7 +14,8 @@ import {
     FaBan,
     FaChevronRight,
     FaTasks,
-    FaCalendarDay
+    FaCalendarDay,
+    FaUsers
 } from 'react-icons/fa';
 import { fetchTask } from '../../../../services/taskService';
 import { fetchProjectById } from '../../../../services/projectService';
@@ -35,6 +36,7 @@ export const TaskDetails: React.FC = () => {
     const navigate = useNavigate();
     const { authState } = useAuth();
     const [canManageTasks, setCanManageTasks] = useState(false);
+    const [project, setProject] = useState<Project | null>(null);
 
     useEffect(() => {
         const loadTask = async () => {
@@ -44,6 +46,7 @@ export const TaskDetails: React.FC = () => {
 
                 // Check permissions
                 const project = await fetchProjectById(projectId!, authState.accessToken!);
+                setProject(project);
                 if (project.owner_id === authState.user?.id) {
                     setCanManageTasks(true);
                 } else {
@@ -163,7 +166,7 @@ export const TaskDetails: React.FC = () => {
                         <FaArrowLeft className="mr-2" />
                         Back to tasks
                     </button>
-                    {canManageTasks && (
+                    {canManageTasks && !project?.read_only && (
                         <button
                             onClick={() => navigate(`/projects/${projectId}/tasks/${taskId}/edit`)}
                             className="flex items-center cursor-pointer px-4 py-2 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white rounded-xl shadow transition-colors"
@@ -173,6 +176,39 @@ export const TaskDetails: React.FC = () => {
                         </button>
                     )}
                 </div>
+
+                {/* Read-only Warning Banner */}
+                {project?.read_only && (
+                    <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-900/50 rounded-xl p-6 mb-4">
+                        <div className="flex items-start">
+                            <div className="flex-shrink-0">
+                                <FaBan className="h-6 w-6 text-red-600 dark:text-red-400" />
+                            </div>
+                            <div className="ml-3">
+                                <h3 className="text-lg font-medium text-red-800 dark:text-red-300">Read-Only Project</h3>
+                                <div className="mt-2 text-red-700 dark:text-red-200">
+                                    <p>This project is currently in read-only mode because:</p>
+                                    <ul className="list-disc list-inside mt-2 ml-4">
+                                        <li>The premium subscription for this project has been canceled</li>
+                                        <li>This project is using premium features (more than 5 team members)</li>
+                                    </ul>
+
+                                    {authState.user.id === project!.owner_id ? (
+                                        <div className="mt-4 flex items-center">
+                                            <FaUsers className="mr-2" />
+                                            <p>To unlock task management, reduce the number of project members to 5 or fewer</p>
+                                        </div>
+                                    ) : (
+                                        <div className="mt-4 flex items-center">
+                                            <FaUsers className="mr-2" />
+                                            <p>Contact the project owner to unlock task management</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* Task Card */}
                 <div className="bg-white/80 dark:bg-gray-800/90 border border-gray-200/80 dark:border-gray-700 rounded-xl shadow-lg overflow-hidden transition-all duration-200 backdrop-blur-sm">
@@ -336,6 +372,7 @@ export const TaskDetails: React.FC = () => {
                                 canManageTasks={canManageTasks}
                                 projectId={projectId!}
                                 isParentTask={!task.parent_task_id}
+                                project={project}
                             />
                         </div>
 
@@ -444,6 +481,7 @@ export const TaskDetails: React.FC = () => {
                             <TaskFiles
                                 displayNoFileIfEmpty={true}
                                 canManageFiles={false}
+                                project={project}
                             />
                         </div>
 
@@ -453,6 +491,7 @@ export const TaskDetails: React.FC = () => {
                                 projectId={projectId!}
                                 taskId={taskId!}
                                 canManageTasks={canManageTasks}
+                                project={project}
                             />
                         </div>
 

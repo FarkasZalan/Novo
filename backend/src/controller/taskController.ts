@@ -23,6 +23,18 @@ export const createTask = async (req: Request, res: Response, next: NextFunction
     try {
         const projectId = req.params.projectId;
         const { title, description, due_date, priority, status, labels, parent_task_id } = req.body;
+
+        const project = await getProjectByIdQuery(projectId);
+        if (!project) {
+            handleResponse(res, 404, "Project not found", null);
+            return;
+        }
+
+        if (project.read_only) {
+            handleResponse(res, 400, "Project is read-only", null);
+            return;
+        }
+
         const newTask = await createTaskQuery(title, description, projectId, due_date, priority, status, parent_task_id);
 
         if (newTask.milestone_id) {
@@ -105,6 +117,17 @@ export const updateTask = async (req: Request, res: Response, next: NextFunction
         const { title, description, due_date, priority, status, labels } = req.body;
         const taskId = req.params.taskId;
 
+        const project = await getProjectByIdQuery(projectId);
+        if (!project) {
+            handleResponse(res, 404, "Project not found", null);
+            return;
+        }
+
+        if (project.read_only) {
+            handleResponse(res, 400, "Project is read-only", null);
+            return;
+        }
+
         const task = await getTaskByIdQuery(taskId);
         if (!task) {
             handleResponse(res, 404, "Task not found", null);
@@ -175,6 +198,17 @@ export const updateTaskStatus = async (req: Request, res: Response, next: NextFu
         const taskId = req.params.taskId;
         const { status } = req.body;
 
+        const project = await getProjectByIdQuery(projectId);
+        if (!project) {
+            handleResponse(res, 404, "Project not found", null);
+            return;
+        }
+
+        if (project.read_only) {
+            handleResponse(res, 400, "Project is read-only", null);
+            return;
+        }
+
         const updateTask = await updateTaskStatusQuery(status, taskId);
         if (!updateTask) {
             handleResponse(res, 404, "Task not found", null);
@@ -224,6 +258,18 @@ export const deleteTask = async (req: Request, res: Response, next: NextFunction
     try {
         const taskId = req.params.taskId;
         const projectId = req.params.projectId;
+
+        const project = await getProjectByIdQuery(projectId);
+        if (!project) {
+            handleResponse(res, 404, "Project not found", null);
+            return;
+        }
+
+        if (project.read_only) {
+            handleResponse(res, 400, "Project is read-only", null);
+            return;
+        }
+
         const deletedTask = await deleteTaskQuery(taskId);
         if (!deletedTask) {
             handleResponse(res, 404, "Task not found", null);

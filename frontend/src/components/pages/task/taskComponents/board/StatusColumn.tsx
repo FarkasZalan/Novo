@@ -13,6 +13,7 @@ interface Props {
     canManageTasks: boolean;
     activeTask: Task | null;
     onTaskUpdate?: (updatedTask: Task) => void;
+    project: Project | null
 }
 
 // represent a column in the task board
@@ -23,7 +24,8 @@ const StatusColumn: React.FC<Props> = React.memo(({
     onAddTask,
     canManageTasks,
     activeTask,
-    onTaskUpdate
+    onTaskUpdate,
+    project
 }) => {
     // useDroppable make the element accept draggable items
     // setNodeRef where we want to drop the draggable items
@@ -108,7 +110,7 @@ const StatusColumn: React.FC<Props> = React.memo(({
                             transition={{ duration: 0.2 }}
                         >
                             {/* one task card */}
-                            <DraggableTaskCard task={task} onTaskUpdate={onTaskUpdate} canManageTasks={canManageTasks} />
+                            <DraggableTaskCard task={task} onTaskUpdate={onTaskUpdate} canManageTasks={canManageTasks} project={project} />
                         </motion.div>
                     ))}
                 </div>

@@ -6,6 +6,7 @@ interface LabelCardProps {
     onEdit: (label: Label) => void;
     onDelete: (id: string) => void;
     canManage: boolean;
+    project: Project | null;
 }
 
 export const LabelCard: React.FC<LabelCardProps> = ({
@@ -13,6 +14,7 @@ export const LabelCard: React.FC<LabelCardProps> = ({
     onEdit,
     onDelete,
     canManage,
+    project
 }) => {
     return (
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 hover:shadow-md transition-shadow">
@@ -37,7 +39,7 @@ export const LabelCard: React.FC<LabelCardProps> = ({
                         {label.task_count} {label.task_count === 1 ? 'task' : 'tasks'}
                     </span>
 
-                    {canManage && (
+                    {canManage && !project?.read_only && (
                         <div className="flex space-x-2">
                             <button
                                 onClick={(e) => {

@@ -21,6 +21,18 @@ export const createComment = async (req: Request, res: Response, next: NextFunct
         const taskId = req.params.taskId;
         const projectId = req.params.projectId;
         const { author_id, comment } = req.body;
+
+        const project = await getProjectByIdQuery(projectId);
+        if (!project) {
+            handleResponse(res, 404, "Project not found", null);
+            return;
+        }
+
+        if (project.read_only) {
+            handleResponse(res, 400, "Project is read-only", null);
+            return;
+        }
+
         const createdComment = await createCommentQuery(comment, taskId, author_id);
         const newComment = await getCommentByIdQuery(createdComment.id);
 
@@ -50,7 +62,19 @@ export const getAllCommentsForTask = async (req: Request, res: Response, next: N
 export const updateComment = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const userId = req.user.id;
+        const projectId = req.params.projectId;
         const { commentId, comment } = req.body;
+
+        const project = await getProjectByIdQuery(projectId);
+        if (!project) {
+            handleResponse(res, 404, "Project not found", null);
+            return;
+        }
+
+        if (project.read_only) {
+            handleResponse(res, 400, "Project is read-only", null);
+            return;
+        }
 
         const commentData = await getCommentByIdQuery(commentId);
         if (commentData.author_id !== userId) {
@@ -68,6 +92,18 @@ export const updateComment = async (req: Request, res: Response, next: NextFunct
 export const deleteComment = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const commentId = req.body.commentId;
+        const projectId = req.params.projectId;
+
+        const project = await getProjectByIdQuery(projectId);
+        if (!project) {
+            handleResponse(res, 404, "Project not found", null);
+            return;
+        }
+
+        if (project.read_only) {
+            handleResponse(res, 400, "Project is read-only", null);
+            return;
+        }
         await deleteCommentQuery(commentId);
         handleResponse(res, 200, "Comment deleted successfully", null);
     } catch (error: any) {

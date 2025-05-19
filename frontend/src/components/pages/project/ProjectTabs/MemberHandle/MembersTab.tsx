@@ -1,4 +1,4 @@
-import { FaUserMinus, FaTimes, FaUserPlus, FaChevronDown } from "react-icons/fa";
+import { FaUserMinus, FaTimes, FaUserPlus, FaChevronDown, FaBan, FaUsers } from "react-icons/fa";
 import ProjectMember from "../../../../../types/projectMember";
 import { useState } from "react";
 import { updateProjectMemberRole, resendProjectInvite } from "../../../../../services/projectMemberService";
@@ -127,7 +127,7 @@ export const MembersTab = ({
                         {members.length} {members.length === 1 ? 'member' : 'members'}
                     </span>
                 </h2>
-                {canManageMembers && (
+                {canManageMembers && !project.read_only && (
                     <button
                         onClick={() => setShowAddMember(true)}
                         className="px-4 py-2 bg-indigo-600 cursor-pointer hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white rounded-lg font-medium transition-colors duration-200 flex items-center cursor-pointer"
@@ -137,6 +137,39 @@ export const MembersTab = ({
                     </button>
                 )}
             </div>
+
+            {/* Read-only Warning Banner */}
+            {project?.read_only && (
+                <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-900/50 rounded-xl p-6 mb-4">
+                    <div className="flex items-start">
+                        <div className="flex-shrink-0">
+                            <FaBan className="h-6 w-6 text-red-600 dark:text-red-400" />
+                        </div>
+                        <div className="ml-3">
+                            <h3 className="text-lg font-medium text-red-800 dark:text-red-300">Read-Only Project</h3>
+                            <div className="mt-2 text-red-700 dark:text-red-200">
+                                <p>This project is currently in read-only mode because:</p>
+                                <ul className="list-disc list-inside mt-2 ml-4">
+                                    <li>The premium subscription for this project has been canceled</li>
+                                    <li>This project is using premium features (more than 5 team members)</li>
+                                </ul>
+
+                                {authState.user.id === project!.owner_id ? (
+                                    <div className="mt-4 flex items-center">
+                                        <FaUsers className="mr-2" />
+                                        <p>To unlock task management, reduce the number of project members to 5 or fewer</p>
+                                    </div>
+                                ) : (
+                                    <div className="mt-4 flex items-center">
+                                        <FaUsers className="mr-2" />
+                                        <p>Contact the project owner to unlock task management</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Loading state */}
             {membersLoading && (
@@ -252,7 +285,7 @@ export const MembersTab = ({
                                         <div className="relative">
                                             <button
                                                 onClick={() => toggleRoleDropdown(member.id)}
-                                                disabled={changingRole === member.id}
+                                                disabled={changingRole === member.id || project?.read_only}
                                                 className={`flex items-center justify-between gap-2 px-3 py-1.5 text-sm rounded-md transition-all duration-200 ${changingRole === member.id
                                                     ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed'
                                                     : 'bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 cursor-pointer'
@@ -310,10 +343,10 @@ export const MembersTab = ({
                                     {member.status === 'pending' ? (
                                         <div className="flex space-x-2">
                                             <button
-                                                className="p-2 text-gray-400 cursor-pointer hover:text-gray-600 dark:hover:text-gray-200 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                                className="p-2 text-gray-400 cursor-pointer hover:text-gray-600 dark:hover:text-gray-200 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                                 onClick={() => handleResendInvite(member.id)}
                                                 title="Resend invitation"
-                                                disabled={resendingInvite === member.id}
+                                                disabled={resendingInvite === member.id || project?.read_only}
                                             >
                                                 {resendingInvite === member.id ? (
                                                     <div className="animate-spin h-4 w-4 border-2 border-gray-400 dark:border-gray-200 border-b-transparent rounded-full"></div>

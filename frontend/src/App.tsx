@@ -31,6 +31,7 @@ import { ProtectedProjectForTaskManagement } from "./components/routes/TaskAdmin
 import { useAuth } from "./hooks/useAuth";
 import { AuthProvider } from "./context/AuthProvider";
 import { MilestoneDetailsPage } from "./components/pages/task/taskComponents/milestones/MilestoneDetails";
+import { TaskEditReadOnlyRoute } from "./components/routes/TaskEditForReadOnlyRoute";
 
 function RootRedirect() {
   const { isAuthenticated } = useAuth();
@@ -101,6 +102,9 @@ function App() {
 
             <Route element={<ProtectedProjectForTaskManagement />}>
               <Route path="/projects/:projectId/tasks/new" element={<CreateTaskPage />} />
+            </Route>
+
+            <Route element={<TaskEditReadOnlyRoute />}>
               <Route path="/projects/:projectId/tasks/:taskId/edit" element={<UpdateTaskPage />} />
             </Route>
 

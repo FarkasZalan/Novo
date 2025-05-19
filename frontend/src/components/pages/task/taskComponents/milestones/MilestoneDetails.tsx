@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../../../hooks/useAuth';
-import { FaArrowLeft, FaEdit, FaTrash, FaFlag, FaTasks, FaCalendarAlt, FaCheck } from 'react-icons/fa';
+import { FaArrowLeft, FaEdit, FaTrash, FaFlag, FaTasks, FaCalendarAlt, FaCheck, FaBan, FaUsers } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     getMilestoneById,
@@ -31,6 +31,7 @@ export const MilestoneDetailsPage: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [canManage, setCanManage] = useState(false);
+    const [project, setProject] = useState<Project | null>(null);
 
     // Modal states
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -57,6 +58,7 @@ export const MilestoneDetailsPage: React.FC = () => {
 
                 // Check permissions
                 const project = await fetchProjectById(projectId!, authState.accessToken!);
+                setProject(project);
                 if (project.owner_id === authState.user?.id) {
                     setCanManage(true);
                 } else {
@@ -233,7 +235,7 @@ export const MilestoneDetailsPage: React.FC = () => {
                         Back to Milestones
                     </button>
 
-                    {canManage && (
+                    {canManage && !project?.read_only && (
                         <div className="flex space-x-3">
                             <button
                                 onClick={() => setIsEditModalOpen(true)}
@@ -252,6 +254,39 @@ export const MilestoneDetailsPage: React.FC = () => {
                         </div>
                     )}
                 </div>
+
+                {/* Read-only Warning Banner */}
+                {project?.read_only && (
+                    <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-900/50 rounded-xl p-6 mb-4">
+                        <div className="flex items-start">
+                            <div className="flex-shrink-0">
+                                <FaBan className="h-6 w-6 text-red-600 dark:text-red-400" />
+                            </div>
+                            <div className="ml-3">
+                                <h3 className="text-lg font-medium text-red-800 dark:text-red-300">Read-Only Project</h3>
+                                <div className="mt-2 text-red-700 dark:text-red-200">
+                                    <p>This project is currently in read-only mode because:</p>
+                                    <ul className="list-disc list-inside mt-2 ml-4">
+                                        <li>The premium subscription for this project has been canceled</li>
+                                        <li>This project is using premium features (more than 5 team members)</li>
+                                    </ul>
+
+                                    {authState.user.id === project!.owner_id ? (
+                                        <div className="mt-4 flex items-center">
+                                            <FaUsers className="mr-2" />
+                                            <p>To unlock task management, reduce the number of project members to 5 or fewer</p>
+                                        </div>
+                                    ) : (
+                                        <div className="mt-4 flex items-center">
+                                            <FaUsers className="mr-2" />
+                                            <p>Contact the project owner to unlock task management</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* Milestone Header Card */}
                 <motion.div
@@ -334,6 +369,7 @@ export const MilestoneDetailsPage: React.FC = () => {
                             canManage={canManage}
                             onAddTasks={handleAddTasks}
                             onRemoveTask={handleRemoveTask}
+                            project={project}
                         />
                     </motion.div>
                 </AnimatePresence>

@@ -10,6 +10,7 @@ import {
     FaEdit,
     FaArrowLeft,
     FaSignOutAlt,
+    FaBan,
 } from "react-icons/fa";
 import { fetchProjectById } from "../../../services/projectService";
 import { AddMemberDialog } from "./ProjectTabs/MemberHandle/AddMemberModal";
@@ -248,6 +249,8 @@ export const ProjectPage = () => {
         try {
             await deleteMemberFromProject(projectId!, memberId, authState.user.id, authState.accessToken!);
             setMembers(prevMembers => prevMembers.filter(member => member.id !== memberId));
+            const updateProject = await fetchProjectById(projectId!, authState.accessToken!);
+            setProject(updateProject);
         } catch (err) {
             console.error(err);
         } finally {
@@ -336,6 +339,13 @@ export const ProjectPage = () => {
                                         {project.name}
                                     </h1>
                                     {getStatusBadge(project.status)}
+
+                                    {project.read_only && (
+                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/40 border border-red-300 dark:border-red-600 text-red-800 dark:text-red-300">
+                                            <FaBan className="mr-1" size={10} />
+                                            Read Only
+                                        </span>
+                                    )}
                                 </div>
                                 <p className="mt-1 text-gray-600 dark:text-gray-300">
                                     {project.description}
@@ -344,16 +354,17 @@ export const ProjectPage = () => {
                         </div>
 
                         <div className="flex space-x-3">
-                            {canAddMembers && (
+                            {canAddMembers && !project.read_only && (
                                 <button
                                     onClick={() => setShowAddMember(true)}
                                     className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 cursor-pointer dark:hover:bg-indigo-800 text-white rounded-lg font-medium transition-colors duration-200 flex items-center"
+                                    disabled={project.read_only}
                                 >
                                     <FaUserPlus className="mr-2" />
                                     Add Member
                                 </button>
                             )}
-                            {canEditProject && (
+                            {canEditProject && !project.read_only && (
                                 <Link
                                     to={`/projects/${projectId}/edit`}
                                     className="px-4 py-2 border border-gray-300 dark:border-gray-600 cursor-pointer bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-medium transition-colors duration-200 flex items-center"
@@ -365,8 +376,9 @@ export const ProjectPage = () => {
 
                             {!canEditProject && (
                                 <button
-                                    onClick={() => setShowLeaveConfirm(true)}
-                                    className="px-4 py-2 border border-red-300 dark:border-red-600 cursor-pointer bg-white dark:bg-gray-700 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg font-medium transition-colors duration-200 flex items-center"
+                                    onClick={() => !project.read_only && setShowLeaveConfirm(true)}
+                                    className={`px-4 py-2 border ${project.read_only ? 'border-gray-300 dark:border-gray-600 cursor-not-allowed' : 'border-red-300 dark:border-red-600 cursor-pointer hover:bg-red-50 dark:hover:bg-red-900/20'} bg-white dark:bg-gray-700 text-red-600 dark:text-red-400 rounded-lg font-medium transition-colors duration-200 flex items-center`}
+                                    disabled={project.read_only}
                                 >
                                     <FaSignOutAlt className="mr-2" />
                                     Leave Project
@@ -515,6 +527,7 @@ export const ProjectPage = () => {
                 confirmColor="red"
             />
 
+            {/* Remove Member Modal */}
             <ConfirmationDialog
                 isOpen={showRemoveMemberConfirm}
                 onClose={() => setShowRemoveMemberConfirm(false)}

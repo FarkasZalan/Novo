@@ -12,9 +12,10 @@ interface CommentProps {
     canManageTasks: boolean;
     compactMode?: boolean;
     listCompactMode?: boolean;
+    project: Project | null;
 }
 
-export const CommentComponent: React.FC<CommentProps> = ({ projectId, taskId, canManageTasks, compactMode, listCompactMode }) => {
+export const CommentComponent: React.FC<CommentProps> = ({ projectId, taskId, canManageTasks, compactMode, listCompactMode, project }) => {
     const { authState } = useAuth();
     const [comments, setComments] = useState<Comment[]>([]);
     const [newComment, setNewComment] = useState('');
@@ -45,8 +46,12 @@ export const CommentComponent: React.FC<CommentProps> = ({ projectId, taskId, ca
     }, [projectId, taskId, authState.accessToken]);
 
     const handleSubmitComment = async (e: React.FormEvent) => {
-        setLoading(true);
         e.preventDefault();
+        if (project?.read_only) {
+            toast.error('This project is read-only. You cannot write comments.');
+            return;
+        }
+        setLoading(true);
         if (!newComment.trim()) return;
 
         try {
@@ -309,7 +314,7 @@ export const CommentComponent: React.FC<CommentProps> = ({ projectId, taskId, ca
                             </div>
                             <button
                                 type="submit"
-                                disabled={!newComment.trim()}
+                                disabled={!newComment.trim() || project?.read_only}
                                 className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 cursor-pointer dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white rounded-lg font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center shadow-sm hover:shadow-md disabled:shadow-none"
                             >
                                 <FaPaperPlane className="mr-2" />
@@ -377,7 +382,7 @@ export const CommentComponent: React.FC<CommentProps> = ({ projectId, taskId, ca
                                                     {formatDate(comment.created_at)}
                                                 </span>
                                             </div>
-                                            {(canManageTasks || isCurrentUserComment(comment)) && (
+                                            {(canManageTasks && !project?.read_only || isCurrentUserComment(comment) && !project?.read_only) && (
                                                 <div className={`flex gap-1 ${isCurrentUserComment(comment) ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity duration-200`}>
                                                     {isCurrentUserComment(comment) && (
                                                         <button

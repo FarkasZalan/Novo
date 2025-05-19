@@ -23,6 +23,7 @@ interface SubtaskItemProps {
     canManageTasks: boolean;
     onNavigateToTask?: () => void;
     openFromEdit?: boolean;
+    project: Project | null
 }
 
 export const SubtaskItem: React.FC<SubtaskItemProps> = ({
@@ -33,7 +34,8 @@ export const SubtaskItem: React.FC<SubtaskItemProps> = ({
     onUpdate,
     canManageTasks,
     onNavigateToTask,
-    openFromEdit
+    openFromEdit,
+    project
 }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -140,7 +142,7 @@ export const SubtaskItem: React.FC<SubtaskItemProps> = ({
                         {/* Title and metadata */}
                         <div className="flex-1 min-w-0 space-y-3">
                             <div className="flex items-center">
-                                {canManageTasks && !openFromEdit && (
+                                {canManageTasks && !project?.read_only && !openFromEdit && (
                                     <div className="flex items-center space-x-2">
                                         <button
                                             type='button'

@@ -15,9 +15,10 @@ interface TaskListProps {
     tasks: Task[];
     setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
     canManageTasks: boolean;
+    project: Project | null;
 }
 
-export const TaskList: React.FC<TaskListProps> = React.memo(({ tasks, setTasks, canManageTasks }) => {
+export const TaskList: React.FC<TaskListProps> = React.memo(({ tasks, setTasks, canManageTasks, project }) => {
     const navigate = useNavigate();
     const { projectId } = useParams<{ projectId: string }>();
     const { authState } = useAuth();
@@ -243,7 +244,7 @@ export const TaskList: React.FC<TaskListProps> = React.memo(({ tasks, setTasks, 
                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 Comments
                             </th>
-                            {canManageTasks && (
+                            {canManageTasks && !project?.read_only && (
                                 <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                     Actions
                                 </th>
@@ -418,12 +419,13 @@ export const TaskList: React.FC<TaskListProps> = React.memo(({ tasks, setTasks, 
                                             taskId={task.id}
                                             canManageTasks={canManageTasks}
                                             listCompactMode={true}
+                                            project={project}
                                         />
                                     </td>
 
 
                                     {/* Actions */}
-                                    {canManageTasks && (
+                                    {canManageTasks && !project?.read_only && (
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <div className="flex justify-end space-x-2">
                                                 <button
@@ -461,6 +463,7 @@ export const TaskList: React.FC<TaskListProps> = React.memo(({ tasks, setTasks, 
                                                 onTaskUpdate={(updatedTask) => {
                                                     setTasks(prevTasks => prevTasks.map(t => t.id === updatedTask.id ? updatedTask : t));
                                                 }}
+                                                project={project}
                                             />
                                         </td>
                                     </tr>

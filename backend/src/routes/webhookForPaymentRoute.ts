@@ -3,6 +3,6 @@ import { handleStripeWebhook } from "../controller/paymentController";
 
 const router = express.Router();
 
-router.post('/webhook', express.raw({ type: 'application/json' }), handleStripeWebhook);
+router.post('/payment/webhook', express.raw({ type: 'application/json' }), handleStripeWebhook);
 
 export default router;

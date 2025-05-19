@@ -48,6 +48,11 @@ export const uploadProjectFile = async (req: Request, res: Response, next: NextF
             return;
         }
 
+        if (project.read_only) {
+            handleResponse(res, 400, "Project is read-only", null);
+            return;
+        }
+
         const newFile = await uploadFileForProjectQuery(projectId, file.originalname, file.mimetype, file.size, uploaded_by, file.buffer);
         await recalculateTaskAttachmentsCountForProjectQuery(projectId);
 
@@ -63,9 +68,13 @@ export const deleteFileFromProject = async (req: Request, res: Response, next: N
         const fileId = req.params.fileId;
 
         const project = await getProjectByIdQuery(projectId);
-
         if (!project) {
             handleResponse(res, 404, "Project not found", null);
+            return;
+        }
+
+        if (project.read_only) {
+            handleResponse(res, 400, "Project is read-only", null);
             return;
         }
 
@@ -126,6 +135,11 @@ export const uploadTaskFile = async (req: Request, res: Response, next: NextFunc
             return;
         }
 
+        if (project.read_only) {
+            handleResponse(res, 400, "Project is read-only", null);
+            return;
+        }
+
         const task = await getTaskByIdQuery(task_id);
 
         if (!task) {
@@ -150,9 +164,13 @@ export const deleteFileFromTask = async (req: Request, res: Response, next: Next
         const fileId = req.params.fileId;
 
         const project = await getProjectByIdQuery(projectId);
-
         if (!project) {
             handleResponse(res, 404, "Project not found", null);
+            return;
+        }
+
+        if (project.read_only) {
+            handleResponse(res, 400, "Project is read-only", null);
             return;
         }
 
@@ -182,10 +200,23 @@ export const deleteFileFromTask = async (req: Request, res: Response, next: Next
 export const downloadFile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const fileId = req.params.fileId;
+        const projectId = req.params.projectId;
+
         const file = await downloadFileQuery(fileId);
 
         if (!file) {
             handleResponse(res, 404, "File not found", null);
+            return;
+        }
+
+        const project = await getProjectByIdQuery(projectId);
+        if (!project) {
+            handleResponse(res, 404, "Project not found", null);
+            return;
+        }
+
+        if (project.read_only) {
+            handleResponse(res, 400, "Project is read-only", null);
             return;
         }
 

@@ -8,6 +8,7 @@ export const useProjectPermissions = (projectId: string) => {
     const [isOwner, setIsOwner] = useState(false);
     const [isAdmin, setIsAdmin] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [project, setProject] = useState<Project | null>(null);
     const { authState } = useAuth();
 
     useEffect(() => {
@@ -22,6 +23,7 @@ export const useProjectPermissions = (projectId: string) => {
 
                 // Check if user is owner
                 const project = await fetchProjectById(projectId, authState.accessToken!);
+                setProject(project);
                 if (project.owner_id === authState.user?.id) {
                     setIsOwner(true);
                     setIsAdmin(true); // Owner has all admin privileges
@@ -49,5 +51,5 @@ export const useProjectPermissions = (projectId: string) => {
         checkPermissions();
     }, [projectId, authState.accessToken]);
 
-    return { isOwner, isAdmin, loading };
+    return { isOwner, isAdmin, loading, project };
 };

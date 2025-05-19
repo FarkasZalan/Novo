@@ -15,6 +15,7 @@ interface MilestoneTasksProps {
     canManage: boolean;
     onAddTasks: (taskIds: string[]) => Promise<void>;
     onRemoveTask: (taskId: string) => Promise<void>;
+    project: Project | null;
 }
 
 export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
@@ -24,6 +25,7 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
     canManage,
     onAddTasks,
     onRemoveTask,
+    project
 }) => {
     const [selectedTaskIds, setSelectedTaskIds] = useState<string[]>([]);
     const [isAdding, setIsAdding] = useState(false);
@@ -158,7 +160,7 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                         </p>
                     </div>
 
-                    {canManage && (
+                    {canManage && !project?.read_only && (
                         <button
                             onClick={() => setShowTaskSelector(!showTaskSelector)}
                             className="flex items-center px-4 py-2.5 cursor-pointer bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors shadow-sm hover:shadow-md"
@@ -365,6 +367,7 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                                                                 projectId={projectId!}
                                                                 canManageTasks={false}
                                                                 compactMode={true}
+                                                                project={project}
                                                             />
                                                         </div>
 
@@ -588,6 +591,7 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                                                     projectId={projectId!}
                                                     canManageTasks={false}
                                                     compactMode={true}
+                                                    project={project}
                                                 />
 
                                                 <TaskAssignments
@@ -605,7 +609,7 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
 
                                     {/* Right section with delete button and arrow */}
                                     <div className="flex items-center space-x-2 self-center">
-                                        {canManage && (
+                                        {canManage && !project?.read_only && (
                                             <button
                                                 onClick={(e) => {
                                                     e.stopPropagation();
@@ -636,7 +640,7 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                             </div>
                             <p className="font-medium">No tasks assigned yet</p>
                             <p className="text-sm mt-1">Add tasks to track progress</p>
-                            {canManage && (
+                            {canManage && !project?.read_only && (
                                 <button
                                     onClick={() => setShowTaskSelector(true)}
                                     className="mt-3 flex items-center cursor-pointer px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium"

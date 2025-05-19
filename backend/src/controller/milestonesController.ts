@@ -3,6 +3,7 @@ import { NextFunction } from "connect";
 import { addMilestoneToTaskQuery, createMilestoneQuery, deleteMilestoneFromTaskQuery, deleteMilestoneQuery, getAllMilestonesForProjectQuery, getAllTaskForMilestoneQuery, getAllUnassignedTaskForMilestoneQuery, getMilestoneByIdQuery, recalculateAllTasksInMilestoneQuery, recalculateCompletedTasksInMilestoneQuery, updateMilestoneQuery } from "../models/milestonesModel";
 import { getParentTaskForSubtaskQuery, getTaskByIdQuery } from "../models/task.Model";
 import { getLabelsForTaskQuery } from "../models/labelModel";
+import { getProjectByIdQuery } from "../models/projectModel";
 
 // Standardized response function
 // it's a function that returns a response to the client when a request is made (CRUD operations)
@@ -18,6 +19,18 @@ export const createMilestone = async (req: Request, res: Response, next: NextFun
     try {
         const project_id = req.params.projectId;
         const { name, description, due_date } = req.body;
+
+        const project = await getProjectByIdQuery(project_id);
+        if (!project) {
+            handleResponse(res, 404, "Project not found", null);
+            return;
+        }
+
+        if (project.read_only) {
+            handleResponse(res, 400, "Project is read-only", null);
+            return;
+        }
+
         const newMilestone = await createMilestoneQuery(project_id, name, description, due_date);
         handleResponse(res, 201, "Milestone created successfully", newMilestone);
     } catch (error: Error | any) {
@@ -54,6 +67,17 @@ export const addMilestoneToTask = async (req: Request, res: Response, next: Next
         const projectId = req.params.projectId;
         const { taskIds } = req.body;
         const milestone_id = req.params.milestoneId;
+
+        const project = await getProjectByIdQuery(projectId);
+        if (!project) {
+            handleResponse(res, 404, "Project not found", null);
+            return;
+        }
+
+        if (project.read_only) {
+            handleResponse(res, 400, "Project is read-only", null);
+            return;
+        }
 
         const updatedTasks = [];
         for (const taskId of taskIds) {
@@ -120,6 +144,18 @@ export const deleteMilestoneFromTask = async (req: Request, res: Response, next:
         const projectId = req.params.projectId;
         const milestone_id = req.params.milestoneId;
         const taskId = req.body.taskId;
+
+        const project = await getProjectByIdQuery(projectId);
+        if (!project) {
+            handleResponse(res, 404, "Project not found", null);
+            return;
+        }
+
+        if (project.read_only) {
+            handleResponse(res, 400, "Project is read-only", null);
+            return;
+        }
+
         await deleteMilestoneFromTaskQuery(taskId);
 
         await recalculateAllTasksInMilestoneQuery(projectId, milestone_id)
@@ -133,7 +169,20 @@ export const deleteMilestoneFromTask = async (req: Request, res: Response, next:
 export const updateMilestone = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const milestone_id = req.params.milestoneId;
+        const projectId = req.params.projectId;
         const { name, description, due_date } = req.body;
+
+        const project = await getProjectByIdQuery(projectId);
+        if (!project) {
+            handleResponse(res, 404, "Project not found", null);
+            return;
+        }
+
+        if (project.read_only) {
+            handleResponse(res, 400, "Project is read-only", null);
+            return;
+        }
+
         const updatedMilestone = await updateMilestoneQuery(milestone_id, name, description, due_date);
 
         updatedMilestone.labels = await getLabelsForTaskQuery(updatedMilestone.id)
@@ -147,6 +196,19 @@ export const updateMilestone = async (req: Request, res: Response, next: NextFun
 export const deleteMilestone = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const milestoneId = req.params.milestoneId;
+        const projectId = req.params.projectId;
+
+        const project = await getProjectByIdQuery(projectId);
+        if (!project) {
+            handleResponse(res, 404, "Project not found", null);
+            return;
+        }
+
+        if (project.read_only) {
+            handleResponse(res, 400, "Project is read-only", null);
+            return;
+        }
+
         await deleteMilestoneQuery(milestoneId);
         handleResponse(res, 200, "Milestone deleted successfully", null);
     } catch (error) {

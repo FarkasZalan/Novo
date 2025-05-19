@@ -3,7 +3,7 @@ import { NextFunction } from "connect";
 import { getUserByIdQuery } from "../models/userModel";
 import { inviteToProjectQuery, addUserToProjectQuery, getProjectMembersQuery, deleteUserFromProjectQuery, deletePendingUserQuery, getProjectMemberQuery, getPendingUsersQuery, getPendingUserQuery, updateProjectMemberRoleQuery, updatePendingUserRoleQuery } from "../models/projectMemberModel";
 import { sendProjectInviteExistingUserEmail, sendProjectInviteNewUserEmail } from "../services/emailService";
-import { getProjectByIdQuery } from "../models/projectModel";
+import { getProjectByIdQuery, updateProjectReadOnlyQuery } from "../models/projectModel";
 
 // Standardized response function
 // it's a function that returns a response to the client when a request is made (CRUD operations)
@@ -21,12 +21,22 @@ export const addUsersToProject = async (req: Request, res: Response, next: NextF
         const { users, currentUserId } = req.body;
 
         const currentUser = await getUserByIdQuery(currentUserId);
-        const project = await getProjectByIdQuery(projectId);
 
+        const project = await getProjectByIdQuery(projectId);
         if (!project) {
             handleResponse(res, 404, "Project not found", null);
             return;
         }
+
+        if (project.read_only) {
+            handleResponse(res, 400, "Project is read-only", null);
+            return;
+        }
+
+        const owner = await getUserByIdQuery(project.owner_id);
+
+        const currentProjectMembers = await getProjectMembersQuery(projectId);
+        const pendingUsers = await getPendingUsersQuery(projectId);
 
         if (!currentUser) {
             handleResponse(res, 403, "Unauthorized", null);
@@ -35,6 +45,14 @@ export const addUsersToProject = async (req: Request, res: Response, next: NextF
 
         if (!Array.isArray(users) || users.length === 0) {
             handleResponse(res, 400, "No users provided", null);
+            return;
+        }
+
+        if (!owner.is_premium) {
+            if (currentProjectMembers.length + pendingUsers.length + users.length > 6) {
+                handleResponse(res, 400, "Premium error", owner);
+                return;
+            }
         }
 
         const addedUsers = [];
@@ -73,9 +91,13 @@ export const resendProjectInvite = async (req: Request, res: Response, next: Nex
         const { inviteUserId, currentUserId } = req.body.data;
 
         const project = await getProjectByIdQuery(projectId);
-
         if (!project) {
             handleResponse(res, 404, "Project not found", null);
+            return;
+        }
+
+        if (project.read_only) {
+            handleResponse(res, 400, "Project is read-only", null);
             return;
         }
 
@@ -130,6 +152,17 @@ export const updateProjectMemberRole = async (req: Request, res: Response, next:
     try {
         const projectId = req.params.projectId;
         const { userId, currentUserId, role } = req.body.data;
+
+        const project = await getProjectByIdQuery(projectId);
+        if (!project) {
+            handleResponse(res, 404, "Project not found", null);
+            return;
+        }
+
+        if (project.read_only) {
+            handleResponse(res, 400, "Project is read-only", null);
+            return;
+        }
 
         const currentUser: any = await getProjectMemberQuery(projectId, currentUserId);
 
@@ -199,6 +232,20 @@ export const removeUserFromProject = async (req: Request, res: Response, next: N
                     return
                 }
                 await deleteUserFromProjectQuery(projectId, userId);
+            }
+
+            const project = await getProjectByIdQuery(projectId);
+
+            if (!project) {
+                handleResponse(res, 404, "Project not found", null);
+                return;
+            }
+
+            const projectMembers = await getProjectMembersQuery(projectId);
+            const pendingUsers = await getPendingUsersQuery(projectId);
+
+            if (projectMembers.length + pendingUsers.length <= 5) {
+                await updateProjectReadOnlyQuery(projectId, false);
             }
         } else {
             handleResponse(res, 400, "You do not have permission to remove users from this project", null);

@@ -9,4 +9,5 @@ interface Project {
     completed_tasks: number = 0;
     progress: number = 0;
     attachments_count: number;
+    read_only: boolean;
 }

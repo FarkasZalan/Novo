@@ -52,10 +52,11 @@ interface TaskBoardProps {
     setTasks: React.Dispatch<React.SetStateAction<Task[]>>; // update the list of tasks
     onTaskUpdate?: (updatedTask: Task) => void; // when a task is moviving update it
     canManageTasks: boolean; // if the user can manage tasks (admin or owner role) that checked in the TaskManaggerPage
+    project: Project | null;
 }
 
 // the main task board
-export const TaskBoard: React.FC<TaskBoardProps> = React.memo(({ tasks, setTasks, onTaskUpdate, canManageTasks }) => {
+export const TaskBoard: React.FC<TaskBoardProps> = React.memo(({ tasks, setTasks, onTaskUpdate, canManageTasks, project }) => {
     const navigate = useNavigate();
     const { projectId } = useParams<{ projectId: string }>();
     const { authState } = useAuth();
@@ -91,6 +92,10 @@ export const TaskBoard: React.FC<TaskBoardProps> = React.memo(({ tasks, setTasks
     // if the user have permission to add tasks
     // this will be checked on the StatusColumn component
     const handleAddTask = (statusKey: string) => {
+        if (project?.read_only) {
+            toast.error("Can't add tasks to a read-only project.");
+            return;
+        }
         navigate(`/projects/${projectId}/tasks/new?status=${statusKey}`);
     };
 
@@ -103,6 +108,13 @@ export const TaskBoard: React.FC<TaskBoardProps> = React.memo(({ tasks, setTasks
     // when the drag ends
     const handleDragEnd = async (event: DragEndEvent) => {
         const { over } = event; // where the task is dropped
+
+        console.log(project?.read_only)
+
+        if (project?.read_only) {
+            toast.error('This project is read-only. You cannot modify its tasks.');
+            return;
+        }
 
         // if there is no task being dragged or there is no place to drop the task
         if (!over || !activeTask) return;
@@ -249,6 +261,7 @@ export const TaskBoard: React.FC<TaskBoardProps> = React.memo(({ tasks, setTasks
                                     canManageTasks={canManageTasks}
                                     activeTask={activeTask}
                                     onTaskUpdate={onTaskUpdate}
+                                    project={project}
                                 />
                             </div>
                         ))}

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { FaTasks, FaChevronRight, FaPlus, FaPaperclip, FaFlag, FaTag, FaBan, FaCalendarDay } from "react-icons/fa";
+import { FaTasks, FaChevronRight, FaPlus, FaPaperclip, FaFlag, FaTag, FaBan, FaCalendarDay, FaUsers } from "react-icons/fa";
 import { fetchAllTasksForProject } from "../../../../services/taskService";
 import { fetchProjectById } from "../../../../services/projectService";
 import { getProjectMembers } from "../../../../services/projectMemberService";
@@ -18,6 +18,7 @@ export const TasksTab = () => {
     const [tasks, setTasks] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [project, setProject] = useState<Project | null>(null);
 
     useEffect(() => {
         const loadTasks = async () => {
@@ -26,6 +27,7 @@ export const TasksTab = () => {
                 const data = await fetchAllTasksForProject(projectId!, authState.accessToken!, "updated_at", "desc");
                 const projectData = await fetchProjectById(projectId!, authState.accessToken!);
                 setTasks(data);
+                setProject(projectData);
 
                 // Check if current user is owner or admin
                 if (projectData.owner_id === authState.user?.id) {
@@ -129,6 +131,40 @@ export const TasksTab = () => {
 
     return (
         <div className="p-6">
+
+            {/* Read-only Warning Banner */}
+            {project?.read_only && (
+                <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-900/50 rounded-xl p-6 mb-4">
+                    <div className="flex items-start">
+                        <div className="flex-shrink-0">
+                            <FaBan className="h-6 w-6 text-red-600 dark:text-red-400" />
+                        </div>
+                        <div className="ml-3">
+                            <h3 className="text-lg font-medium text-red-800 dark:text-red-300">Read-Only Project</h3>
+                            <div className="mt-2 text-red-700 dark:text-red-200">
+                                <p>This project is currently in read-only mode because:</p>
+                                <ul className="list-disc list-inside mt-2 ml-4">
+                                    <li>The premium subscription for this project has been canceled</li>
+                                    <li>This project is using premium features (more than 5 team members)</li>
+                                </ul>
+
+                                {authState.user.id === project!.owner_id ? (
+                                    <div className="mt-4 flex items-center">
+                                        <FaUsers className="mr-2" />
+                                        <p>To unlock task management, reduce the number of project members to 5 or fewer</p>
+                                    </div>
+                                ) : (
+                                    <div className="mt-4 flex items-center">
+                                        <FaUsers className="mr-2" />
+                                        <p>Contact the project owner to unlock task management</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <div className="flex justify-between items-center mb-8"> {/* Increased margin-bottom */}
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
                     Recent Tasks
@@ -138,7 +174,7 @@ export const TasksTab = () => {
                         </span>
                     )}
                 </h2>
-                {canManageTasks && (
+                {canManageTasks && !project?.read_only && (
                     <div className="flex space-x-3">
                         <button
                             onClick={handleCreateNewTask}
@@ -341,6 +377,7 @@ export const TasksTab = () => {
                                                     projectId={projectId!}
                                                     canManageTasks={canManageTasks}
                                                     compactMode={true}
+                                                    project={project!}
                                                 />
 
                                                 {/* Assignments */}

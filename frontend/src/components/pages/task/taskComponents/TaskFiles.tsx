@@ -12,10 +12,11 @@ interface TaskFilesProps {
     canManageFiles: boolean;
     selectedFiles?: File[];
     setSelectedFiles?: React.Dispatch<React.SetStateAction<File[]>>;
+    project: Project | null
 }
 
 
-export const TaskFiles: React.FC<TaskFilesProps> = React.memo(({ canManageFiles, displayNoFileIfEmpty, selectedFiles, setSelectedFiles }) => {
+export const TaskFiles: React.FC<TaskFilesProps> = React.memo(({ canManageFiles, displayNoFileIfEmpty, selectedFiles, setSelectedFiles, project }) => {
     const { projectId } = useParams<{ projectId: string }>();
     const { taskId } = useParams<{ taskId: string }>();
     const { authState } = useAuth();
@@ -135,6 +136,11 @@ export const TaskFiles: React.FC<TaskFilesProps> = React.memo(({ canManageFiles,
 
     const handleDownloadFile = async (fileId: string) => {
         if (!projectId || !taskId || !authState.accessToken) return;
+
+        if (project?.read_only) {
+            toast.error("You can't download files from a read-only project");
+            return;
+        }
 
         try {
             const blob = await downloadTaskFile(fileId, projectId, taskId, authState.accessToken);

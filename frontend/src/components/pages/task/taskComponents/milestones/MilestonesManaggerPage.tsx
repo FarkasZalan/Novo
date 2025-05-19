@@ -28,7 +28,7 @@ interface MilestoneFormValues {
     due_date: string;
 }
 
-export const MilestonesManagerPage: React.FC = () => {
+export const MilestonesManagerPage: React.FC<{ project: Project | null }> = React.memo(({ project }) => {
     const { projectId, milestoneId } = useParams<{ projectId: string; milestoneId?: string }>();
     const { authState } = useAuth();
     const navigate = useNavigate();
@@ -271,7 +271,7 @@ export const MilestonesManagerPage: React.FC = () => {
                         <p className="text-gray-600 dark:text-gray-300 mb-6 max-w-md mx-auto">
                             Create your first milestone to organize and track your project tasks
                         </p>
-                        {canManage && (
+                        {canManage && !project?.read_only && (
                             <button
                                 onClick={openNewModal}
                                 className="inline-flex cursor-pointer items-center px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors shadow-lg hover:shadow-xl"
@@ -301,6 +301,7 @@ export const MilestonesManagerPage: React.FC = () => {
                                             canManage={canManage}
                                             onAddTasks={handleAddTasks}
                                             onRemoveTask={handleRemoveTask}
+                                            project={project}
                                         />
                                     </motion.div>
                                 ) : (
@@ -321,7 +322,7 @@ export const MilestonesManagerPage: React.FC = () => {
                                                 ? "Choose a milestone from the list to view details"
                                                 : "Create a milestone to get started"}
                                         </p>
-                                        {canManage && (
+                                        {canManage && !project?.read_only && (
                                             <button
                                                 onClick={openNewModal}
                                                 className="inline-flex cursor-pointer items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors"
@@ -363,6 +364,7 @@ export const MilestonesManagerPage: React.FC = () => {
                                                 onEdit={openEditModal}
                                                 onDelete={confirmDelete}
                                                 canManage={canManage}
+                                                project={project}
                                             />
                                         ))
                                     ) : (
@@ -406,4 +408,4 @@ export const MilestonesManagerPage: React.FC = () => {
             />
         </div>
     );
-};
+});

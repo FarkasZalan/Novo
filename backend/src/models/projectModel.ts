@@ -24,6 +24,15 @@ export const updateProjectQuery = async (name: string, description: string, id: 
     return result.rows[0];
 }
 
+export const getPremiumProjectsQuery = async (userId: string) => {
+    const result = await pool.query("SELECT * FROM projects WHERE owner_id = $1 AND is_premium = true", [userId]);
+    return result.rows;
+}
+
+export const updateProjectReadOnlyQuery = async (id: string, read_only: boolean) => {
+    await pool.query("UPDATE projects SET read_only = $1, updated_at = $2 WHERE id = $3 RETURNING *", [read_only, new Date(), id]);
+}
+
 export const recalculateProjectStatus = async (project_id: string) => {
     const total = await getTaskCountForProjectQuery(project_id);
     const completed = await getCompletedTaskCountForProjectQuery(project_id);

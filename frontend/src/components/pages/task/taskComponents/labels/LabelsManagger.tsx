@@ -17,7 +17,7 @@ interface LabelFormValues {
     color: string;
 }
 
-export const LabelsManagerPage: React.FC = () => {
+export const LabelsManagerPage: React.FC<{ project: Project | null }> = React.memo(({ project }) => {
     const { projectId } = useParams<{ projectId: string; }>();
     const { authState } = useAuth();
 
@@ -174,7 +174,7 @@ export const LabelsManagerPage: React.FC = () => {
                         <p className="text-gray-600 dark:text-gray-300 mb-6 max-w-md mx-auto">
                             Create your first label to categorize and organize your project tasks
                         </p>
-                        {canManage && (
+                        {canManage && !project?.read_only && (
                             <button
                                 onClick={openNewModal}
                                 className="inline-flex cursor-pointer items-center px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors shadow-lg hover:shadow-xl"
@@ -194,7 +194,7 @@ export const LabelsManagerPage: React.FC = () => {
                                         {labels.length} {labels.length === 1 ? 'label' : 'labels'} total
                                     </p>
                                 </div>
-                                {canManage && (
+                                {canManage && !project?.read_only && (
                                     <button
                                         onClick={openNewModal}
                                         className="inline-flex cursor-pointer items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors"
@@ -244,6 +244,7 @@ export const LabelsManagerPage: React.FC = () => {
                                                 onEdit={openEditModal}
                                                 onDelete={confirmDelete}
                                                 canManage={canManage}
+                                                project={project}
                                             />
                                         </motion.div>
                                     ))}
@@ -287,4 +288,4 @@ export const LabelsManagerPage: React.FC = () => {
             />
         </div>
     );
-};
+});

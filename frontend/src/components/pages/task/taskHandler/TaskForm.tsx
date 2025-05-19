@@ -886,6 +886,7 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
                             canManageFiles={true}
                             selectedFiles={selectedFiles}
                             setSelectedFiles={setSelectedFiles}
+                            project={null}
                         />
                     </div>
 
@@ -905,6 +906,7 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
                             projectId={projectId!}
                             isParentTask={!formData.parentTaskId}
                             openFromEdit={true}
+                            project={null}
                         />
                     )}
                 </div>

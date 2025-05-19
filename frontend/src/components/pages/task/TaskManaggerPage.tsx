@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { FaArrowLeft, FaFlag, FaList, FaPlus, FaTags, FaThLarge } from 'react-icons/fa';
+import { FaArrowLeft, FaBan, FaFlag, FaList, FaPlus, FaTags, FaThLarge, FaUsers } from 'react-icons/fa';
 import { fetchAllTasksForProject } from '../../../services/taskService';
 import { TaskBoard } from './taskComponents/board/TaskBoard';
 import { TaskList } from './taskComponents/list/TaskList';
@@ -14,7 +14,7 @@ import { LabelsManagerPage } from './taskComponents/labels/LabelsManagger';
 export const TasksManagerPage: React.FC = () => {
     const { projectId } = useParams<{ projectId: string }>();
     const location = useLocation();
-    const [project, setProject] = useState<any>(null);
+    const [project, setProject] = useState<Project | null>(null);
     const { authState } = useAuth();
     const navigate = useNavigate();
     const [tasks, setTasks] = useState<Task[]>([]);
@@ -93,13 +93,21 @@ export const TasksManagerPage: React.FC = () => {
                             >
                                 <FaArrowLeft />
                             </button>
-                            <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white">{project?.name}</h1>
+                            <div className="flex items-center space-x-3">
+                                <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white">{project?.name}</h1>
+                                {project?.read_only && (
+                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/40 border border-red-300 dark:border-red-600 text-red-800 dark:text-red-300">
+                                        <FaBan className="mr-1" size={10} />
+                                        Read Only
+                                    </span>
+                                )}
+                            </div>
                         </div>
                         <p className="mt-2 text-gray-600 dark:text-gray-400 ml-10">
                             Managing tasks for <span className="font-semibold">{project?.name}</span>
                         </p>
                     </div>
-                    {canManageTasks && (
+                    {canManageTasks && !project?.read_only && (
                         <button
                             onClick={() => navigate(`/projects/${projectId}/tasks/new`)}
                             className="inline-flex cursor-pointer items-center px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold shadow transition-all"
@@ -108,6 +116,39 @@ export const TasksManagerPage: React.FC = () => {
                         </button>
                     )}
                 </div>
+
+                {/* Read-only Warning Banner */}
+                {project?.read_only && (
+                    <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-900/50 rounded-xl p-6 mb-4">
+                        <div className="flex items-start">
+                            <div className="flex-shrink-0">
+                                <FaBan className="h-6 w-6 text-red-600 dark:text-red-400" />
+                            </div>
+                            <div className="ml-3">
+                                <h3 className="text-lg font-medium text-red-800 dark:text-red-300">Read-Only Project</h3>
+                                <div className="mt-2 text-red-700 dark:text-red-200">
+                                    <p>This project is currently in read-only mode because:</p>
+                                    <ul className="list-disc list-inside mt-2 ml-4">
+                                        <li>The premium subscription for this project has been canceled</li>
+                                        <li>This project is using premium features (more than 5 team members)</li>
+                                    </ul>
+
+                                    {authState.user.id === project!.owner_id ? (
+                                        <div className="mt-4 flex items-center">
+                                            <FaUsers className="mr-2" />
+                                            <p>To unlock task management, reduce the number of project members to 5 or fewer</p>
+                                        </div>
+                                    ) : (
+                                        <div className="mt-4 flex items-center">
+                                            <FaUsers className="mr-2" />
+                                            <p>Contact the project owner to unlock task management</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* View Toggle */}
                 <div className="flex flex-wrap bg-white dark:bg-gray-800 rounded-xl shadow overflow-hidden mb-8 border border-gray-200 dark:border-gray-700">
@@ -144,13 +185,13 @@ export const TasksManagerPage: React.FC = () => {
                 ) : (
                     <div className="animate-fade-in">
                         {view === 'board' ? (
-                            <TaskBoard tasks={tasks} setTasks={setTasks} onTaskUpdate={handleTaskUpdate} canManageTasks={canManageTasks} />
+                            <TaskBoard tasks={tasks} setTasks={setTasks} onTaskUpdate={handleTaskUpdate} canManageTasks={canManageTasks} project={project} />
                         ) : view === 'list' ? (
-                            <TaskList tasks={tasks} setTasks={setTasks} canManageTasks={canManageTasks} />
+                            <TaskList tasks={tasks} setTasks={setTasks} canManageTasks={canManageTasks} project={project} />
                         ) : view === 'milestones' ? (
-                            <MilestonesManagerPage />
+                            <MilestonesManagerPage project={project} />
                         ) : (
-                            <LabelsManagerPage />
+                            <LabelsManagerPage project={project} />
                         )}
                     </div>
                 )}

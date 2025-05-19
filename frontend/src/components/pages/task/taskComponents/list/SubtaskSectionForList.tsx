@@ -20,6 +20,7 @@ interface SubtaskListProps {
     canManageTasks: boolean;
     onDeleteSubtask: (taskId: string, subtaskId: string) => void;
     onTaskUpdate: (updatedTask: Task) => void;
+    project: Project | null;
 }
 
 export const SubtaskList: React.FC<SubtaskListProps> = React.memo(({
@@ -29,7 +30,8 @@ export const SubtaskList: React.FC<SubtaskListProps> = React.memo(({
     onSubtaskStatusChange,
     canManageTasks,
     onDeleteSubtask,
-    onTaskUpdate
+    onTaskUpdate,
+    project
 }) => {
     const navigate = useNavigate();
     const { projectId } = useParams<{ projectId: string }>();
@@ -49,6 +51,11 @@ export const SubtaskList: React.FC<SubtaskListProps> = React.memo(({
 
     const handleToggleSubtaskComplete = async (subtaskId: string, currentStatus: string) => {
         if (!projectId || !authState.accessToken) return;
+
+        if (project?.read_only) {
+            toast.error('This project is read-only. You cannot modify its tasks.');
+            return;
+        }
 
         const newStatus = currentStatus === 'completed' ? 'not-started' : 'completed';
         try {
@@ -193,7 +200,7 @@ export const SubtaskList: React.FC<SubtaskListProps> = React.memo(({
                             className="overflow-hidden border-t border-gray-100 dark:border-gray-700"
                         >
                             {/* Add subtask form */}
-                            {canManageTasks && isAdding && (
+                            {canManageTasks && !project?.read_only && isAdding && (
                                 <motion.div
                                     initial={{ opacity: 0, height: 0 }}
                                     animate={{ opacity: 1, height: 'auto' }}
@@ -241,7 +248,7 @@ export const SubtaskList: React.FC<SubtaskListProps> = React.memo(({
                             )}
 
                             {/* Add subtask button */}
-                            {canManageTasks && !isAdding && (
+                            {canManageTasks && !project?.read_only && !isAdding && (
                                 <div className="px-4 py-3 border-t cursor-pointer border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/30"
                                     onClick={(e) => {
                                         e.stopPropagation();
@@ -366,6 +373,7 @@ export const SubtaskList: React.FC<SubtaskListProps> = React.memo(({
                                                                 taskId={subtask.id}
                                                                 compactMode={true}
                                                                 canManageTasks={canManageTasks}
+                                                                project={project}
                                                             />
                                                         </div>
                                                     )}
@@ -394,7 +402,7 @@ export const SubtaskList: React.FC<SubtaskListProps> = React.memo(({
                                                 <div className="flex items-center gap-1">
                                                     {/* Action buttons */}
                                                     <div className="flex items-center gap-1 transition-opacity">
-                                                        {canManageTasks && (
+                                                        {canManageTasks && !project?.read_only && (
                                                             <button
                                                                 onClick={(e) => initiateDelete(e, subtask.id)}
                                                                 className="p-1.5 rounded-full cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"

@@ -145,8 +145,20 @@ export const getProjectById = async (req: Request, res: Response, next: NextFunc
 export const updateProject = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const { name, description } = req.body;
-        const procejtId = req.params.projectId;
-        const updateProject = await updateProjectQuery(name, description, procejtId);
+        const projectId = req.params.projectId;
+
+        const project = await getProjectByIdQuery(projectId);
+        if (!project) {
+            handleResponse(res, 404, "Project not found", null);
+            return;
+        }
+
+        if (project.read_only) {
+            handleResponse(res, 400, "Project is read-only", null);
+            return;
+        }
+
+        const updateProject = await updateProjectQuery(name, description, projectId);
         if (!updateProject) {
             handleResponse(res, 404, "Project not found", null);
             return;
@@ -159,8 +171,20 @@ export const updateProject = async (req: Request, res: Response, next: NextFunct
 
 export const deleteProject = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const procejtId = req.params.projectId;
-        const deletedProject = await deleteProjectQuery(procejtId);
+        const projectId = req.params.projectId;
+
+        const project = await getProjectByIdQuery(projectId);
+        if (!project) {
+            handleResponse(res, 404, "Project not found", null);
+            return;
+        }
+
+        if (project.read_only) {
+            handleResponse(res, 400, "Project is read-only", null);
+            return;
+        }
+
+        const deletedProject = await deleteProjectQuery(projectId);
         if (!deletedProject) {
             handleResponse(res, 404, "Project not found", null);
             return;

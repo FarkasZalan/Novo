@@ -8,6 +8,7 @@ interface MilestoneCardProps {
     onEdit: (milestone: Milestone) => void;
     onDelete: (milestoneId: string) => void;
     canManage: boolean;
+    project: Project | null
 }
 
 export const MilestoneCard: React.FC<MilestoneCardProps> = ({
@@ -17,6 +18,7 @@ export const MilestoneCard: React.FC<MilestoneCardProps> = ({
     onEdit,
     onDelete,
     canManage,
+    project
 }) => {
     const isOverdue = milestone.due_date && new Date(milestone.due_date) < new Date();
     const progress = milestone.all_tasks_count > 0
@@ -89,7 +91,7 @@ export const MilestoneCard: React.FC<MilestoneCardProps> = ({
                     </div>
                 </div>
 
-                {canManage && (
+                {canManage && !project?.read_only && (
                     <div className="flex space-x-2 ml-2">
                         <button
                             onClick={(e) => {

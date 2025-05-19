@@ -10,7 +10,7 @@ import { SubtaskListOnBoard } from './SubtaskListOnBoard';
 import { CommentComponent } from '../Comments';
 
 // one task card
-const DraggableTaskCard: React.FC<{ task: Task, onTaskUpdate?: (updatedTask: Task) => void, canManageTasks: boolean }> = React.memo(({ task, onTaskUpdate, canManageTasks }) => {
+const DraggableTaskCard: React.FC<{ task: Task, onTaskUpdate?: (updatedTask: Task) => void, canManageTasks: boolean, project: Project | null }> = React.memo(({ task, onTaskUpdate, canManageTasks, project }) => {
     const navigate = useNavigate();
     const { projectId } = useParams<{ projectId: string }>();
 
@@ -150,6 +150,7 @@ const DraggableTaskCard: React.FC<{ task: Task, onTaskUpdate?: (updatedTask: Tas
                     onTaskUpdate={onTaskUpdate}
                     projectId={projectId!}
                     canManageTasks={canManageTasks}
+                    project={project}
                 />
             )}
 
@@ -201,6 +202,7 @@ const DraggableTaskCard: React.FC<{ task: Task, onTaskUpdate?: (updatedTask: Tas
                         projectId={projectId!}
                         canManageTasks={canManageTasks}
                         compactMode={true}
+                        project={project}
                     />
                 </div>
 

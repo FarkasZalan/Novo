@@ -4,6 +4,8 @@ import Stripe from "stripe";
 import dotenv from "dotenv";
 import { premiumPlanCancelDateQuery, updateUserPremiumStatusQuery } from "../models/userModel";
 import { sendPremiumActivationEmail, sendPremiumCancellationEmail, sendPremiumReactivatedEmail, sendPremiumRenewalFailedEmail } from "../services/emailService";
+import { getAllProjectForUsersQuery, updateProjectReadOnlyQuery } from "../models/projectModel";
+import { getPendingUserQuery, getProjectMemberQuery } from "../models/projectMemberModel";
 
 dotenv.config();
 
@@ -133,7 +135,7 @@ export const handleStripeWebhook = async (req: Request, res: Response, next: Nex
         }
     }
 
-    // Handle other event types you're interested in
+    // Handle other events
     switch (event.type) {
         case 'checkout.session.async_payment_succeeded':
             const succeededSession = event.data.object as Stripe.Checkout.Session;
@@ -149,12 +151,10 @@ export const handleStripeWebhook = async (req: Request, res: Response, next: Nex
             const subscription = event.data.object as Stripe.Subscription;
             const userId = subscription.metadata?.userId;
             if (userId) {
-                await updateUserPremiumStatusQuery(userId, false, subscription.id);
-                sendPremiumReactivatedEmail(subscription.metadata!.userEmail!, subscription.metadata!.userName);
+                await deleteSubscription(subscription, userId);
+
             }
             break;
-
-        // Add more event types as needed
     }
 
     handleResponse(res, 200, "Payment webhook handled successfully", {});
@@ -165,7 +165,11 @@ async function fulfillOrder(session: Stripe.Checkout.Session): Promise<void> {
     const subscriptionId = session.subscription as string;
     await updateUserPremiumStatusQuery(userId, true, subscriptionId);
 
-    const subscription: Stripe.Subscription = await stripe.subscriptions.retrieve(subscriptionId);
+    const allProjectForUser = await getAllProjectForUsersQuery(userId);
+
+    for (let project of allProjectForUser) {
+        await updateProjectReadOnlyQuery(project.id, false);
+    }
 
     sendPremiumActivationEmail(session.customer_email!, session.metadata!.userName);
 }
@@ -175,4 +179,19 @@ async function handleFailedPayment(session: Stripe.Checkout.Session): Promise<vo
     const sessionId = session.subscription as string;
     await updateUserPremiumStatusQuery(userId, false, sessionId);
     sendPremiumRenewalFailedEmail(session.customer_email!, session.metadata!.userName);
+}
+
+async function deleteSubscription(subscription: Stripe.Subscription, userId: string): Promise<void> {
+    await updateUserPremiumStatusQuery(userId, false, subscription.id);
+    const allProjectForUser = await getAllProjectForUsersQuery(userId);
+
+    for (let project of allProjectForUser) {
+        const projectmembers = await getProjectMemberQuery(project.id, userId);
+        const pendingUsers = await getPendingUserQuery(project.id, userId);
+
+        if (projectmembers.length + pendingUsers.length > 5) {
+            await updateProjectReadOnlyQuery(project.id, true);
+        }
+    }
+    sendPremiumReactivatedEmail(subscription.metadata!.userEmail!, subscription.metadata!.userName);
 }

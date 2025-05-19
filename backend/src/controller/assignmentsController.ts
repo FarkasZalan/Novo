@@ -29,6 +29,17 @@ export const createAssignmentMyself = async (req: Request, res: Response, next: 
             return;
         }
 
+        const project = await getProjectByIdQuery(project_id);
+        if (!project) {
+            handleResponse(res, 404, "Project not found", null);
+            return;
+        }
+
+        if (project.read_only) {
+            handleResponse(res, 400, "Project is read-only", null);
+            return;
+        }
+
         const newAssignment = await createAssignmentQuery(task_id, user_id, project_id, assigned_by)
 
         handleResponse(res, 201, "Assignment created successfully", newAssignment);
@@ -57,6 +68,16 @@ export const createAssignmentForUsers = async (req: Request, res: Response, next
         const addedUsers = [];
         const task = await getTaskByIdQuery(task_id);
         const project = await getProjectByIdQuery(project_id);
+
+        if (!project) {
+            handleResponse(res, 404, "Project not found", null);
+            return;
+        }
+
+        if (project.read_only) {
+            handleResponse(res, 400, "Project is read-only", null);
+            return;
+        }
 
         for (const user of users) {
             const { id: user_id } = user;
@@ -101,6 +122,18 @@ export const deleteAssignmentsFromTask = async (req: Request, res: Response, nex
     try {
         const task_id = req.params.taskId
         const user_id = req.body.user_id
+        const project_id = req.params.projectId
+
+        const project = await getProjectByIdQuery(project_id);
+        if (!project) {
+            handleResponse(res, 404, "Project not found", null);
+            return;
+        }
+
+        if (project.read_only) {
+            handleResponse(res, 400, "Project is read-only", null);
+            return;
+        }
         const deleteAssignment = await deleteAssignmentQuery(task_id, user_id)
         handleResponse(res, 200, "Assignments fetched successfully", deleteAssignment);
     } catch (error: any) {

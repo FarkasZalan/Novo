@@ -11,7 +11,8 @@ import {
     FaExclamationTriangle,
     FaCog,
     FaSignOutAlt,
-    FaPaperclip
+    FaPaperclip,
+    FaBan
 } from "react-icons/fa";
 import { useEffect, useState } from "react";
 import { fetchProjects } from "../../../services/projectService";
@@ -153,7 +154,7 @@ export const Dashboard = () => {
                     <p>{error}</p>
                     <button
                         onClick={() => window.location.reload()}
-                        className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+                        className="mt-4 px-4 cursor-pointer py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
                     >
                         Retry
                     </button>
@@ -306,6 +307,13 @@ export const Dashboard = () => {
                                                 {!isProjectOwner(project) && (
                                                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
                                                         Member
+                                                    </span>
+                                                )}
+
+                                                {project.read_only && (
+                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/40 border border-red-300 dark:border-red-600 text-red-800 dark:text-red-300">
+                                                        <FaBan className="mr-1" size={10} />
+                                                        Read Only
                                                     </span>
                                                 )}
                                             </div>

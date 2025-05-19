@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from "react";
-import { FaTrash, FaDownload, FaUpload, FaCheck, FaExclamationTriangle } from "react-icons/fa";
+import { FaTrash, FaDownload, FaUpload, FaCheck, FaExclamationTriangle, FaBan, FaUsers } from "react-icons/fa";
 import { useParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import { fetchProjectFiles, uploadProjectFile, deleteProjectFile, downloadProjectFile } from "../../../../services/fileService";
 import { getProjectMembers } from "../../../../services/projectMemberService";
 import { ConfirmationDialog } from "../ConfirmationDialog";
 import { useAuth } from "../../../../hooks/useAuth";
+import { fetchProjectById } from "../../../../services/projectService";
 
 interface ProjectFile {
     id: string;
@@ -32,9 +33,10 @@ export const FilesTab = () => {
     const [userRole, setUserRole] = useState<string | null>(null);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [fileToDelete, setFileToDelete] = useState<string | null>(null);
+    const [project, setProject] = useState<Project | null>(null);
 
     // Check if user has permission to manage files (owner or admin)
-    const canManageFiles = userRole === "owner" || userRole === "admin";
+    const canManageFiles = (userRole === "owner" || userRole === "admin") && project !== null && !project.read_only;
     const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes
     const [hasOversizedFiles, setHasOversizedFiles] = useState(false);
 
@@ -44,6 +46,7 @@ export const FilesTab = () => {
             if (projectId && authState.accessToken) {
                 const filesData = await fetchProjectFiles(projectId, authState.accessToken);
                 setFiles(filesData);
+                setProject(await fetchProjectById(projectId, authState.accessToken));
             }
         } catch (err) {
             setError("Failed to load files");
@@ -174,6 +177,11 @@ export const FilesTab = () => {
             return;
         }
 
+        if (project?.read_only) {
+            toast.error("You can't upload files to a read-only project");
+            return;
+        }
+
         // Filter out files that are too large
         const validFiles = selectedFiles.filter(file => file.size <= MAX_FILE_SIZE);
 
@@ -239,6 +247,11 @@ export const FilesTab = () => {
     const handleDownloadFile = async (fileId: string) => {
         if (!projectId || !authState.accessToken) return;
 
+        if (project?.read_only) {
+            toast.error("You can't download files from a read-only project");
+            return;
+        }
+
         try {
             const blob = await downloadProjectFile(fileId, projectId, authState.accessToken);
             const url = window.URL.createObjectURL(blob);
@@ -271,7 +284,7 @@ export const FilesTab = () => {
     }
 
     const handleDeleteFile = async () => {
-        if (!canManageFiles || !fileToDelete || !projectId || !authState.accessToken) {
+        if (!canManageFiles || !fileToDelete || !projectId || !authState.accessToken || project?.read_only) {
             setShowDeleteConfirm(false);
             return;
         }
@@ -438,7 +451,7 @@ export const FilesTab = () => {
             </h2>
 
             {/* Enhanced File Upload Dropzone - Only show if user has permission */}
-            {canManageFiles && (
+            {canManageFiles && !project.read_only && (
                 <div className="mb-6">
                     <div
                         ref={dropZoneRef}
@@ -589,6 +602,39 @@ export const FilesTab = () => {
                 </div>
             )}
 
+            {/* Read-only Warning Banner */}
+            {project?.read_only && (
+                <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-900/50 rounded-xl p-6 mb-4">
+                    <div className="flex items-start">
+                        <div className="flex-shrink-0">
+                            <FaBan className="h-6 w-6 text-red-600 dark:text-red-400" />
+                        </div>
+                        <div className="ml-3">
+                            <h3 className="text-lg font-medium text-red-800 dark:text-red-300">Read-Only Project</h3>
+                            <div className="mt-2 text-red-700 dark:text-red-200">
+                                <p>This project is currently in read-only mode because:</p>
+                                <ul className="list-disc list-inside mt-2 ml-4">
+                                    <li>The premium subscription for this project has been canceled</li>
+                                    <li>This project is using premium features (more than 5 team members)</li>
+                                </ul>
+
+                                {authState.user.id === project!.owner_id ? (
+                                    <div className="mt-4 flex items-center">
+                                        <FaUsers className="mr-2" />
+                                        <p>To unlock task management, reduce the number of project members to 5 or fewer</p>
+                                    </div>
+                                ) : (
+                                    <div className="mt-4 flex items-center">
+                                        <FaUsers className="mr-2" />
+                                        <p>Contact the project owner to unlock task management</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Files List */}
             <div className="space-y-3">
                 {files.length === 0 ? (
@@ -626,7 +672,7 @@ export const FilesTab = () => {
                                 >
                                     <FaDownload />
                                 </button>
-                                {canManageFiles && (
+                                {canManageFiles && !project.read_only && (
                                     <button
                                         onClick={() => confirmDeleteFile(file.id)}
                                         className="p-2 text-gray-400 hover:text-red-600 cursor-pointer dark:hover:text-red-400 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"

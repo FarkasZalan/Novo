@@ -13,6 +13,7 @@ const createProjectsTable = async () => {
             total_tasks INTEGER DEFAULT 0,
             attachments_count INTEGER DEFAULT 0,
             completed_tasks INTEGER DEFAULT 0,
+            read_only BOOLEAN DEFAULT FALSE,
             created_at TIMESTAMP DEFAULT NOW(),
             updated_at TIMESTAMP
         );

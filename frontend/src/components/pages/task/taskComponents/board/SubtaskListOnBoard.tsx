@@ -15,13 +15,15 @@ interface SubtaskListProps {
     onTaskUpdate?: (updatedTask: Task) => void;
     projectId: string;
     canManageTasks: boolean;
+    project: Project | null
 }
 
 export const SubtaskListOnBoard: React.FC<SubtaskListProps> = ({
     task,
     onTaskUpdate,
     projectId,
-    canManageTasks
+    canManageTasks,
+    project
 }) => {
     const [expanded, setExpanded] = useState(false);
     const [isAdding, setIsAdding] = useState(false);
@@ -37,6 +39,11 @@ export const SubtaskListOnBoard: React.FC<SubtaskListProps> = ({
 
     const handleToggleComplete = async (subtask: Task, e: React.MouseEvent) => {
         e.stopPropagation();
+
+        if (project?.read_only) {
+            toast.error('This project is read-only. You cannot modify its tasks.');
+            return;
+        }
 
         const newStatus = subtask.status === 'completed' ? 'not-started' : 'completed';
         try {
@@ -177,7 +184,7 @@ export const SubtaskListOnBoard: React.FC<SubtaskListProps> = ({
                         className="overflow-hidden border-t border-gray-100 dark:border-gray-700"
                     >
 
-                        {canManageTasks && !isAdding && totalSubtasks > 0 && (
+                        {canManageTasks && !isAdding && totalSubtasks > 0 && !project?.read_only && (
                             <div className="p-3 border-t border-gray-100 dark:border-gray-700">
                                 <motion.button
                                     whileHover={{ scale: 1.02 }}
@@ -382,6 +389,7 @@ export const SubtaskListOnBoard: React.FC<SubtaskListProps> = ({
                                                             projectId={projectId!}
                                                             canManageTasks={canManageTasks}
                                                             compactMode={true}
+                                                            project={project}
                                                         />
                                                     </div>
 

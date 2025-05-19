@@ -6,19 +6,11 @@ import {
     FaTrash,
     FaExclamationTriangle,
     FaCheck,
+    FaBan,
+    FaUsers
 } from "react-icons/fa";
 import { updateProject, deleteProject, fetchProjectById } from "../../../../services/projectService";
 import { useAuth } from "../../../../hooks/useAuth";
-
-interface Project {
-    id: string;
-    name: string;
-    description: string;
-    owner_id: string;
-    status: string;
-    progress: number;
-    members: number;
-}
 
 export const EditProject = () => {
     const { projectId } = useParams<{ projectId: string }>();
@@ -66,6 +58,8 @@ export const EditProject = () => {
     }, [authState.accessToken, projectId]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        if (project?.read_only) return; // Prevent changes if read-only
+
         const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
@@ -79,6 +73,8 @@ export const EditProject = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (project?.read_only) return; // Prevent submission if read-only
+
         setIsSubmitting(true);
         setError(null);
         setFieldErrors({});
@@ -95,7 +91,7 @@ export const EditProject = () => {
 
         try {
             await updateProject(
-                projectId!, // ! - non null
+                projectId!,
                 formData.name,
                 formData.description,
                 project?.owner_id!,
@@ -125,6 +121,7 @@ export const EditProject = () => {
     };
 
     const handleDeleteProject = async () => {
+        if (project?.read_only) return; // Prevent deletion if read-only
         if (deleteConfirmation !== project?.name) return;
 
         try {
@@ -187,11 +184,14 @@ export const EditProject = () => {
             <div className="bg-white dark:bg-gray-800 shadow-sm transition-colors duration-200">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                     <div className="flex justify-between items-center">
-                        <div>
+                        <div className="flex items-center space-x-3">
                             <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Edit Project</h1>
-                            <p className="mt-1 text-gray-600 dark:text-gray-300">
-                                Update your project details and settings
-                            </p>
+                            {project.read_only && (
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/40 border border-red-300 dark:border-red-600 text-red-800 dark:text-red-300">
+                                    <FaBan className="mr-1" size={10} />
+                                    Read Only
+                                </span>
+                            )}
                         </div>
                         <div className="flex space-x-2">
                             <button
@@ -217,6 +217,39 @@ export const EditProject = () => {
 
             {/* Main Content */}
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+                {/* Read-only Warning Banner */}
+                {project.read_only && (
+                    <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-900/50 rounded-xl p-6">
+                        <div className="flex items-start">
+                            <div className="flex-shrink-0">
+                                <FaBan className="h-6 w-6 text-red-600 dark:text-red-400" />
+                            </div>
+                            <div className="ml-3">
+                                <h3 className="text-lg font-medium text-red-800 dark:text-red-300">Read-Only Project</h3>
+                                <div className="mt-2 text-red-700 dark:text-red-200">
+                                    <p>This project is currently in read-only mode because:</p>
+                                    <ul className="list-disc list-inside mt-2 ml-4">
+                                        <li>The premium subscription for this project has been canceled</li>
+                                        <li>This project is using premium features (more than 5 team members)</li>
+                                    </ul>
+                                    <div className="mt-4 flex items-center">
+                                        <FaUsers className="mr-2" />
+                                        <p>To unlock editing, reduce the number of project members to 5 or fewer</p>
+                                    </div>
+                                </div>
+                                <div className="mt-4">
+                                    <button
+                                        onClick={() => navigate(`/projects/${projectId}`)}
+                                        className="inline-flex cursor-pointer items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                    >
+                                        Return to Project
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {/* Success Message */}
                 {successMessage && (
                     <div className={`p-4 rounded-lg ${successMessage.includes("deleted")
@@ -250,7 +283,7 @@ export const EditProject = () => {
                 )}
 
                 {/* Project Settings Card */}
-                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md dark:shadow-gray-700/50 overflow-hidden transition-colors duration-200">
+                <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-md dark:shadow-gray-700/50 overflow-hidden transition-colors duration-200 ${project.read_only ? 'opacity-70' : ''}`}>
                     <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                         <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Project Settings</h2>
                     </div>
@@ -268,10 +301,11 @@ export const EditProject = () => {
                                 required
                                 value={formData.name}
                                 onChange={handleChange}
+                                disabled={project.read_only}
                                 className={`block w-full px-4 py-2 border ${fieldErrors.name
                                     ? "border-red-300 dark:border-red-700 focus:ring-red-500 focus:border-red-500"
                                     : "border-gray-300 dark:border-gray-600 focus:ring-indigo-500 focus:border-indigo-500"
-                                    } rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100`}
+                                    } rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 ${project.read_only ? 'cursor-not-allowed bg-gray-50 dark:bg-gray-700/50' : ''}`}
                                 placeholder="Project name"
                             />
                             {fieldErrors.name && (
@@ -290,10 +324,11 @@ export const EditProject = () => {
                                 rows={4}
                                 value={formData.description}
                                 onChange={handleChange}
+                                disabled={project.read_only}
                                 className={`block w-full px-4 py-2 border ${fieldErrors.description
                                     ? "border-red-300 dark:border-red-700 focus:ring-red-500 focus:border-red-500"
                                     : "border-gray-300 dark:border-gray-600 focus:ring-indigo-500 focus:border-indigo-500"
-                                    } rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100`}
+                                    } rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 ${project.read_only ? 'cursor-not-allowed bg-gray-50 dark:bg-gray-700/50' : ''}`}
                                 placeholder="Describe your project..."
                             />
                             {fieldErrors.description && (
@@ -305,11 +340,12 @@ export const EditProject = () => {
                         <div className="flex justify-center pt-4">
                             <button
                                 type="submit"
-                                disabled={isSubmitting}
-                                className={`px-6 py-3 rounded-lg font-medium text-white flex items-center justify-center cursor-pointer ${isSubmitting
+                                disabled={isSubmitting || project.read_only}
+                                className={`px-6 py-3 rounded-lg font-medium text-white flex items-center justify-center ${isSubmitting || project.read_only
                                     ? 'bg-indigo-400 dark:bg-indigo-600 cursor-not-allowed'
                                     : 'bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800'
                                     } transition-colors duration-200`}
+                                title={project.read_only ? "Project is read-only" : ""}
                             >
                                 <FaSave className="mr-2" />
                                 {isSubmitting ? 'Saving...' : 'Save Changes'}

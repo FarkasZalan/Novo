@@ -11,6 +11,7 @@ import { useParams } from 'react-router-dom';
 import { AddTaskAssignmentDialog } from './AssignMemberDialog';
 import ProjectMember from '../../../../../types/projectMember';
 import { motion } from 'framer-motion';
+import { fetchProjectById } from '../../../../../services/projectService';
 
 interface TaskAssignmentsProps {
     isOpenForm?: boolean
@@ -37,6 +38,7 @@ export const TaskAssignments: React.FC<TaskAssignmentsProps> = ({
     const { authState } = useAuth();
     const [showAddDialog, setShowAddDialog] = useState(false);
     const [isAssigningSelf, setIsAssigningSelf] = useState(false);
+    const [project, setProject] = useState<Project | null>(null);
 
     const fetchUsers = async () => {
         try {
@@ -44,6 +46,8 @@ export const TaskAssignments: React.FC<TaskAssignmentsProps> = ({
             setError(null);
             if (!projectId || !taskId || !authState.accessToken) return;
             const users = await fetchAssignmentsForTask(projectId!, taskId!, authState.accessToken!);
+
+            setProject(await fetchProjectById(projectId!, authState.accessToken!));
 
             const assignedUsers: ProjectMember[] = users.map((user: any) => ({
                 id: user.user_id,
@@ -181,7 +185,7 @@ export const TaskAssignments: React.FC<TaskAssignmentsProps> = ({
                         )}
 
                         {/* Assign button - only shown when enabled and there's a user */}
-                        {showAssignButtonInCompactMode && showAssignSelfButton && (
+                        {showAssignButtonInCompactMode && showAssignSelfButton && !project?.read_only && (
                             <button
                                 type='button'
                                 onClick={(e) => {
@@ -219,7 +223,7 @@ export const TaskAssignments: React.FC<TaskAssignmentsProps> = ({
                 </div>
 
                 <div className="flex gap-2">
-                    {showAssignSelfButton && (
+                    {showAssignSelfButton && !project?.read_only && (
                         <button
                             type="button"
                             onClick={handleAssignMyself}

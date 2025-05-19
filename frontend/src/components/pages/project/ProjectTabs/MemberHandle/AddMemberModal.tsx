@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from "react";
-import { FaUserPlus, FaExclamationTriangle, FaSearch, FaTimes, FaPlus, FaUser } from "react-icons/fa";
+import { FaUserPlus, FaExclamationTriangle, FaSearch, FaTimes, FaPlus, FaUser, FaCrown, FaEnvelope } from "react-icons/fa";
 import { fetchAllRegisteredUsers } from "../../../../../services/userService";
 import { addMembersToProject, getProjectMembers } from "../../../../../services/projectMemberService";
 import { useAuth } from "../../../../../hooks/useAuth";
+import { Link } from "react-router-dom";
 
 interface User {
     id: string;
@@ -38,6 +39,13 @@ export const AddMemberDialog = ({ project, onClose, onInvite }: AddMemberModalPr
     const searchInputRef = useRef<HTMLInputElement>(null);
     const emailAlreadyInProject = projectMemberEmails.includes(manualEmail);
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const [premiumError, setPremiumError] = useState<{
+        show: boolean;
+        isOwner: boolean;
+        message: string;
+        ownerDetails?: { name: string; email: string };
+    }>({ show: false, isOwner: false, message: "" });
 
     // Close modal when clicking outside
     useEffect(() => {
@@ -131,9 +139,26 @@ export const AddMemberDialog = ({ project, onClose, onInvite }: AddMemberModalPr
             );
             onInvite();
             onClose();
-        } catch (error) {
+        } catch (error: any) {
             console.error("Failed to add members:", error);
-            setError("Failed to send invitations. Please try again.");
+
+            // Check if error is related to premium limitations
+            if (error.response?.data?.message?.includes("Premium")) {
+                const isOwner = authState.user?.id === project.owner_id;
+                setPremiumError({
+                    show: true,
+                    isOwner,
+                    message: isOwner
+                        ? "You've reached the member limit for your current plan. Upgrade to Premium to add more members."
+                        : "This project has reached its member limit. Please contact the project owner to upgrade.",
+                    ownerDetails: isOwner ? undefined : {
+                        name: error.response?.data.data.name,
+                        email: error.response?.data.data.email
+                    }
+                });
+            } else {
+                setError("Failed to send invitations. Please try again.");
+            }
         } finally {
             setIsSubmitting(false); // End loading
         }
@@ -209,12 +234,87 @@ export const AddMemberDialog = ({ project, onClose, onInvite }: AddMemberModalPr
 
                 {/* Main Content */}
                 <div className="px-4 py-4 sm:px-6 sm:py-6">
-                    {error && (
+                    {/* Premium Error Banner */}
+                    {premiumError.show && (
+                        <div className="mb-4 p-4 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                            <div className="flex items-start">
+                                <div className="flex-shrink-0 pt-1">
+                                    <FaCrown className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                                </div>
+                                <div className="ml-3 flex-1">
+                                    <h3 className="text-sm font-medium text-purple-800 dark:text-purple-200">
+                                        {premiumError.isOwner ? "Premium Feature Required" : "Project Limit Reached"}
+                                    </h3>
+                                    <div className="mt-2 text-sm text-purple-700 dark:text-purple-300">
+                                        <p>{premiumError.message}</p>
+                                    </div>
+
+                                    {premiumError.isOwner ? (
+                                        <div className="mt-4">
+                                            <Link
+                                                to="/profile"
+                                                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                            >
+                                                <FaCrown className="mr-2" />
+                                                Upgrade to Premium
+                                            </Link>
+                                        </div>
+                                    ) : (
+                                        <div className="mt-4">
+                                            <div className="bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm">
+                                                <h4 className="text-sm font-medium text-gray-800 dark:text-gray-200 mb-3">
+                                                    Contact the project owner:
+                                                </h4>
+
+                                                <div className="flex items-center space-x-4 mb-3">
+                                                    <div className="h-10 w-10 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center text-indigo-600 dark:text-indigo-300 font-medium">
+                                                        {premiumError.ownerDetails?.name.split(' ').map(n => n[0]).join('')}
+                                                    </div>
+                                                    <div>
+                                                        <p className="font-medium text-gray-900 dark:text-gray-100">
+                                                            {premiumError.ownerDetails?.name}
+                                                        </p>
+                                                        {premiumError.ownerDetails?.email && (
+                                                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                                                                {premiumError.ownerDetails.email}
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex space-x-3 mt-3">
+                                                    {premiumError.ownerDetails?.email && (
+                                                        <a
+                                                            href={`mailto:${premiumError.ownerDetails.email}`}
+                                                            className="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600"
+                                                        >
+                                                            <FaEnvelope className="mr-1.5" />
+                                                            Email
+                                                        </a>
+                                                    )}
+                                                </div>
+
+                                                {!premiumError.ownerDetails?.email && (
+                                                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                                                        No contact information available for the project owner.
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Other error display */}
+                    {error && !premiumError.show && (
                         <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400 rounded-lg flex items-center">
                             <FaExclamationTriangle className="mr-2" />
                             {error}
                         </div>
                     )}
+
 
                     {/* Selected Users */}
                     {selectedUsers.length > 0 && (
