@@ -1,8 +1,9 @@
-import { FaUserMinus, FaTimes, FaUserPlus, FaChevronDown, FaBan, FaUsers } from "react-icons/fa";
+import { FaUserMinus, FaTimes, FaUserPlus, FaChevronDown, FaBan, FaUsers, FaCrown } from "react-icons/fa";
 import ProjectMember from "../../../../../types/projectMember";
 import { useState } from "react";
 import { updateProjectMemberRole, resendProjectInvite } from "../../../../../services/projectMemberService";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 interface MembersTabProps {
     project: Project;
@@ -23,6 +24,7 @@ export const MembersTab = ({
     handleRemoveMember,
     setShowAddMember,
 }: MembersTabProps) => {
+    const navigate = useNavigate();
     // State to track which member's role dropdown is open
     const [openRoleDropdown, setOpenRoleDropdown] = useState<string | null>(null);
     // State to track if a role change is in progress
@@ -155,9 +157,19 @@ export const MembersTab = ({
                                 </ul>
 
                                 {authState.user.id === project!.owner_id ? (
-                                    <div className="mt-4 flex items-center">
-                                        <FaUsers className="mr-2" />
-                                        <p>To unlock task management, reduce the number of project members to 5 or fewer</p>
+                                    <div className="mt-4">
+                                        <div className="flex items-center mb-3">
+                                            <FaUsers className="mr-2" />
+                                            <p>To unlock task management, reduce the number of project members to 5 or fewer</p>
+                                        </div>
+                                        <button
+                                            onClick={() => navigate('/profile')}
+                                            className="inline-flex cursor-pointer items-center justify-center gap-2 mt-4 px-5 py-2.5 border border-transparent text-white bg-indigo-600 dark:bg-indigo-700 hover:bg-indigo-700 dark:hover:bg-indigo-600 rounded-xl font-medium shadow-sm hover:shadow-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-indigo-400"
+                                        >
+                                            <FaCrown className="text-yellow-300 dark:text-yellow-200" />
+                                            Upgrade to Premium
+                                        </button>
+
                                     </div>
                                 ) : (
                                     <div className="mt-4 flex items-center">

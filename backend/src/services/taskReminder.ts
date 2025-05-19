@@ -24,6 +24,9 @@ export const checkDueTasksAndSendReminders = async () => {
             if (isDueToday || isDueTomorrow) {
                 const assignments = await getAssignmentsForTaskQuery(task.id);
                 const project = await getProjectByIdQuery(task.project_id);
+                const projectOwner = await getUserByIdQuery(project.owner_id);
+
+                if (projectOwner.is_premium) continue;
 
                 for (const assignment of assignments) {
                     await sendTaskDueSoonEmail(
@@ -49,6 +52,12 @@ export const checkDueMilestonesAndSendReminders = async () => {
 
         for (const milestone of milestones) {
             if (!milestone.due_date) continue;
+
+            const project = await getProjectByIdQuery(milestone.project_id);
+            const projectOwner = await getUserByIdQuery(project.owner_id);
+
+            if (projectOwner.is_premium) continue;
+
             const allTaskCount = await getAllTaskCountForMilestoneQuery(milestone.id);
             const completedTaskCount = await getAllCOmpletedTaskCountForMilestoneQuery(milestone.id);
 

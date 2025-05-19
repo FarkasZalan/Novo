@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { FaTasks, FaChevronRight, FaPlus, FaPaperclip, FaFlag, FaTag, FaBan, FaCalendarDay, FaUsers } from "react-icons/fa";
+import { FaTasks, FaChevronRight, FaPlus, FaPaperclip, FaFlag, FaTag, FaBan, FaCalendarDay, FaUsers, FaCrown } from "react-icons/fa";
 import { fetchAllTasksForProject } from "../../../../services/taskService";
 import { fetchProjectById } from "../../../../services/projectService";
 import { getProjectMembers } from "../../../../services/projectMemberService";
@@ -149,9 +149,19 @@ export const TasksTab = () => {
                                 </ul>
 
                                 {authState.user.id === project!.owner_id ? (
-                                    <div className="mt-4 flex items-center">
-                                        <FaUsers className="mr-2" />
-                                        <p>To unlock task management, reduce the number of project members to 5 or fewer</p>
+                                    <div className="mt-4">
+                                        <div className="flex items-center mb-3">
+                                            <FaUsers className="mr-2" />
+                                            <p>To unlock task management, reduce the number of project members to 5 or fewer</p>
+                                        </div>
+                                        <button
+                                            onClick={() => navigate('/profile')}
+                                            className="inline-flex cursor-pointer items-center justify-center gap-2 mt-4 px-5 py-2.5 border border-transparent text-white bg-indigo-600 dark:bg-indigo-700 hover:bg-indigo-700 dark:hover:bg-indigo-600 rounded-xl font-medium shadow-sm hover:shadow-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-indigo-400"
+                                        >
+                                            <FaCrown className="text-yellow-300 dark:text-yellow-200" />
+                                            Upgrade to Premium
+                                        </button>
+
                                     </div>
                                 ) : (
                                     <div className="mt-4 flex items-center">

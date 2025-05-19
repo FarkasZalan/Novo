@@ -3,12 +3,17 @@ import { TypeAnimation } from 'react-type-animation';
 import {
     FaTasks,
     FaProjectDiagram,
-    FaUsers,
     FaUserPlus,
     FaRocket,
     FaTags,
-    FaComments,
-    FaChartLine
+    FaCheck,
+    FaFileAlt,
+    FaHistory,
+    FaUserShield,
+    FaBell,
+    FaCrown,
+    FaEnvelope,
+    FaUserFriends
 } from "react-icons/fa";
 import { useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
@@ -50,7 +55,7 @@ export const Home = () => {
                             </span>
                         </h1>
                         <p className="text-lg md:text-xl text-gray-600 dark:text-gray-200 max-w-3xl mx-auto mb-10">
-                            Novo helps teams manage projects, track tasks, and collaborate effectively - all in one powerful platform.
+                            Novo helps teams manage projects, track tasks, and collaborate effectively with role-based access control.
                         </p>
                         <div className="flex flex-col sm:flex-row justify-center gap-4">
                             {isAuthenticated ? (
@@ -91,149 +96,248 @@ export const Home = () => {
                 </div>
             </section>
 
-            {/* Features Section - Enhanced for logged-in users */}
+            {/* Features Section */}
             <section className="py-16 bg-white dark:bg-gray-800">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-16">
                         <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-200 mb-4">
-                            {isAuthenticated ? "Your Work Management Hub" : "Powerful Project Management"}
+                            {isAuthenticated ? "Your Work Management Hub" : "Core Features"}
                         </h2>
                         <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
                             {isAuthenticated
                                 ? "Everything you need to organize and track your team's work"
-                                : "Complete solution for managing projects, tasks, and team collaboration"}
+                                : "Powerful features designed for effective team collaboration"}
                         </p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        <div className="bg-gray-50 dark:bg-gray-700 p-8 rounded-xl hover:shadow-lg transition-shadow hover:transform hover:-translate-y-1">
+                        {/* Projects Feature */}
+                        <div className="bg-gray-50 dark:bg-gray-700 p-8 rounded-xl transition-all duration-300 ease-[cubic-bezier(0.25,0.8,0.25,1)] hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02]">
                             <div className="w-14 h-14 bg-indigo-100 dark:bg-indigo-500 rounded-lg flex items-center justify-center mb-6">
                                 <FaProjectDiagram className="text-indigo-600 dark:text-white text-2xl" />
                             </div>
                             <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-200 mb-3">
-                                {isAuthenticated ? "Your Projects" : "Projects & Milestones"}
+                                Project Management
                             </h3>
                             <p className="text-gray-600 dark:text-gray-300">
-                                {isAuthenticated
-                                    ? "Organize work into projects with milestones and track progress"
-                                    : "Create projects with milestones to structure your work and track progress"}
+                                Organize work into projects with milestones and visual progress tracking.
                             </p>
-                            {isAuthenticated && (
-                                <Link
-                                    to="/projects"
-                                    className="mt-4 inline-block text-indigo-600 dark:text-indigo-400 font-medium hover:underline"
-                                >
-                                    View Projects →
-                                </Link>
-                            )}
+                            <ul className="mt-2 space-y-1 text-sm text-gray-500 dark:text-gray-400">
+                                <li className="flex items-center">
+                                    <FaCheck className="mr-2 text-indigo-500" />
+                                    Create unlimited projects
+                                </li>
+                                <li className="flex items-center">
+                                    <FaCheck className="mr-2 text-indigo-500" />
+                                    Set and track milestones
+                                </li>
+                            </ul>
                         </div>
 
-                        <div className="bg-gray-50 dark:bg-gray-700 p-8 rounded-xl hover:shadow-lg transition-shadow hover:transform hover:-translate-y-1">
+                        {/* Task Board */}
+                        <div className="bg-gray-50 dark:bg-gray-700 p-8 rounded-xl transition-all duration-300 ease-[cubic-bezier(0.25,0.8,0.25,1)] hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02]">
                             <div className="w-14 h-14 bg-blue-100 dark:bg-blue-600 rounded-lg flex items-center justify-center mb-6">
                                 <FaTasks className="text-blue-600 dark:text-white text-2xl" />
                             </div>
                             <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-200 mb-3">
-                                {isAuthenticated ? "Task Management" : "Advanced Tasks"}
+                                Task Board
                             </h3>
                             <p className="text-gray-600 dark:text-gray-300">
-                                {isAuthenticated
-                                    ? "Create, assign, and track tasks and subtasks with labels, due dates, and comments"
-                                    : "Detailed task system with assignments, labels, due dates, and discussions"}
+                                Visual task management with drag-and-drop functionality and role-based access.
                             </p>
-                            {isAuthenticated && (
-                                <Link
-                                    to="/tasks"
-                                    className="mt-4 inline-block text-blue-600 dark:text-blue-400 font-medium hover:underline"
-                                >
-                                    View Tasks →
-                                </Link>
-                            )}
+                            <ul className="mt-2 space-y-1 text-sm text-gray-500 dark:text-gray-400">
+                                <li className="flex items-center">
+                                    <FaCheck className="mr-2 text-blue-500" />
+                                    Kanban-style boards
+                                </li>
+                                <li className="flex items-center">
+                                    <FaCheck className="mr-2 text-blue-500" />
+                                    Owner/Admin/Member roles
+                                </li>
+                            </ul>
                         </div>
 
-                        <div className="bg-gray-50 dark:bg-gray-700 p-8 rounded-xl hover:shadow-lg transition-shadow hover:transform hover:-translate-y-1">
+                        {/* Team & Roles */}
+                        <div className="bg-gray-50 dark:bg-gray-700 p-8 rounded-xl transition-all duration-300 ease-[cubic-bezier(0.25,0.8,0.25,1)] hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02]">
                             <div className="w-14 h-14 bg-purple-100 dark:bg-purple-600 rounded-lg flex items-center justify-center mb-6">
-                                <FaUsers className="text-purple-600 dark:text-white text-2xl" />
+                                <FaUserShield className="text-purple-600 dark:text-white text-2xl" />
                             </div>
                             <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-200 mb-3">
-                                {isAuthenticated ? "Team Collaboration" : "Team Features"}
+                                Team & Roles
                             </h3>
                             <p className="text-gray-600 dark:text-gray-300">
-                                {isAuthenticated
-                                    ? "Invite team members (free up to 5) and collaborate in real-time"
-                                    : "Free plan includes 5 team members per project, with premium for unlimited"}
+                                Granular permission system with Owner, Admin, and Member roles.
                             </p>
-                            {isAuthenticated && (
-                                <Link
-                                    to="/team"
-                                    className="mt-4 inline-block text-purple-600 dark:text-purple-400 font-medium hover:underline"
-                                >
-                                    Manage Team →
-                                </Link>
-                            )}
+                            <ul className="mt-2 space-y-1 text-sm text-gray-500 dark:text-gray-400">
+                                <li className="flex items-center">
+                                    <FaCheck className="mr-2 text-purple-500" />
+                                    Free for up to 5 members
+                                </li>
+                                <li className="flex items-center">
+                                    <FaCheck className="mr-2 text-purple-500" />
+                                    Role-based access control
+                                </li>
+                            </ul>
                         </div>
 
-                        {/* Additional feature boxes */}
-                        <div className="bg-gray-50 dark:bg-gray-700 p-8 rounded-xl hover:shadow-lg transition-shadow hover:transform hover:-translate-y-1">
+                        {/* Activity Tracking */}
+                        <div className="bg-gray-50 dark:bg-gray-700 p-8 rounded-xl transition-all duration-300 ease-[cubic-bezier(0.25,0.8,0.25,1)] hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02]">
+                            <div className="w-14 h-14 bg-teal-100 dark:bg-teal-600 rounded-lg flex items-center justify-center mb-6">
+                                <FaHistory className="text-teal-600 dark:text-white text-2xl" />
+                            </div>
+                            <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-200 mb-3">
+                                Activity Tracking
+                            </h3>
+                            <p className="text-gray-600 dark:text-gray-300">
+                                Complete audit trail of all changes across your projects.
+                            </p>
+                            <ul className="mt-2 space-y-1 text-sm text-gray-500 dark:text-gray-400">
+                                <li className="flex items-center">
+                                    <FaCheck className="mr-2 text-teal-500" />
+                                    See who changed what
+                                </li>
+                                <li className="flex items-center">
+                                    <FaCheck className="mr-2 text-teal-500" />
+                                    Timestamped history
+                                </li>
+                            </ul>
+                        </div>
+
+                        {/* Labels & Categories */}
+                        <div className="bg-gray-50 dark:bg-gray-700 p-8 rounded-xl transition-all duration-300 ease-[cubic-bezier(0.25,0.8,0.25,1)] hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02]">
                             <div className="w-14 h-14 bg-green-100 dark:bg-green-600 rounded-lg flex items-center justify-center mb-6">
                                 <FaTags className="text-green-600 dark:text-white text-2xl" />
                             </div>
                             <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-200 mb-3">
-                                Labels & Categorization
+                                Labels & Categories
                             </h3>
                             <p className="text-gray-600 dark:text-gray-300">
-                                Organize tasks with customizable labels and categories for better workflow management.
+                                Organize tasks with customizable labels and filtering options.
                             </p>
+                            <ul className="mt-2 space-y-1 text-sm text-gray-500 dark:text-gray-400">
+                                <li className="flex items-center">
+                                    <FaCheck className="mr-2 text-green-500" />
+                                    Color-coded labels
+                                </li>
+                                <li className="flex items-center">
+                                    <FaCheck className="mr-2 text-green-500" />
+                                    Custom categories
+                                </li>
+                            </ul>
                         </div>
 
-                        <div className="bg-gray-50 dark:bg-gray-700 p-8 rounded-xl hover:shadow-lg transition-shadow hover:transform hover:-translate-y-1">
+                        {/* File Management */}
+                        <div className="bg-gray-50 dark:bg-gray-700 p-8 rounded-xl transition-all duration-300 ease-[cubic-bezier(0.25,0.8,0.25,1)] hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02]">
+                            <div className="w-14 h-14 bg-orange-100 dark:bg-orange-600 rounded-lg flex items-center justify-center mb-6">
+                                <FaFileAlt className="text-orange-600 dark:text-white text-2xl" />
+                            </div>
+                            <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-200 mb-3">
+                                File Management
+                            </h3>
+                            <p className="text-gray-600 dark:text-gray-300">
+                                Attach and organize files directly with your projects and tasks.
+                            </p>
+                            <ul className="mt-2 space-y-1 text-sm text-gray-500 dark:text-gray-400">
+                                <li className="flex items-center">
+                                    <FaCheck className="mr-2 text-orange-500" />
+                                    File attachments
+                                </li>
+                                <li className="flex items-center">
+                                    <FaCheck className="mr-2 text-orange-500" />
+                                    Document previews
+                                </li>
+                            </ul>
+                        </div>
+
+                        {/* Premium Feature 1 - Unlimited Members */}
+                        <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/20 p-8 rounded-xl transition-all duration-300 ease-[cubic-bezier(0.25,0.8,0.25,1)] hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02] border-2 border-yellow-200 dark:border-yellow-600">
                             <div className="w-14 h-14 bg-yellow-100 dark:bg-yellow-600 rounded-lg flex items-center justify-center mb-6">
-                                <FaComments className="text-yellow-600 dark:text-white text-2xl" />
+                                <FaUserFriends className="text-yellow-600 dark:text-white text-2xl" />
                             </div>
                             <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-200 mb-3">
-                                Task Discussions
+                                Unlimited Team Members
                             </h3>
                             <p className="text-gray-600 dark:text-gray-300">
-                                Comment directly on tasks to discuss details, share updates, and resolve issues.
+                                Remove the 5-member limit and collaborate with your entire team.
                             </p>
+                            <ul className="mt-2 space-y-1 text-sm text-gray-500 dark:text-gray-400">
+                                <li className="flex items-center">
+                                    <FaCrown className="mr-2 text-yellow-500" />
+                                    No restrictions on team size
+                                </li>
+                                <li className="flex items-center">
+                                    <FaCrown className="mr-2 text-yellow-500" />
+                                    Scale with your organization
+                                </li>
+                            </ul>
                         </div>
 
-                        <div className="bg-gray-50 dark:bg-gray-700 p-8 rounded-xl hover:shadow-lg transition-shadow hover:transform hover:-translate-y-1">
-                            <div className="w-14 h-14 bg-red-100 dark:bg-red-600 rounded-lg flex items-center justify-center mb-6">
-                                <FaChartLine className="text-red-600 dark:text-white text-2xl" />
+                        {/* Premium Feature 2 - Due Date Reminders */}
+                        <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/20 p-8 rounded-xl transition-all duration-300 ease-[cubic-bezier(0.25,0.8,0.25,1)] hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02] border-2 border-yellow-200 dark:border-yellow-600">
+                            <div className="w-14 h-14 bg-yellow-100 dark:bg-yellow-600 rounded-lg flex items-center justify-center mb-6">
+                                <FaBell className="text-yellow-600 dark:text-white text-2xl" />
                             </div>
                             <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-200 mb-3">
-                                Premium Benefits
+                                Due Date Reminders
                             </h3>
                             <p className="text-gray-600 dark:text-gray-300">
-                                Upgrade for unlimited team members, custom project branding, and priority support.
+                                Automatic email reminders for upcoming deadlines.
                             </p>
+                            <ul className="mt-2 space-y-1 text-sm text-gray-500 dark:text-gray-400">
+                                <li className="flex items-center">
+                                    <FaCrown className="mr-2 text-yellow-500" />
+                                    Tasks due today/tomorrow
+                                </li>
+                                <li className="flex items-center">
+                                    <FaCrown className="mr-2 text-yellow-500" />
+                                    Milestone reminders
+                                </li>
+                            </ul>
+                        </div>
+
+                        {/* Premium Feature 3 - Comment Notifications */}
+                        <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/20 p-8 rounded-xl transition-all duration-300 ease-[cubic-bezier(0.25,0.8,0.25,1)] hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02] border-2 border-yellow-200 dark:border-yellow-600">
+                            <div className="w-14 h-14 bg-yellow-100 dark:bg-yellow-600 rounded-lg flex items-center justify-center mb-6">
+                                <FaEnvelope className="text-yellow-600 dark:text-white text-2xl" />
+                            </div>
+                            <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-200 mb-3">
+                                Comment Notifications
+                            </h3>
+                            <p className="text-gray-600 dark:text-gray-300">
+                                Stay updated with email alerts for new task comments.
+                            </p>
+                            <ul className="mt-2 space-y-1 text-sm text-gray-500 dark:text-gray-400">
+                                <li className="flex items-center">
+                                    <FaCrown className="mr-2 text-yellow-500" />
+                                    Instant notifications
+                                </li>
+                                <li className="flex items-center">
+                                    <FaCrown className="mr-2 text-yellow-500" />
+                                    Only for assigned members
+                                </li>
+                            </ul>
                         </div>
                     </div>
                 </div>
             </section>
 
-            {/* CTA Section - Different for logged-in users */}
+            {/* CTA Section */}
             <section className="py-16 bg-indigo-600 text-white dark:bg-indigo-900">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                     <h2 className="text-3xl font-bold mb-6 dark:text-indigo-200">
-                        {isAuthenticated ? "Ready to collaborate with your team?" : "Ready to streamline your workflow?"}
+                        {isAuthenticated ? "Ready to collaborate with your team?" : "Ready to get started?"}
                     </h2>
                     <p className="text-lg text-indigo-100 dark:text-indigo-200 max-w-2xl mx-auto mb-8">
                         {isAuthenticated
-                            ? "Manage your projects efficiently with your team members."
-                            : "Join teams who are already managing their work more effectively with Novo."}
+                            ? "Leverage the full power of role-based task management for your team."
+                            : "Join teams who are already managing their work more effectively."}
                     </p>
                     <Link
-                        to={isAuthenticated ? "/projects/new" : "/register"}
+                        to={isAuthenticated ? "/new" : "/register"}
                         className="dark:bg-indigo-600 dark:hover:bg-indigo-700 dark:text-white inline-block px-8 py-3 bg-white text-indigo-600 font-medium rounded-lg hover:bg-gray-100 transition-colors shadow-lg hover:shadow-xl"
                     >
                         {isAuthenticated ? "Create New Project" : "Get Started for Free"}
                     </Link>
-                    {!isAuthenticated && (
-                        <p className="mt-4 text-indigo-200 dark:text-indigo-300">
-                            Free plan includes up to 5 team members per project
-                        </p>
-                    )}
                 </div>
             </section>
         </div>

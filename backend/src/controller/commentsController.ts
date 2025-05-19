@@ -5,6 +5,7 @@ import { getAssignmentsForTaskQuery } from "../models/assignmentModel";
 import { sendTaskCommentEmail } from "../services/emailService";
 import { getTaskByIdQuery } from "../models/task.Model";
 import { getProjectByIdQuery } from "../models/projectModel";
+import { getUserByIdQuery } from "../models/userModel";
 
 // Standardized response function
 // it's a function that returns a response to the client when a request is made (CRUD operations)
@@ -35,14 +36,20 @@ export const createComment = async (req: Request, res: Response, next: NextFunct
 
         const createdComment = await createCommentQuery(comment, taskId, author_id);
         const newComment = await getCommentByIdQuery(createdComment.id);
+        const projectOwner = await getUserByIdQuery(project.owner_id);
 
-        const taskData = await getTaskByIdQuery(taskId);
-        const projectData = await getProjectByIdQuery(projectId);
-        const assignedUsers = await getAssignmentsForTaskQuery(taskId);
-        for (const user of assignedUsers) {
-            if (user.user_id === author_id) continue;
-            sendTaskCommentEmail(user.user_email, newComment.author_name, newComment.author_email, taskData.title, projectData.name, newComment.comment, taskId, projectId);
+        if (projectOwner.is_premium) {
+
+
+            const taskData = await getTaskByIdQuery(taskId);
+            const projectData = await getProjectByIdQuery(projectId);
+            const assignedUsers = await getAssignmentsForTaskQuery(taskId);
+            for (const user of assignedUsers) {
+                if (user.user_id === author_id) continue;
+                sendTaskCommentEmail(user.user_email, newComment.author_name, newComment.author_email, taskData.title, projectData.name, newComment.comment, taskId, projectId);
+            }
         }
+
         handleResponse(res, 200, "Comment created successfully", newComment);
     } catch (error: any) {
         next(error);

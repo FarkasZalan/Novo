@@ -335,6 +335,14 @@ export const Profile = () => {
                                                     )}
                                                     <span>Standard support</span>
                                                 </li>
+                                                <li className="flex items-center text-gray-700 dark:text-gray-300">
+                                                    <FaTimes className="text-red-500 dark:text-red-400 mr-2" />
+                                                    <span>No email notifications</span>
+                                                </li>
+                                                <li className="flex items-center text-gray-700 dark:text-gray-300">
+                                                    <FaTimes className="text-red-500 dark:text-red-400 mr-2" />
+                                                    <span>No due date reminders</span>
+                                                </li>
                                             </ul>
                                         </div>
 
@@ -354,7 +362,7 @@ export const Profile = () => {
                                             <ul className="space-y-2">
                                                 <li className="flex items-center text-gray-700 dark:text-gray-300">
                                                     <FaCheck className="text-green-500 dark:text-green-400 mr-2" />
-                                                    <span>Unlimited team members</span>
+                                                    <span>Unlimited team members per project</span>
                                                 </li>
                                                 <li className="flex items-center text-gray-700 dark:text-gray-300">
                                                     <FaCheck className="text-green-500 dark:text-green-400 mr-2" />
@@ -362,11 +370,15 @@ export const Profile = () => {
                                                 </li>
                                                 <li className="flex items-center text-gray-700 dark:text-gray-300">
                                                     <FaCheck className="text-green-500 dark:text-green-400 mr-2" />
-                                                    <span>Custom project branding</span>
+                                                    <span>Priority support</span>
                                                 </li>
                                                 <li className="flex items-center text-gray-700 dark:text-gray-300">
                                                     <FaCheck className="text-green-500 dark:text-green-400 mr-2" />
-                                                    <span>Priority support</span>
+                                                    <span>Email notifications for new comments</span>
+                                                </li>
+                                                <li className="flex items-center text-gray-700 dark:text-gray-300">
+                                                    <FaCheck className="text-green-500 dark:text-green-400 mr-2" />
+                                                    <span>Due date reminders (today/tomorrow)</span>
                                                 </li>
                                             </ul>
                                         </div>
