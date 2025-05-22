@@ -20,6 +20,7 @@ import { ConfirmationDialog } from "./ConfirmationDialog";
 import toast from "react-hot-toast";
 import { leaveProject } from "../../../services/projectMemberService";
 import { useAuth } from "../../../hooks/useAuth";
+import { ProjectLogsComponent } from "./ProjectLogs";
 
 export const Dashboard = () => {
     const { authState } = useAuth();
@@ -387,52 +388,7 @@ export const Dashboard = () => {
                         <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Recent Activity</h2>
                     </div>
                     <div className="divide-y divide-gray-200 dark:divide-gray-700">
-                        {/* Sample activity items */}
-                        <div className="px-6 py-4">
-                            <div className="flex space-x-3">
-                                <div className="flex-shrink-0">
-                                    <div className="h-10 w-10 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center text-indigo-600 dark:text-indigo-300">
-                                        <FaTasks />
-                                    </div>
-                                </div>
-                                <div className="min-w-0 flex-1">
-                                    <p className="text-sm text-gray-800 dark:text-gray-200">
-                                        <span className="font-medium">You</span> completed task "Update homepage design" in <Link to="#" className="font-medium text-indigo-600 dark:text-indigo-400 hover:underline">Website Redesign</Link>
-                                    </p>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">2 hours ago</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="px-6 py-4">
-                            <div className="flex space-x-3">
-                                <div className="flex-shrink-0">
-                                    <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-300">
-                                        <FaUsers />
-                                    </div>
-                                </div>
-                                <div className="min-w-0 flex-1">
-                                    <p className="text-sm text-gray-800 dark:text-gray-200">
-                                        <span className="font-medium">Sarah Johnson</span> was added to <Link to="#" className="font-medium text-indigo-600 dark:text-indigo-400 hover:underline">Mobile App Development</Link> by <span className="font-medium">You</span>
-                                    </p>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">1 day ago</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="px-6 py-4">
-                            <div className="flex space-x-3">
-                                <div className="flex-shrink-0">
-                                    <div className="h-10 w-10 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center text-green-600 dark:text-green-300">
-                                        <FaCheckCircle />
-                                    </div>
-                                </div>
-                                <div className="min-w-0 flex-1">
-                                    <p className="text-sm text-gray-800 dark:text-gray-200">
-                                        <span className="font-medium">Marketing Campaign Q4</span> was marked as completed
-                                    </p>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">3 days ago</p>
-                                </div>
-                            </div>
-                        </div>
+                        <ProjectLogsComponent />
                     </div>
                     <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 text-center">
                         <Link to="/activity" className="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 hover:underline">

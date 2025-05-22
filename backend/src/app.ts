@@ -11,6 +11,7 @@ import fileRoutes from "./routes/filesRoutes";
 import taskRoutes from "./routes/taskRoutes";
 import labelRoutes from "./routes/labelRoutes";
 import milestoneRoutes from "./routes/milestonesRoutes";
+import changeLogsRoutes from "./routes/changeLogRoutes";
 import paymentRoutes from "./routes/paymentRoutes";
 import webhookForPaymentRoute from "./routes/webhookForPaymentRoute";
 import commentRoutes from "./routes/commentRoutes";
@@ -105,6 +106,7 @@ app.use("/api", milestoneRoutes);
 app.use("/api", labelRoutes);
 app.use("/api", commentRoutes);
 app.use("/api", paymentRoutes);
+app.use("/api", changeLogsRoutes);
 
 // Error handling middleware
 app.use(errorHandling);

@@ -3,6 +3,8 @@ import jwt from 'jsonwebtoken';
 import { generateAccessToken } from '../utils/token-utils';
 import bcrypt from "bcryptjs";
 import { getUserByIdQuery } from '../models/userModel';
+import pool from '../config/db';
+import format from 'pg-format';
 
 
 declare module "express-serve-static-core" {
@@ -24,7 +26,7 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
     }
 
     // Verify access token
-    jwt.verify(token, process.env.JWT_SECRET as string, (err: any, user: any) => {
+    jwt.verify(token, process.env.JWT_SECRET as string, async (err: any, user: any) => {
         if (err) {
             if (err.name === 'TokenExpiredError') {
                 return res.status(401).json({ message: 'Access token expired' });
@@ -32,6 +34,7 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
             return res.status(403).json({ message: 'Invalid access token' });
         }
         req.user = { id: user.id }; // add user id to request
+        await pool.query(format("SET app.user_id = %L", user.id));
         next(); // call next middleware
     });
 };
@@ -46,7 +49,6 @@ export const refreshAccessToken = async (req: Request, res: Response, next: Next
                 message: "No refresh token found in cookies",
                 code: "NO_REFRESH_TOKEN" // Add specific error code
             });
-            return;
             return;
         }
 

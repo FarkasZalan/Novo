@@ -14,6 +14,9 @@ import createSubtaskTable from "../data/createSubtaskTable";
 import createCommentTable from "../data/createCommentsTable";
 import cron from 'node-cron';
 import { checkDueMilestonesAndSendReminders, checkDueTasksAndSendReminders } from "../services/taskReminder";
+import createChangeLogsTable from "../data/log/createChangeLogsTable";
+import { createChangeLogTriggerFunction } from "../data/log/triggerFunction";
+import { addAuditTriggers } from "../middlewares/audittriggersForTables";
 
 const { Pool } = pkg;
 
@@ -53,6 +56,10 @@ export const initializeDatabase = async () => {
     await createAssignmentsTable();
     await createPendingInvitationsTable();
     await createFilesTable();
+
+    await createChangeLogsTable();
+    await createChangeLogTriggerFunction();
+    await addAuditTriggers();
 };
 
 // listens for new connections and when a new connection is requested from the pool it will execute this callback function
