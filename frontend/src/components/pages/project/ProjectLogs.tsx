@@ -299,7 +299,7 @@ export const ProjectLogsComponent = () => {
                             {getActionDescription(log)}
                         </p>
                         <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                            By {getChangedByDisplay(log)} • {format(new Date(log.created_at), 'MMM d, yyyy h:mm a')}
+                            By {getChangedByDisplay(log)} • {format(new Date(log.created_at), 'MMM d, yyyy')}
                         </p>
                         {getAdditionalDetails(log) && (
                             <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">

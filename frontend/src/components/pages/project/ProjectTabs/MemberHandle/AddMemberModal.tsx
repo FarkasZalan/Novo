@@ -337,10 +337,10 @@ export const AddMemberDialog = ({ project, onClose, onInvite }: AddMemberModalPr
                                                 )
                                             )
                                         }
-                                        className="ml-2 text-xs px-2 py-1 rounded-lg bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-100 hover:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 transition-colors"
+                                        className="ml-2 cursor-pointer text-xs px-2 py-1 rounded-lg bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-100 hover:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 transition-colors"
                                     >
-                                        <option value="member" className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100">Member</option>
-                                        <option value="admin" className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100">Admin</option>
+                                        <option value="member" className="bg-white cursor-pointer dark:bg-gray-700 text-gray-800 dark:text-gray-100">Member</option>
+                                        <option value="admin" className="bg-white cursor-pointer dark:bg-gray-700 text-gray-800 dark:text-gray-100">Admin</option>
                                     </select>
                                     {/* Badge for unregistered users */}
                                     {!user.is_registered && (
