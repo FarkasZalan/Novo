@@ -193,5 +193,5 @@ async function deleteSubscription(subscription: Stripe.Subscription, userId: str
             await updateProjectReadOnlyQuery(project.id, true);
         }
     }
-    sendPremiumReactivatedEmail(subscription.metadata!.userEmail!, subscription.metadata!.userName);
+    sendPremiumCancellationEmail(subscription.metadata!.userEmail!, subscription.metadata!.userName);
 }
