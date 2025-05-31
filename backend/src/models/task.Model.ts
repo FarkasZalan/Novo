@@ -11,7 +11,7 @@ export const getAllTaskForReminderQuery = async () => {
 
 export const getTaskNameForLogsQuery = async (id: string) => {
     const result = await pool.query("SELECT title FROM tasks WHERE id = $1", [id]); // send a query to the database with one of the open connection from the pool
-    return result.rows[0].title;
+    return result.rows[0]?.title;
 }
 
 export const getAllTaskForProjectQuery = async (id: string, order_by: string, order: string) => {

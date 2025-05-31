@@ -1,13 +1,13 @@
 import { Request, Response } from "express";
 import { NextFunction } from "connect";
 import { getUserByIdQuery } from "../models/userModel";
-import { getAllProjectForUsersQuery, getProjectByIdQuery, getProjectNameQuery } from "../models/projectModel";
+import { getAllProjectForUsersQuery, getProjectNameQuery } from "../models/projectModel";
 import { getChangeLogsForProject } from "../models/changeLogModel";
 import { getAssignmentForLogsQuery } from "../models/assignmentModel";
 import { getTaskNameForLogsQuery } from "../models/task.Model";
-import { getProjectMemberQuery } from "../models/projectMemberModel";
 import { deleteLogQuery } from "../models/changeLogModal";
 import { getLabelQuery } from "../models/labelModel";
+import { getMilestoneByIdQuery } from "../models/milestonesModel";
 
 // Standardized response function
 // it's a function that returns a response to the client when a request is made (CRUD operations)
@@ -33,6 +33,10 @@ export const getAllProjectLogForUser = async (req: Request, res: Response, next:
             const logs: any = await getChangeLogsForProject(projectId);
 
             for (const log of logs) {
+                if (log.new_data === log.old_data) {
+                    await deleteLogQuery(log.id);
+                }
+
                 const projectName = await getProjectNameQuery(projectId);
                 if (log.table_name === "assignments") {
                     let assignmentDetails: any;
@@ -43,7 +47,7 @@ export const getAllProjectLogForUser = async (req: Request, res: Response, next:
                         assignmentDetails = {
                             task_id: log.old_data.task_id,
                             user_id: log.old_data.user_id,
-                            task_title: await getTaskNameForLogsQuery(log.old_data.task_id),
+                            task_title: await getTaskNameForLogsQuery(log.old_data.task_id) || 'Deleted',
                             assigned_by_name: assigned_by.name || assigned_by.email || "Unknown",
                             assigned_by_email: assigned_by.email || assigned_by.name || "Unknown",
                             user_name: user.name || user.email || "Unknown",
@@ -59,7 +63,7 @@ export const getAllProjectLogForUser = async (req: Request, res: Response, next:
                             assignmentDetails = {
                                 task_id: log.new_data.task_id,
                                 user_id: log.new_data.user_id,
-                                task_title: await getTaskNameForLogsQuery(log.new_data.task_id),
+                                task_title: await getTaskNameForLogsQuery(log.new_data.task_id) || 'Deleted',
                                 assigned_by_name: assigned_by.name || assigned_by.email || "Unknown",
                                 assigned_by_email: assigned_by.email || assigned_by.name || "Unknown",
                                 user_name: user.name || user.email || "Unknown",
@@ -79,7 +83,7 @@ export const getAllProjectLogForUser = async (req: Request, res: Response, next:
                             user_name: user.name || user.email || "Unknown",
                             user_email: user.email || user.name || "Unknown",
                             comment: log.old_data.comment,
-                            task_title: await getTaskNameForLogsQuery(log.old_data.task_id)
+                            task_title: await getTaskNameForLogsQuery(log.old_data.task_id) || 'Deleted'
                         }
                     } else {
                         const user = await getUserByIdQuery(log.new_data.author_id);
@@ -88,12 +92,13 @@ export const getAllProjectLogForUser = async (req: Request, res: Response, next:
                             user_name: user.name || user.email || "Unknown",
                             user_email: user.email || user.name || "Unknown",
                             comment: log.new_data.comment,
-                            task_title: await getTaskNameForLogsQuery(log.new_data.task_id)
+                            task_title: await getTaskNameForLogsQuery(log.new_data.task_id) || 'Deleted'
                         }
                     }
                     changeLogs.push({ ...log, comment: commentDetails, projectName });
                 } else if (log.table_name === "milestones") {
                     let milestoneDetails: any;
+
                     if (log.operation === "DELETE") {
                         milestoneDetails = {
                             title: log.old_data.name,
@@ -121,7 +126,7 @@ export const getAllProjectLogForUser = async (req: Request, res: Response, next:
                             id: log.old_data.id,
                             project_id: log.old_data.project_id,
                             task_id: log.old_data.task_id,
-                            task_title: taskName
+                            task_title: taskName || 'Deleted'
                         }
                     } else {
                         let taskName = "";
@@ -133,7 +138,7 @@ export const getAllProjectLogForUser = async (req: Request, res: Response, next:
                             id: log.new_data.id,
                             project_id: log.new_data.project_id,
                             task_id: log.new_data.task_id,
-                            task_title: taskName
+                            task_title: taskName || 'Deleted'
                         }
                     }
                     changeLogs.push({ ...log, file: fileDetails, projectName });
@@ -188,7 +193,7 @@ export const getAllProjectLogForUser = async (req: Request, res: Response, next:
 
                         taskLabelDetails = {
                             task_id: log.old_data.task_id,
-                            task_title: task,
+                            task_title: task || 'Deleted',
                             label_id: log.old_data.label_id,
                             label_name: label.name,
                             project_id: log.old_data.project_id
@@ -199,7 +204,7 @@ export const getAllProjectLogForUser = async (req: Request, res: Response, next:
 
                         taskLabelDetails = {
                             task_id: log.new_data.task_id,
-                            task_title: task,
+                            task_title: task || 'Deleted',
                             label_id: log.new_data.label_id,
                             label_name: label.name,
                             project_id: log.new_data.project_id
@@ -213,6 +218,29 @@ export const getAllProjectLogForUser = async (req: Request, res: Response, next:
                         }
                     }
                     changeLogs.push({ ...log, projectName });
+                } else if (log.table_name === "tasks") {
+                    let taskDetails: any;
+
+                    if (log.operation === "DELETE") {
+                        const milestone = await getMilestoneByIdQuery(log.old_data.milestone_id);
+                        taskDetails = {
+                            task_id: log.old_data.id,
+                            task_title: 'Deleted',
+                            project_id: log.old_data.project_id,
+                            milestone_id: log.old_data.milestone_id,
+                            milestone_name: milestone?.name
+                        }
+                    } else {
+                        const milestone = await getMilestoneByIdQuery(log.new_data.milestone_id);
+                        taskDetails = {
+                            task_id: log.new_data.id,
+                            task_title: await getTaskNameForLogsQuery(log.new_data.id) || 'Deleted',
+                            project_id: log.new_data.project_id,
+                            milestone_id: log.new_data.milestone_id,
+                            milestone_name: milestone?.name
+                        }
+                    }
+                    changeLogs.push({ ...log, task: taskDetails, projectName });
                 }
                 else {
                     changeLogs.push({ ...log, projectName });
@@ -222,6 +250,7 @@ export const getAllProjectLogForUser = async (req: Request, res: Response, next:
 
         handleResponse(res, 200, "Project change logs successfully fetched", changeLogs);
     } catch (error: Error | any) {
+        console.log(error);
         next(error);
     }
 };

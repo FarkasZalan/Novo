@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../../hooks/useAuth";
-import { FaUserEdit, FaPlus, FaTrash, FaInfoCircle, FaUserCheck, FaEnvelope, FaComment, FaFlag, FaFile, FaTag } from "react-icons/fa";
+import { FaUserEdit, FaPlus, FaTrash, FaInfoCircle, FaUserCheck, FaEnvelope, FaComment, FaFlag, FaFile, FaTag, FaTasks } from "react-icons/fa";
 import { format } from "date-fns";
 import { fetchAllProjectLogForUser } from "../../../services/changeLogService";
 import { Link } from "react-router-dom";
@@ -20,6 +20,7 @@ interface ProjectLog {
     file: any;
     projectMember: any;
     task_label: any;
+    task: any;
     projectName?: string;
     project_id?: string;
     task_title?: string;
@@ -77,6 +78,9 @@ export const ProjectLogsComponent = () => {
         if (tableName === 'projects') {
             return <FaInfoCircle className="text-blue-500" />;
         }
+        if (tableName === 'tasks') {
+            return <FaTasks className="text-rose-500" />;
+        }
 
 
         switch (operation.toLowerCase()) {
@@ -115,6 +119,9 @@ export const ProjectLogsComponent = () => {
         }
         if (tableName === 'projects') {
             return "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300";
+        }
+        if (tableName === 'tasks') {
+            return "bg-rose-100 dark:bg-rose-900/30 text-rose-800 dark:text-rose-300";
         }
 
         switch (operation.toLowerCase()) {
@@ -165,8 +172,8 @@ export const ProjectLogsComponent = () => {
                 return 'Comment';
             case 'milestones':
                 return 'Milestone';
-            case 'labels':
-                return 'Label';
+            case 'task_labels':
+                return 'Task Label';
             default:
                 return log.table_name;
         }
@@ -186,8 +193,8 @@ export const ProjectLogsComponent = () => {
 
     const renderTaskLink = (log: ProjectLog) => {
         const project_id = log.new_data?.project_id || log.old_data?.project_id || null;
-        const task_title = log.assignment?.task_title || log.task_label?.task_title || log.comment?.task_title || log.file?.task_title || log.new_data?.task_title || log.old_data?.task_title;
-        const task_id = log.assignment?.task_id || log.task_label?.task_id || log.comment?.task_id || log.file?.task_id || log.new_data?.task_id || log.old_data?.task_id;
+        const task_title = log.assignment?.task_title || log.task?.task_title || log.task_label?.task_title || log.comment?.task_title || log.file?.task_title || log.new_data?.task_title || log.old_data?.task_title;
+        const task_id = log.assignment?.task_id || log.task?.task_id || log.task_label?.task_id || log.comment?.task_id || log.file?.task_id || log.new_data?.task_id || log.old_data?.task_id;
 
         if (!task_title || !task_id || !project_id) return null;
         return (
@@ -348,10 +355,54 @@ export const ProjectLogsComponent = () => {
                         </>
                     );
                 } else if (log.operation.toLowerCase() === 'update') {
+                    const changedFields = [];
+                    const MAX_LENGTH = 40; // Strict character limit
+
+                    // Simple truncation function
+                    const truncate = (text: string) => {
+                        if (!text) return '(empty)';
+                        return text.length > MAX_LENGTH
+                            ? `${text.substring(0, MAX_LENGTH)}...`
+                            : text;
+                    };
+
+                    // Comment text changes
+                    if (log.old_data?.comment !== log.new_data?.comment) {
+                        changedFields.push({
+                            field: 'text',
+                            oldValue: truncate(log.old_data?.comment),
+                            newValue: truncate(log.new_data?.comment),
+                        });
+                    }
+
+                    if (changedFields.length === 0) {
+                        return (
+                            <>
+                                Updated a comment on task {renderTaskLink(log)} in project {renderProjectLink(log)}
+                            </>
+                        );
+                    }
+
                     return (
-                        <>
-                            Updated a comment on task {renderTaskLink(log)} in project {renderProjectLink(log)}
-                        </>
+                        <div className="space-y-1">
+                            <span>
+                                Updated comment on task {renderTaskLink(log)} in project {renderProjectLink(log)}:
+                            </span>
+                            <ul className="list-disc list-inside space-y-1 pl-2 text-sm">
+                                {changedFields.map((change, index) => (
+                                    <li key={index} className="flex flex-wrap items-baseline">
+                                        <span className="font-medium mr-1">{change.field}:</span>
+                                        <span className="line-through text-gray-500 dark:text-gray-400 mr-1">
+                                            {change.oldValue}
+                                        </span>
+                                        <span className="mr-1">→</span>
+                                        <span className="text-green-600 dark:text-green-400">
+                                            {change.newValue}
+                                        </span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
                     );
                 } else if (log.operation.toLowerCase() === 'delete') {
                     return (
@@ -369,10 +420,77 @@ export const ProjectLogsComponent = () => {
                         </>
                     );
                 } else if (log.operation.toLowerCase() === 'update') {
+                    const changedFields = [];
+
+                    // Compare old and new data to find changed fields
+                    if (log.old_data?.name !== log.new_data?.name) {
+                        changedFields.push({
+                            field: 'name',
+                            oldValue: log.old_data?.name,
+                            newValue: log.new_data?.name
+                        });
+                    }
+                    if (log.old_data?.description !== log.new_data?.description) {
+                        changedFields.push({
+                            field: 'description',
+                            oldValue: log.old_data?.description || '(empty)',
+                            newValue: log.new_data?.description || '(empty)'
+                        });
+                    }
+                    if (log.old_data?.due_date !== log.new_data?.due_date) {
+                        changedFields.push({
+                            field: 'due date',
+                            oldValue: log.old_data?.due_date ? format(new Date(log.old_data.due_date), 'MMM d, yyyy') : 'none',
+                            newValue: log.new_data?.due_date ? format(new Date(log.new_data.due_date), 'MMM d, yyyy') : 'none'
+                        });
+                    }
+                    if (log.old_data?.all_tasks_count !== log.new_data?.all_tasks_count) {
+                        changedFields.push({
+                            field: 'total tasks',
+                            oldValue: log.old_data?.all_tasks_count,
+                            newValue: log.new_data?.all_tasks_count
+                        });
+                    }
+                    if (log.old_data?.completed_tasks_count !== log.new_data?.completed_tasks_count) {
+                        changedFields.push({
+                            field: 'completed tasks',
+                            oldValue: log.old_data?.completed_tasks_count,
+                            newValue: log.new_data?.completed_tasks_count
+                        });
+                    }
+
+                    if (changedFields.length === 0) {
+                        return (
+                            <>
+                                Updated milestone {renderMilestoneLink(log)} in project {renderProjectLink(log)}
+                            </>
+                        );
+                    }
+
                     return (
-                        <>
-                            Updated milestone {renderMilestoneLink(log)} in project {renderProjectLink(log)}
-                        </>
+                        <div className="space-y-1">
+                            <span>
+                                Updated milestone {renderMilestoneLink(log)} in project {renderProjectLink(log)}:
+                            </span>
+                            <ul className="list-disc list-inside space-y-1 pl-2 text-sm">
+                                {changedFields.map((change, index) => (
+                                    <li key={index} className="flex flex-wrap items-baseline">
+                                        <span className="font-medium mr-1">{change.field}:</span>
+                                        {change.oldValue ? (
+                                            <span className="line-through text-gray-500 dark:text-gray-400 mr-1">{change.oldValue}</span>
+                                        ) : (
+                                            <span className="text-gray-500 dark:text-gray-400 mr-1">(empty)</span>
+                                        )}
+                                        <span className="mr-1">→</span>
+                                        {change.newValue ? (
+                                            <span className="font-medium text-green-600 dark:text-green-400">{change.newValue}</span>
+                                        ) : (
+                                            <span className="font-medium text-gray-500 dark:text-gray-400">(empty)</span>
+                                        )}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
                     );
                 } else if (log.operation.toLowerCase() === 'delete') {
                     return (
@@ -410,7 +528,7 @@ export const ProjectLogsComponent = () => {
                 } else if (log.operation.toLowerCase() === 'delete') {
                     return (
                         <>
-                            Deleted file {fileLink} {taskContext}
+                            Deleted file {fileLink} {log.new_data?.task_id || log.old_data?.task_id ? `from task ${taskLink}` : `from project ${projectLink}`}
                         </>
                     );
                 }
@@ -468,38 +586,200 @@ export const ProjectLogsComponent = () => {
                         <>
                             Created project {renderProjectLink(log)}
                         </>
-                    )
+                    );
                 } else if (log.operation.toLowerCase() === 'update') {
-                    if (log.old_data?.name !== log.new_data?.name && log.old_data?.description === log.new_data?.description) {
-                        return (
-                            <>
-                                Renamed project {renderProjectLink(log)} from "{log.old_data?.name}" to "{log.new_data?.name}"
-                            </>
-                        )
-                    } else if (log.old_data?.name !== log.new_data?.name && log.old_data?.description !== log.new_data?.description) {
-                        return (
-                            <>
-                                Renamed project {renderProjectLink(log)} from "{log.old_data?.name}" to "{log.new_data?.name}"
-                                and modified description
-                            </>
-                        )
-                    } else {
-                        return (
-                            <>
-                                Modified project {renderProjectLink(log)} description
-                            </>
-                        )
+                    const changedFields = [];
+                    const MAX_LENGTH = 40; // Character limit
+
+                    // Simple truncation function
+                    const truncate = (text: string) => {
+                        if (!text) return '(empty)';
+                        return text.length > MAX_LENGTH
+                            ? `${text.substring(0, MAX_LENGTH)}...`
+                            : text;
+                    };
+
+                    // Project name changes
+                    if (log.old_data?.name !== log.new_data?.name) {
+                        changedFields.push({
+                            field: 'name',
+                            oldValue: truncate(log.old_data?.name),
+                            newValue: truncate(log.new_data?.name)
+                        });
                     }
+
+                    // Description changes
+                    if (log.old_data?.description !== log.new_data?.description) {
+                        changedFields.push({
+                            field: 'description',
+                            oldValue: truncate(log.old_data?.description),
+                            newValue: truncate(log.new_data?.description)
+                        });
+                    }
+
+                    if (changedFields.length === 0) {
+                        return (
+                            <>
+                                Modified project {renderProjectLink(log)}
+                            </>
+                        );
+                    }
+
+                    return (
+                        <div className="space-y-1">
+                            <span>
+                                Updated project {renderProjectLink(log)}:
+                            </span>
+                            <ul className="list-disc list-inside space-y-1 pl-2 text-sm">
+                                {changedFields.map((change, index) => (
+                                    <li key={index} className="flex flex-wrap items-baseline">
+                                        <span className="font-medium mr-1">{change.field}:</span>
+                                        {change.oldValue ? (
+                                            <span className="line-through text-gray-500 dark:text-gray-400 mr-1">{change.oldValue}</span>
+                                        ) : (
+                                            <span className="text-gray-500 dark:text-gray-400 mr-1">(empty)</span>
+                                        )}
+                                        <span className="mr-1">→</span>
+                                        {change.newValue ? (
+                                            <span className="font-medium text-green-600 dark:text-green-400">{change.newValue}</span>
+                                        ) : (
+                                            <span className="font-medium text-gray-500 dark:text-gray-400">(empty)</span>
+                                        )}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    );
                 } else if (log.operation.toLowerCase() === 'delete') {
                     return (
                         <>
                             Deleted project {renderProjectLink(log)}
                         </>
-                    )
+                    );
                 }
                 return (
                     <>
                         Modified project {renderProjectLink(log)}
+                    </>
+                );
+            case 'tasks':
+                if (log.operation.toLowerCase() === 'insert') {
+                    return (
+                        <>
+                            Added task {renderTaskLink(log)} to project {renderProjectLink(log)}
+                        </>
+                    )
+                } else if (log.operation.toLowerCase() === 'update') {
+                    const changedFields = [];
+
+                    // Title changes
+                    if (log.old_data?.title !== log.new_data?.title) {
+                        changedFields.push({
+                            field: 'title',
+                            oldValue: log.old_data?.title,
+                            newValue: log.new_data?.title
+                        });
+                    }
+
+                    // Description changes
+                    if (log.old_data?.description !== log.new_data?.description) {
+                        changedFields.push({
+                            field: 'description',
+                            oldValue: log.old_data?.description || '(empty)',
+                            newValue: log.new_data?.description || '(empty)'
+                        });
+                    }
+
+                    // Status changes
+                    if (log.old_data?.status !== log.new_data?.status) {
+                        changedFields.push({
+                            field: 'status',
+                            oldValue: log.old_data?.status,
+                            newValue: log.new_data?.status
+                        });
+                    }
+
+                    // Priority changes
+                    if (log.old_data?.priority !== log.new_data?.priority) {
+                        changedFields.push({
+                            field: 'priority',
+                            oldValue: log.old_data?.priority,
+                            newValue: log.new_data?.priority
+                        });
+                    }
+
+                    // Due date changes
+                    const oldDueDate = log.old_data?.due_date ? format(new Date(log.old_data.due_date), 'MMM d, yyyy') : 'none';
+                    const newDueDate = log.new_data?.due_date ? format(new Date(log.new_data.due_date), 'MMM d, yyyy') : 'none';
+                    if (oldDueDate !== newDueDate) {
+                        changedFields.push({
+                            field: 'due date',
+                            oldValue: oldDueDate,
+                            newValue: newDueDate
+                        });
+                    }
+
+                    // Milestone changes
+                    if (log.old_data?.milestone_id !== log.new_data?.milestone_id) {
+                        changedFields.push({
+                            field: 'milestone',
+                            oldValue: log.old_data?.milestone_id ? log.task.milestone_name : 'none',
+                            newValue: log.new_data?.milestone_id ? log.task.milestone_name : 'none'
+                        });
+                    }
+
+                    // Attachments count changes
+                    if (log.old_data?.attachments_count !== log.new_data?.attachments_count) {
+                        changedFields.push({
+                            field: 'attachments',
+                            oldValue: log.old_data?.attachments_count,
+                            newValue: log.new_data?.attachments_count
+                        });
+                    }
+
+                    if (changedFields.length === 0) {
+                        return (
+                            <>
+                                Modified task {renderTaskLink(log)} in project {renderProjectLink(log)}
+                            </>
+                        );
+                    }
+
+                    return (
+                        <div className="space-y-1">
+                            <span>
+                                Updated task {renderTaskLink(log)} in project {renderProjectLink(log)}:
+                            </span>
+                            <ul className="list-disc list-inside space-y-1 pl-2 text-sm">
+                                {changedFields.map((change, index) => (
+                                    <li key={index} className="flex flex-wrap items-baseline">
+                                        <span className="font-medium mr-1">{change.field}:</span>
+                                        {change.oldValue ? (
+                                            <span className="line-through text-gray-500 dark:text-gray-400 mr-1">{change.oldValue}</span>
+                                        ) : (
+                                            <span className="text-gray-500 dark:text-gray-400 mr-1">(empty)</span>
+                                        )}
+                                        <span className="mr-1">→</span>
+                                        {change.newValue ? (
+                                            <span className="font-medium text-green-600 dark:text-green-400">{change.newValue}</span>
+                                        ) : (
+                                            <span className="font-medium text-gray-500 dark:text-gray-400">(empty)</span>
+                                        )}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    );
+                } else if (log.operation.toLowerCase() === 'delete') {
+                    return (
+                        <>
+                            Deleted task {log.task?.task_title} from project {renderProjectLink(log)}
+                        </>
+                    )
+                }
+                return (
+                    <>
+                        Modified task {renderTaskLink(log)} in project {renderProjectLink(log)}
                     </>
                 );
             default:
@@ -585,9 +865,9 @@ export const ProjectLogsComponent = () => {
                         </div>
                     </div>
                     <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                        <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
                             {getActionDescription(log)}
-                        </p>
+                        </div>
                         <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                             By {getChangedByDisplay(log)} • {format(new Date(log.created_at), 'MMM d, yyyy')}
                         </p>
