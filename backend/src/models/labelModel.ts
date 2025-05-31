@@ -23,8 +23,8 @@ export const getAllLabelForProjectQuery = async (project_id: string) => {
 
 // task label querys
 
-export const addLabelToTaskQuery = async (task_id: string, label_id: string) => {
-    const result = await pool.query(`INSERT INTO task_labels (task_id, label_id) VALUES ($1, $2) ON CONFLICT DO NOTHING RETURNING *`, [task_id, label_id]);
+export const addLabelToTaskQuery = async (task_id: string, label_id: string, project_id: string) => {
+    const result = await pool.query(`INSERT INTO task_labels (task_id, label_id, project_id) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING RETURNING *`, [task_id, label_id, project_id]);
     return result.rows[0];
 }
 
@@ -36,4 +36,9 @@ export const deleteLabelFromTaskQuery = async (task_id: string, label_id: string
 export const getLabelsForTaskQuery = async (task_id: string) => {
     const result = await pool.query(`SELECT labels.* FROM labels INNER JOIN task_labels ON labels.id = task_labels.label_id WHERE task_labels.task_id = $1`, [task_id]);
     return result.rows;
+}
+
+export const getLabelQuery = async (id: string) => {
+    const result = await pool.query(`SELECT * FROM labels WHERE id = $1`, [id]);
+    return result.rows[0];
 }

@@ -62,10 +62,10 @@ export const addUsersToProject = async (req: Request, res: Response, next: NextF
 
             try {
                 if (!userId) {
-                    await inviteToProjectQuery(projectId, user.email, role, currentUser.name);
+                    await inviteToProjectQuery(projectId, user.email, role, currentUser.name, currentUser.id);
                     await sendProjectInviteNewUserEmail(user.email, currentUser.name, project.name, currentUser.email);
                 } else {
-                    await addUserToProjectQuery(projectId, userId, role, currentUser.name);
+                    await addUserToProjectQuery(projectId, userId, role, currentUser.name, currentUser.id);
                     await sendProjectInviteExistingUserEmail(user.email, currentUser.name, project.name, projectId, currentUser.email);
                 }
                 addedUsers.push({ userId, status: "success" });

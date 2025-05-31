@@ -7,6 +7,7 @@ const createCommentTable = async () => {
       id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
       author_id UUID REFERENCES users(id) ON DELETE SET NULL DEFAULT NULL,
       task_id UUID NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
+      project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
       comment TEXT NOT NULL,
       created_at TIMESTAMP DEFAULT NOW(),
       updated_at TIMESTAMP
@@ -15,6 +16,7 @@ const createCommentTable = async () => {
     -- Additional indexes for users table
         CREATE INDEX IF NOT EXISTS idx_comments_author_id ON comments(author_id);
         CREATE INDEX IF NOT EXISTS idx_comments_task_id ON comments(task_id);
+        CREATE INDEX IF NOT EXISTS idx_comments_project_id ON comments(project_id);
         CREATE INDEX IF NOT EXISTS idx_comments_created_at ON comments(created_at);
         CREATE INDEX IF NOT EXISTS idx_comments_updated_at ON comments(updated_at);
     `

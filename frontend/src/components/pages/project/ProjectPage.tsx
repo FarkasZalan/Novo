@@ -41,6 +41,23 @@ export const ProjectPage = () => {
     const [showRemoveMemberConfirm, setShowRemoveMemberConfirm] = useState(false);
     const [memberToRemove, setMemberToRemove] = useState<string | null>(null);
 
+    useEffect(() => {
+        const searchParams = new URLSearchParams(location.search);
+        if (searchParams.has('files')) {
+            setActiveTab('files');
+            // Clean the URL by replacing it without the query parameters
+            navigate(location.pathname, { replace: true });
+        } else if (searchParams.has('members')) {
+            setActiveTab('members');
+            // Clean the URL by replacing it without the query parameters
+            navigate(location.pathname, { replace: true });
+        } else if (searchParams.has('tasks')) {
+            setActiveTab('tasks');
+            // Clean the URL by replacing it without the query parameters
+            navigate(location.pathname, { replace: true });
+        }
+    }, [location.search, location.pathname, navigate]);
+
     // Load project data
     useEffect(() => {
         const loadProject = async () => {

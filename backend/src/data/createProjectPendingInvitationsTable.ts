@@ -8,6 +8,7 @@ const createPendingInvitationsTable = async () => {
             email VARCHAR(255) NOT NULL,
             role VARCHAR(50) DEFAULT 'member',
             inviter_name VARCHAR(255),
+            inviter_user_id UUID REFERENCES users(id) ON DELETE SET NULL,
             created_at TIMESTAMP DEFAULT NOW(),
             UNIQUE (project_id, email)
         );

@@ -11,6 +11,8 @@ export const addAuditTriggers = async () => {
         "project_members",
         "assignments",
         "pending_project_invitations",
+        "task_labels",
+        "subtasks"
     ];
 
     const client = await pool.connect();

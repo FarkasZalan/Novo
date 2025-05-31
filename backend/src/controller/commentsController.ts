@@ -34,7 +34,7 @@ export const createComment = async (req: Request, res: Response, next: NextFunct
             return;
         }
 
-        const createdComment = await createCommentQuery(comment, taskId, author_id);
+        const createdComment = await createCommentQuery(comment, taskId, author_id, projectId);
         const newComment = await getCommentByIdQuery(createdComment.id);
         const projectOwner = await getUserByIdQuery(project.owner_id);
 

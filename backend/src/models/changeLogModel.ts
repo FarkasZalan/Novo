@@ -5,7 +5,7 @@ export const getChangeLogsForProject = async (projectId: number) => {
         change_logs.*, users.name AS changed_by_name, users.email AS changed_by_email 
         FROM change_logs 
         LEFT JOIN users ON users.id = change_logs.changed_by
-        WHERE (old_data ->> 'project_id' = $1 OR new_data ->> 'project_id' = $1) 
+        WHERE (old_data ->> 'project_id' = $1 OR new_data ->> 'project_id' = $1 OR old_data ->> 'id' = $1 OR new_data ->> 'id' = $1) 
         ORDER BY created_at DESC`, [projectId]);
     return result.rows;
 };

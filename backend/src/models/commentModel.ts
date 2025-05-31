@@ -1,7 +1,7 @@
 import pool from "../config/db";
 
-export const createCommentQuery = async (comment: string, taskId: string, author_id: string) => {
-    const result = await pool.query("INSERT INTO comments (comment, task_id, author_id, created_at) VALUES ($1, $2, $3, $4) RETURNING *", [comment, taskId, author_id, new Date()]);
+export const createCommentQuery = async (comment: string, taskId: string, author_id: string, projectId: string) => {
+    const result = await pool.query("INSERT INTO comments (comment, task_id, author_id, created_at, project_id) VALUES ($1, $2, $3, $4, $5) RETURNING *", [comment, taskId, author_id, new Date(), projectId]);
     return result.rows[0];
 }
 

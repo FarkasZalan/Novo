@@ -1,11 +1,11 @@
 import pool from "../config/db";
 
-export const addUserToProjectQuery = async (project_id: string, user_id: string, role: string, inviter_name: string) => {
-    await pool.query("INSERT INTO project_members (project_id, user_id, role, inviter_name) VALUES ($1, $2, $3, $4) ON CONFLICT (project_id, user_id) DO NOTHING RETURNING *", [project_id, user_id, role, inviter_name]);
+export const addUserToProjectQuery = async (project_id: string, user_id: string, role: string, inviter_name: string, inviter_user_id: string) => {
+    await pool.query("INSERT INTO project_members (project_id, user_id, role, inviter_name, inviter_user_id) VALUES ($1, $2, $3, $4, $5) ON CONFLICT (project_id, user_id) DO NOTHING RETURNING *", [project_id, user_id, role, inviter_name, inviter_user_id]);
 }
 
-export const inviteToProjectQuery = async (project_id: string, email: string, role: string, inviter_name: string) => {
-    await pool.query("INSERT INTO pending_project_invitations (project_id, email, role, inviter_name) VALUES ($1, $2, $3, $4) ON CONFLICT (project_id, email) DO NOTHING RETURNING *", [project_id, email, role, inviter_name]);
+export const inviteToProjectQuery = async (project_id: string, email: string, role: string, inviter_name: string, inviter_user_id: string) => {
+    await pool.query("INSERT INTO pending_project_invitations (project_id, email, role, inviter_name, inviter_user_id) VALUES ($1, $2, $3, $4, $5) ON CONFLICT (project_id, email) DO NOTHING RETURNING *", [project_id, email, role, inviter_name, inviter_user_id]);
 }
 
 export const getPendingUsersQuery = async (project_id: string) => {

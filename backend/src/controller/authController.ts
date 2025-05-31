@@ -324,7 +324,7 @@ export const verifyEmail = async (req: Request, res: Response, next: NextFunctio
         if (pendingUserProjects) {
             for (const invite of pendingUserProjects) {
                 try {
-                    await addUserToProjectQuery(invite.project_id, user.id, invite.role, invite.inviter_name);
+                    await addUserToProjectQuery(invite.project_id, user.id, invite.role, invite.inviter_name, invite.inviter_user_id);
                     await deletePendingUserQuery(invite.id);
                 } catch (error) {
                     console.error("normal register activate user error", error);

@@ -8,6 +8,7 @@ const createProjectMembersTable = async () => {
             role VARCHAR(50) DEFAULT 'member',
             joined_at TIMESTAMP DEFAULT NOW(),
             inviter_name VARCHAR(255),
+            inviter_user_id UUID REFERENCES users(id) ON DELETE SET NULL,
             PRIMARY KEY (project_id, user_id)
         );
 

@@ -43,7 +43,7 @@ export const createTask = async (req: Request, res: Response, next: NextFunction
         }
 
         for (const label of labels) {
-            await addLabelToTaskQuery(newTask.id, label.id);
+            await addLabelToTaskQuery(newTask.id, label.id, projectId);
         }
 
         if (parent_task_id) {
@@ -171,7 +171,7 @@ export const updateTask = async (req: Request, res: Response, next: NextFunction
         // add labels if they are not in the existing labels array
         for (const newLabelId of newLabelsIds) {
             if (!existingLabelIds.includes(newLabelId)) {
-                await addLabelToTaskQuery(updateTask.id, newLabelId);
+                await addLabelToTaskQuery(updateTask.id, newLabelId, projectId);
             }
         }
 
