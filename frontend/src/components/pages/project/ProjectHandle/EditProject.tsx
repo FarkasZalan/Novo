@@ -341,7 +341,7 @@ export const EditProject = () => {
                             <button
                                 type="submit"
                                 disabled={isSubmitting || project.read_only}
-                                className={`px-6 py-3 rounded-lg font-medium text-white flex items-center justify-center ${isSubmitting || project.read_only
+                                className={`px-6 py-3 rounded-lg font-medium text-white flex items-center justify-center cursor-pointer ${isSubmitting || project.read_only
                                     ? 'bg-indigo-400 dark:bg-indigo-600 cursor-not-allowed'
                                     : 'bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800'
                                     } transition-colors duration-200`}

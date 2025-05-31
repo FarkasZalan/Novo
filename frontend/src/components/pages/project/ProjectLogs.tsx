@@ -470,10 +470,17 @@ export const ProjectLogsComponent = () => {
                         </>
                     )
                 } else if (log.operation.toLowerCase() === 'update') {
-                    if (log.old_data?.name !== log.new_data?.name) {
+                    if (log.old_data?.name !== log.new_data?.name && log.old_data?.description === log.new_data?.description) {
                         return (
                             <>
                                 Renamed project {renderProjectLink(log)} from "{log.old_data?.name}" to "{log.new_data?.name}"
+                            </>
+                        )
+                    } else if (log.old_data?.name !== log.new_data?.name && log.old_data?.description !== log.new_data?.description) {
+                        return (
+                            <>
+                                Renamed project {renderProjectLink(log)} from "{log.old_data?.name}" to "{log.new_data?.name}"
+                                and modified description
                             </>
                         )
                     } else {
