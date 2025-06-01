@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../../../hooks/useAuth";
-import { FaInfoCircle, FaUserCheck, FaEnvelope, FaComment, FaFlag, FaFile, FaTag, FaTasks, FaUserMinus, FaUserPlus, FaArrowRight, FaRegClock, FaUser } from "react-icons/fa";
+import { FaInfoCircle, FaUserCheck, FaEnvelope, FaComment, FaFlag, FaFile, FaTag, FaTasks, FaUserMinus, FaUserPlus, FaArrowLeft, FaExclamationCircle, FaUser, FaUserEdit, FaUserSlash, FaRegClock, FaChevronDown, FaChevronUp, FaFilter, FaArrowUp } from "react-icons/fa";
 import { format } from "date-fns";
-import { fetchDashboardLogForUser } from "../../../services/changeLogService";
 import { Link, useNavigate } from "react-router-dom";
+import { fetchAllFilteredLogForUser } from "../../../services/filterService";
 
 interface ProjectLog {
     id: string;
@@ -21,38 +21,192 @@ interface ProjectLog {
     projectMember: any;
     task_label: any;
     task: any;
+    user: any;
     projectName?: string;
     project_id?: string;
     task_title?: string;
     task_id?: string;
 }
 
-export const DashboardLogsComponent = () => {
+const DEFAULT_TABLES = [
+    'projects',
+    'tasks',
+    'project_members',
+    'files',
+    'assignments',
+    'pending_project_invitations',
+    'comments',
+    'milestones',
+    'task_labels',
+    'users'
+];
+
+export const AllFilteredLogsComponent = () => {
     const { authState } = useAuth();
     const [logs, setLogs] = useState<ProjectLog[]>([]);
     const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [selectedTables, setSelectedTables] = useState<string[]>([]);
+    const [hasMore, setHasMore] = useState(true);
     const navigate = useNavigate();
+    const [limit, setLimit] = useState(20);
+    const [filterOpen, setFilterOpen] = useState(false);
+    const filterRef = useRef<HTMLDivElement>(null);
+    const [showScrollToTop, setShowScrollToTop] = useState(false);
+
+    const filterGroups = [
+        {
+            name: "Projects",
+            tables: ['projects'],
+            icon: <FaInfoCircle className="text-sky-500" />,
+            color: "bg-sky-100 dark:bg-sky-900/20 text-sky-800 dark:text-sky-300"
+        },
+        {
+            name: "Tasks",
+            tables: ['tasks', 'assignments'],
+            icon: <FaTasks className="text-orange-500" />,
+            color: "bg-orange-100 dark:bg-orange-900/20 text-orange-800 dark:text-orange-300"
+        },
+        {
+            name: "Team",
+            tables: ['project_members', 'pending_project_invitations'],
+            icon: <FaUserCheck className="text-teal-500" />,
+            color: "bg-teal-100 dark:bg-teal-900/20 text-teal-800 dark:text-teal-300"
+        },
+        {
+            name: "Content",
+            tables: ['files', 'comments', 'milestones'],
+            icon: <FaFile className="text-emerald-500" />,
+            color: "bg-emerald-100 dark:bg-emerald-900/20 text-emerald-800 dark:text-emerald-300"
+        },
+        {
+            name: "Organization",
+            tables: ['task_labels', 'users'],
+            icon: <FaTag className="text-pink-500" />,
+            color: "bg-pink-100 dark:bg-pink-900/20 text-pink-800 dark:text-pink-300"
+        }
+    ];
+
+    const loadLogs = async (newLimit: number, reset: boolean = false) => {
+        try {
+            if (reset) {
+                setLoading(true);
+                setLogs([]); // Clear existing logs when resetting
+            } else {
+                setLoadingMore(true);
+            }
+
+            const [newLogs, moreAvailable] = await fetchAllFilteredLogForUser(
+                authState.accessToken!,
+                selectedTables,
+                newLimit // Use the newLimit parameter directly
+            );
+            console.log(newLogs);
+            setLogs(newLogs);
+            setHasMore(moreAvailable);
+            setLimit(newLimit);
+        } catch (err) {
+            setError("Failed to load activity logs");
+            console.error(err);
+        } finally {
+            setLoading(false);
+            setLoadingMore(false);
+        }
+    };
 
     useEffect(() => {
-        const loadLogs = async () => {
-            try {
-                setLoading(true);
-                const logs = await fetchDashboardLogForUser(authState.accessToken!);
-                setLogs(logs);
-                console.log(logs);
-            } catch (err) {
-                setError("Failed to load project logs");
-                console.error(err);
-            } finally {
-                setLoading(false);
+        if (authState.accessToken) {
+            const timer = setTimeout(() => {
+                loadLogs(20, true);
+            }, 100);
+
+            return () => clearTimeout(timer);
+        }
+    }, [authState.accessToken, selectedTables]);
+
+    const handleLoadMore = () => {
+        if (!loadingMore && hasMore) {
+            loadLogs(limit + 20);
+        }
+    };
+
+    const handleShowLess = () => {
+        loadLogs(20, false);
+    };
+
+    const toggleTableFilter = (table: string) => {
+        setSelectedTables(prev => {
+            const newTables = prev.includes(table)
+                ? prev.filter(t => t !== table)
+                : [...prev, table];
+            return newTables;
+        });
+    };
+
+    const toggleGroupFilter = (tables: string[]) => {
+        const allSelected = tables.every(table => selectedTables.includes(table));
+
+        setSelectedTables(prev => {
+            if (allSelected) {
+                return prev.filter(table => !tables.includes(table));
+            } else {
+                const newTables = [...prev];
+                tables.forEach(table => {
+                    if (!newTables.includes(table)) {
+                        newTables.push(table);
+                    }
+                });
+                return newTables;
+            }
+        });
+    };
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (filterRef.current && !filterRef.current.contains(event.target as Node)) {
+                setFilterOpen(false);
             }
         };
 
-        if (authState.accessToken) {
-            loadLogs();
+        if (filterOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
         }
-    }, [authState.accessToken]);
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [filterOpen]);
+
+    const selectAllFilters = () => {
+        setSelectedTables(DEFAULT_TABLES);
+    };
+
+    const clearAllFilters = () => {
+        setSelectedTables([]);
+    };
+
+    // scroll to top check
+    useEffect(() => {
+        const handleScroll = () => {
+            if (window.scrollY > 300) {
+                setShowScrollToTop(true);
+            } else {
+                setShowScrollToTop(false);
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
+    // scroll to top
+    const scrollToTop = () => {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    };
 
     const getOperationIcon = (operation: string, tableName: string) => {
         switch (tableName) {
@@ -76,6 +230,17 @@ export const DashboardLogsComponent = () => {
                 return <FaInfoCircle className="text-sky-500" />;
             case 'tasks':
                 return <FaTasks className="text-orange-500" />;
+            case 'users':
+                switch (operation.toLowerCase()) {
+                    case 'insert':
+                        return <FaUserCheck className="text-green-500" />;
+                    case 'update':
+                        return <FaUserEdit className="text-blue-500" />;
+                    case 'delete':
+                        return <FaUserSlash className="text-red-500" />;
+                    default:
+                        return <FaUser className="text-gray-500" />;
+                }
             default:
                 return <FaInfoCircle className="text-gray-500" />;
         }
@@ -101,6 +266,8 @@ export const DashboardLogsComponent = () => {
                 return "bg-sky-50 dark:bg-sky-900/20 text-sky-800 dark:text-sky-300";
             case 'tasks':
                 return "bg-orange-50 dark:bg-orange-900/20 text-orange-800 dark:text-orange-300";
+            case 'users':
+                return "bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-300";
             default:
                 return "bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-300";
         }
@@ -144,6 +311,8 @@ export const DashboardLogsComponent = () => {
                 return 'Milestone';
             case 'task_labels':
                 return 'Task Label';
+            case 'users':
+                return 'User';
             default:
                 return log.table_name;
         }
@@ -235,6 +404,10 @@ export const DashboardLogsComponent = () => {
     };
 
     const getChangedByDisplay = (log: ProjectLog) => {
+        if (log.table_name === 'users') {
+            return "You";
+        }
+
         let name = log.changed_by_name;
         let email = log.changed_by_email;
 
@@ -944,6 +1117,111 @@ export const DashboardLogsComponent = () => {
                         </>
                     );
                 }
+            case 'users':
+                const changedFields = [];
+                const userRef = log.user?.email === authState.user?.email ? "your" : "their";
+                const userRefYou = log.user?.email === authState.user?.email ? "You" : "They";
+                const userRefYour = log.user?.email === authState.user?.email ? "your" : "their";
+
+                // Format function for premium dates
+                const formatPremiumDate = (dateString: string | null) => {
+                    if (!dateString) return 'Not set';
+                    return format(new Date(dateString), 'MMM d, yyyy H:mm');
+                };
+
+                // User creation
+                if (log.operation.toLowerCase() === 'insert') {
+                    return `${userRefYou} created an account`;
+                }
+
+                // User deletion
+                if (log.operation.toLowerCase() === 'delete') {
+                    return `${userRefYou} deleted ${userRef} account`;
+                }
+
+                // Premium subscription changes
+                if (log.old_data?.is_premium !== log.new_data?.is_premium) {
+                    if (log.new_data?.is_premium) {
+                        return `${userRefYou} upgraded to Premium`;
+                    } else {
+                        return `${userRefYou} downgraded to Free plan`;
+                    }
+                }
+
+                // Premium cancellation
+                if (log.old_data?.user_cancelled_premium !== log.new_data?.user_cancelled_premium) {
+                    if (log.new_data?.user_cancelled_premium) {
+                        return `${userRefYou} cancelled ${userRefYour} Premium subscription`;
+                    } else {
+                        return `${userRefYou} reactivated ${userRefYour} Premium subscription`;
+                    }
+                }
+
+                // Compare old and new data to find changed fields
+                if (log.old_data?.name !== log.new_data?.name) {
+                    changedFields.push({
+                        field: 'name',
+                        oldValue: log.old_data?.name,
+                        newValue: log.new_data?.name
+                    });
+                }
+
+                if (log.old_data?.email !== log.new_data?.email) {
+                    changedFields.push({
+                        field: 'email',
+                        oldValue: log.old_data?.email,
+                        newValue: log.new_data?.email
+                    });
+                }
+
+                if (log.old_data?.premium_start_date !== log.new_data?.premium_start_date) {
+                    changedFields.push({
+                        field: 'premium start date',
+                        oldValue: formatPremiumDate(log.old_data?.premium_start_date),
+                        newValue: formatPremiumDate(log.new_data?.premium_start_date),
+                        icon: <FaRegClock className="mr-1" />
+                    });
+                }
+
+                if (log.old_data?.premium_end_date !== log.new_data?.premium_end_date) {
+                    changedFields.push({
+                        field: 'premium end date',
+                        oldValue: formatPremiumDate(log.old_data?.premium_end_date),
+                        newValue: formatPremiumDate(log.new_data?.premium_end_date),
+                        icon: <FaRegClock className="mr-1" />
+                    });
+                }
+
+                if (changedFields.length === 0) {
+                    return `${userRefYou} updated ${userRef} profile`;
+                }
+
+                return (
+                    <div className="space-y-1">
+                        <span className="font-medium">{userRefYou} updated {userRef} profile:</span>
+                        <ul className="list-disc list-inside space-y-1 pl-2 text-sm">
+                            {changedFields.map((change, index) => (
+                                <li key={index} className="flex flex-wrap items-baseline">
+                                    <span className="font-medium mr-1 flex items-center">
+                                        {change.icon || null}
+                                        {change.field}:
+                                    </span>
+                                    {change.oldValue ? (
+                                        <span className="line-through text-gray-500 dark:text-gray-400 mr-1">{change.oldValue}</span>
+                                    ) : (
+                                        <span className="text-gray-500 dark:text-gray-400 mr-1">(empty)</span>
+                                    )}
+                                    <span className="mr-1">→</span>
+                                    {change.newValue ? (
+                                        <span className="font-medium text-green-600 dark:text-green-400">{change.newValue}</span>
+                                    ) : (
+                                        <span className="font-medium text-gray-500 dark:text-gray-400">(empty)</span>
+                                    )}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                );
             default:
                 switch (log.operation.toLowerCase()) {
                     case 'insert':
@@ -995,73 +1273,299 @@ export const DashboardLogsComponent = () => {
 
     if (loading) {
         return (
-            <div className="flex justify-center py-4">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+            <div className="flex justify-center py-8">
+                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600 dark:border-indigo-400"></div>
             </div>
         );
     }
 
     if (error) {
         return (
-            <div className="text-center text-red-500 dark:text-red-400 py-4">
-                <p>{error}</p>
+            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
+                <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg max-w-md w-full p-6 text-center">
+                    <FaExclamationCircle className="mx-auto text-red-500 text-5xl mb-4" />
+                    <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                        Logs not found
+                    </h2>
+                    <p className="text-gray-600 dark:text-gray-400 mb-6">
+                        Error fetching logs
+                    </p>
+                    <button
+                        onClick={() => navigate("/dashboard", { replace: true })}
+                        className="inline-flex items-center cursor-pointer justify-center px-5 py-2 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white font-medium rounded-lg shadow-sm transition-colors"
+                    >
+                        <FaArrowLeft className="mr-2" />
+                        Return to Dashboard
+                    </button>
+                </div>
             </div>
         );
     }
 
     if (logs.length === 0) {
         return (
-            <div className="text-center text-gray-500 dark:text-gray-400 py-4">
-                No activity logs found
+            <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+                <div className="w-24 h-24 mb-6 flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
+                    <FaInfoCircle className="text-4xl text-gray-400 dark:text-gray-500" />
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                    No activity found
+                </h3>
+                <p className="text-gray-500 dark:text-gray-400 max-w-md mb-6">
+                    {selectedTables.length > 0
+                        ? "No logs match your current filters. Try adjusting your filters or reset to see all activities."
+                        : "There are no activity logs to display at this time."}
+                </p>
+                {selectedTables.length > 0 && (
+                    <button
+                        onClick={clearAllFilters}
+                        className="inline-flex items-center cursor-pointer justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
+                    >
+                        <FaFilter className="mr-2" />
+                        Reset all filters
+                    </button>
+                )}
             </div>
         );
     }
 
     return (
-        <div className="space-y-4">
-            {logs.map((log) => (
-                <div
-                    key={log.id}
-                    className="flex space-x-3 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-xs border border-gray-200 dark:border-gray-700 hover:shadow-sm transition-all duration-200"
-                >
-                    <div className="flex-shrink-0">
-                        <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${getOperationColor(log.table_name)}`}>
-                            {getOperationIcon(log.operation, log.table_name)}
-                        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            {/* Header with filter button */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                <div className="flex items-center gap-4">
+                    <button
+                        onClick={() => navigate(-1)}
+                        className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-pointer"
+                    >
+                        <FaArrowLeft className="w-5 h-5" />
+                    </button>
+                    <div>
+                        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Activity Logs</h1>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                            Track all changes and activities across your projects
+                        </p>
                     </div>
-                    <div className="min-w-0 flex-1">
-                        <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                            {getActionDescription(log)}
-                        </div>
-                        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-500 dark:text-gray-400">
-                            <span className="flex items-center">
-                                <FaUser className="mr-1.5 opacity-70" />
-                                {getChangedByDisplay(log)}
+                </div>
+
+                <div className="relative w-full sm:w-auto" ref={filterRef}>
+                    <button
+                        onClick={() => setFilterOpen(!filterOpen)}
+                        className="w-full sm:w-auto flex items-center justify-between gap-3 px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xs hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer"
+                    >
+                        <div className="flex items-center gap-2">
+                            <FaFilter className="text-indigo-500 dark:text-indigo-400" />
+                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Filters
                             </span>
-                            <span className="flex items-center">
-                                <FaRegClock className="mr-1.5 opacity-70" />
-                                {format(new Date(log.created_at), 'MMM d, yyyy h:mm a')}
-                            </span>
-                            {getAdditionalDetails(log) && (
-                                <span className="bg-gray-100 dark:bg-gray-700/50 rounded-full px-2.5 py-0.5">
-                                    {getAdditionalDetails(log)}
+                            {selectedTables.length > 0 && (
+                                <span className="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-200 text-xs font-medium px-2 py-0.5 rounded-full">
+                                    {selectedTables.length}
                                 </span>
                             )}
                         </div>
-                    </div>
-                </div>
-            ))}
+                        {filterOpen ? (
+                            <FaChevronUp className="text-gray-500 dark:text-gray-400 text-xs" />
+                        ) : (
+                            <FaChevronDown className="text-gray-500 dark:text-gray-400 text-xs" />
+                        )}
+                    </button>
 
-            {logs.length > 0 && (
-                <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 text-center">
-                    <Link
-                        to="/all-log"
-                        className="inline-flex items-center px-4 py-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors"
-                    >
-                        View all activity
-                        <FaArrowRight className="ml-2 h-3.5 w-3.5" />
-                    </Link>
+                    {/* Filter dropdown */}
+                    {filterOpen && (
+                        <div className="absolute right-0 mt-2 w-full sm:w-96 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-10 overflow-hidden">
+                            <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+                                <div className="flex justify-between items-center">
+                                    <h3 className="font-medium text-gray-900 dark:text-white">Filter Activity</h3>
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={clearAllFilters}
+                                            className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 hover:underline cursor-pointer transition-colors"
+                                        >
+                                            Clear all
+                                        </button>
+                                        <button
+                                            onClick={selectAllFilters}
+                                            className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 hover:underline cursor-pointer transition-colors"
+                                        >
+                                            Select all
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="p-4 max-h-96 overflow-y-auto">
+                                {filterGroups.map((group) => {
+                                    const groupSelected = group.tables.some(table => selectedTables.includes(table));
+                                    const allSelected = group.tables.every(table => selectedTables.includes(table));
+
+                                    return (
+                                        <div key={group.name} className="mb-4 last:mb-0">
+                                            <button
+                                                onClick={() => toggleGroupFilter(group.tables)}
+                                                className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors cursor-pointer ${groupSelected ? group.color : 'bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700'}`}
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    <div className={`p-2 rounded-lg ${group.color}`}>
+                                                        {group.icon}
+                                                    </div>
+                                                    <span className={`font-medium ${groupSelected ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-300'}`}>
+                                                        {group.name}
+                                                    </span>
+                                                </div>
+                                                <div className={`h-2 w-2 rounded-full ${allSelected ? 'bg-indigo-500' : groupSelected ? 'bg-indigo-300' : 'bg-gray-300'}`}></div>
+                                            </button>
+
+                                            <div className="mt-2 pl-4 space-y-2">
+                                                {group.tables.map((table) => (
+                                                    <div
+                                                        key={table}
+                                                        className="flex items-center pl-4 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50 cursor-pointer transition-colors"
+                                                        onClick={() => toggleTableFilter(table)}
+                                                    >
+                                                        <input
+                                                            type="checkbox"
+                                                            id={`filter-${table}`}
+                                                            checked={selectedTables.includes(table)}
+                                                            onChange={() => toggleTableFilter(table)}
+                                                            className="h-4 w-4 text-indigo-600 dark:text-indigo-400 border-gray-300 dark:border-gray-600 rounded focus:ring-indigo-500 dark:focus:ring-indigo-600 cursor-pointer"
+                                                        />
+                                                        <label
+                                                            htmlFor={`filter-${table}`}
+                                                            className="ml-3 text-sm text-gray-700 dark:text-gray-300 cursor-pointer select-none"
+                                                        >
+                                                            {getChangedItemType({ table_name: table } as ProjectLog)}
+                                                        </label>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
                 </div>
+            </div>
+
+            {/* Active filters chips */}
+            {selectedTables.length > 0 && (
+                <div className="mb-6 flex flex-wrap gap-2">
+                    {selectedTables.map((table) => (
+                        <div
+                            key={table}
+                            className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-200"
+                        >
+                            {getChangedItemType({ table_name: table } as ProjectLog)}
+                            <button
+                                onClick={() => toggleTableFilter(table)}
+                                className="ml-2 -mr-1 cursor-pointer text-indigo-500 hover:text-indigo-700 dark:hover:text-indigo-400"
+                            >
+                                &times;
+                            </button>
+                        </div>
+                    ))}
+                    {selectedTables.length > 1 && (
+                        <button
+                            onClick={clearAllFilters}
+                            className="inline-flex cursor-pointer items-center px-3 py-1.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
+                        >
+                            Clear all
+                        </button>
+                    )}
+                </div>
+            )}
+
+            {/* Logs list */}
+            <div className="space-y-4">
+                {logs.map((log) => (
+                    <div
+                        key={log.id}
+                        className="group relative p-5 bg-white dark:bg-gray-800 rounded-xl shadow-xs border border-gray-200 dark:border-gray-700 hover:shadow-sm transition-all duration-200"
+                    >
+                        <div className="flex gap-4">
+                            <div className="flex-shrink-0">
+                                <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${getOperationColor(log.table_name)}`}>
+                                    {getOperationIcon(log.operation, log.table_name)}
+                                </div>
+                            </div>
+                            <div className="min-w-0 flex-1">
+                                <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                    {getActionDescription(log)}
+                                </div>
+                                <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-500 dark:text-gray-400">
+                                    <span className="flex items-center">
+                                        <FaUser className="mr-1.5 opacity-70" />
+                                        {getChangedByDisplay(log)}
+                                    </span>
+                                    <span className="flex items-center">
+                                        <FaRegClock className="mr-1.5 opacity-70" />
+                                        {format(new Date(log.created_at), 'MMM d, yyyy h:mm a')}
+                                    </span>
+                                    {getAdditionalDetails(log) && (
+                                        <span className="bg-gray-100 dark:bg-gray-700/50 rounded-full px-2.5 py-0.5">
+                                            {getAdditionalDetails(log)}
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            {/* Load more button */}
+            {hasMore && (
+                <div className="mt-8 flex justify-center">
+                    <button
+                        onClick={handleLoadMore}
+                        className="px-5 py-2.5 cursor-pointer bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white rounded-lg font-medium transition-colors duration-200 flex items-center gap-2"
+                        disabled={loadingMore}
+                    >
+                        {loadingMore ? (
+                            <>
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                Loading...
+                            </>
+                        ) : (
+                            'Load More Activity'
+                        )}
+                    </button>
+                </div>
+            )}
+
+            {!hasMore && logs.length > 0 && (
+                <div className="flex flex-col items-center gap-4 mt-8">
+                    <div className="text-center text-gray-500 dark:text-gray-400 py-2">
+                        You've reached the end of activity logs
+                    </div>
+                    {limit > 20 && (
+                        <button
+                            onClick={handleShowLess}
+                            className="px-5 py-2.5 cursor-pointer bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white rounded-lg font-medium transition-colors duration-200 flex items-center gap-2"
+                            disabled={loadingMore}
+                        >
+                            {loadingMore ? (
+                                <>
+                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-indigo-600"></div>
+                                    Loading...
+                                </>
+                            ) : (
+                                'Show Less Activity'
+                            )}
+                        </button>
+                    )}
+                </div>
+            )}
+
+            {showScrollToTop && (
+                <button
+                    onClick={scrollToTop}
+                    className="fixed right-6 cursor-pointer bottom-6 p-3 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white rounded-full shadow-lg transition-all duration-200 z-50"
+                    aria-label="Scroll to top"
+                >
+                    <FaArrowUp className="h-5 w-5" />
+                </button>
             )}
         </div>
     );

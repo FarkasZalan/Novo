@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import {
     FaCheckCircle,
     FaClock,
@@ -529,11 +529,6 @@ export const TaskDetails: React.FC = () => {
                                 projectId={projectId!}
                                 taskId={taskId!}
                             />
-                        </div>
-                        <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 text-center">
-                            <Link to="/activity" className="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 hover:underline">
-                                View all activity
-                            </Link>
                         </div>
                     </div>
 

@@ -546,11 +546,6 @@ export const ProjectPage = () => {
                             projectId={projectId!}
                         />
                     </div>
-                    <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 text-center">
-                        <Link to="/activity" className="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 hover:underline">
-                            View all activity
-                        </Link>
-                    </div>
                 </div>
             </main>
 

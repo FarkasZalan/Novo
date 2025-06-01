@@ -9,6 +9,7 @@ import { TaskAssignments } from '../assignments/TaskAssignments';
 import { format, isPast, isToday, isTomorrow } from 'date-fns';
 import toast from 'react-hot-toast';
 import { CommentComponent } from '../taskDetails/Comments/Comments';
+import { addMilestoneToTask } from '../../../../../services/milestonesService';
 
 interface SubtaskListProps {
     task: Task;
@@ -90,6 +91,10 @@ export const SubtaskListOnBoard: React.FC<SubtaskListProps> = ({
                 [],
                 task.id
             );
+
+            if (task.milestone_id) {
+                await addMilestoneToTask(task.milestone_id, projectId, [newSubtask.id], authState.accessToken!);
+            }
 
             // Update local state
             const updatedSubtasks = [...(task.subtasks || []), {

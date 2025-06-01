@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../../hooks/useAuth";
-import { FaUser, FaUserCheck, FaUserEdit, FaUserSlash, FaRegClock } from "react-icons/fa";
+import { FaUser, FaUserCheck, FaUserEdit, FaUserSlash, FaRegClock, FaArrowRight } from "react-icons/fa";
 import { format } from "date-fns";
 import { fetchUserLog } from "../../../services/changeLogService";
+import { Link } from "react-router-dom";
 
 interface UserLog {
     id: string;
@@ -204,7 +205,7 @@ export const UserLogsComponent = () => {
 
     return (
         <div className="space-y-4">
-            <div className="px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            <div className="px-4 py-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
                 <h3 className="font-medium text-gray-700 dark:text-gray-300">Account History</h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
                     Showing changes made to your account
@@ -212,7 +213,7 @@ export const UserLogsComponent = () => {
             </div>
 
             {logs.map((log) => (
-                <div key={log.id} className="flex space-x-3 p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg transition-colors duration-200">
+                <div key={log.id} className="flex space-x-3 p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-sm transition-shadow duration-200">
                     <div className="flex-shrink-0">
                         <div className={`h-10 w-10 rounded-full flex items-center justify-center ${getOperationColor(log.operation)}`}>
                             {getOperationIcon(log.operation)}
@@ -222,12 +223,25 @@ export const UserLogsComponent = () => {
                         <div className="text-sm text-gray-900 dark:text-gray-100">
                             {getActionDescription(log)}
                         </div>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                        <div className="mt-2 flex items-center text-xs text-gray-500 dark:text-gray-400">
+                            <FaRegClock className="mr-1.5 opacity-70" />
                             {format(new Date(log.created_at), 'MMM d, yyyy H:mm')}
-                        </p>
+                        </div>
                     </div>
                 </div>
             ))}
+
+            {logs.length > 0 && (
+                <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 text-center">
+                    <Link
+                        to="/all-user-activity"
+                        className="inline-flex items-center text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 hover:underline transition-colors"
+                    >
+                        View all activity
+                        <FaArrowRight className="ml-1.5 h-3.5 w-3.5" />
+                    </Link>
+                </div>
+            )}
         </div>
     );
 };

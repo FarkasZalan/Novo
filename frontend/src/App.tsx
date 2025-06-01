@@ -32,6 +32,7 @@ import { useAuth } from "./hooks/useAuth";
 import { AuthProvider } from "./context/AuthProvider";
 import { MilestoneDetailsPage } from "./components/pages/task/taskComponents/milestones/milestoneDetails/MilestoneDetails";
 import { TaskEditReadOnlyRoute } from "./components/routes/TaskEditForReadOnlyRoute";
+import { AllFilteredLogsComponent } from "./components/pages/project/AllLog";
 
 function RootRedirect() {
   const { isAuthenticated } = useAuth();
@@ -94,6 +95,9 @@ function App() {
               { /* Task routes */}
               <Route path="/projects/:projectId/tasks" element={<TasksManagerPage />} />
               <Route path="/projects/:projectId/tasks/:taskId" element={<TaskDetails />} />
+
+              {/* Logs */}
+              <Route path="/all-log" element={<AllFilteredLogsComponent />} />
             </Route>
 
             <Route element={<ProtectedProjectForOwner />}>

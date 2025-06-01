@@ -15,6 +15,7 @@ import changeLogsRoutes from "./routes/changeLogRoutes";
 import paymentRoutes from "./routes/paymentRoutes";
 import webhookForPaymentRoute from "./routes/webhookForPaymentRoute";
 import commentRoutes from "./routes/commentRoutes";
+import filterRoutes from "./routes/filterRoutes";
 import errorHandling from "./middlewares/errorHandler";
 import { setupSwagger } from "./config/swagger";
 import passport from 'passport';
@@ -107,6 +108,7 @@ app.use("/api", labelRoutes);
 app.use("/api", commentRoutes);
 app.use("/api", paymentRoutes);
 app.use("/api", changeLogsRoutes);
+app.use("/api", filterRoutes);
 
 // Error handling middleware
 app.use(errorHandling);
