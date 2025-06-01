@@ -47,7 +47,7 @@ export const getDahboardLogForUser = async (req: Request, res: Response, next: N
         let changeLogs: any[] = [];
 
         for (let projectId of projectIds) {
-            const logs: any = await getChangeLogsForProjectQuery(projectId, 10);
+            const logs: any = await getChangeLogsForProjectQuery(projectId, 5);
 
             for (const log of logs) {
                 if (shouldDeleteLog(log)) {
@@ -302,7 +302,7 @@ export const getProjectLogs = async (req: Request, res: Response, next: NextFunc
         const projectId = req.params.projectId;
 
         let changeLogs: any[] = [];
-        const logs: any = await getChangeLogsForProjectQuery(projectId, 10);
+        const logs: any = await getChangeLogsForProjectQuery(projectId, 5);
 
         for (const log of logs) {
             if (shouldDeleteLog(log)) {
@@ -555,7 +555,7 @@ export const getTaskLogs = async (req: Request, res: Response, next: NextFunctio
         const taskId = req.params.taskId;
 
         let changeLogs: any[] = [];
-        const logs: any = await getChangeLogsForTaskQuery(taskId, 10);
+        const logs: any = await getChangeLogsForTaskQuery(taskId, 5);
 
         for (const log of logs) {
             if (shouldDeleteLog(log)) {
@@ -764,7 +764,7 @@ export const getMilestoneLogs = async (req: Request, res: Response, next: NextFu
         const milestone = await getMilestoneByIdQuery(milestoneId);
 
         let changeLogs: any[] = [];
-        const logs: any = await getChangeLogsForMilestoneQuery(milestoneId, 10);
+        const logs: any = await getChangeLogsForMilestoneQuery(milestoneId, 5);
 
         for (const log of logs) {
             if (shouldDeleteLog(log)) {
@@ -818,7 +818,7 @@ export const getUserLog = async (req: Request, res: Response, next: NextFunction
 
         let changeLogs: any[] = [];
 
-        const logs: any = await getChangeLogsForUserQuery(userId, 10);
+        const logs: any = await getChangeLogsForUserQuery(userId, 5);
 
         for (const log of logs) {
             if (shouldDeleteLog(log)) {

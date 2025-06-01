@@ -519,6 +519,24 @@ export const TaskDetails: React.FC = () => {
 
                     </div>
 
+                    {/* Recent Activity Section */}
+                    <div className="mt-8 bg-white/80 dark:bg-gray-800/90 rounded-xl shadow-md dark:shadow-gray-700/50 overflow-hidden transition-colors duration-200">
+                        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Recent Activity</h2>
+                        </div>
+                        <div className="divide-y divide-gray-200 dark:divide-gray-700">
+                            <TaskLogsComponent
+                                projectId={projectId!}
+                                taskId={taskId!}
+                            />
+                        </div>
+                        <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 text-center">
+                            <Link to="/activity" className="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 hover:underline">
+                                View all activity
+                            </Link>
+                        </div>
+                    </div>
+
                     {/* Footer */}
                     <div className="px-6 py-4 bg-gray-50/70 dark:bg-gray-700/60 border-t border-gray-200 dark:border-gray-700 text-sm text-gray-500 dark:text-gray-400">
                         <div className="flex flex-wrap justify-between">
@@ -545,23 +563,6 @@ export const TaskDetails: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Recent Activity Section */}
-                    <div className="mt-8 bg-white dark:bg-gray-800 rounded-xl shadow-md dark:shadow-gray-700/50 overflow-hidden transition-colors duration-200">
-                        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Recent Activity</h2>
-                        </div>
-                        <div className="divide-y divide-gray-200 dark:divide-gray-700">
-                            <TaskLogsComponent
-                                projectId={projectId!}
-                                taskId={taskId!}
-                            />
-                        </div>
-                        <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 text-center">
-                            <Link to="/activity" className="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 hover:underline">
-                                View all activity
-                            </Link>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>

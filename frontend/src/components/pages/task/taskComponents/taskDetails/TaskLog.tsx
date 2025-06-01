@@ -50,7 +50,7 @@ export const TaskLogsComponent = ({ projectId, taskId }: TaskLogProps) => {
         if (authState.accessToken) {
             loadLogs();
         }
-    }, [authState.accessToken]);
+    }, [authState.accessToken, projectId, taskId]);
 
     const getOperationIcon = (tableName: string) => {
         switch (tableName) {
