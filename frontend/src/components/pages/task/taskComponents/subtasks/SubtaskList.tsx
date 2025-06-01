@@ -85,6 +85,7 @@ export const SubtaskList: React.FC<SubtaskListProps> = ({
 
                 {canAddSubtasks && !project?.read_only && !isAdding && (
                     <motion.button
+                        type='button'
                         whileHover={{ scale: 1.03 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={() => setIsAdding(true)}
@@ -128,6 +129,7 @@ export const SubtaskList: React.FC<SubtaskListProps> = ({
                                 />
                                 <div className="flex justify-end space-x-2">
                                     <button
+                                        type='button'
                                         onClick={() => {
                                             setIsAdding(false);
                                             setNewSubtaskTitle('');

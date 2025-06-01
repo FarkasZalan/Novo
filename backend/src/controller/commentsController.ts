@@ -88,6 +88,11 @@ export const updateComment = async (req: Request, res: Response, next: NextFunct
             handleResponse(res, 403, "You are not authorized to update this comment", null);
             return;
         }
+
+        if (commentData.comment === comment) {
+            handleResponse(res, 200, "Comment is already up to date", commentData);
+            return;
+        }
         const updatedComment = await updateCommentQuery(comment, commentId);
         const updatedCommentData = await getCommentByIdQuery(updatedComment.id);
         handleResponse(res, 200, "Comment updated successfully", updatedCommentData);

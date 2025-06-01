@@ -85,7 +85,7 @@ export const TasksManagerPage: React.FC = () => {
             <div className="max-w-screen-2xl mx-auto">
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
-                    <div>
+                    <div className='flex-1 min-w-0'>
                         <div className="flex items-center">
                             <button
                                 onClick={() => navigate(`/projects/${projectId}`)}

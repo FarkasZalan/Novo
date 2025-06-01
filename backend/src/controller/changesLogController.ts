@@ -19,6 +19,23 @@ const handleResponse = (res: Response, status: number, message: string, data: an
     });
 };
 
+function shouldDeleteLog(log: any): boolean {
+    // If operation is INSERT or DELETE, keep the log
+    if (log.operation !== 'UPDATE') return false;
+
+    // No old_data means it's an INSERT, not an UPDATE
+    if (!log.old_data) return false;
+
+    // Table-specific comparison for project
+    switch (log.table_name) {
+        case 'projects':
+            return log.new_data.name === log.old_data.name &&
+                log.new_data.description === log.old_data.description;
+        default:
+            return JSON.stringify(log.new_data) === JSON.stringify(log.old_data);
+    }
+}
+
 export const getAllProjectLogForUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const userId = req.user.id;
@@ -33,8 +50,9 @@ export const getAllProjectLogForUser = async (req: Request, res: Response, next:
             const logs: any = await getChangeLogsForProject(projectId);
 
             for (const log of logs) {
-                if (log.new_data === log.old_data) {
+                if (shouldDeleteLog(log)) {
                     await deleteLogQuery(log.id);
+                    continue;
                 }
 
                 const projectName = await getProjectNameQuery(projectId);

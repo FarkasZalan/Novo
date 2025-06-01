@@ -340,23 +340,23 @@ export const ProjectPage = () => {
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
             {/* Project Header */}
+            {/* Project Header */}
             <div className="bg-white dark:bg-gray-800 shadow-sm transition-colors duration-200">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                     <div className="flex flex-col space-y-4 md:space-y-0 md:flex-row md:items-center md:justify-between">
-                        <div className="flex items-center space-x-4">
+                        <div className="flex items-center space-x-4 min-w-0">
                             <button
                                 onClick={() => navigate(`/dashboard`, { replace: true })}
                                 className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-pointer"
                             >
                                 <FaArrowLeft className="w-5 h-5" />
                             </button>
-                            <div>
+                            <div className="min-w-0">
                                 <div className="flex items-center space-x-3">
-                                    <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                                    <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 truncate">
                                         {project.name}
                                     </h1>
                                     {getStatusBadge(project.status)}
-
                                     {project.read_only && (
                                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/40 border border-red-300 dark:border-red-600 text-red-800 dark:text-red-300">
                                             <FaBan className="mr-1" size={10} />
@@ -364,17 +364,22 @@ export const ProjectPage = () => {
                                         </span>
                                     )}
                                 </div>
-                                <p className="mt-1 text-gray-600 dark:text-gray-300">
-                                    {project.description}
-                                </p>
+                                {project.description && (
+                                    <p
+                                        className="mt-1 text-gray-600 dark:text-gray-300 truncate max-w-[500px] md:max-w-[600px] lg:max-w-[700px]"
+                                        title={project.description} // Tooltip for full description
+                                    >
+                                        {project.description}
+                                    </p>
+                                )}
                             </div>
                         </div>
 
-                        <div className="flex space-x-3">
+                        <div className="flex space-x-3 shrink-0">
                             {canAddMembers && !project.read_only && (
                                 <button
                                     onClick={() => setShowAddMember(true)}
-                                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 cursor-pointer dark:hover:bg-indigo-800 text-white rounded-lg font-medium transition-colors duration-200 flex items-center"
+                                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white rounded-lg font-medium transition-colors duration-200 flex items-center shrink-0"
                                     disabled={project.read_only}
                                 >
                                     <FaUserPlus className="mr-2" />
@@ -384,17 +389,16 @@ export const ProjectPage = () => {
                             {canEditProject && !project.read_only && (
                                 <Link
                                     to={`/projects/${projectId}/edit`}
-                                    className="px-4 py-2 border border-gray-300 dark:border-gray-600 cursor-pointer bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-medium transition-colors duration-200 flex items-center"
+                                    className="px-4 py-2 border border-gray-300 dark:border-gray-600 cursor-pointer bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-medium transition-colors duration-200 flex items-center shrink-0"
                                 >
                                     <FaEdit className="mr-2" />
                                     Edit
                                 </Link>
                             )}
-
                             {!canEditProject && (
                                 <button
                                     onClick={() => !project.read_only && setShowLeaveConfirm(true)}
-                                    className={`px-4 py-2 border ${project.read_only ? 'border-gray-300 dark:border-gray-600 cursor-not-allowed' : 'border-red-300 dark:border-red-600 cursor-pointer hover:bg-red-50 dark:hover:bg-red-900/20'} bg-white dark:bg-gray-700 text-red-600 dark:text-red-400 rounded-lg font-medium transition-colors duration-200 flex items-center`}
+                                    className={`px-4 py-2 border ${project.read_only ? 'border-gray-300 dark:border-gray-600 cursor-not-allowed' : 'border-red-300 dark:border-red-600 cursor-pointer hover:bg-red-50 dark:hover:bg-red-900/20'} bg-white dark:bg-gray-700 text-red-600 dark:text-red-400 rounded-lg font-medium transition-colors duration-200 flex items-center shrink-0`}
                                     disabled={project.read_only}
                                 >
                                     <FaSignOutAlt className="mr-2" />

@@ -111,6 +111,14 @@ export const getTaskById = async (req: Request, res: Response, next: NextFunctio
     }
 };
 
+const datesEqual = (date1: any, date2: any) => {
+    if (!date1 && !date2) return true; // Both are falsy (null, undefined, '')
+    if (!date1 || !date2) return false; // Only one is falsy
+
+    // Compare as ISO strings if both are valid dates
+    return new Date(date1).toISOString() === new Date(date2).toISOString();
+}
+
 export const updateTask = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const projectId = req.params.projectId;
@@ -131,6 +139,13 @@ export const updateTask = async (req: Request, res: Response, next: NextFunction
         const task = await getTaskByIdQuery(taskId);
         if (!task) {
             handleResponse(res, 404, "Task not found", null);
+            return;
+        }
+
+        if (task.title === title && task.description === description && datesEqual(task.due_date, due_date) && task.priority === priority && task.status === status) {
+            const taskLabels = await getLabelsForTaskQuery(task.id);
+            task.labels = taskLabels;
+            handleResponse(res, 200, "No changes detected", task);
             return;
         }
 

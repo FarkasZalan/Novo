@@ -166,6 +166,15 @@ export const deleteMilestoneFromTask = async (req: Request, res: Response, next:
     }
 }
 
+const datesEqual = (date1: any, date2: any) => {
+    if (!date1 && !date2) return true; // Both are falsy (null, undefined, '')
+    if (!date1 || !date2) return false; // Only one is falsy
+
+    // Compare as ISO strings if both are valid dates
+    return new Date(date1).toISOString() === new Date(date2).toISOString();
+}
+
+
 export const updateMilestone = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const milestone_id = req.params.milestoneId;
@@ -180,6 +189,17 @@ export const updateMilestone = async (req: Request, res: Response, next: NextFun
 
         if (project.read_only) {
             handleResponse(res, 400, "Project is read-only", null);
+            return;
+        }
+
+        const oldMilestone = await getMilestoneByIdQuery(milestone_id);
+        if (!oldMilestone) {
+            handleResponse(res, 404, "Milestone not found", null);
+            return;
+        }
+
+        if (oldMilestone.name === name && oldMilestone.description === description && datesEqual(oldMilestone.due_date, due_date)) {
+            handleResponse(res, 200, "No changes detected", oldMilestone);
             return;
         }
 

@@ -544,7 +544,9 @@ export const ProjectLogsComponent = () => {
                     } else {
                         return (
                             <>
-                                Joined {log.projectMember.user_name} ({log.projectMember.user_email}) to project {renderProjectLink(log)}
+                                {log.projectMember.inviter_user_id === authState.user.id
+                                    ? "You invited"
+                                    : `${log.projectMember.inviter_user_name} invited`} {log.projectMember.user_name} ({log.projectMember.user_email}) to project {renderProjectLink(log)}
                             </>
                         )
                     }
@@ -554,10 +556,64 @@ export const ProjectLogsComponent = () => {
                             Removed {log.projectMember.user_name} ({log.projectMember.user_email}) from project {renderProjectLink(log)}
                         </>
                     )
+                } else if (log.operation.toLowerCase() === 'update') {
+                    const changedFields = [];
+
+                    // Role changes
+                    if (log.old_data?.role !== log.new_data?.role) {
+                        changedFields.push({
+                            field: 'role',
+                            oldValue: log.old_data?.role,
+                            newValue: log.new_data?.role
+                        });
+                    }
+
+                    // Status changes (if applicable)
+                    if (log.old_data?.status !== log.new_data?.status) {
+                        changedFields.push({
+                            field: 'status',
+                            oldValue: log.old_data?.status,
+                            newValue: log.new_data?.status
+                        });
+                    }
+
+                    if (changedFields.length === 0) {
+                        return (
+                            <>
+                                Modified {log.projectMember.user_name}'s membership in project {renderProjectLink(log)}
+                            </>
+                        );
+                    }
+
+                    return (
+                        <div className="space-y-1">
+                            <span>
+                                Updated {log.projectMember.user_name}'s membership in project {renderProjectLink(log)}:
+                            </span>
+                            <ul className="list-disc list-inside space-y-1 pl-2 text-sm">
+                                {changedFields.map((change, index) => (
+                                    <li key={index} className="flex flex-wrap items-baseline">
+                                        <span className="font-medium mr-1">{change.field}:</span>
+                                        {change.oldValue ? (
+                                            <span className="line-through text-gray-500 dark:text-gray-400 mr-1">{change.oldValue}</span>
+                                        ) : (
+                                            <span className="text-gray-500 dark:text-gray-400 mr-1">(empty)</span>
+                                        )}
+                                        <span className="mr-1">→</span>
+                                        {change.newValue ? (
+                                            <span className="font-medium text-green-600 dark:text-green-400">{change.newValue}</span>
+                                        ) : (
+                                            <span className="font-medium text-gray-500 dark:text-gray-400">(empty)</span>
+                                        )}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    );
                 }
                 return (
                     <>
-                        Modified {log.projectMember.user_name} ({log.projectMember.user_email}) status in project {renderProjectLink(log)}
+                        Modified {log.projectMember.user_name}'s membership in project {renderProjectLink(log)}
                     </>
                 )
             case 'task_labels':

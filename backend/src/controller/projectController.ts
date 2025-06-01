@@ -158,6 +158,11 @@ export const updateProject = async (req: Request, res: Response, next: NextFunct
             return;
         }
 
+        if (project.name === name && project.description === description) {
+            handleResponse(res, 200, "No changes detected", project);
+            return;
+        }
+
         const updateProject = await updateProjectQuery(name, description, projectId);
         if (!updateProject) {
             handleResponse(res, 404, "Project not found", null);
