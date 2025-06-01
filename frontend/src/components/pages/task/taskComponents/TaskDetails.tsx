@@ -16,7 +16,8 @@ import {
     FaTasks,
     FaCalendarDay,
     FaUsers,
-    FaCrown
+    FaCrown,
+    FaExclamationCircle
 } from 'react-icons/fa';
 import { fetchTask } from '../../../../services/taskService';
 import { fetchProjectById } from '../../../../services/projectService';
@@ -140,14 +141,23 @@ export const TaskDetails: React.FC = () => {
 
     if (error || !task) {
         return (
-            <div className="text-center flex flex-col py-8 min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-                <div className="text-red-500 dark:text-red-400 text-lg mb-4">{error}</div>
-                <button
-                    onClick={() => navigate("/dashboard", { replace: true })}
-                    className="px-4 cursor-pointer py-2 cursor-pointer bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white rounded-lg transition-colors"
-                >
-                    Go Back
-                </button>
+            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
+                <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg max-w-md w-full p-6 text-center">
+                    <FaExclamationCircle className="mx-auto text-red-500 text-5xl mb-4" />
+                    <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                        Oops! Something went wrong
+                    </h2>
+                    <p className="text-gray-600 dark:text-gray-400 mb-6">
+                        We couldn’t load the task you were looking for. Try refreshing or go back to your dashboard.
+                    </p>
+                    <button
+                        onClick={() => navigate('/dashboard', { replace: true })}
+                        className="inline-flex items-center cursor-pointer justify-center px-5 py-2 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white font-medium rounded-lg shadow-sm transition-colors"
+                    >
+                        <FaArrowLeft className="mr-2" />
+                        Go to Dashboard
+                    </button>
+                </div>
             </div>
         );
     }

@@ -12,7 +12,8 @@ import {
     FaCog,
     FaSignOutAlt,
     FaPaperclip,
-    FaBan
+    FaBan,
+    FaExclamationCircle
 } from "react-icons/fa";
 import { useEffect, useState } from "react";
 import { fetchProjects } from "../../../services/projectService";
@@ -20,7 +21,7 @@ import { ConfirmationDialog } from "./ConfirmationDialog";
 import toast from "react-hot-toast";
 import { leaveProject } from "../../../services/projectMemberService";
 import { useAuth } from "../../../hooks/useAuth";
-import { ProjectLogsComponent } from "./ProjectLogs";
+import { DashboardLogsComponent } from "./DashboardLogs";
 
 export const Dashboard = () => {
     const { authState } = useAuth();
@@ -150,12 +151,18 @@ export const Dashboard = () => {
 
     if (error) {
         return (
-            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-                <div className="text-center text-red-500 dark:text-red-400">
-                    <p>{error}</p>
+            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
+                <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg max-w-md w-full p-6 text-center">
+                    <FaExclamationCircle className="mx-auto text-red-500 text-5xl mb-4" />
+                    <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                        Oops! Couldn’t load projects
+                    </h2>
+                    <p className="text-gray-600 dark:text-gray-400 mb-6">
+                        Something went wrong while fetching your projects. Please try again.
+                    </p>
                     <button
                         onClick={() => window.location.reload()}
-                        className="mt-4 px-4 cursor-pointer py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+                        className="inline-flex items-center justify-center px-5 py-2 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white font-medium rounded-lg shadow-sm transition-colors"
                     >
                         Retry
                     </button>
@@ -388,7 +395,7 @@ export const Dashboard = () => {
                         <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Recent Activity</h2>
                     </div>
                     <div className="divide-y divide-gray-200 dark:divide-gray-700">
-                        <ProjectLogsComponent />
+                        <DashboardLogsComponent />
                     </div>
                     <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 text-center">
                         <Link to="/activity" className="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 hover:underline">

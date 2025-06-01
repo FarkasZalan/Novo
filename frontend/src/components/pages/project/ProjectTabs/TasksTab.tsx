@@ -264,7 +264,7 @@ export const TasksTab = () => {
                                         </div>
 
                                         {/* Title and metadata */}
-                                        <div className="flex-1 min-w-0 space-y-3"> {/* Added space-y for vertical spacing */}
+                                        <div className="flex-1 min-w-0 space-y-3">
                                             <div className="flex items-center">
                                                 <h3
                                                     className={`font-medium text-gray-900 dark:text-gray-100 truncate text-base

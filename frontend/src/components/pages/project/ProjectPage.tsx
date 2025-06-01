@@ -11,6 +11,7 @@ import {
     FaArrowLeft,
     FaSignOutAlt,
     FaBan,
+    FaExclamationCircle,
 } from "react-icons/fa";
 import { fetchProjectById } from "../../../services/projectService";
 import { AddMemberDialog } from "./ProjectTabs/MemberHandle/AddMemberModal";
@@ -307,14 +308,21 @@ export const ProjectPage = () => {
 
     if (error) {
         return (
-            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-                <div className="text-center text-red-500 dark:text-red-400">
-                    <p>{error}</p>
+            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
+                <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg max-w-md w-full p-6 text-center">
+                    <FaExclamationCircle className="mx-auto text-red-500 text-5xl mb-4" />
+                    <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                        Oops! Something went wrong
+                    </h2>
+                    <p className="text-gray-600 dark:text-gray-400 mb-6">
+                        We couldn’t load this project. Please try refreshing or go back to your dashboard.
+                    </p>
                     <button
                         onClick={() => navigate("/dashboard", { replace: true })}
-                        className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+                        className="inline-flex cursor-pointer items-center justify-center px-5 py-2 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white font-medium rounded-lg shadow-sm transition-colors"
                     >
-                        Go Back
+                        <FaArrowLeft className="mr-2" />
+                        Go to Dashboard
                     </button>
                 </div>
             </div>
@@ -323,13 +331,20 @@ export const ProjectPage = () => {
 
     if (!project) {
         return (
-            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-                <div className="text-center">
-                    <p className="text-gray-600 dark:text-gray-300">Project not found</p>
+            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
+                <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg max-w-md w-full p-6 text-center">
+                    <FaExclamationCircle className="mx-auto text-red-500 text-5xl mb-4" />
+                    <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                        Project Not Found
+                    </h2>
+                    <p className="text-gray-600 dark:text-gray-400 mb-6">
+                        We couldn’t find the project you’re looking for. It may have been deleted or you might not have access.
+                    </p>
                     <button
-                        onClick={() => navigate("/dashboard")}
-                        className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+                        onClick={() => navigate("/dashboard", { replace: true })}
+                        className="inline-flex items-center cursor-pointer justify-center px-5 py-2 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white font-medium rounded-lg shadow-sm transition-colors"
                     >
+                        <FaArrowLeft className="mr-2" />
                         Return to Dashboard
                     </button>
                 </div>

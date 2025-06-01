@@ -38,6 +38,7 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
     });
 
     const [isLoading, setLoading] = useState(false);
+    const [isInitialLoading, setInitialLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     // files states
@@ -69,20 +70,23 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
     useEffect(() => {
         const loadData = async () => {
             try {
-                setLoading(true);
+                setInitialLoading(true);
+                setError(null);
 
-                // Load milestones
-                const loadedMilestones = await getAllMilestonesForProject(projectId!, authState.accessToken!);
+                // Load milestones and labels in parallel
+                const [loadedMilestones, loadedLabels] = await Promise.all([
+                    getAllMilestonesForProject(projectId!, authState.accessToken!),
+                    getAllLabelForProject(projectId!, authState.accessToken!)
+                ]);
+
                 setMilestones(loadedMilestones);
-
-                // Load labels
-                const loadedLabels = await getAllLabelForProject(projectId!, authState.accessToken!);
                 setLabels(loadedLabels);
 
                 if (isEdit && taskId) {
                     // Load task data
                     const tasks = await fetchAllTasksForProject(projectId!, authState.accessToken!, "priority", "asc");
                     const task = tasks.find((t: any) => t.id === taskId);
+
                     if (task) {
                         setFormData({
                             title: task.title,
@@ -95,7 +99,7 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
                             parentTaskId: task.parent_task_id
                         });
 
-                        // If task has a milestone, set it as selected
+                        // Set milestone if exists
                         if (task.milestone_id) {
                             const milestone = loadedMilestones.find((m: Milestone) => m.id === task.milestone_id);
                             if (milestone) {
@@ -103,6 +107,7 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
                             }
                         }
 
+                        // Set labels if exist
                         setSelectedLabels(task.labels || []);
                     }
                 }
@@ -110,7 +115,7 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
                 console.error(err);
                 setError('Failed to load data');
             } finally {
-                setLoading(false);
+                setInitialLoading(false);
             }
         };
 
@@ -462,6 +467,16 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, []);
+
+    if (isInitialLoading) {
+        return (
+            <div className="max-w-7xl mx-auto">
+                <div className="flex justify-center items-center h-screen">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+                </div>
+            </div>
+        );
+    }
 
 
     return (

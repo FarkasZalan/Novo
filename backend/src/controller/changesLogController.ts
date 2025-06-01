@@ -2,9 +2,9 @@ import { Request, Response } from "express";
 import { NextFunction } from "connect";
 import { getUserByIdQuery } from "../models/userModel";
 import { getAllProjectForUsersQuery, getProjectNameQuery } from "../models/projectModel";
-import { getChangeLogsForProject } from "../models/changeLogModel";
+import { getChangeLogsForDashboard } from "../models/changeLogModel";
 import { getAssignmentForLogsQuery } from "../models/assignmentModel";
-import { getTaskNameForLogsQuery } from "../models/task.Model";
+import { getTaskByIdQuery, getTaskNameForLogsQuery } from "../models/task.Model";
 import { deleteLogQuery } from "../models/changeLogModal";
 import { getLabelQuery } from "../models/labelModel";
 import { getMilestoneByIdQuery } from "../models/milestonesModel";
@@ -36,7 +36,7 @@ function shouldDeleteLog(log: any): boolean {
     }
 }
 
-export const getAllProjectLogForUser = async (req: Request, res: Response, next: NextFunction) => {
+export const getDahboardLogForUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const userId = req.user.id;
 
@@ -47,7 +47,7 @@ export const getAllProjectLogForUser = async (req: Request, res: Response, next:
         let changeLogs: any[] = [];
 
         for (let projectId of projectIds) {
-            const logs: any = await getChangeLogsForProject(projectId);
+            const logs: any = await getChangeLogsForDashboard(projectId);
 
             for (const log of logs) {
                 if (shouldDeleteLog(log)) {
@@ -241,21 +241,48 @@ export const getAllProjectLogForUser = async (req: Request, res: Response, next:
 
                     if (log.operation === "DELETE") {
                         const milestone = await getMilestoneByIdQuery(log.old_data.milestone_id);
-                        taskDetails = {
-                            task_id: log.old_data.id,
-                            task_title: 'Deleted',
-                            project_id: log.old_data.project_id,
-                            milestone_id: log.old_data.milestone_id,
-                            milestone_name: milestone?.name
+                        if (log.old_data.parent_task_id) {
+                            const parentTask = await getTaskByIdQuery(log.old_data.parent_task_id);
+                            taskDetails = {
+                                task_id: log.old_data.id,
+                                task_title: await getTaskNameForLogsQuery(log.old_data.id) || 'Deleted',
+                                project_id: log.old_data.project_id,
+                                milestone_id: log.old_data.milestone_id,
+                                milestone_name: milestone?.name,
+                                parent_task_id: log.old_data.parent_task_id,
+                                parent_task_title: parentTask?.title || 'Deleted'
+                            }
+                        } else {
+                            taskDetails = {
+                                task_id: log.old_data.id,
+                                task_title: 'Deleted',
+                                project_id: log.old_data.project_id,
+                                milestone_id: log.old_data.milestone_id,
+                                milestone_name: milestone?.name
+                            }
                         }
                     } else {
                         const milestone = await getMilestoneByIdQuery(log.new_data.milestone_id);
-                        taskDetails = {
-                            task_id: log.new_data.id,
-                            task_title: await getTaskNameForLogsQuery(log.new_data.id) || 'Deleted',
-                            project_id: log.new_data.project_id,
-                            milestone_id: log.new_data.milestone_id,
-                            milestone_name: milestone?.name
+
+                        if (log.new_data.parent_task_id) {
+                            const parentTask = await getTaskByIdQuery(log.new_data.parent_task_id);
+                            taskDetails = {
+                                task_id: log.new_data.id,
+                                task_title: await getTaskNameForLogsQuery(log.new_data.id) || 'Deleted',
+                                project_id: log.new_data.project_id,
+                                milestone_id: log.new_data.milestone_id,
+                                milestone_name: milestone?.name,
+                                parent_task_id: log.new_data.parent_task_id,
+                                parent_task_title: parentTask?.title || 'Deleted'
+                            }
+                        } else {
+                            taskDetails = {
+                                task_id: log.new_data.id,
+                                task_title: await getTaskNameForLogsQuery(log.new_data.id) || 'Deleted',
+                                project_id: log.new_data.project_id,
+                                milestone_id: log.new_data.milestone_id,
+                                milestone_name: milestone?.name
+                            }
                         }
                     }
                     changeLogs.push({ ...log, task: taskDetails, projectName });

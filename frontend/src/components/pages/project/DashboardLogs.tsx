@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../../hooks/useAuth";
-import { FaUserEdit, FaPlus, FaTrash, FaInfoCircle, FaUserCheck, FaEnvelope, FaComment, FaFlag, FaFile, FaTag, FaTasks } from "react-icons/fa";
+import { FaInfoCircle, FaUserCheck, FaEnvelope, FaComment, FaFlag, FaFile, FaTag, FaTasks, FaUserMinus, FaUserPlus } from "react-icons/fa";
 import { format } from "date-fns";
-import { fetchAllProjectLogForUser } from "../../../services/changeLogService";
-import { Link } from "react-router-dom";
+import { fetchDashboardLogForUser } from "../../../services/changeLogService";
+import { Link, useNavigate } from "react-router-dom";
 
 interface ProjectLog {
     id: string;
@@ -27,17 +27,18 @@ interface ProjectLog {
     task_id?: string;
 }
 
-export const ProjectLogsComponent = () => {
+export const DashboardLogsComponent = () => {
     const { authState } = useAuth();
     const [logs, setLogs] = useState<ProjectLog[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const loadLogs = async () => {
             try {
                 setLoading(true);
-                const logs = await fetchAllProjectLogForUser(authState.accessToken!);
+                const logs = await fetchDashboardLogForUser(authState.accessToken!);
                 setLogs(logs);
                 console.log(logs);
             } catch (err) {
@@ -54,85 +55,54 @@ export const ProjectLogsComponent = () => {
     }, [authState.accessToken]);
 
     const getOperationIcon = (operation: string, tableName: string) => {
-        if (tableName === 'assignments') {
-            return <FaUserCheck className="text-indigo-500" />;
-        }
-        if (tableName === 'pending_project_invitations') {
-            return <FaEnvelope className="text-purple-500" />;
-        }
-        if (tableName === 'comments') {
-            return <FaComment className="text-amber-500" />;
-        }
-        if (tableName === 'milestones') {
-            return <FaFlag className="text-fuchsia-500" />;
-        }
-        if (tableName === 'files') {
-            return <FaFile className="text-emerald-500" />;
-        }
-        if (tableName === 'project_members') {
-            return <FaUserCheck className="text-cyan-500" />;
-        }
-        if (tableName === 'task_labels') {
-            return <FaTag className="text-pink-500" />;
-        }
-        if (tableName === 'projects') {
-            return <FaInfoCircle className="text-blue-500" />;
-        }
-        if (tableName === 'tasks') {
-            return <FaTasks className="text-rose-500" />;
-        }
-
-
-        switch (operation.toLowerCase()) {
-            case 'insert':
-                return <FaPlus className="text-green-500" />;
-            case 'update':
-                return <FaUserEdit className="text-blue-500" />;
-            case 'delete':
-                return <FaTrash className="text-red-500" />;
+        switch (tableName) {
+            case 'assignments':
+                return <FaUserCheck className="text-indigo-500" />;
+            case 'pending_project_invitations':
+                return <FaEnvelope className="text-purple-500" />;
+            case 'comments':
+                return <FaComment className="text-amber-500" />;
+            case 'milestones':
+                return <FaFlag className="text-fuchsia-500" />;
+            case 'files':
+                return <FaFile className="text-emerald-500" />;
+            case 'project_members':
+                return operation.toLowerCase() === 'insert'
+                    ? <FaUserPlus className="text-teal-500" />
+                    : <FaUserMinus className="text-rose-500" />;
+            case 'task_labels':
+                return <FaTag className="text-pink-500" />;
+            case 'projects':
+                return <FaInfoCircle className="text-sky-500" />;
+            case 'tasks':
+                return <FaTasks className="text-orange-500" />;
             default:
                 return <FaInfoCircle className="text-gray-500" />;
         }
     };
 
-    const getOperationColor = (operation: string, tableName: string) => {
-        if (tableName === 'assignments') {
-            return "bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-300";
-        }
-        if (tableName === 'pending_project_invitations') {
-            return "bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300";
-        }
-        if (tableName === 'comments') {
-            return "bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300";
-        }
-        if (tableName === 'milestones') {
-            return "bg-fuchsia-100 dark:bg-fuchsia-900/30 text-fuchsia-800 dark:text-fuchsia-300";
-        }
-        if (tableName === 'files') {
-            return "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300";
-        }
-        if (tableName === 'project_members') {
-            return "bg-cyan-100 dark:bg-cyan-900/30 text-cyan-800 dark:text-cyan-300";
-        }
-        if (tableName === 'task_labels') {
-            return "bg-pink-100 dark:bg-pink-900/30 text-pink-800 dark:text-pink-300";
-        }
-        if (tableName === 'projects') {
-            return "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300";
-        }
-        if (tableName === 'tasks') {
-            return "bg-rose-100 dark:bg-rose-900/30 text-rose-800 dark:text-rose-300";
-        }
-
-        switch (operation.toLowerCase()) {
-            case 'insert':
-                return "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300";
-            case 'update':
-                return "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300";
-            case 'delete':
-                return "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300";
+    const getOperationColor = (tableName: string) => {
+        switch (tableName) {
+            case 'assignments':
+                return "bg-indigo-50 dark:bg-indigo-900/20 text-indigo-800 dark:text-indigo-300";
+            case 'pending_project_invitations':
+                return "bg-purple-50 dark:bg-purple-900/20 text-purple-800 dark:text-purple-300";
+            case 'comments':
+                return "bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300";
+            case 'milestones':
+                return "bg-fuchsia-50 dark:bg-fuchsia-900/20 text-fuchsia-800 dark:text-fuchsia-300";
+            case 'files':
+                return "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-800 dark:text-emerald-300";
+            case 'project_members':
+                return "bg-teal-50 dark:bg-teal-900/20 text-teal-800 dark:text-teal-300";
+            case 'task_labels':
+                return "bg-pink-50 dark:bg-pink-900/20 text-pink-800 dark:text-pink-300";
+            case 'projects':
+                return "bg-sky-50 dark:bg-sky-900/20 text-sky-800 dark:text-sky-300";
+            case 'tasks':
+                return "bg-orange-50 dark:bg-orange-900/20 text-orange-800 dark:text-orange-300";
             default:
-                return "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300";
+                return "bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-300";
         }
     };
 
@@ -282,6 +252,66 @@ export const ProjectLogsComponent = () => {
         }
 
         return "Unknown user";
+    };
+
+    const renderParentTaskConnection = (log: ProjectLog) => {
+        if (!log.task?.parent_task_id) return null;
+        const project_id = log.new_data?.project_id || log.old_data?.project_id;
+
+        return (
+            <div className="mt-1.5 group/parent relative">
+                <div
+                    className="flex items-center gap-1.5 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors rounded-lg p-1.5 max-w-fit -ml-1.5"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/projects/${project_id}/tasks/${log.task.parent_task_id}`);
+                    }}
+                >
+                    {/* Connection line */}
+                    <div className="h-4 w-4 flex items-center justify-center relative">
+                        <div className="absolute left-0 top-0 h-3 w-4 border-l-2 border-b-2 border-indigo-300 dark:border-indigo-600 rounded-bl-md"></div>
+                    </div>
+
+                    {/* Parent task icon & info */}
+                    <div className="flex items-center gap-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                        <div className="bg-indigo-50 dark:bg-indigo-900/30 p-1 rounded-md">
+                            <svg
+                                className="h-3.5 w-3.5 text-indigo-500 dark:text-indigo-400"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"
+                                />
+                            </svg>
+                        </div>
+                        <span>Part of:</span>
+                        <span className="font-semibold text-gray-700 dark:text-gray-300 truncate max-w-[150px]">
+                            {log.task.parent_task_title || 'Parent Task'}
+                        </span>
+                        <div className="opacity-0 group-hover/parent:opacity-100 transition-opacity">
+                            <svg
+                                className="h-3.5 w-3.5 text-indigo-500 dark:text-indigo-400"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                                />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
     };
 
     const getActionDescription = (log: ProjectLog) => {
@@ -720,11 +750,22 @@ export const ProjectLogsComponent = () => {
                 );
             case 'tasks':
                 if (log.operation.toLowerCase() === 'insert') {
+                    // For subtasks
+                    if (log.task?.parent_task_id) {
+                        return (
+                            <div className="space-y-1">
+                                <div>
+                                    Added subtask {renderTaskLink(log)} to project {renderProjectLink(log)}
+                                </div>
+                                {renderParentTaskConnection(log)}
+                            </div>
+                        );
+                    }
                     return (
                         <>
                             Added task {renderTaskLink(log)} to project {renderProjectLink(log)}
                         </>
-                    )
+                    );
                 } else if (log.operation.toLowerCase() === 'update') {
                     const changedFields = [];
 
@@ -794,50 +835,115 @@ export const ProjectLogsComponent = () => {
                     }
 
                     if (changedFields.length === 0) {
-                        return (
-                            <>
-                                Modified task {renderTaskLink(log)} in project {renderProjectLink(log)}
-                            </>
-                        );
+                        if (log.task?.parent_task_id) {
+                            return (
+                                <div className="space-y-1">
+                                    <div>
+                                        Modified subtask {renderTaskLink(log)} in project {renderProjectLink(log)}
+                                    </div>
+                                    {renderParentTaskConnection(log)}
+                                </div>
+                            )
+                        } else {
+                            return (
+                                <>
+                                    Modified task {renderTaskLink(log)} in project {renderProjectLink(log)}
+                                </>
+                            );
+                        }
                     }
 
+                    if (log.task?.parent_task_id) {
+                        return (
+                            <div className="space-y-2">
+                                <div className="space-y-1">
+                                    <span>
+                                        Updated subtask {renderTaskLink(log)} in project {renderProjectLink(log)}:
+                                    </span>
+                                    <ul className="list-disc list-inside space-y-1 pl-2 text-sm">
+                                        {changedFields.map((change, index) => (
+                                            <li key={index} className="flex flex-wrap items-baseline">
+                                                <span className="font-medium mr-1">{change.field}:</span>
+                                                {change.oldValue ? (
+                                                    <span className="line-through text-gray-500 dark:text-gray-400 mr-1">{change.oldValue}</span>
+                                                ) : (
+                                                    <span className="text-gray-500 dark:text-gray-400 mr-1">(empty)</span>
+                                                )}
+                                                <span className="mr-1">→</span>
+                                                {change.newValue ? (
+                                                    <span className="font-medium text-green-600 dark:text-green-400">{change.newValue}</span>
+                                                ) : (
+                                                    <span className="font-medium text-gray-500 dark:text-gray-400">(empty)</span>
+                                                )}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                                {renderParentTaskConnection(log)}
+                            </div>
+                        )
+                    } else {
+                        return (
+                            <div className="space-y-1">
+                                <span>
+                                    Updated task {renderTaskLink(log)} in project {renderProjectLink(log)}:
+                                </span>
+                                <ul className="list-disc list-inside space-y-1 pl-2 text-sm">
+                                    {changedFields.map((change, index) => (
+                                        <li key={index} className="flex flex-wrap items-baseline">
+                                            <span className="font-medium mr-1">{change.field}:</span>
+                                            {change.oldValue ? (
+                                                <span className="line-through text-gray-500 dark:text-gray-400 mr-1">{change.oldValue}</span>
+                                            ) : (
+                                                <span className="text-gray-500 dark:text-gray-400 mr-1">(empty)</span>
+                                            )}
+                                            <span className="mr-1">→</span>
+                                            {change.newValue ? (
+                                                <span className="font-medium text-green-600 dark:text-green-400">{change.newValue}</span>
+                                            ) : (
+                                                <span className="font-medium text-gray-500 dark:text-gray-400">(empty)</span>
+                                            )}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        );
+                    }
+                } else if (log.operation.toLowerCase() === 'delete') {
+                    if (log.task?.parent_task_id) {
+                        return (
+                            <div className="space-y-1">
+                                <div>
+                                    Deleted subtask {log.task?.task_title} from project {renderProjectLink(log)}
+                                </div>
+                                {renderParentTaskConnection(log)}
+                            </div>
+                        )
+                    } else {
+                        return (
+                            <>
+                                Deleted task {log.task?.task_title} from project {renderProjectLink(log)}
+                            </>
+                        )
+                    }
+                }
+
+                if (log.task?.parent_task_id) {
                     return (
                         <div className="space-y-1">
-                            <span>
-                                Updated task {renderTaskLink(log)} in project {renderProjectLink(log)}:
-                            </span>
-                            <ul className="list-disc list-inside space-y-1 pl-2 text-sm">
-                                {changedFields.map((change, index) => (
-                                    <li key={index} className="flex flex-wrap items-baseline">
-                                        <span className="font-medium mr-1">{change.field}:</span>
-                                        {change.oldValue ? (
-                                            <span className="line-through text-gray-500 dark:text-gray-400 mr-1">{change.oldValue}</span>
-                                        ) : (
-                                            <span className="text-gray-500 dark:text-gray-400 mr-1">(empty)</span>
-                                        )}
-                                        <span className="mr-1">→</span>
-                                        {change.newValue ? (
-                                            <span className="font-medium text-green-600 dark:text-green-400">{change.newValue}</span>
-                                        ) : (
-                                            <span className="font-medium text-gray-500 dark:text-gray-400">(empty)</span>
-                                        )}
-                                    </li>
-                                ))}
-                            </ul>
+                            <div>
+                                Modified subtask <span className="font-medium">{log.task.task_title}</span> in project {renderProjectLink(log)}
+                            </div>
+                            {renderParentTaskConnection(log)}
                         </div>
                     );
-                } else if (log.operation.toLowerCase() === 'delete') {
+                } else {
                     return (
                         <>
-                            Deleted task {log.task?.task_title} from project {renderProjectLink(log)}
+                            Modified task {renderTaskLink(log)} in project {renderProjectLink(log)}
                         </>
-                    )
+                    );
                 }
-                return (
-                    <>
-                        Modified task {renderTaskLink(log)} in project {renderProjectLink(log)}
-                    </>
-                );
             default:
                 switch (log.operation.toLowerCase()) {
                     case 'insert':
@@ -916,7 +1022,7 @@ export const ProjectLogsComponent = () => {
             {logs.map((log) => (
                 <div key={log.id} className="flex space-x-3 p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg transition-colors duration-200">
                     <div className="flex-shrink-0">
-                        <div className={`h-10 w-10 rounded-full flex items-center justify-center ${getOperationColor(log.operation, log.table_name)}`}>
+                        <div className={`h-10 w-10 rounded-full flex items-center justify-center ${getOperationColor(log.table_name)}`}>
                             {getOperationIcon(log.operation, log.table_name)}
                         </div>
                     </div>
