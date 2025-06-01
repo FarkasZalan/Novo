@@ -2,7 +2,7 @@ import { FaLinkedin, FaGithub, FaEnvelope, FaGlobe } from "react-icons/fa";
 
 export const Contact = () => {
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-900 p-6">
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
             <div className="max-w-lg w-full bg-white dark:bg-gray-800 shadow-lg rounded-2xl p-8 text-center">
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">Get in Touch</h1>
                 <p className="text-gray-600 dark:text-gray-300 mb-6">Feel free to reach out through any of the platforms below:</p>

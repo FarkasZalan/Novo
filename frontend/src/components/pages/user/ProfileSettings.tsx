@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { FaUser, FaEnvelope, FaLock, FaSave, FaTimes, FaGoogle, FaGithub } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../hooks/useAuth";
 import { updateUser } from "../../../services/userService";
 
@@ -257,10 +257,16 @@ export const ProfileSettings = () => {
                                     type="email"
                                     required
                                     value={formData.email}
-                                    onChange={handleChange}
-                                    className={`block w-full pl-10 pr-3 py-3 border ${fieldErrors.email ? "border-red-500 dark:border-red-400" : "border-gray-300 dark:border-gray-600"} rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500`}
+                                    readOnly
+                                    className={`block w-full pl-10 pr-3 py-3 cursor-not-allowed border ${fieldErrors.email
+                                            ? "border-red-500 dark:border-red-400"
+                                            : "border-gray-300 dark:border-gray-600"
+                                        } rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500`}
                                     placeholder="you@example.com"
                                 />
+                            </div>
+                            <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                Email cannot be changed. <Link to="/contact" className="text-indigo-600 dark:text-indigo-400 hover:underline">Contact support</Link> if you need to update your email address.
                             </div>
                             {fieldErrors.email && (
                                 <p className="mt-1 text-sm text-red-600 dark:text-red-400">
