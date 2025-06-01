@@ -1,7 +1,7 @@
 import { FaUserMinus, FaTimes, FaUserPlus, FaChevronDown, FaBan, FaUsers, FaCrown } from "react-icons/fa";
-import ProjectMember from "../../../../../types/projectMember";
+import ProjectMember from "../../../../../../types/projectMember";
 import { useState } from "react";
-import { updateProjectMemberRole, resendProjectInvite } from "../../../../../services/projectMemberService";
+import { updateProjectMemberRole, resendProjectInvite } from "../../../../../../services/projectMemberService";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 

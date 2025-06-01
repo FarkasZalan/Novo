@@ -7,7 +7,7 @@ import { Task } from '../../../../../types/task';
 import { FaFlag, FaPaperclip, FaTag } from 'react-icons/fa';
 import { TaskAssignments } from '../assignments/TaskAssignments';
 import { SubtaskListOnBoard } from './SubtaskListOnBoard';
-import { CommentComponent } from '../Comments';
+import { CommentComponent } from '../taskDetails/Comments/Comments';
 
 // one task card
 const DraggableTaskCard: React.FC<{ task: Task, onTaskUpdate?: (updatedTask: Task) => void, canManageTasks: boolean, project: Project | null }> = React.memo(({ task, onTaskUpdate, canManageTasks, project }) => {

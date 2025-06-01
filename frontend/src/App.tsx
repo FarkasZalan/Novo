@@ -20,17 +20,17 @@ import { VerifyEmail } from "./components/pages/auth/VerifyEmail";
 import { Dashboard } from "./components/pages/project/Dashboard";
 import { CreateProject } from "./components/pages/project/ProjectHandle/CreateProject";
 import { EditProject } from "./components/pages/project/ProjectHandle/EditProject";
-import { ProjectPage } from "./components/pages/project/ProjectPage";
+import { ProjectPage } from "./components/pages/project/projectPage/ProjectPage";
 import { ProtectedProjectForOwner } from "./components/routes/ProjectOwnerRoute";
-import { FilesTab } from "./components/pages/project/ProjectTabs/FilesTab";
+import { FilesTab } from "./components/pages/project/projectPage/ProjectTabs/FilesTab";
 import { CreateTaskPage } from "./components/pages/task/taskHandler/CreateTaskPage";
 import { TasksManagerPage } from "./components/pages/task/TaskManaggerPage";
 import { UpdateTaskPage } from "./components/pages/task/taskHandler/UpdateTaskPage";
-import { TaskDetails } from "./components/pages/task/taskComponents/TaskDetails";
+import { TaskDetails } from "./components/pages/task/taskComponents/taskDetails/TaskDetails";
 import { ProtectedProjectForTaskManagement } from "./components/routes/TaskAdminOrOwnerRoute";
 import { useAuth } from "./hooks/useAuth";
 import { AuthProvider } from "./context/AuthProvider";
-import { MilestoneDetailsPage } from "./components/pages/task/taskComponents/milestones/MilestoneDetails";
+import { MilestoneDetailsPage } from "./components/pages/task/taskComponents/milestones/milestoneDetails/MilestoneDetails";
 import { TaskEditReadOnlyRoute } from "./components/routes/TaskEditForReadOnlyRoute";
 
 function RootRedirect() {

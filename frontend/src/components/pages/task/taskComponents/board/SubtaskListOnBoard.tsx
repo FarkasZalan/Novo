@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { TaskAssignments } from '../assignments/TaskAssignments';
 import { format, isPast, isToday, isTomorrow } from 'date-fns';
 import toast from 'react-hot-toast';
-import { CommentComponent } from '../Comments';
+import { CommentComponent } from '../taskDetails/Comments/Comments';
 
 interface SubtaskListProps {
     task: Task;

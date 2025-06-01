@@ -12,7 +12,7 @@ const createUserTable = async () => {
       premium_session_id VARCHAR(255) DEFAULT NULL,
       premium_start_date TIMESTAMP DEFAULT NULL,
       premium_end_date TIMESTAMP DEFAULT NULL,
-      user_cancelled_premiunm BOOLEAN DEFAULT FALSE,
+      user_cancelled_premium BOOLEAN DEFAULT FALSE,
       refresh_session_id VARCHAR(255),
       provider VARCHAR(50),
       reset_password_token VARCHAR(255),
@@ -20,8 +20,7 @@ const createUserTable = async () => {
       is_verified BOOLEAN DEFAULT FALSE,
       verification_token VARCHAR(255),
       verification_token_expires TIMESTAMP,
-      created_at TIMESTAMP DEFAULT NOW(),
-      updated_at TIMESTAMP DEFAULT NOW()
+      created_at TIMESTAMP DEFAULT NOW()
     );
     
     -- Additional indexes for users table

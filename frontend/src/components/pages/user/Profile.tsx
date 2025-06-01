@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { FaUser, FaEnvelope, FaCog, FaCalendarAlt, FaSignOutAlt, FaTasks, FaExclamationTriangle, FaTrash, FaCrown, FaCheck, FaTimes, FaChevronLeft } from "react-icons/fa";
+import { FaUser, FaCog, FaCalendarAlt, FaSignOutAlt, FaExclamationTriangle, FaTrash, FaCrown, FaCheck, FaTimes, FaChevronLeft } from "react-icons/fa";
 import { useAuth } from "../../../hooks/useAuth";
 import { useEffect, useState } from "react";
 import { cancelPremiumPlan, createPayment, deleteAccount, reactivatePremiumPlan } from "../../../services/userService";
@@ -7,6 +7,7 @@ import { loadStripe } from '@stripe/stripe-js';
 import toast from "react-hot-toast";
 import { PremiumInfoDialog } from "./PremiumInfoDialog";
 import { PremiumManagementModal } from "./PremiumManagementDialog";
+import { UserLogsComponent } from "./UserLog";
 
 export const Profile = () => {
     const { authState, logout, refreshUserData } = useAuth();
@@ -262,7 +263,7 @@ export const Profile = () => {
                                             {user?.is_premium ? (
                                                 <span className="flex items-center text-yellow-500 dark:text-yellow-400">
                                                     <FaCrown className="mr-1" />
-                                                    {user.user_cancelled_premiunm ? 'Premium (Ending Soon)' : 'Premium Member'}
+                                                    {user.user_cancelled_premium ? 'Premium (Ending Soon)' : 'Premium Member'}
                                                 </span>
                                             ) : (
                                                 "Free Member"
@@ -283,7 +284,7 @@ export const Profile = () => {
                                 </h2>
                                 <div className="space-y-4">
                                     {/* Premium Cancellation Notice */}
-                                    {user?.user_cancelled_premiunm && (
+                                    {user?.user_cancelled_premium && (
                                         <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 dark:border-yellow-500 p-4 rounded-lg">
                                             <div className="flex">
                                                 <div className="flex-shrink-0">
@@ -347,13 +348,13 @@ export const Profile = () => {
                                         </div>
 
                                         {/* Premium Plan */}
-                                        <div className={`border rounded-lg p-4 transition-colors duration-200 ${user?.user_cancelled_premiunm
+                                        <div className={`border rounded-lg p-4 transition-colors duration-200 ${user?.user_cancelled_premium
                                             ? 'border-yellow-400 dark:border-yellow-500 bg-yellow-50/50 dark:bg-gray-700'
                                             : 'border-yellow-500 dark:border-yellow-400 bg-yellow-50 dark:bg-gray-700'
                                             }`}>
                                             <div className="flex justify-between items-start">
                                                 <h3 className="font-bold text-lg mb-2 text-yellow-600 dark:text-yellow-400">Premium Plan</h3>
-                                                {user?.user_cancelled_premiunm && (
+                                                {user?.user_cancelled_premium && (
                                                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200">
                                                         Ending Soon
                                                     </span>
@@ -390,7 +391,7 @@ export const Profile = () => {
                                             onClick={() => setShowPremiumManagement(true)}
                                         >
                                             <FaCog className="mr-2" />
-                                            {user.user_cancelled_premiunm ? 'Membership Ending Soon' : 'Manage Membership'}
+                                            {user.user_cancelled_premium ? 'Membership Ending Soon' : 'Manage Membership'}
                                         </button>
                                     ) : (
                                         <button
@@ -408,24 +409,7 @@ export const Profile = () => {
                             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md dark:shadow-gray-700/50 p-6 transition-colors duration-200">
                                 <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">Recent Activity</h2>
                                 <div className="space-y-4">
-                                    <div className="flex items-start">
-                                        <div className="flex-shrink-0 h-10 w-10 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center text-indigo-600 dark:text-indigo-300 mr-4">
-                                            <FaTasks />
-                                        </div>
-                                        <div>
-                                            <p className="text-gray-800 dark:text-gray-200">Created new project "Website Redesign"</p>
-                                            <p className="text-sm text-gray-500 dark:text-gray-400">2 hours ago</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-start">
-                                        <div className="flex-shrink-0 h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-300 mr-4">
-                                            <FaEnvelope />
-                                        </div>
-                                        <div>
-                                            <p className="text-gray-800 dark:text-gray-200">Received message from team member</p>
-                                            <p className="text-sm text-gray-500 dark:text-gray-400">1 day ago</p>
-                                        </div>
-                                    </div>
+                                    <UserLogsComponent />
                                 </div>
                             </div>
 

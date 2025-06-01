@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { FaComment, FaTrash, FaPaperPlane, FaEdit, FaTimes } from 'react-icons/fa';
-import { useAuth } from '../../../../hooks/useAuth';
-import { createComment, getAllCommentsForTask, deleteComment, updateComment } from '../../../../services/commentService';
+import { useAuth } from '../../../../../../hooks/useAuth';
+import { createComment, getAllCommentsForTask, deleteComment, updateComment } from '../../../../../../services/commentService';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ConfirmationDialog } from '../../project/ConfirmationDialog';
+import { ConfirmationDialog } from '../../../../project/ConfirmationDialog';
+import { CommentLogsComponent } from './CommentLog';
 
 interface CommentProps {
     projectId: string;
@@ -415,7 +416,7 @@ export const CommentComponent: React.FC<CommentProps> = ({ projectId, taskId, ca
                                                 <textarea
                                                     value={editedComment}
                                                     onChange={(e) => setEditedComment(e.target.value)}
-                                                    className="w-full px-3 py-2 bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:focus:ring-indigo-600 dark:focus:border-indigo-600 resize-none"
+                                                    className="w-full px-3 py-2 bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:focus:ring-indigo-600 dark:focus:border-indigo-600 resize-none"
                                                     rows={3}
                                                     autoFocus
                                                 />
@@ -440,6 +441,13 @@ export const CommentComponent: React.FC<CommentProps> = ({ projectId, taskId, ca
                                                 {comment.comment}
                                             </p>
                                         )}
+                                    </div>
+                                    <div className="mt-2 ml-12">
+                                        <CommentLogsComponent
+                                            projectId={projectId}
+                                            taskId={taskId}
+                                            commentId={comment.id}
+                                        />
                                     </div>
                                 </div>
                             </motion.div>

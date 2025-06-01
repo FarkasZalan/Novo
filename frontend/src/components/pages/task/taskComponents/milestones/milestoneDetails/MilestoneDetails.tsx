@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../../../../hooks/useAuth';
+import { useAuth } from '../../../../../../hooks/useAuth';
 import { FaArrowLeft, FaEdit, FaTrash, FaFlag, FaTasks, FaCalendarAlt, FaCheck, FaBan, FaUsers, FaCrown } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -11,14 +11,15 @@ import {
     deleteMilestone,
     addMilestoneToTask,
     deleteMilestoneFromTask,
-} from '../../../../../services/milestonesService';
-import { Task } from '../../../../../types/task';
-import { MilestoneFormModal } from './MilestoneFormModal';
-import { ConfirmationDialog } from '../../../project/ConfirmationDialog';
+} from '../../../../../../services/milestonesService';
+import { Task } from '../../../../../../types/task';
+import { MilestoneFormModal } from '../MilestoneFormModal';
+import { ConfirmationDialog } from '../../../../project/ConfirmationDialog';
 import toast from 'react-hot-toast';
-import { MilestoneTasks } from './MilestoneTasks';
-import { getProjectMembers } from '../../../../../services/projectMemberService';
-import { fetchProjectById } from '../../../../../services/projectService';
+import { MilestoneTasks } from '../MilestoneTasks';
+import { getProjectMembers } from '../../../../../../services/projectMemberService';
+import { fetchProjectById } from '../../../../../../services/projectService';
+import { MilestoneLogsComponent } from './MilestoneLog';
 
 export const MilestoneDetailsPage: React.FC = () => {
     const { projectId, milestoneId } = useParams<{ projectId: string; milestoneId: string }>();
@@ -381,6 +382,30 @@ export const MilestoneDetailsPage: React.FC = () => {
                             onRemoveTask={handleRemoveTask}
                             project={project}
                         />
+                    </motion.div>
+                </AnimatePresence>
+
+                {/* Activity Log Section */}
+                <AnimatePresence>
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.3, delay: 0.2 }}
+                        className="mt-8"
+                    >
+                        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
+                            <div className="p-6 md:p-8">
+                                <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6">
+                                    Activity Log
+                                </h2>
+                                {projectId && milestoneId && (
+                                    <MilestoneLogsComponent
+                                        projectId={projectId}
+                                        milestoneId={milestoneId}
+                                    />
+                                )}
+                            </div>
+                        </div>
                     </motion.div>
                 </AnimatePresence>
             </div>

@@ -10,7 +10,7 @@ import { TaskAssignments } from '../assignments/TaskAssignments';
 import { ConfirmationDialog } from '../../../project/ConfirmationDialog';
 import toast from 'react-hot-toast';
 import { isPast, isToday, isTomorrow, format } from 'date-fns';
-import { CommentComponent } from '../Comments';
+import { CommentComponent } from '../taskDetails/Comments/Comments';
 
 interface SubtaskListProps {
     task: Task;

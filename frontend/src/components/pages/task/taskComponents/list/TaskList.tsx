@@ -9,7 +9,7 @@ import toast from 'react-hot-toast';
 import { Task } from '../../../../../types/task';
 import { TaskAssignments } from '../assignments/TaskAssignments';
 import { SubtaskList } from './SubtaskSectionForList';
-import { CommentComponent } from '../Comments';
+import { CommentComponent } from '../taskDetails/Comments/Comments';
 
 interface TaskListProps {
     tasks: Task[];

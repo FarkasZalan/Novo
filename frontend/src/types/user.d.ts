@@ -9,6 +9,6 @@ interface User {
     premium_start_date: string;
     premium_end_date: string;
     premium_session_id: string;
-    user_cancelled_premiunm: boolean;
+    user_cancelled_premium: boolean;
     provider: string;
 }

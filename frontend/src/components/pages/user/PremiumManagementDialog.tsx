@@ -45,11 +45,11 @@ export const PremiumManagementModal = ({
                     <div className="flex justify-between items-start">
                         <div>
                             <h3 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                                <FaCrown className={`${user.user_cancelled_premiunm ? 'text-yellow-400 dark:text-yellow-300' : 'text-yellow-500 dark:text-yellow-400'}`} />
-                                {user.user_cancelled_premiunm ? 'Premium Ending Soon' : 'Premium Membership'}
+                                <FaCrown className={`${user.user_cancelled_premium ? 'text-yellow-400 dark:text-yellow-300' : 'text-yellow-500 dark:text-yellow-400'}`} />
+                                {user.user_cancelled_premium ? 'Premium Ending Soon' : 'Premium Membership'}
                             </h3>
                             <p className="text-gray-500 dark:text-gray-400 mt-2 text-sm">
-                                {user.user_cancelled_premiunm
+                                {user.user_cancelled_premium
                                     ? 'Your premium access will end soon'
                                     : 'Manage your premium subscription details'}
                             </p>
@@ -65,7 +65,7 @@ export const PremiumManagementModal = ({
 
                 {/* Membership Details */}
                 <div className="px-6 pb-4">
-                    {user.user_cancelled_premiunm && (
+                    {user.user_cancelled_premium && (
                         <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 dark:border-yellow-500 rounded-lg p-4 mb-4">
                             <div className="flex">
                                 <div className="flex-shrink-0">
@@ -90,25 +90,25 @@ export const PremiumManagementModal = ({
                     )}
 
                     <div className="space-y-4">
-                        <div className={`${user.user_cancelled_premiunm ? 'bg-yellow-50/50 dark:bg-yellow-900/10 border-yellow-200 dark:border-yellow-800' : 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800'} border rounded-lg p-4`}>
+                        <div className={`${user.user_cancelled_premium ? 'bg-yellow-50/50 dark:bg-yellow-900/10 border-yellow-200 dark:border-yellow-800' : 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800'} border rounded-lg p-4`}>
                             <div className="flex items-start">
-                                <FaInfoCircle className={`mt-1 mr-3 flex-shrink-0 ${user.user_cancelled_premiunm ? 'text-yellow-400 dark:text-yellow-300' : 'text-yellow-500 dark:text-yellow-400'}`} />
+                                <FaInfoCircle className={`mt-1 mr-3 flex-shrink-0 ${user.user_cancelled_premium ? 'text-yellow-400 dark:text-yellow-300' : 'text-yellow-500 dark:text-yellow-400'}`} />
                                 <div>
-                                    <h4 className={`font-medium ${user.user_cancelled_premiunm ? 'text-yellow-700 dark:text-yellow-300' : 'text-yellow-800 dark:text-yellow-200'}`}>
-                                        {user.user_cancelled_premiunm ? 'Current Benefits (Until End Date)' : 'Premium Member Benefits'}
+                                    <h4 className={`font-medium ${user.user_cancelled_premium ? 'text-yellow-700 dark:text-yellow-300' : 'text-yellow-800 dark:text-yellow-200'}`}>
+                                        {user.user_cancelled_premium ? 'Current Benefits (Until End Date)' : 'Premium Member Benefits'}
                                     </h4>
                                     <ul className="mt-2 text-sm space-y-1">
                                         <li className="flex items-center">
-                                            <FaCheck className={`mr-2 ${user.user_cancelled_premiunm ? 'text-yellow-400 dark:text-yellow-300' : 'text-yellow-500 dark:text-yellow-400'}`} />
-                                            <span className={user.user_cancelled_premiunm ? 'text-yellow-600 dark:text-yellow-300' : 'text-yellow-700 dark:text-yellow-300'}>Custom project branding</span>
+                                            <FaCheck className={`mr-2 ${user.user_cancelled_premium ? 'text-yellow-400 dark:text-yellow-300' : 'text-yellow-500 dark:text-yellow-400'}`} />
+                                            <span className={user.user_cancelled_premium ? 'text-yellow-600 dark:text-yellow-300' : 'text-yellow-700 dark:text-yellow-300'}>Custom project branding</span>
                                         </li>
                                         <li className="flex items-center">
-                                            <FaCheck className={`mr-2 ${user.user_cancelled_premiunm ? 'text-yellow-400 dark:text-yellow-300' : 'text-yellow-500 dark:text-yellow-400'}`} />
-                                            <span className={user.user_cancelled_premiunm ? 'text-yellow-600 dark:text-yellow-300' : 'text-yellow-700 dark:text-yellow-300'}>Unlimited team members</span>
+                                            <FaCheck className={`mr-2 ${user.user_cancelled_premium ? 'text-yellow-400 dark:text-yellow-300' : 'text-yellow-500 dark:text-yellow-400'}`} />
+                                            <span className={user.user_cancelled_premium ? 'text-yellow-600 dark:text-yellow-300' : 'text-yellow-700 dark:text-yellow-300'}>Unlimited team members</span>
                                         </li>
                                         <li className="flex items-center">
-                                            <FaCheck className={`mr-2 ${user.user_cancelled_premiunm ? 'text-yellow-400 dark:text-yellow-300' : 'text-yellow-500 dark:text-yellow-400'}`} />
-                                            <span className={user.user_cancelled_premiunm ? 'text-yellow-600 dark:text-yellow-300' : 'text-yellow-700 dark:text-yellow-300'}>Priority support</span>
+                                            <FaCheck className={`mr-2 ${user.user_cancelled_premium ? 'text-yellow-400 dark:text-yellow-300' : 'text-yellow-500 dark:text-yellow-400'}`} />
+                                            <span className={user.user_cancelled_premium ? 'text-yellow-600 dark:text-yellow-300' : 'text-yellow-700 dark:text-yellow-300'}>Priority support</span>
                                         </li>
                                     </ul>
                                 </div>
@@ -124,7 +124,7 @@ export const PremiumManagementModal = ({
                             </div>
                             <div>
                                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                                    {user.user_cancelled_premiunm ? 'Access Ends' : 'Renewal Date'}
+                                    {user.user_cancelled_premium ? 'Access Ends' : 'Renewal Date'}
                                 </p>
                                 <p className="text-gray-900 dark:text-white font-medium">
                                     {user.premium_end_date ? formatDate(user.premium_end_date) : "N/A"}
@@ -139,10 +139,10 @@ export const PremiumManagementModal = ({
                     <div className="px-6 py-4">
                         <h4 className="font-semibold text-red-600 dark:text-red-400 flex items-center mb-3">
                             <FaExclamationTriangle className="mr-2" />
-                            {user.user_cancelled_premiunm ? 'Subscription Status' : 'Danger Zone'}
+                            {user.user_cancelled_premium ? 'Subscription Status' : 'Danger Zone'}
                         </h4>
 
-                        {user.user_cancelled_premiunm ? (
+                        {user.user_cancelled_premium ? (
                             <div className="space-y-4">
                                 <div className="bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
                                     <h5 className="font-medium text-blue-800 dark:text-blue-200 mb-2">

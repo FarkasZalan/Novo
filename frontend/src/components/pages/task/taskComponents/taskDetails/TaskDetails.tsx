@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
     FaCheckCircle,
     FaClock,
@@ -19,16 +19,17 @@ import {
     FaCrown,
     FaExclamationCircle
 } from 'react-icons/fa';
-import { fetchTask } from '../../../../services/taskService';
-import { fetchProjectById } from '../../../../services/projectService';
-import { getProjectMembers } from '../../../../services/projectMemberService';
-import { useAuth } from '../../../../hooks/useAuth';
-import { TaskFiles } from './TaskFiles';
-import { TaskAssignments } from './assignments/TaskAssignments';
-import { SubtaskList } from './subtasks/SubtaskList';
-import { Task } from '../../../../types/task';
+import { fetchTask } from '../../../../../services/taskService';
+import { fetchProjectById } from '../../../../../services/projectService';
+import { getProjectMembers } from '../../../../../services/projectMemberService';
+import { useAuth } from '../../../../../hooks/useAuth';
+import { TaskFiles } from '../TaskFiles';
+import { TaskAssignments } from '../assignments/TaskAssignments';
+import { SubtaskList } from '../subtasks/SubtaskList';
+import { Task } from '../../../../../types/task';
 import { isPast, isToday, isTomorrow, format } from 'date-fns';
-import { CommentComponent } from './Comments';
+import { CommentComponent } from './Comments/Comments';
+import { TaskLogsComponent } from './TaskLog';
 
 export const TaskDetails: React.FC = () => {
     const { taskId, projectId } = useParams<{ taskId: string; projectId: string }>();
@@ -541,6 +542,24 @@ export const TaskDetails: React.FC = () => {
                                     minute: '2-digit'
                                 })}
                             </div>
+                        </div>
+                    </div>
+
+                    {/* Recent Activity Section */}
+                    <div className="mt-8 bg-white dark:bg-gray-800 rounded-xl shadow-md dark:shadow-gray-700/50 overflow-hidden transition-colors duration-200">
+                        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Recent Activity</h2>
+                        </div>
+                        <div className="divide-y divide-gray-200 dark:divide-gray-700">
+                            <TaskLogsComponent
+                                projectId={projectId!}
+                                taskId={taskId!}
+                            />
+                        </div>
+                        <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 text-center">
+                            <Link to="/activity" className="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 hover:underline">
+                                View all activity
+                            </Link>
                         </div>
                     </div>
                 </div>

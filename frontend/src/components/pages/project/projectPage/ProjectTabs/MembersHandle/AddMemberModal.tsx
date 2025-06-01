@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { FaUserPlus, FaExclamationTriangle, FaSearch, FaTimes, FaPlus, FaUser, FaCrown, FaEnvelope } from "react-icons/fa";
-import { fetchAllRegisteredUsers } from "../../../../../services/userService";
-import { addMembersToProject, getProjectMembers } from "../../../../../services/projectMemberService";
-import { useAuth } from "../../../../../hooks/useAuth";
+import { fetchAllRegisteredUsers } from "../../../../../../services/userService";
+import { addMembersToProject, getProjectMembers } from "../../../../../../services/projectMemberService";
+import { useAuth } from "../../../../../../hooks/useAuth";
 import { Link } from "react-router-dom";
 
 interface User {

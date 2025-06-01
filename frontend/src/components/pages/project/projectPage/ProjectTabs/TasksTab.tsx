@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { FaTasks, FaChevronRight, FaPlus, FaPaperclip, FaFlag, FaTag, FaBan, FaCalendarDay, FaUsers, FaCrown } from "react-icons/fa";
-import { fetchAllTasksForProject } from "../../../../services/taskService";
-import { fetchProjectById } from "../../../../services/projectService";
-import { getProjectMembers } from "../../../../services/projectMemberService";
+import { fetchAllTasksForProject } from "../../../../../services/taskService";
+import { fetchProjectById } from "../../../../../services/projectService";
+import { getProjectMembers } from "../../../../../services/projectMemberService";
 import { format, isPast, isToday, isTomorrow } from "date-fns";
-import { useAuth } from "../../../../hooks/useAuth";
-import { TaskAssignments } from "../../task/taskComponents/assignments/TaskAssignments";
-import { Task } from "../../../../types/task";
-import { CommentComponent } from "../../task/taskComponents/Comments";
+import { useAuth } from "../../../../../hooks/useAuth";
+import { TaskAssignments } from "../../../task/taskComponents/assignments/TaskAssignments";
+import { Task } from "../../../../../types/task";
+import { CommentComponent } from "../../../task/taskComponents/taskDetails/Comments/Comments";
 
 export const TasksTab = () => {
     const { projectId } = useParams<{ projectId: string }>();

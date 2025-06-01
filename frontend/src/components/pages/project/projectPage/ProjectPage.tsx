@@ -13,16 +13,17 @@ import {
     FaBan,
     FaExclamationCircle,
 } from "react-icons/fa";
-import { fetchProjectById } from "../../../services/projectService";
-import { AddMemberDialog } from "./ProjectTabs/MemberHandle/AddMemberModal";
-import { MembersTab } from "./ProjectTabs/MemberHandle/MembersTab";
+import { fetchProjectById } from "../../../../services/projectService";
+import { AddMemberDialog } from "./ProjectTabs/MembersHandle/AddMemberModal";
+import { MembersTab } from "./ProjectTabs/MembersHandle/MembersTab";
 import { TasksTab } from "./ProjectTabs/TasksTab";
 import { FilesTab } from "./ProjectTabs/FilesTab";
-import ProjectMember from "../../../types/projectMember";
-import { ConfirmationDialog } from "./ConfirmationDialog";
+import ProjectMember from "../../../../types/projectMember";
+import { ConfirmationDialog } from "../ConfirmationDialog";
 import toast from "react-hot-toast";
-import { getProjectMembers, deleteMemberFromProject, leaveProject } from "../../../services/projectMemberService";
-import { useAuth } from "../../../hooks/useAuth";
+import { getProjectMembers, deleteMemberFromProject, leaveProject } from "../../../../services/projectMemberService";
+import { useAuth } from "../../../../hooks/useAuth";
+import { ProjectLogsComponent } from "./ProjectLog";
 
 export const ProjectPage = () => {
     const { projectId } = useParams<{ projectId: string }>();
@@ -355,7 +356,6 @@ export const ProjectPage = () => {
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
             {/* Project Header */}
-            {/* Project Header */}
             <div className="bg-white dark:bg-gray-800 shadow-sm transition-colors duration-200">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                     <div className="flex flex-col space-y-4 md:space-y-0 md:flex-row md:items-center md:justify-between">
@@ -394,7 +394,7 @@ export const ProjectPage = () => {
                             {canAddMembers && !project.read_only && (
                                 <button
                                     onClick={() => setShowAddMember(true)}
-                                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white rounded-lg font-medium transition-colors duration-200 flex items-center shrink-0"
+                                    className="px-4 py-2 cursor-pointer bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white rounded-lg font-medium transition-colors duration-200 flex items-center shrink-0"
                                     disabled={project.read_only}
                                 >
                                     <FaUserPlus className="mr-2" />
@@ -404,7 +404,7 @@ export const ProjectPage = () => {
                             {canEditProject && !project.read_only && (
                                 <Link
                                     to={`/projects/${projectId}/edit`}
-                                    className="px-4 py-2 border border-gray-300 dark:border-gray-600 cursor-pointer bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-medium transition-colors duration-200 flex items-center shrink-0"
+                                    className="px-4 py-2 cursor-pointer border border-gray-300 dark:border-gray-600 cursor-pointer bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-medium transition-colors duration-200 flex items-center shrink-0"
                                 >
                                     <FaEdit className="mr-2" />
                                     Edit
@@ -413,7 +413,7 @@ export const ProjectPage = () => {
                             {!canEditProject && (
                                 <button
                                     onClick={() => !project.read_only && setShowLeaveConfirm(true)}
-                                    className={`px-4 py-2 border ${project.read_only ? 'border-gray-300 dark:border-gray-600 cursor-not-allowed' : 'border-red-300 dark:border-red-600 cursor-pointer hover:bg-red-50 dark:hover:bg-red-900/20'} bg-white dark:bg-gray-700 text-red-600 dark:text-red-400 rounded-lg font-medium transition-colors duration-200 flex items-center shrink-0`}
+                                    className={`px-4 py-2 cursor-pointer border ${project.read_only ? 'border-gray-300 dark:border-gray-600 cursor-not-allowed' : 'border-red-300 dark:border-red-600 cursor-pointer hover:bg-red-50 dark:hover:bg-red-900/20'} bg-white dark:bg-gray-700 text-red-600 dark:text-red-400 rounded-lg font-medium transition-colors duration-200 flex items-center shrink-0`}
                                     disabled={project.read_only}
                                 >
                                     <FaSignOutAlt className="mr-2" />
@@ -534,6 +534,23 @@ export const ProjectPage = () => {
                         />
                     )}
                     {activeTab === "files" && <FilesTab />}
+                </div>
+
+                {/* Recent Activity Section */}
+                <div className="mt-8 bg-white dark:bg-gray-800 rounded-xl shadow-md dark:shadow-gray-700/50 overflow-hidden transition-colors duration-200">
+                    <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                        <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Recent Activity</h2>
+                    </div>
+                    <div className="divide-y divide-gray-200 dark:divide-gray-700">
+                        <ProjectLogsComponent
+                            projectId={projectId!}
+                        />
+                    </div>
+                    <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 text-center">
+                        <Link to="/activity" className="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 hover:underline">
+                            View all activity
+                        </Link>
+                    </div>
                 </div>
             </main>
 

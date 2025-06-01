@@ -6,7 +6,7 @@ import { TaskAssignments } from '../assignments/TaskAssignments';
 import toast from 'react-hot-toast';
 import { useNavigate, useParams } from 'react-router-dom';
 import { format, isPast, isToday, isTomorrow } from 'date-fns';
-import { CommentComponent } from '../Comments';
+import { CommentComponent } from '../taskDetails/Comments/Comments';
 
 interface MilestoneTasksProps {
     milestone: Milestone;
