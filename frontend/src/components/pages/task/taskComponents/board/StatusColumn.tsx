@@ -39,7 +39,7 @@ const StatusColumn: React.FC<Props> = React.memo(({
     });
 
     return (
-        <div className="flex flex-col">
+        <div className="flex flex-col h-full">
             <div className="flex items-center justify-between mb-4 px-2">
                 <div className="flex items-center space-x-2">
                     {statusInfo.icon}
@@ -53,13 +53,13 @@ const StatusColumn: React.FC<Props> = React.memo(({
             {/* dropable area*/}
             <motion.div
                 ref={setNodeRef}
-                className={`flex-1 rounded-xl p-4 ${statusInfo.color} min-h-64 transition-all duration-200`}
+                className={`flex-1 rounded-xl p-4 ${statusInfo.color} min-h-64 h-full transition-all duration-200`}
                 animate={{
                     border: isOver ? '2px solid #818cf8' : '2px solid transparent'
                 }}
                 transition={{ type: 'spring', stiffness: 500, damping: 30 }}
             >
-                <div className="space-y-3">
+                <div className="space-y-3 h-full">
                     {/* add task button if the user have permission */}
                     {canManageTasks ? (
                         <motion.button
