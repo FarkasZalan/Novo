@@ -46,8 +46,10 @@ export const TasksManagerPage: React.FC = () => {
     // Load tasks when milestone selection changes
     useEffect(() => {
         const loadTasksForMilestone = async () => {
+            setLoading(true);
             if (!selectedMilestone || selectedMilestone === 'all') {
                 setFilteredTasks(tasks);
+                setLoading(false);
                 return;
             }
 
@@ -65,33 +67,46 @@ export const TasksManagerPage: React.FC = () => {
                 console.error("Failed to load tasks for milestone:", error);
                 toast.error("Failed to load tasks for milestone");
                 setFilteredTasks([]);
+            } finally {
+                setLoading(false);
             }
         };
 
         loadTasksForMilestone();
     }, [selectedMilestone, projectId, authState.accessToken, tasks]);
 
+    const selectDefaultMilestone = (milestones: Milestone[]) => {
+        if (milestones.length === 0) return null;
+
+        // Find milestones with future due dates
+        const futureMilestones = milestones.filter(m =>
+            m.due_date && new Date(m.due_date) > new Date()
+        ).sort((a, b) =>
+            new Date(a.due_date!).getTime() - new Date(b.due_date!).getTime()
+        );
+
+        if (futureMilestones.length > 0) {
+            return futureMilestones[0].id;
+        } else {
+            // If no future milestones, sort by creation date (newest first)
+            const sortedByCreation = [...milestones].sort((a, b) =>
+                new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+            );
+            return sortedByCreation[0].id;
+        }
+    };
+
     // Set initial milestone selection
     useEffect(() => {
         if (milestones.length > 0 && !selectedMilestone) {
-            // Find milestones with future due dates
-            const futureMilestones = milestones.filter(m =>
-                m.due_date && new Date(m.due_date) > new Date()
-            ).sort((a, b) =>
-                new Date(a.due_date!).getTime() - new Date(b.due_date!).getTime()
-            );
-
-            if (futureMilestones.length > 0) {
-                setSelectedMilestone(futureMilestones[0].id);
-            } else {
-                // If no future milestones, sort by creation date (newest first)
-                const sortedByCreation = [...milestones].sort((a, b) =>
-                    new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-                );
-                setSelectedMilestone(sortedByCreation[0].id);
-            }
+            const defaultMilestone = selectDefaultMilestone(milestones);
+            setSelectedMilestone(defaultMilestone);
         }
-    }, [milestones]);
+    }, [milestones, selectedMilestone]);
+
+    useEffect(() => {
+        setSelectedMilestone(null);
+    }, [view]);
 
     // Update filtered tasks when main tasks change and no specific milestone is selected
     useEffect(() => {

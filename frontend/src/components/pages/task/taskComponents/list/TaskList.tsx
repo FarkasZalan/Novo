@@ -248,7 +248,10 @@ export const TaskList: React.FC<TaskListProps> = React.memo(({
                         <div className="absolute z-10 right-0 mt-2 w-64 origin-top-right rounded-lg shadow-lg bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 focus:outline-none">
                             <div className="py-1">
                                 <button
-                                    onClick={() => onMilestoneChange('all')}
+                                    onClick={() => {
+                                        onMilestoneChange('all')
+                                        setIsMilestoneDropdownOpen(!isMilestoneDropdownOpen)
+                                    }}
                                     className={`flex cursor-pointer items-center w-full px-4 py-2 text-sm ${selectedMilestone === 'all'
                                         ? 'bg-indigo-50 dark:bg-indigo-900/30  text-gray-800 dark:text-gray-100 '
                                         : 'text-gray-800 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-600'}`}
@@ -264,7 +267,10 @@ export const TaskList: React.FC<TaskListProps> = React.memo(({
                                     return (
                                         <button
                                             key={milestone.id}
-                                            onClick={() => onMilestoneChange(milestone.id)}
+                                            onClick={() => {
+                                                onMilestoneChange(milestone.id)
+                                                setIsMilestoneDropdownOpen(!isMilestoneDropdownOpen)
+                                            }}
                                             className={`flex  cursor-pointer items-center w-full px-4 py-2 text-sm text-left  text-gray-800 dark:text-gray-100  transition-colors ${isActive
                                                 ? 'bg-indigo-50 dark:bg-indigo-900/30 '
                                                 : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'}`}
@@ -279,7 +285,7 @@ export const TaskList: React.FC<TaskListProps> = React.memo(({
                                             <FaFlag className="mr-2" style={{ color: milestoneColor }} />
                                             <span className="truncate  text-gray-800 dark:text-gray-100 ">{milestone.name}</span>
                                             {milestone.due_date && (
-                                                <span className="ml-auto text-xs" style={{ color: isActive ? `${milestoneColor}80` : 'var(--text-gray-500)' }}>
+                                                <span className="ml-auto text-xs  text-gray-600 dark:text-gray-300">
                                                     {new Date(milestone.due_date).toLocaleDateString()}
                                                 </span>
                                             )}
