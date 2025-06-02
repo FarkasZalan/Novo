@@ -159,13 +159,16 @@ const DraggableTaskCard: React.FC<{ task: Task, onTaskUpdate?: (updatedTask: Tas
                 {task.milestone_id && (
                     <button
                         onClick={(e) => handleMilestoneClick(e, task.milestone_id!)}
-                        className="inline-flex cursor-pointer hover:underline items-center text-xs font-medium bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 px-2.5 py-1 rounded-full hover:bg-indigo-100 dark:hover:bg-indigo-800/30 transition"
+                        className="inline-flex cursor-pointer items-center text-xs font-medium bg-sky-100 dark:bg-sky-900/20  text-gray-800 dark:text-gray-100 px-2 py-0.5 rounded-full transition"
+                        style={{
+                            backgroundColor: `${task.milestone_color}20`,
+                            border: `1px solid ${task.milestone_color}40`
+                        }}
                     >
-                        <FaFlag className="mr-1.5 h-3 w-3" />
+                        <FaFlag className="mr-1 h-3 w-3" style={{ color: task.milestone_color }} />
                         {task.milestone_name || 'Milestone'}
                     </button>
                 )}
-
 
             </div>
 

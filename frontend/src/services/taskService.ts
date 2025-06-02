@@ -4,7 +4,29 @@ const API_URL = import.meta.env.VITE_BACKEND_URL;
 
 export const fetchAllTasksForProject = async (projectId: string, token: string, order_by: string, order: string) => {
     try {
-        const response = await axios.get(`${API_URL}/project/${projectId}/tasks?order_by=${order_by}&order=${order}`, {
+        const response = await axios.get(`${API_URL}/project/${projectId}/tasks`, {
+            params: {
+                order_by: order_by,
+                order: order
+            },
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return response.data.data;
+    } catch (error) {
+        console.error("Error fetching tasks:", error);
+        throw error;
+    }
+};
+
+export const fetchAllTasksForProjectWithNoParent = async (projectId: string, token: string, order_by: string, order: string) => {
+    try {
+        const response = await axios.get(`${API_URL}/project/${projectId}/tasks-with-no-parent`, {
+            params: {
+                order_by: order_by,
+                order: order
+            },
             headers: {
                 Authorization: `Bearer ${token}`
             }

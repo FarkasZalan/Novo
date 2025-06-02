@@ -1,9 +1,10 @@
 import { Request, Response } from "express";
 import { NextFunction } from "connect";
-import { addMilestoneToTaskQuery, createMilestoneQuery, deleteMilestoneFromTaskQuery, deleteMilestoneQuery, getAllMilestonesForProjectQuery, getAllTaskForMilestoneQuery, getAllUnassignedTaskForMilestoneQuery, getMilestoneByIdQuery, recalculateAllTasksInMilestoneQuery, recalculateCompletedTasksInMilestoneQuery, updateMilestoneQuery } from "../models/milestonesModel";
+import { addMilestoneToTaskQuery, createMilestoneQuery, deleteMilestoneFromTaskQuery, deleteMilestoneQuery, getAllMilestonesForProjectQuery, getAllTaskForMilestoneQuery, getAllTaskForMilestoneWithSubtasksQuery, getAllUnassignedTaskForMilestoneQuery, getMilestoneByIdQuery, recalculateAllTasksInMilestoneQuery, recalculateCompletedTasksInMilestoneQuery, updateMilestoneQuery } from "../models/milestonesModel";
 import { getParentTaskForSubtaskQuery, getTaskByIdQuery } from "../models/task.Model";
 import { getLabelsForTaskQuery } from "../models/labelModel";
 import { getProjectByIdQuery } from "../models/projectModel";
+import { DEFAULT_COLORS } from "../utils/default-colors";
 
 // Standardized response function
 // it's a function that returns a response to the client when a request is made (CRUD operations)
@@ -31,7 +32,19 @@ export const createMilestone = async (req: Request, res: Response, next: NextFun
             return;
         }
 
-        const newMilestone = await createMilestoneQuery(project_id, name, description, due_date);
+        // Get existing milestone colors in the project
+        const existingMilestones = await getAllMilestonesForProjectQuery(project_id);
+        const usedColors = new Set(existingMilestones.map((m: any) => m.color));
+
+        // Filter available colors
+        const availableColors = DEFAULT_COLORS.filter(c => !usedColors.has(c.color));
+
+        // Select a color
+        const selectedColor = availableColors.length > 0
+            ? availableColors[Math.floor(Math.random() * availableColors.length)].color
+            : DEFAULT_COLORS[Math.floor(Math.random() * DEFAULT_COLORS.length)].color;
+
+        const newMilestone = await createMilestoneQuery(project_id, name, description, due_date, selectedColor);
         handleResponse(res, 201, "Milestone created successfully", newMilestone);
     } catch (error: Error | any) {
         // Check for unique constraint violation (duplicate email)
@@ -112,6 +125,24 @@ export const getAllTaskForMilestone = async (req: Request, res: Response, next: 
                 const parentTask = await getTaskByIdQuery(task.parent_task_id) || null;
                 task.parent_task_name = parentTask.title || null;
             }
+        }
+        handleResponse(res, 200, "Tasks fetched successfully", tasks);
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const getAllTaskForMilestoneWithSubtasks = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const projectId = req.params.projectId;
+        const milestone_id = req.params.milestoneId;
+        const orderBy = typeof req.query.order_by === 'string' ? req.query.order_by : "updated_at";
+        const order = typeof req.query.order === 'string' ? req.query.order : "desc";
+        const tasks = await getAllTaskForMilestoneWithSubtasksQuery(projectId, orderBy, order, milestone_id); // get all tasks for the project;
+
+        for (const task of tasks) {
+            const taskLabels = await getLabelsForTaskQuery(task.id);
+            task.labels = taskLabels;
         }
         handleResponse(res, 200, "Tasks fetched successfully", tasks);
     } catch (error) {

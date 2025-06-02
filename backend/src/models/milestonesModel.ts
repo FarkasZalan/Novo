@@ -1,5 +1,6 @@
 import { addDays, endOfDay } from "date-fns";
 import pool from "../config/db";
+import { getLabelsForTaskQuery } from "./labelModel";
 
 export const getAllMilestoneForReminderQuery = async () => {
 
@@ -19,8 +20,8 @@ export const getMilestoneByIdQuery = async (id: string) => {
     return result.rows[0]
 }
 
-export const createMilestoneQuery = async (procejt_Id: string, name: string, description: string, due_date: Date) => {
-    const result = await pool.query("INSERT INTO milestones (project_id, name, description, due_date, created_at, all_tasks_count, completed_tasks_count) VALUES ($1, $2, $3, $4, $5, 0, 0) RETURNING *;", [procejt_Id, name, description, due_date, new Date()]); // send a query to the database with one of the open connection from the pool
+export const createMilestoneQuery = async (procejt_Id: string, name: string, description: string, due_date: Date, color: string) => {
+    const result = await pool.query("INSERT INTO milestones (project_id, name, description, due_date, created_at, all_tasks_count, completed_tasks_count, color) VALUES ($1, $2, $3, $4, $5, 0, 0, $6) RETURNING *;", [procejt_Id, name, description, due_date, new Date(), color]); // send a query to the database with one of the open connection from the pool
     return result.rows[0]
 }
 
@@ -33,6 +34,59 @@ export const getAllTaskForMilestoneQuery = async (milestone_id: string) => {
     const result = await pool.query("SELECT tasks.* FROM tasks WHERE milestone_id = $1;", [milestone_id]); // send a query to the database with one of the open connection from the pool
     return result.rows
 }
+
+
+
+export const getAllTaskForMilestoneWithSubtasksQuery = async (id: string, order_by: string, order: string, milestone_id: string) => {
+    let finalOrderBy = "";
+
+    if (order_by === "priority") {
+        finalOrderBy = `
+        CASE
+            WHEN priority = 'high' THEN 1
+            WHEN priority = 'medium' THEN 2
+            WHEN priority = 'low' THEN 3
+            ELSE 4
+        END
+        `
+    } else {
+        finalOrderBy = order_by
+    }
+    const tasksResult = await pool.query("SELECT tasks.*, milestones.name AS milestone_name, milestones.color AS milestone_color FROM tasks LEFT JOIN milestones ON tasks.milestone_id = milestones.id  WHERE tasks.milestone_id = $2 AND tasks.project_id = $1 AND tasks.parent_task_id IS NULL ORDER BY " + finalOrderBy + " " + order + ", due_date ASC", [id, milestone_id]); // send a query to the database with one of the open connection from the pool
+
+    const subtasksResult = await pool.query(
+        `SELECT subtasks.*, t.id AS id, t.title AS title, t.description AS description,
+                t.status AS status, t.priority AS priority, t.due_date AS due_date, t.attachments_count AS attachments_count,
+                m.name AS milestone_name, m.id AS milestone_id, m.color AS milestone_color
+         FROM subtasks
+         JOIN tasks t ON subtasks.subtask_id = t.id
+         LEFT JOIN milestones m ON t.milestone_id = m.id
+         WHERE subtasks.task_id IN (
+             SELECT id FROM tasks WHERE project_id = $1
+         )`,
+        [id]
+    )
+
+    // Combine tasks with their subtasks
+    const tasks = tasksResult.rows;
+    const subtasks = subtasksResult.rows;
+
+    for (const subtask of subtasks) {
+        subtask.labels = await getLabelsForTaskQuery(subtask.id);
+    }
+
+    const tasksWithSubtasks = tasks.map(task => {
+        return {
+            ...task,
+            subtasks: subtasks.filter(subtask => subtask.task_id === task.id)
+        };
+    });
+
+    return tasksWithSubtasks;
+}
+
+
+
 
 export const getAllTaskCountForMilestoneQuery = async (milestone_id: string) => {
     const result = await pool.query("SELECT COUNT(*) FROM tasks WHERE milestone_id = $1;", [milestone_id]); // send a query to the database with one of the open connection from the pool

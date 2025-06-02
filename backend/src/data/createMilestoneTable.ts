@@ -7,6 +7,7 @@ const createMilestoneTable = async () => {
         id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
         project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
         name VARCHAR(255) NOT NULL,
+        color VARCHAR(255) NOT NULL,
         description TEXT,
         due_date TIMESTAMP,
         created_at TIMESTAMP DEFAULT NOW(),

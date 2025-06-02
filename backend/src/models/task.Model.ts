@@ -29,12 +29,60 @@ export const getAllTaskForProjectQuery = async (id: string, order_by: string, or
     } else {
         finalOrderBy = order_by
     }
-    const tasksResult = await pool.query("SELECT tasks.*, milestones.name AS milestone_name FROM tasks LEFT JOIN milestones ON tasks.milestone_id = milestones.id  WHERE tasks.project_id = $1 ORDER BY " + finalOrderBy + " " + order + ", due_date ASC", [id]); // send a query to the database with one of the open connection from the pool
+    const tasksResult = await pool.query("SELECT tasks.*, milestones.name AS milestone_name, milestones.color AS milestone_color FROM tasks LEFT JOIN milestones ON tasks.milestone_id = milestones.id  WHERE tasks.project_id = $1 ORDER BY " + finalOrderBy + " " + order + ", due_date ASC", [id]); // send a query to the database with one of the open connection from the pool
 
     const subtasksResult = await pool.query(
         `SELECT subtasks.*, t.id AS id, t.title AS title, t.description AS description,
                 t.status AS status, t.priority AS priority, t.due_date AS due_date, t.attachments_count AS attachments_count,
-                m.name AS milestone_name, m.id AS milestone_id
+                m.name AS milestone_name, m.id AS milestone_id, m.color AS milestone_color
+         FROM subtasks
+         JOIN tasks t ON subtasks.subtask_id = t.id
+         LEFT JOIN milestones m ON t.milestone_id = m.id
+         WHERE subtasks.task_id IN (
+             SELECT id FROM tasks WHERE project_id = $1
+         )`,
+        [id]
+    )
+
+    // Combine tasks with their subtasks
+    const tasks = tasksResult.rows;
+    const subtasks = subtasksResult.rows;
+
+    for (const subtask of subtasks) {
+        subtask.labels = await getLabelsForTaskQuery(subtask.id);
+    }
+
+    const tasksWithSubtasks = tasks.map(task => {
+        return {
+            ...task,
+            subtasks: subtasks.filter(subtask => subtask.task_id === task.id)
+        };
+    });
+
+    return tasksWithSubtasks;
+}
+
+export const getAllTaskForProjectWithNoParentQuery = async (id: string, order_by: string, order: string) => {
+    let finalOrderBy = "";
+
+    if (order_by === "priority") {
+        finalOrderBy = `
+        CASE
+            WHEN priority = 'high' THEN 1
+            WHEN priority = 'medium' THEN 2
+            WHEN priority = 'low' THEN 3
+            ELSE 4
+        END
+        `
+    } else {
+        finalOrderBy = order_by
+    }
+    const tasksResult = await pool.query("SELECT tasks.*, milestones.name AS milestone_name, milestones.color AS milestone_color FROM tasks LEFT JOIN milestones ON tasks.milestone_id = milestones.id  WHERE tasks.parent_task_id IS NULL AND tasks.project_id = $1 ORDER BY " + finalOrderBy + " " + order + ", due_date ASC", [id]); // send a query to the database with one of the open connection from the pool
+
+    const subtasksResult = await pool.query(
+        `SELECT subtasks.*, t.id AS id, t.title AS title, t.description AS description,
+                t.status AS status, t.priority AS priority, t.due_date AS due_date, t.attachments_count AS attachments_count,
+                m.name AS milestone_name, m.id AS milestone_id, m.color AS milestone_color
          FROM subtasks
          JOIN tasks t ON subtasks.subtask_id = t.id
          LEFT JOIN milestones m ON t.milestone_id = m.id
@@ -63,12 +111,12 @@ export const getAllTaskForProjectQuery = async (id: string, order_by: string, or
 }
 
 export const getTaskByIdQuery = async (id: string) => {
-    const tasksResult = await pool.query("SELECT tasks.*, milestones.name AS milestone_name FROM tasks LEFT JOIN milestones ON tasks.milestone_id = milestones.id WHERE tasks.id = $1", [id]);
+    const tasksResult = await pool.query("SELECT tasks.*, milestones.name AS milestone_name, milestones.color AS milestone_color FROM tasks LEFT JOIN milestones ON tasks.milestone_id = milestones.id WHERE tasks.id = $1", [id]);
 
     const subtasksResult = await pool.query(
         `SELECT subtasks.*, t.id AS id, t.title AS title, t.description AS description,
                 t.status AS status, t.priority AS priority, t.due_date AS due_date, t.attachments_count AS attachments_count,
-                m.name AS milestone_name, m.id AS milestone_id
+                m.name AS milestone_name, m.id AS milestone_id, m.color AS milestone_color
          FROM subtasks
          JOIN tasks t ON subtasks.subtask_id = t.id
          LEFT JOIN milestones m ON t.milestone_id = m.id

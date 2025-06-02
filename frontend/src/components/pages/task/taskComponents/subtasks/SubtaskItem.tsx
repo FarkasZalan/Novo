@@ -175,8 +175,13 @@ export const SubtaskItem: React.FC<SubtaskItemProps> = ({
                             <div className="flex flex-wrap gap-2">
                                 {/* Milestone */}
                                 {subtask.milestone_id && (
-                                    <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-indigo-50 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/70">
-                                        <FaFlag className="mr-1.5" size={10} />
+                                    <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-indigo-50 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/70"
+                                        style={{
+                                            backgroundColor: `${subtask.milestone_color}20`,
+                                            border: `1px solid ${subtask.milestone_color}40`
+                                        }}
+                                    >
+                                        <FaFlag className="mr-1.5" style={{ color: subtask.milestone_color }} />
                                         {subtask.milestone_name || "Milestone"}
                                     </span>
                                 )}

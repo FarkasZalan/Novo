@@ -8,7 +8,7 @@ interface MilestoneCardProps {
     onEdit: (milestone: Milestone) => void;
     onDelete: (milestoneId: string) => void;
     canManage: boolean;
-    project: Project | null
+    project: Project | null;
 }
 
 export const MilestoneCard: React.FC<MilestoneCardProps> = ({
@@ -35,6 +35,9 @@ export const MilestoneCard: React.FC<MilestoneCardProps> = ({
         });
     };
 
+    const milestoneColor = milestone.color || '#6366f1'; // indigo-500 as fallback
+    const progressColor = isOverdue ? '#ef4444' : milestoneColor; // red-500 if overdue
+
     return (
         <motion.div
             layout
@@ -44,28 +47,49 @@ export const MilestoneCard: React.FC<MilestoneCardProps> = ({
             transition={{ duration: 0.2 }}
             onClick={() => onSelect(milestone)}
             className={`p-4 rounded-xl transition-all duration-200 cursor-pointer ${isSelected
-                ? 'bg-indigo-50 dark:bg-indigo-900/30 border-l-4 border-indigo-500'
+                ? 'border-l-4'
                 : 'bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600/30'
                 }`}
+            style={isSelected ? {
+                backgroundColor: `${milestoneColor}20`,
+                borderLeftColor: milestoneColor
+            } : {}}
         >
             <div className="flex items-start justify-between">
                 <div className="flex-1">
                     <div className="flex items-start space-x-3">
-                        <div className={`mt-1 flex-shrink-0 h-10 w-10 rounded-lg flex items-center justify-center ${isOverdue ? 'bg-red-500' : 'bg-indigo-500'
-                            }`}>
-                            <FaFlag className="text-white text-lg" />
+                        <div
+                            className="mt-1 flex-shrink-0 h-10 w-10 rounded-lg flex items-center justify-center"
+                            style={{
+                                backgroundColor: isOverdue ? '#ef4444' : `${milestoneColor}30`
+                            }}
+                        >
+                            <FaFlag
+                                className="text-lg"
+                                style={{
+                                    color: isOverdue ? 'white' : milestoneColor
+                                }}
+                            />
                         </div>
                         <div className="flex-1 min-w-0">
-                            <h3 className={`text-lg font-semibold truncate ${isSelected
-                                ? 'text-indigo-700 dark:text-indigo-300'
-                                : 'text-gray-900 dark:text-gray-100'
-                                }`}>
+                            <h3
+                                className={`text-lg font-semibold truncate ${isSelected
+                                    ? 'dark:text-gray-100'
+                                    : 'text-gray-900 dark:text-gray-100'
+                                    }`}
+                                style={isSelected ? { color: milestoneColor } : {}}
+                            >
                                 {milestone.name}
                             </h3>
-                            <p className={`text-sm truncate ${isSelected
-                                ? 'text-indigo-600/80 dark:text-indigo-300/80'
-                                : 'text-gray-500 dark:text-gray-400'
-                                }`}>
+                            <p
+                                className={`text-sm truncate ${isSelected
+                                    ? 'dark:text-gray-300'
+                                    : 'text-gray-500 dark:text-gray-400'
+                                    }`}
+                                style={isSelected ? {
+                                    color: `${milestoneColor}80`
+                                } : {}}
+                            >
                                 {milestone.description || 'No description'}
                             </p>
 
@@ -83,8 +107,11 @@ export const MilestoneCard: React.FC<MilestoneCardProps> = ({
 
                             <div className="mt-2 w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
                                 <div
-                                    className="bg-indigo-500 h-2 rounded-full transition-all duration-300"
-                                    style={{ width: `${progress}%` }}
+                                    className="h-2 rounded-full transition-all duration-300"
+                                    style={{
+                                        width: `${progress}%`,
+                                        backgroundColor: progressColor
+                                    }}
                                 />
                             </div>
                         </div>

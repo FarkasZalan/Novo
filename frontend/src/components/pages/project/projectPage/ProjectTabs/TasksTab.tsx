@@ -278,12 +278,19 @@ export const TasksTab = () => {
                                             <div className="flex flex-wrap gap-2">
                                                 {/* Milestone */}
                                                 {task.milestone_id && (
-                                                    <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-indigo-50 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/70 hover:bg-indigo-100 hover:text-indigo-900 dark:hover:bg-indigo-900 dark:hover:text-indigo-200 cursor-pointer"
+                                                    <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium text-gray-800 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 hover:underline cursor-pointer"
                                                         onClick={(e) => {
                                                             e.stopPropagation();
                                                             navigate(`/projects/${projectId}/milestones/${task.milestone_id}`)
-                                                        }}>
-                                                        <FaFlag className="mr-1.5" size={10} />
+                                                        }}
+
+                                                        style={{
+                                                            backgroundColor: `${task.milestone_color}20`,
+                                                            border: `1px solid ${task.milestone_color}40`
+                                                        }}
+                                                    >
+
+                                                        <FaFlag className="mr-1.5 h-3 w-3" style={{ color: task.milestone_color }} />
                                                         {task.milestone_name || "Milestone"}
                                                     </span>
                                                 )}

@@ -7,4 +7,5 @@ interface Milestone {
     created_at: string
     all_tasks_count: number = 0
     completed_tasks_count: number = 0
+    color?: string
 }

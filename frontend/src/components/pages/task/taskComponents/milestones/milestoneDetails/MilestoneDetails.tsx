@@ -308,9 +308,25 @@ export const MilestoneDetailsPage: React.FC = () => {
                 >
                     <div className="p-6 md:p-8">
                         <div className="flex flex-col md:flex-row md:items-center md:space-x-6">
-                            <div className={`flex-shrink-0 h-16 w-16 rounded-lg flex items-center justify-center mb-4 md:mb-0 ${isOverdue ? 'bg-red-500' : 'bg-indigo-500'
-                                }`}>
-                                <FaFlag className="text-white text-2xl" />
+                            <div
+                                className="flex-shrink-0 h-16 w-16 rounded-lg flex items-center justify-center mb-4 md:mb-0"
+                                style={{
+                                    backgroundColor: isOverdue
+                                        ? '#ef4444' // red-500 for overdue
+                                        : `${milestone.color || '#6366f1'}30`, // 30% opacity of milestone color (fallback to indigo-500)
+                                    border: `2px solid ${isOverdue
+                                        ? '#ef4444' // red-500 for overdue
+                                        : `${milestone.color || '#6366f1'}50`}` // 50% opacity of milestone color
+                                }}
+                            >
+                                <FaFlag
+                                    className="text-2xl"
+                                    style={{
+                                        color: isOverdue
+                                            ? 'white'
+                                            : milestone.color || '#6366f1' // Use milestone color or fallback to indigo
+                                    }}
+                                />
                             </div>
 
                             <div className="flex-1">

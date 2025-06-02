@@ -409,12 +409,17 @@ export const TaskDetails: React.FC = () => {
 
                             {task.milestone_id ? (
                                 <div className="flex items-center justify-between">
-                                    <span className="inline-flex items-center hover:cursor-pointer hover:text-indigo-800 hover:dark:text-indigo-300 px-3 py-1 bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300 rounded-full text-sm"
+                                    <span className="inline-flex items-center hover:cursor-pointer  text-gray-800 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 hover:underline px-2 py-1 rounded-full text-sm"
                                         onClick={() =>
                                             navigate(`/projects/${projectId}/milestones/${task.milestone_id}`)
-                                        }>
-                                        <FaFlag className="mr-2"
-                                        />
+                                        }
+
+                                        style={{
+                                            backgroundColor: `${task.milestone_color}20`,
+                                            border: `1px solid ${task.milestone_color}40`
+                                        }}
+                                    >
+                                        <FaFlag className="mr-2" style={{ color: task.milestone_color }} />
                                         {task.milestone_name || 'View Milestone'}
                                     </span>
                                 </div>

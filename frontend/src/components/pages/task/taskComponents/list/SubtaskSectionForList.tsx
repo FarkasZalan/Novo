@@ -336,9 +336,13 @@ export const SubtaskList: React.FC<SubtaskListProps> = React.memo(({
                                                             {subtask.milestone_id && (
                                                                 <button
                                                                     onClick={(e) => handleMilestoneClick(e, subtask.milestone_id!)}
-                                                                    className="inline-flex cursor-pointer items-center text-xs font-medium bg-sky-100 dark:bg-sky-900/20 text-sky-700 dark:text-sky-300 px-2 py-0.5 rounded-full hover:bg-sky-200 dark:hover:bg-sky-800/30 transition"
+                                                                    className="inline-flex cursor-pointer items-center text-xs font-medium text-gray-800 dark:text-gray-100 px-2 py-0.5 rounded-full transition"
+                                                                    style={{
+                                                                        backgroundColor: `${subtask.milestone_color}20`,
+                                                                        border: `1px solid ${subtask.milestone_color}40`
+                                                                    }}
                                                                 >
-                                                                    <FaFlag className="mr-1 h-3 w-3" />
+                                                                    <FaFlag className="mr-1 h-3 w-3" style={{ color: subtask.milestone_color }} />
                                                                     {subtask.milestone_name || 'Milestone'}
                                                                 </button>
                                                             )}

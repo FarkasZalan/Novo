@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { NextFunction } from "connect";
-import { addSubtaskToTaskQuery, createTaskQuery, deleteTaskQuery, getAllTaskForProjectQuery, getCompletedTaskCountForProjectQuery, getInProgressTaskCountForProjectQuery, getParentTaskForSubtaskQuery, getSubtasksForTaskQuery, getTaskByIdQuery, getTaskCountForProjectQuery, updateTaskQuery, updateTaskStatusQuery } from "../models/task.Model";
+import { addSubtaskToTaskQuery, createTaskQuery, deleteTaskQuery, getAllTaskForProjectQuery, getAllTaskForProjectWithNoParentQuery, getCompletedTaskCountForProjectQuery, getInProgressTaskCountForProjectQuery, getParentTaskForSubtaskQuery, getSubtasksForTaskQuery, getTaskByIdQuery, getTaskCountForProjectQuery, updateTaskQuery, updateTaskStatusQuery } from "../models/task.Model";
 import { getProjectByIdQuery, recalculateProjectStatus } from "../models/projectModel";
 import { addMilestoneToTaskQuery, recalculateAllTasksInMilestoneQuery, recalculateCompletedTasksInMilestoneQuery } from "../models/milestonesModel";
 import { addLabelToTaskQuery, deleteLabelFromTaskQuery, getLabelsForTaskQuery } from "../models/labelModel";
@@ -80,6 +80,23 @@ export const getAllTasks = async (req: Request, res: Response, next: NextFunctio
                 const parentTask = await getTaskByIdQuery(task.parent_task_id) || null;
                 task.parent_task_name = parentTask.title || null;
             }
+        }
+        handleResponse(res, 200, "Tasks fetched successfully", tasks);
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const getAllTasksWithNoParent = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const projectId = req.params.projectId;
+        const orderBy = typeof req.query.order_by === 'string' ? req.query.order_by : "updated_at";
+        const order = typeof req.query.order === 'string' ? req.query.order : "desc";
+        const tasks = await getAllTaskForProjectWithNoParentQuery(projectId, orderBy, order); // get all tasks for the project;
+
+        for (const task of tasks) {
+            const taskLabels = await getLabelsForTaskQuery(task.id);
+            task.labels = taskLabels;
         }
         handleResponse(res, 200, "Tasks fetched successfully", tasks);
     } catch (error) {

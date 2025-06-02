@@ -1,7 +1,7 @@
 import express from "express";
 import { authenticateToken } from "../middlewares/authenticate";
 import { authorizeProject, authorizeProjectForOwnerAndAdmin } from "../middlewares/authorization";
-import { getAllMilestonesForProject, getMilestoneById, getAllTaskForMilestone, getAllUnassignedTaskForMilestone, createMilestone, addMilestoneToTask, deleteMilestoneFromTask, updateMilestone, deleteMilestone } from "../controller/milestonesController";
+import { getAllMilestonesForProject, getMilestoneById, getAllTaskForMilestone, getAllUnassignedTaskForMilestone, createMilestone, addMilestoneToTask, deleteMilestoneFromTask, updateMilestone, deleteMilestone, getAllTaskForMilestoneWithSubtasks } from "../controller/milestonesController";
 
 const router = express.Router();
 
@@ -10,6 +10,8 @@ router.get("/project/:projectId/milestones", authenticateToken, authorizeProject
 router.get("/project/:projectId/milestone/:milestoneId", authenticateToken, authorizeProject, getMilestoneById);
 
 router.get("/project/:projectId/milestone/:milestoneId/tasks", authenticateToken, authorizeProject, getAllTaskForMilestone);
+
+router.get("/project/:projectId/milestone/:milestoneId/tasks-with-subtasks", authenticateToken, authorizeProject, getAllTaskForMilestoneWithSubtasks);
 
 router.get("/project/:projectId/milestone/tasks/unassigned", authenticateToken, authorizeProject, getAllUnassignedTaskForMilestone);
 

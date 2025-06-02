@@ -638,13 +638,30 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
 
                         {/* Selected milestone display */}
                         {selectedMilestone ? (
-                            <div className="flex items-center justify-between bg-indigo-50/50 dark:bg-indigo-800/30 rounded-lg px-4 py-3 border border-indigo-100 dark:border-indigo-600 transition-all duration-200 shadow-sm dark:shadow-indigo-900/40">
+                            <div
+                                className="flex items-center justify-between rounded-lg px-4 py-3 border transition-all duration-200 shadow-sm"
+                                style={{
+                                    backgroundColor: `${selectedMilestone.color}20`,
+                                    borderColor: `${selectedMilestone.color}40`,
+                                }}
+                            >
                                 <div className="flex items-center space-x-3">
-                                    <div className="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-700 shadow-inner">
-                                        <FaFlag className="text-indigo-600 dark:text-indigo-200 text-sm" />
+                                    <div
+                                        className="p-2 rounded-lg shadow-inner"
+                                        style={{
+                                            backgroundColor: `${selectedMilestone.color}30`,
+                                        }}
+                                    >
+                                        <FaFlag
+                                            className="text-sm"
+                                            style={{ color: selectedMilestone.color }}
+                                        />
                                     </div>
                                     <div>
-                                        <span className="font-medium text-indigo-700 dark:text-indigo-100">
+                                        <span
+                                            className="font-medium"
+                                            style={{ color: selectedMilestone.color }}
+                                        >
                                             {selectedMilestone.name}
                                         </span>
                                         {selectedMilestone.due_date && (
@@ -657,7 +674,11 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
                                 <button
                                     type="button"
                                     onClick={() => setSelectedMilestone(null)}
-                                    className="p-1.5 -mr-1 cursor-pointer rounded-lg hover:bg-indigo-100/50 dark:hover:bg-indigo-700/70 transition-colors text-indigo-500 dark:text-indigo-200 hover:text-indigo-700 dark:hover:text-indigo-50"
+                                    className="p-1.5 -mr-1 cursor-pointer rounded-lg hover:bg-opacity-30 transition-colors"
+                                    style={{
+                                        color: selectedMilestone.color,
+                                        backgroundColor: `${selectedMilestone.color}20`
+                                    }}
                                     aria-label="Remove milestone"
                                 >
                                     <FaTimes className="h-4 w-4" />
@@ -713,11 +734,22 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
                                                             }}
                                                         >
                                                             <div className="flex items-center space-x-3">
-                                                                <div className="flex-shrink-0 p-1 rounded-lg bg-indigo-100/70 dark:bg-indigo-900/20">
-                                                                    <FaFlag className="text-indigo-600 dark:text-indigo-400 text-sm" />
+                                                                <div
+                                                                    className="flex-shrink-0 p-1 rounded-lg"
+                                                                    style={{
+                                                                        backgroundColor: `${milestone.color}20`
+                                                                    }}
+                                                                >
+                                                                    <FaFlag
+                                                                        className="text-sm"
+                                                                        style={{ color: milestone.color }}
+                                                                    />
                                                                 </div>
                                                                 <div>
-                                                                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                                                    <p
+                                                                        className="text-sm font-medium"
+                                                                        style={{ color: milestone.color }}
+                                                                    >
                                                                         {milestone.name}
                                                                     </p>
                                                                     {milestone.due_date && (

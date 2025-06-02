@@ -16,4 +16,5 @@ export interface Task {
     subtasks?: Task[];
     created_at: string;
     updated_at: string;
+    milestone_color: string
 }
