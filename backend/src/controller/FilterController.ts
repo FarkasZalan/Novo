@@ -2,11 +2,12 @@ import { Request, Response } from "express";
 import { NextFunction } from "connect";
 import { getAssignmentForLogsQuery } from "../models/assignmentModel";
 import { getChangeLogsForProjectQuery, deleteLogQuery, getAllLogForUserQuery } from "../models/changeLogModel";
-import { getLabelQuery } from "../models/labelModel";
+import { getLabelQuery, getLabelsForTaskQuery } from "../models/labelModel";
 import { getMilestoneByIdQuery } from "../models/milestonesModel";
 import { getAllProjectForUsersQuery, getProjectNameQuery } from "../models/projectModel";
-import { getTaskNameForLogsQuery, getTaskByIdQuery } from "../models/task.Model";
-import { filterUserByNameOrEmailQuery, getUserByIdQuery } from "../models/userModel";
+import { getTaskNameForLogsQuery, getTaskByIdQuery, getParentTaskForSubtaskQuery } from "../models/task.Model";
+import { getUserByIdQuery } from "../models/userModel";
+import { FilterAllUnassignedTaskForMilestoneQuery, filterTaskByTitleBasedOnMilestoneQuery, filterUserByNameOrEmailQuery } from "../models/filterModel";
 
 // Standardized response function
 // it's a function that returns a response to the client when a request is made (CRUD operations)
@@ -373,6 +374,70 @@ export const getAllUserByNameOrEmail = async (req: Request, res: Response, next:
         handleResponse(res, 200, "Users successfully fetched", users);
     } catch (error: Error | any) {
         console.log(error);
+        next(error);
+    }
+}
+
+export const getAllTaskByNameBasedOnMilestone = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const milestoneId = req.params.milestoneId as string || '';
+        const projectId = req.params.projectId;
+        const title = req.query.title as string || '';
+
+        if (title.length < 2) {
+            handleResponse(res, 400, "Title should be at least 2 characters long", null);
+            return;
+        }
+
+        if (!milestoneId || !projectId) {
+            handleResponse(res, 400, "Project id is required", null);
+            return;
+        }
+
+        const tasks = await filterTaskByTitleBasedOnMilestoneQuery(projectId, milestoneId, title);
+
+        for (const task of tasks) {
+            const taskLabels = await getLabelsForTaskQuery(task.id);
+            task.labels = taskLabels;
+
+            task.parent_task_id = await getParentTaskForSubtaskQuery(task.id) || null;
+            if (task.parent_task_id) {
+                const parentTask = await getTaskByIdQuery(task.parent_task_id) || null;
+                task.parent_task_name = parentTask.title || null;
+            }
+        }
+
+        handleResponse(res, 200, "Tasks successfully fetched", tasks);
+    } catch (error: Error | any) {
+        console.log(error);
+        next(error);
+    }
+}
+
+export const getAllUnassignedTaskForMilestone = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const title = req.query.title as string || '';
+
+
+
+        if (title.length < 2) {
+            handleResponse(res, 400, "Title should be at least 2 characters long", null);
+            return;
+        }
+        const tasks = await FilterAllUnassignedTaskForMilestoneQuery(req.params.projectId, title);
+
+        for (const task of tasks) {
+            const taskLabels = await getLabelsForTaskQuery(task.id);
+            task.labels = taskLabels;
+
+            task.parent_task_id = await getParentTaskForSubtaskQuery(task.id) || null;
+            if (task.parent_task_id) {
+                const parentTask = await getTaskByIdQuery(task.parent_task_id) || null;
+                task.parent_task_name = parentTask.title || null;
+            }
+        }
+        handleResponse(res, 200, "Tasks fetched successfully", tasks);
+    } catch (error) {
         next(error);
     }
 }
