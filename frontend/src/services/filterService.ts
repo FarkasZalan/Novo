@@ -19,3 +19,20 @@ export const fetchAllFilteredLogForUser = async (token: string, tables: string[]
         throw error;
     }
 };
+
+export const filterAllUserByNameOrEmail = async (token: string, projectId: string, nameOrEmail: string) => {
+    try {
+        const response = await axios.get(`${API_URL}/project/${projectId}/all-user-filter`, {
+            params: {
+                nameOrEmail: nameOrEmail
+            },
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return response.data.data;
+    } catch (error) {
+        console.error("Error fetching project logs:", error);
+        throw error;
+    }
+}

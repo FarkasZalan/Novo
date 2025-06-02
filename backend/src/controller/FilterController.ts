@@ -6,7 +6,7 @@ import { getLabelQuery } from "../models/labelModel";
 import { getMilestoneByIdQuery } from "../models/milestonesModel";
 import { getAllProjectForUsersQuery, getProjectNameQuery } from "../models/projectModel";
 import { getTaskNameForLogsQuery, getTaskByIdQuery } from "../models/task.Model";
-import { getUserByIdQuery } from "../models/userModel";
+import { filterUserByNameOrEmailQuery, getUserByIdQuery } from "../models/userModel";
 
 // Standardized response function
 // it's a function that returns a response to the client when a request is made (CRUD operations)
@@ -359,3 +359,20 @@ export const getAllFilteredLogForUser = async (req: Request, res: Response, next
         next(error);
     }
 };
+
+export const getAllUserByNameOrEmail = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const nameOrEmail = req.query.nameOrEmail as string || '';
+
+        if (nameOrEmail.length < 2) {
+            handleResponse(res, 400, "Name or email should be at least 2 characters long", null);
+            return;
+        }
+        const users = await filterUserByNameOrEmailQuery(nameOrEmail);
+
+        handleResponse(res, 200, "Users successfully fetched", users);
+    } catch (error: Error | any) {
+        console.log(error);
+        next(error);
+    }
+}

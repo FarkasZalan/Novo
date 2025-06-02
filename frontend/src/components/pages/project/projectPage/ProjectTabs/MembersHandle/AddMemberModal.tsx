@@ -1,9 +1,9 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { FaUserPlus, FaExclamationTriangle, FaSearch, FaTimes, FaPlus, FaUser, FaCrown, FaEnvelope } from "react-icons/fa";
-import { fetchAllRegisteredUsers } from "../../../../../../services/userService";
 import { addMembersToProject, getProjectMembers } from "../../../../../../services/projectMemberService";
 import { useAuth } from "../../../../../../hooks/useAuth";
 import { Link } from "react-router-dom";
+import { filterAllUserByNameOrEmail } from "../../../../../../services/filterService";
 
 interface User {
     id: string;
@@ -26,9 +26,13 @@ export const AddMemberDialog = ({ project, onClose, onInvite }: AddMemberModalPr
     const [selectedUsers, setSelectedUsers] = useState<SelectedUser[]>([]);
     const [manualEmail, setManualEmail] = useState("");
     const [error, setError] = useState<string | null>(null);
+
     const [searchQuery, setSearchQuery] = useState("");
+    const [isSearching, setIsSearching] = useState(false);
+    const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
+    const MIN_SEARCH_LENGTH = 2; // Require 2 characters to search
+
     const [potentialMembers, setPotentialMembers] = useState<User[]>([]);
-    const [isLoading, setIsLoading] = useState(false);
     const [showSearchResults, setShowSearchResults] = useState(false);
     // hold the IDs of users already in the project
     const [projectMemberIds, setProjectMemberIds] = useState<string[]>([]); // for active project members
@@ -57,27 +61,6 @@ export const AddMemberDialog = ({ project, onClose, onInvite }: AddMemberModalPr
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, [onClose]);
-
-    // Load registered users
-    useEffect(() => {
-        const loadUsers = async () => {
-            try {
-                setIsLoading(true);
-                const users = await fetchAllRegisteredUsers();
-                setPotentialMembers(users.map((user: any) => ({
-                    id: user.id,
-                    name: user.name,
-                    email: user.email,
-                    is_registered: true
-                })));
-            } catch (err) {
-                console.error("Failed to load users:", err);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-        loadUsers();
-    }, []);
 
     // Fetch project members and store their IDs for quick lookup
     useEffect(() => {
@@ -207,12 +190,76 @@ export const AddMemberDialog = ({ project, onClose, onInvite }: AddMemberModalPr
         searchInputRef.current?.focus();
     };
 
+
+
+    const handleSearch = useCallback(async (query: string) => {
+        if (query.trim().length < MIN_SEARCH_LENGTH) {
+            setPotentialMembers([]);
+            return;
+        }
+
+        try {
+            setIsSearching(true);
+            const users = await filterAllUserByNameOrEmail(
+                authState.accessToken!,
+                project.id!,
+                query
+            );
+
+            setPotentialMembers(users.map((user: any) => ({
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                is_registered: true
+            })));
+        } catch (err) {
+            console.error("Search failed:", err);
+            setError("Failed to search users. Please try again.");
+        } finally {
+            setIsSearching(false);
+        }
+    }, [authState.accessToken, project.id]);
+
+
+
+    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setManualEmail(value);
+        setSearchQuery(value);
+        setError(null);
+
+        // Clear previous timeout
+        if (searchTimeout) {
+            clearTimeout(searchTimeout);
+        }
+
+        // Only set new timeout if we have enough characters
+        if (value.trim().length >= MIN_SEARCH_LENGTH) {
+            setShowSearchResults(true);
+            setSearchTimeout(
+                setTimeout(() => {
+                    handleSearch(value);
+                }, 300) // 300ms debounce delay
+            );
+        } else {
+            setShowSearchResults(false);
+            setPotentialMembers([]);
+        }
+    };
+
+    // Clean up timeout on unmount
+    useEffect(() => {
+        return () => {
+            if (searchTimeout) {
+                clearTimeout(searchTimeout);
+            }
+        };
+    }, [searchTimeout]);
+
+
     // Filter potential members based on search while excluding those already selected.
     const filteredUsers = potentialMembers.filter(user =>
-        !selectedUsers.some(selected => selected.id === user.id) &&
-        (searchQuery || manualEmail) &&
-        (user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            user.email.toLowerCase().includes(searchQuery.toLowerCase()))
+        !selectedUsers.some(selected => selected.id === user.id)
     );
 
     const hasValidEmail = manualEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(manualEmail);
@@ -372,16 +419,10 @@ export const AddMemberDialog = ({ project, onClose, onInvite }: AddMemberModalPr
                                 ref={searchInputRef}
                                 type="text"
                                 value={searchQuery || manualEmail}
-                                onChange={(e) => {
-                                    const value = e.target.value;
-                                    setManualEmail(value);
-                                    setSearchQuery(value);
-                                    setShowSearchResults(true);
-                                    setError(null);
-                                }}
+                                onChange={handleSearchChange}
                                 onFocus={() => setShowSearchResults(true)}
                                 className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-indigo-500 focus:border-indigo-500"
-                                placeholder="Search users or enter email address"
+                                placeholder={`Search users (min ${MIN_SEARCH_LENGTH} chars)...`}
                             />
 
                             <button
@@ -393,12 +434,20 @@ export const AddMemberDialog = ({ project, onClose, onInvite }: AddMemberModalPr
 
                         </div>
 
+                        {/* Search Hint */}
+                        {searchQuery.trim().length > 0 && searchQuery.trim().length < MIN_SEARCH_LENGTH && (
+                            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                Type at least {MIN_SEARCH_LENGTH} characters to search
+                            </p>
+                        )}
+
                         {/* Search Results */}
                         {showSearchResults && (searchQuery || manualEmail) && (
                             <div className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-700 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 max-h-50 overflow-y-auto">
-                                {isLoading ? (
+                                {isSearching ? (
                                     <div className="p-4 text-center">
                                         <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600 mx-auto"></div>
+                                        <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">Searching...</p>
                                     </div>
                                 ) : filteredUsers.length > 0 ? (
                                     <ul className="py-1">
@@ -421,7 +470,7 @@ export const AddMemberDialog = ({ project, onClose, onInvite }: AddMemberModalPr
                                                     }}
                                                 >
                                                     <div className="h-8 w-8 rounded-full bg-indigo-100 dark:bg-indigo-800 flex items-center justify-center text-indigo-600 dark:text-indigo-300 font-medium text-sm mr-3">
-                                                        {user.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                                                        {user?.name?.split(' ').map(n => n[0]).join('').toUpperCase() || '?'}
                                                     </div>
                                                     <div className="flex-1">
                                                         <p className="font-medium dark:text-white">{user.name}</p>
@@ -466,14 +515,16 @@ export const AddMemberDialog = ({ project, onClose, onInvite }: AddMemberModalPr
                                                 </button>
                                             </div>
                                         ) : (
-                                            <div className="flex flex-col items-center py-2">
-                                                <div className="rounded-full bg-gray-100 dark:bg-gray-700 p-3 mb-3">
-                                                    <svg className="h-5 w-5 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                                    </svg>
-                                                </div>
-                                                <p className="text-gray-600 dark:text-gray-300 font-medium">No users found</p>
-                                                <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Try adjusting your search criteria</p>
+                                            <div className="flex flex-col items-center py-4">
+                                                <svg className="h-12 w-12 text-gray-400 dark:text-gray-500 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                                <p className="text-gray-600 dark:text-gray-300 font-medium">
+                                                    No users found
+                                                </p>
+                                                <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
+                                                    Try a different search term or enter an email
+                                                </p>
                                             </div>
                                         )}
                                     </div>

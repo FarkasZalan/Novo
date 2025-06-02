@@ -38,3 +38,21 @@ export const deleteUserQuery = async (id: string) => {
     const result = await pool.query("DELETE FROM users WHERE id = $1 RETURNING *", [id]);
     return result.rows[0];
 }
+
+// LOWER = ensures case sensitive
+// REPLACE (..., ' ', '') = removes whitespaces
+// %${name}% = 
+export const filterUserByNameOrEmailQuery = async (nameOrEmail: string) => {
+    const normalizedNameOrEmail = nameOrEmail.trim().toLowerCase();
+
+    const result = await pool.query(
+        `
+      SELECT *
+      FROM users
+      WHERE LOWER(name)  LIKE '%' || $1 || '%'
+         OR LOWER(email) LIKE '%' || $1 || '%'
+    `,
+        [normalizedNameOrEmail]
+    );
+    return result.rows;
+};
