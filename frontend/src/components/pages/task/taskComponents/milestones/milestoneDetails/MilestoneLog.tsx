@@ -258,7 +258,7 @@ export const MilestoneLogsComponent = ({ projectId, milestoneId }: MilestoneLogP
                             </span>
                             <span className="inline-flex items-center">
                                 <FaRegClock className="mr-1.5 opacity-70 text-xs" />
-                                {format(new Date(log.created_at), 'MMM d, yyyy h:mm a')}
+                                {format(new Date(log.created_at), 'MMM d, yyyy H:mm')}
                             </span>
                         </div>
                     </div>

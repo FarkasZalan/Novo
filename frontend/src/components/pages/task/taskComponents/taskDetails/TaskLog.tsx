@@ -574,7 +574,7 @@ export const TaskLogsComponent = ({ projectId, taskId }: TaskLogProps) => {
                             </span>
                             <span className="inline-flex items-center">
                                 <FaRegClock className="mr-1.5 opacity-70 text-xs" />
-                                {format(new Date(log.created_at), 'MMM d, yyyy h:mm a')}
+                                {format(new Date(log.created_at), 'MMM d, yyyy H:mm')}
                             </span>
                             {getAdditionalDetails(log) && (
                                 <span className="inline-flex items-center bg-gray-100 dark:bg-gray-700/50 rounded-full px-2.5 py-0.5">

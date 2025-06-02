@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { NextFunction } from "connect";
 import { getUserByIdQuery } from "../models/userModel";
 import { getAllProjectForUsersQuery, getProjectNameQuery } from "../models/projectModel";
-import { getChangeLogsForCommentQuery, getChangeLogsForMilestoneQuery, getChangeLogsForProjectQuery, getChangeLogsForTaskQuery, getChangeLogsForUserQuery } from "../models/changeLogModel";
+import { getChangeLogsForCommentQuery, getChangeLogsForDashboardQuery, getChangeLogsForMilestoneQuery, getChangeLogsForProjectQuery, getChangeLogsForTaskQuery, getChangeLogsForUserQuery } from "../models/changeLogModel";
 import { getAssignmentForLogsQuery } from "../models/assignmentModel";
 import { getTaskByIdQuery, getTaskNameForLogsQuery } from "../models/task.Model";
 import { deleteLogQuery } from "../models/changeLogModel";
@@ -47,7 +47,7 @@ export const getDahboardLogForUser = async (req: Request, res: Response, next: N
         let changeLogs: any[] = [];
 
         for (let projectId of projectIds) {
-            const logs: any = await getChangeLogsForProjectQuery(projectId, 5);
+            const logs: any = await getChangeLogsForDashboardQuery(projectId, 5);
 
             for (const log of logs) {
                 if (shouldDeleteLog(log)) {
@@ -289,6 +289,8 @@ export const getDahboardLogForUser = async (req: Request, res: Response, next: N
                 }
             }
         }
+
+
 
         handleResponse(res, 200, "Project change logs successfully fetched", changeLogs);
     } catch (error: Error | any) {
