@@ -142,11 +142,26 @@ export const updateTask = async (req: Request, res: Response, next: NextFunction
             return;
         }
 
+        const taskLabels = await getLabelsForTaskQuery(task.id);
+        task.labels = taskLabels;
+
         if (task.title === title && task.description === description && datesEqual(task.due_date, due_date) && task.priority === priority && task.status === status) {
-            const taskLabels = await getLabelsForTaskQuery(task.id);
-            task.labels = taskLabels;
-            handleResponse(res, 200, "No changes detected", task);
-            return;
+            let haveNewLabels = false;
+            if (labels.length !== task.labels.length) {
+                haveNewLabels = true;
+            } else {
+                for (const label of labels) {
+                    if (!task.labels.find((newLabel: Label) => newLabel.id === label.id)) {
+                        haveNewLabels = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!haveNewLabels) {
+                handleResponse(res, 200, "No changes detected", task);
+                return;
+            }
         }
 
         const updateTask = await updateTaskQuery(title, description, projectId, due_date, priority, taskId, status);
@@ -183,6 +198,7 @@ export const updateTask = async (req: Request, res: Response, next: NextFunction
             }
         }
 
+        console.log(newLabelsIds);
         // add labels if they are not in the existing labels array
         for (const newLabelId of newLabelsIds) {
             if (!existingLabelIds.includes(newLabelId)) {
@@ -199,8 +215,8 @@ export const updateTask = async (req: Request, res: Response, next: NextFunction
 
         await recalculateProjectStatus(projectId);
 
-        const taskLabels = await getLabelsForTaskQuery(updateTask.id);
-        updateTask.labels = taskLabels;
+        const updatedTaskLabels = await getLabelsForTaskQuery(updateTask.id);
+        updateTask.labels = updatedTaskLabels;
         handleResponse(res, 200, "Task updated successfully", updateTask);
     } catch (error) {
         next(error);

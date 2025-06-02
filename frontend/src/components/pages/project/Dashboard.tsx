@@ -5,7 +5,6 @@ import {
     FaUsers,
     FaPlus,
     FaSearch,
-    FaFilter,
     FaCheckCircle,
     FaClock,
     FaExclamationTriangle,
@@ -162,7 +161,7 @@ export const Dashboard = () => {
                     </p>
                     <button
                         onClick={() => window.location.reload()}
-                        className="inline-flex items-center justify-center px-5 py-2 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white font-medium rounded-lg shadow-sm transition-colors"
+                        className="inline-flex items-center cursor-pointer justify-center px-5 py-2 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white font-medium rounded-lg shadow-sm transition-colors"
                     >
                         Retry
                     </button>
@@ -258,12 +257,6 @@ export const Dashboard = () => {
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                 />
                             </div>
-
-                            {/* Filter Button */}
-                            <button className="px-4 cursor-pointer py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors duration-200 flex items-center">
-                                <FaFilter className="mr-2" />
-                                Filter
-                            </button>
                         </div>
                     </div>
 
