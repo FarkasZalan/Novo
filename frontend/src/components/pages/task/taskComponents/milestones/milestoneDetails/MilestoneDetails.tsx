@@ -370,7 +370,10 @@ export const MilestoneDetailsPage: React.FC = () => {
                                     <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2.5">
                                         <div
                                             className="bg-indigo-500 h-2.5 rounded-full"
-                                            style={{ width: `${progress}%` }}
+                                            style={{
+                                                width: `${progress}%`,
+                                                backgroundColor: isOverdue ? '#ef4444' : milestone.color
+                                            }}
                                         />
                                     </div>
                                     <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">

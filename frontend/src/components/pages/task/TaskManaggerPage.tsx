@@ -73,7 +73,7 @@ export const TasksManagerPage: React.FC = () => {
         };
 
         loadTasksForMilestone();
-    }, [selectedMilestone, projectId, authState.accessToken, tasks]);
+    }, [selectedMilestone, projectId, authState.accessToken]);
 
     const selectDefaultMilestone = (milestones: Milestone[]) => {
         if (milestones.length === 0) return null;

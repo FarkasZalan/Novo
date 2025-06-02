@@ -92,6 +92,8 @@ export const SubtaskListOnBoard: React.FC<SubtaskListProps> = ({
                 task.id
             );
 
+            newSubtask.milestone_color = task.milestone_color
+
             if (task.milestone_id) {
                 await addMilestoneToTask(task.milestone_id, projectId, [newSubtask.id], authState.accessToken!);
             }

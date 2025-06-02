@@ -215,7 +215,6 @@ export const updateTask = async (req: Request, res: Response, next: NextFunction
             }
         }
 
-        console.log(newLabelsIds);
         // add labels if they are not in the existing labels array
         for (const newLabelId of newLabelsIds) {
             if (!existingLabelIds.includes(newLabelId)) {
@@ -267,6 +266,12 @@ export const updateTaskStatus = async (req: Request, res: Response, next: NextFu
             const subtasks = await getSubtasksForTaskQuery(taskId);
             for (const subtask of subtasks) {
                 await updateTaskStatusQuery("completed", subtask.subtask_id);
+                console.log(subtask)
+
+                if (subtask.milestone_id) {
+                    await recalculateAllTasksInMilestoneQuery(projectId, subtask.milestone_id)
+                    await recalculateCompletedTasksInMilestoneQuery(projectId, subtask.milestone_id)
+                }
             }
         }
 
