@@ -2,7 +2,7 @@ import pool from "../config/db";
 
 export const FilterAllUnassignedTaskForMilestoneQuery = async (projectId: string, title: string) => {
     const normalizedTitle = title.trim().toLowerCase();
-    const result = await pool.query("SELECT tasks.* FROM tasks WHERE project_id = $1 AND milestone_id IS NULL AND LOWER(title)  LIKE '%' || $2 || '%';", [projectId, normalizedTitle]); // send a query to the database with one of the open connection from the pool
+    const result = await pool.query("SELECT tasks.* FROM tasks WHERE project_id = $1 AND parent_task_id IS NULL AND milestone_id IS NULL AND LOWER(title)  LIKE '%' || $2 || '%';", [projectId, normalizedTitle]); // send a query to the database with one of the open connection from the pool
     return result.rows
 }
 

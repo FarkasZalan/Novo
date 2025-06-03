@@ -12,23 +12,25 @@ import { SubtaskList } from './SubtaskSectionForList';
 import { CommentComponent } from '../taskDetails/Comments/Comments';
 
 interface TaskListProps {
-    filteredTasks: Task[];
+    tasks: Task[];
     setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
     canManageTasks: boolean;
     project: Project | null;
     milestones: Milestone[];
     selectedMilestone: string | null;
     onMilestoneChange: (milestoneId: string | null) => void;
+    onTaskDelete?: (taskId: string) => void;
 }
 
 export const TaskList: React.FC<TaskListProps> = React.memo(({
-    filteredTasks,
+    tasks,
     setTasks,
     canManageTasks,
     project,
     milestones,
     selectedMilestone,
-    onMilestoneChange
+    onMilestoneChange,
+    onTaskDelete
 }) => {
     const navigate = useNavigate();
     const { projectId } = useParams<{ projectId: string }>();
@@ -107,7 +109,15 @@ export const TaskList: React.FC<TaskListProps> = React.memo(({
 
             setLoading(true);
             await deleteTask(taskId, projectId, authState.accessToken);
+
+            // Update local state
             setTasks(prevTasks => prevTasks.filter(task => task.id !== taskId));
+
+            // Notify parent component if needed
+            if (onTaskDelete) {
+                onTaskDelete(taskId);
+            }
+
             toast.success('Task deleted successfully');
         } catch (err) {
             console.error(err);
@@ -220,86 +230,96 @@ export const TaskList: React.FC<TaskListProps> = React.memo(({
 
     return (
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg dark:shadow-gray-700/50 overflow-visible transition-all duration-200">
-            <div className="flex justify-between items-center px-6 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 px-6 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
+                {/* Title */}
                 <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">Tasks</h2>
 
-                <div ref={milestoneWrapperRef} className="relative z-50">
-                    <button
-                        onClick={() => setIsMilestoneDropdownOpen(!isMilestoneDropdownOpen)}
-                        className="inline-flex cursor-pointer items-center justify-between px-4 py-2 text-sm text-gray-700 dark:text-gray-200 font-medium rounded-lg bg-white dark:bg-gray-700 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600 transition-colors"
-                    >
-                        <span className="flex items-center">
-                            <FaFlag
-                                className="mr-2"
-                                style={{
-                                    color: selectedMilestone && selectedMilestone !== 'all'
-                                        ? milestones.find(m => m.id === selectedMilestone)?.color || '#6b7280'
-                                        : '#6b7280'
-                                }}
-                            />
-                            {selectedMilestone === 'all'
-                                ? 'All Tasks'
-                                : milestones.find(m => m.id === selectedMilestone)?.name || 'Select Milestone'}
-                        </span>
-                        <FaChevronDown className={`ml-2 h-3 w-3 transition-transform ${isMilestoneDropdownOpen ? 'transform rotate-180' : ''}`} />
-                    </button>
-
-                    {isMilestoneDropdownOpen && (
-                        <div className="absolute z-10 right-0 mt-2 w-64 origin-top-right rounded-lg shadow-lg bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 focus:outline-none">
-                            <div className="py-1">
-                                <button
-                                    onClick={() => {
-                                        onMilestoneChange('all')
-                                        setIsMilestoneDropdownOpen(!isMilestoneDropdownOpen)
+                {/* Milestone Selector Dropdown */}
+                <div className="w-full sm:w-auto">
+                    <div ref={milestoneWrapperRef} className="relative z-50 w-full sm:w-48 md:w-56">
+                        {/* Dropdown Button */}
+                        <button
+                            onClick={() => setIsMilestoneDropdownOpen(!isMilestoneDropdownOpen)}
+                            className="w-full inline-flex cursor-pointer items-center justify-between px-4 py-2 text-sm text-gray-700 dark:text-gray-200 font-medium rounded-lg bg-white dark:bg-gray-700 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600 transition-colors"
+                        >
+                            <span className="flex items-center max-w-[calc(100%-24px)] truncate">
+                                <FaFlag
+                                    className="flex-shrink-0 mr-2"
+                                    style={{
+                                        color: selectedMilestone && selectedMilestone !== 'all'
+                                            ? milestones.find(m => m.id === selectedMilestone)?.color || '#6b7280'
+                                            : '#6b7280'
                                     }}
-                                    className={`flex cursor-pointer items-center w-full px-4 py-2 text-sm ${selectedMilestone === 'all'
-                                        ? 'bg-indigo-50 dark:bg-indigo-900/30  text-gray-800 dark:text-gray-100 '
-                                        : 'text-gray-800 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-600'}`}
-                                >
-                                    <FaTasks className="mr-2 opacity-70" />
-                                    All Tasks
-                                </button>
+                                />
+                                <span className="truncate">
+                                    {selectedMilestone === 'all'
+                                        ? 'All Tasks'
+                                        : milestones.find(m => m.id === selectedMilestone)?.name || 'Select Milestone'}
+                                </span>
+                            </span>
+                            <FaChevronDown className={`ml-2 h-3 w-3 flex-shrink-0 transition-transform ${isMilestoneDropdownOpen ? 'transform rotate-180' : ''}`} />
+                        </button>
 
-                                {milestones.map(milestone => {
-                                    const milestoneColor = milestone.color || '#6366f1'; // Fallback to indigo
-                                    const isActive = selectedMilestone === milestone.id;
+                        {/* Dropdown Menu */}
+                        {isMilestoneDropdownOpen && (
+                            <div className="absolute right-0 mt-2 w-full sm:w-64 origin-top-right rounded-lg shadow-lg bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 focus:outline-none">
+                                <div className="py-1 max-h-[60vh] overflow-y-auto">
+                                    {/* All Tasks Option */}
+                                    <button
+                                        onClick={() => {
+                                            onMilestoneChange('all')
+                                            setIsMilestoneDropdownOpen(!isMilestoneDropdownOpen)
+                                        }}
+                                        className={`flex cursor-pointer items-center w-full px-4 py-2 text-sm ${selectedMilestone === 'all'
+                                            ? 'bg-indigo-50 dark:bg-indigo-900/30 text-gray-800 dark:text-gray-100'
+                                            : 'text-gray-800 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-600'}`}
+                                    >
+                                        <FaTasks className="mr-2 opacity-70 flex-shrink-0" />
+                                        <span className="text-left">All Tasks</span>
+                                    </button>
 
-                                    return (
-                                        <button
-                                            key={milestone.id}
-                                            onClick={() => {
-                                                onMilestoneChange(milestone.id)
-                                                setIsMilestoneDropdownOpen(!isMilestoneDropdownOpen)
-                                            }}
-                                            className={`flex  cursor-pointer items-center w-full px-4 py-2 text-sm text-left  text-gray-800 dark:text-gray-100  transition-colors ${isActive
-                                                ? 'bg-indigo-50 dark:bg-indigo-900/30 '
-                                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'}`}
-                                            style={isActive ? {
-                                                backgroundColor: `${milestoneColor}20`,
-                                                color: milestoneColor,
-                                                borderLeft: `3px solid ${milestoneColor}`,
-                                            } : {
-                                                color: 'var(--text-gray-700)',
-                                            }}
-                                        >
-                                            <FaFlag className="mr-2" style={{ color: milestoneColor }} />
-                                            <span className="truncate  text-gray-800 dark:text-gray-100 ">{milestone.name}</span>
-                                            {milestone.due_date && (
-                                                <span className="ml-auto text-xs  text-gray-600 dark:text-gray-300">
-                                                    {new Date(milestone.due_date).toLocaleDateString()}
+                                    {/* Milestone Options */}
+                                    {milestones.map(milestone => {
+                                        const milestoneColor = milestone.color || '#6366f1';
+                                        const isActive = selectedMilestone === milestone.id;
+
+                                        return (
+                                            <button
+                                                key={milestone.id}
+                                                onClick={() => {
+                                                    onMilestoneChange(milestone.id)
+                                                    setIsMilestoneDropdownOpen(!isMilestoneDropdownOpen)
+                                                }}
+                                                className={`flex cursor-pointer items-center w-full px-4 py-2 text-sm text-left transition-colors ${isActive
+                                                    ? 'bg-indigo-50 dark:bg-indigo-900/30'
+                                                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'}`}
+                                                style={isActive ? {
+                                                    backgroundColor: `${milestoneColor}20`,
+                                                    color: milestoneColor,
+                                                    borderLeft: `3px solid ${milestoneColor}`,
+                                                } : undefined}
+                                            >
+                                                <FaFlag className="mr-2 flex-shrink-0" style={{ color: milestoneColor }} />
+                                                <span className="truncate flex-1 text-gray-800 dark:text-gray-100">
+                                                    {milestone.name}
                                                 </span>
-                                            )}
-                                        </button>
-                                    );
-                                })}
+                                                {milestone.due_date && (
+                                                    <span className="ml-2 text-xs text-gray-600 dark:text-gray-300 flex-shrink-0">
+                                                        {new Date(milestone.due_date).toLocaleDateString()}
+                                                    </span>
+                                                )}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
                             </div>
-                        </div>
-                    )}
+                        )}
+                    </div>
                 </div>
             </div>
 
-
-            {filteredTasks.length === 0 ? (
+            {/* Task List */}
+            {tasks.length === 0 ? (
                 <div className="text-center p-12">
                     <FaTasks className="mx-auto text-4xl text-gray-400 dark:text-gray-500 mb-4" />
                     <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
@@ -359,7 +379,7 @@ export const TaskList: React.FC<TaskListProps> = React.memo(({
                             </tr>
                         </thead>
                         <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                            {filteredTasks.map(task => (
+                            {tasks.map(task => (
                                 <React.Fragment key={task.id}>
                                     <tr
                                         className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer"

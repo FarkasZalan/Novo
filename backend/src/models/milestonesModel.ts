@@ -98,7 +98,7 @@ export const getAllCOmpletedTaskCountForMilestoneQuery = async (milestone_id: st
 }
 
 export const getAllUnassignedTaskForMilestoneQuery = async (projectId: string) => {
-    const result = await pool.query("SELECT tasks.* FROM tasks WHERE project_id = $1 AND milestone_id IS NULL;", [projectId]); // send a query to the database with one of the open connection from the pool
+    const result = await pool.query("SELECT tasks.* FROM tasks WHERE project_id = $1 AND milestone_id IS NULL AND parent_task_id IS NULL;", [projectId]); // send a query to the database with one of the open connection from the pool
     return result.rows
 }
 

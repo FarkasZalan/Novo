@@ -636,169 +636,209 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
                             Milestone
                         </label>
 
-                        {/* Selected milestone display */}
-                        {selectedMilestone ? (
-                            <div
-                                className="flex items-center justify-between rounded-lg px-4 py-3 border transition-all duration-200 shadow-sm"
-                                style={{
-                                    backgroundColor: `${selectedMilestone.color}20`,
-                                    borderColor: `${selectedMilestone.color}40`,
-                                }}
-                            >
-                                <div className="flex items-center space-x-3">
-                                    <div
-                                        className="p-2 rounded-lg shadow-inner"
-                                        style={{
-                                            backgroundColor: `${selectedMilestone.color}30`,
-                                        }}
-                                    >
-                                        <FaFlag
-                                            className="text-sm"
-                                            style={{ color: selectedMilestone.color }}
-                                        />
-                                    </div>
-                                    <div>
-                                        <span
-                                            className="font-medium"
-                                            style={{ color: selectedMilestone.color }}
+                        {/* If this is a subtask */}
+                        {formData.parentTaskId ? (
+                            <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+                                {selectedMilestone ? (
+                                    <div className="flex items-center gap-3">
+                                        <div
+                                            className="p-2 rounded-lg shadow-inner"
+                                            style={{
+                                                backgroundColor: `${selectedMilestone.color}30`,
+                                            }}
                                         >
-                                            {selectedMilestone.name}
-                                        </span>
-                                        {selectedMilestone.due_date && (
-                                            <span className="block text-xs text-gray-500 dark:text-gray-300 mt-0.5">
-                                                Due {new Date(selectedMilestone.due_date).toLocaleDateString()}
+                                            <FaFlag
+                                                className="text-sm"
+                                                style={{ color: selectedMilestone.color }}
+                                            />
+                                        </div>
+                                        <div>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                                                Inherited from parent task
+                                            </p>
+                                            <span
+                                                className="font-medium"
+                                                style={{ color: selectedMilestone.color }}
+                                            >
+                                                {selectedMilestone.name}
                                             </span>
-                                        )}
+                                            {selectedMilestone.due_date && (
+                                                <span className="block text-xs text-gray-500 dark:text-gray-300 mt-0.5">
+                                                    Due {new Date(selectedMilestone.due_date).toLocaleDateString()}
+                                                </span>
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
-                                <button
-                                    type="button"
-                                    onClick={() => setSelectedMilestone(null)}
-                                    className="p-1.5 -mr-1 cursor-pointer rounded-lg hover:bg-opacity-30 transition-colors"
-                                    style={{
-                                        color: selectedMilestone.color,
-                                        backgroundColor: `${selectedMilestone.color}20`
-                                    }}
-                                    aria-label="Remove milestone"
-                                >
-                                    <FaTimes className="h-4 w-4" />
-                                </button>
+                                ) : (
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                                        No milestone assigned to parent task
+                                    </p>
+                                )}
                             </div>
                         ) : (
-                            <div className="relative">
-                                {/* Search input */}
-                                <div className="relative">
-                                    <input
-                                        type="text"
-                                        className="block w-full pl-10 pr-3 py-2.5 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-200"
-                                        placeholder="Search or create milestone..."
-                                        value={milestoneSearchTerm}
-                                        onChange={(e) => {
-                                            setMilestoneSearchTerm(e.target.value);
-                                            setShowSearchResults(true);
+                            /* Regular task milestone selector */
+                            <>
+                                {selectedMilestone ? (
+                                    <div
+                                        className="flex items-center justify-between rounded-lg px-4 py-3 border transition-all duration-200 shadow-sm"
+                                        style={{
+                                            backgroundColor: `${selectedMilestone.color}20`,
+                                            borderColor: `${selectedMilestone.color}40`,
                                         }}
-                                        onFocus={() => setShowSearchResults(true)}
-                                    />
-                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <FaSearch className="text-gray-400 dark:text-gray-500 text-sm" />
-                                    </div>
-
-                                    {/* Clear search button */}
-                                    {milestoneSearchTerm && (
+                                    >
+                                        <div className="flex items-center space-x-3">
+                                            <div
+                                                className="p-2 rounded-lg shadow-inner"
+                                                style={{
+                                                    backgroundColor: `${selectedMilestone.color}30`,
+                                                }}
+                                            >
+                                                <FaFlag
+                                                    className="text-sm"
+                                                    style={{ color: selectedMilestone.color }}
+                                                />
+                                            </div>
+                                            <div>
+                                                <span
+                                                    className="font-medium"
+                                                    style={{ color: selectedMilestone.color }}
+                                                >
+                                                    {selectedMilestone.name}
+                                                </span>
+                                                {selectedMilestone.due_date && (
+                                                    <span className="block text-xs text-gray-500 dark:text-gray-300 mt-0.5">
+                                                        Due {new Date(selectedMilestone.due_date).toLocaleDateString()}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
                                         <button
-                                            onClick={() => {
-                                                setMilestoneSearchTerm('');
-                                                setShowSearchResults(false);
+                                            type="button"
+                                            onClick={() => setSelectedMilestone(null)}
+                                            className="p-1.5 -mr-1 cursor-pointer rounded-lg hover:bg-opacity-30 transition-colors"
+                                            style={{
+                                                color: selectedMilestone.color,
+                                                backgroundColor: `${selectedMilestone.color}20`
                                             }}
-                                            className="absolute cursor-pointer inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                                            aria-label="Remove milestone"
                                         >
-                                            <FaTimes />
+                                            <FaTimes className="h-4 w-4" />
                                         </button>
-                                    )}
-                                </div>
+                                    </div>
+                                ) : (
+                                    <div className="relative">
+                                        <div className="relative">
+                                            <input
+                                                type="text"
+                                                className="block w-full pl-10 pr-3 py-2.5 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-200"
+                                                placeholder="Search or create milestone..."
+                                                value={milestoneSearchTerm}
+                                                onChange={(e) => {
+                                                    setMilestoneSearchTerm(e.target.value);
+                                                    setShowSearchResults(true);
+                                                }}
+                                                onFocus={() => setShowSearchResults(true)}
+                                            />
+                                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <FaSearch className="text-gray-400 dark:text-gray-500 text-sm" />
+                                            </div>
 
-                                {/* Search Results Dropdown */}
-                                {showSearchResults && (
-                                    <div className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 max-h-60 overflow-y-auto">
-                                        {filteredMilestones.length > 0 ? (
-                                            <>
-                                                <ul className="py-1">
-                                                    {filteredMilestones.map(milestone => (
-                                                        <li
-                                                            key={milestone.id}
-                                                            className="px-3 py-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
-                                                            onClick={() => {
-                                                                setSelectedMilestone(milestone);
-                                                                setMilestoneSearchTerm('');
-                                                                setShowSearchResults(false);
-                                                            }}
-                                                        >
-                                                            <div className="flex items-center space-x-3">
-                                                                <div
-                                                                    className="flex-shrink-0 p-1 rounded-lg"
-                                                                    style={{
-                                                                        backgroundColor: `${milestone.color}20`
+                                            {milestoneSearchTerm && (
+                                                <button
+                                                    onClick={() => {
+                                                        setMilestoneSearchTerm('');
+                                                        setShowSearchResults(false);
+                                                    }}
+                                                    className="absolute cursor-pointer inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                                                >
+                                                    <FaTimes />
+                                                </button>
+                                            )}
+                                        </div>
+
+                                        {showSearchResults && (
+                                            <div className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 max-h-60 overflow-y-auto">
+                                                {filteredMilestones.length > 0 ? (
+                                                    <>
+                                                        <ul className="py-1">
+                                                            {filteredMilestones.map(milestone => (
+                                                                <li
+                                                                    key={milestone.id}
+                                                                    className="px-3 py-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                                                                    onClick={() => {
+                                                                        setSelectedMilestone(milestone);
+                                                                        setMilestoneSearchTerm('');
+                                                                        setShowSearchResults(false);
                                                                     }}
                                                                 >
-                                                                    <FaFlag
-                                                                        className="text-sm"
-                                                                        style={{ color: milestone.color }}
-                                                                    />
-                                                                </div>
-                                                                <div>
-                                                                    <p
-                                                                        className="text-sm font-medium"
-                                                                        style={{ color: milestone.color }}
-                                                                    >
-                                                                        {milestone.name}
-                                                                    </p>
-                                                                    {milestone.due_date && (
-                                                                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                                                                            Due {new Date(milestone.due_date).toLocaleDateString()}
-                                                                        </p>
-                                                                    )}
-                                                                </div>
+                                                                    <div className="flex items-center space-x-3">
+                                                                        <div
+                                                                            className="flex-shrink-0 p-1 rounded-lg"
+                                                                            style={{
+                                                                                backgroundColor: `${milestone.color}20`
+                                                                            }}
+                                                                        >
+                                                                            <FaFlag
+                                                                                className="text-sm"
+                                                                                style={{ color: milestone.color }}
+                                                                            />
+                                                                        </div>
+                                                                        <div>
+                                                                            <p
+                                                                                className="text-sm font-medium"
+                                                                                style={{ color: milestone.color }}
+                                                                            >
+                                                                                {milestone.name}
+                                                                            </p>
+                                                                            {milestone.due_date && (
+                                                                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                                                                    Due {new Date(milestone.due_date).toLocaleDateString()}
+                                                                                </p>
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                        {milestoneSearchTerm && !milestones.some(m => m.name.toLowerCase() === milestoneSearchTerm.toLowerCase()) && (
+                                                            <div className="border-t border-gray-100 dark:border-gray-700 px-3 py-2">
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={handleCreateMilestone}
+                                                                    className="w-full cursor-pointer flex items-center justify-between px-2 py-1.5 text-sm text-indigo-600 dark:text-indigo-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded transition-colors"
+                                                                >
+                                                                    <span>Create "{milestoneSearchTerm}"</span>
+                                                                    <FaPlus className="h-3 w-3" />
+                                                                </button>
                                                             </div>
-                                                        </li>
-                                                    ))}
-                                                </ul>
-                                                {milestoneSearchTerm && !milestones.some(m => m.name.toLowerCase() === milestoneSearchTerm.toLowerCase()) && (
-                                                    <div className="border-t border-gray-100 dark:border-gray-700 px-3 py-2">
-                                                        <button
-                                                            type="button"
-                                                            onClick={handleCreateMilestone}
-                                                            className="w-full cursor-pointer flex items-center justify-between px-2 py-1.5 text-sm text-indigo-600 dark:text-indigo-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded transition-colors"
-                                                        >
-                                                            <span>Create "{milestoneSearchTerm}"</span>
-                                                            <FaPlus className="h-3 w-3" />
-                                                        </button>
+                                                        )}
+                                                    </>
+                                                ) : (
+                                                    <div className="p-4 text-center">
+                                                        <div className="flex flex-col items-center">
+                                                            <div className="mb-3 rounded-lg bg-gray-100 dark:bg-gray-700 p-2">
+                                                                <FaPlus className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+                                                            </div>
+                                                            <p className="text-gray-700 dark:text-gray-300 font-medium text-sm mb-2">
+                                                                No milestones found
+                                                            </p>
+                                                            {milestoneSearchTerm && (
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={handleCreateMilestone}
+                                                                    className="w-full cursor-pointer py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded transition-colors text-sm"
+                                                                >
+                                                                    Create "{milestoneSearchTerm}"
+                                                                </button>
+                                                            )}
+                                                        </div>
                                                     </div>
                                                 )}
-                                            </>
-                                        ) : (
-                                            <div className="p-4 text-center">
-                                                <div className="flex flex-col items-center">
-                                                    <div className="mb-3 rounded-lg bg-gray-100 dark:bg-gray-700 p-2">
-                                                        <FaPlus className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-                                                    </div>
-                                                    <p className="text-gray-700 dark:text-gray-300 font-medium text-sm mb-2">
-                                                        No milestones found
-                                                    </p>
-                                                    {milestoneSearchTerm && (
-                                                        <button
-                                                            type="button"
-                                                            onClick={handleCreateMilestone}
-                                                            className="w-full cursor-pointer py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded transition-colors text-sm"
-                                                        >
-                                                            Create "{milestoneSearchTerm}"
-                                                        </button>
-                                                    )}
-                                                </div>
                                             </div>
                                         )}
                                     </div>
                                 )}
-                            </div>
+                            </>
                         )}
                     </div>
 

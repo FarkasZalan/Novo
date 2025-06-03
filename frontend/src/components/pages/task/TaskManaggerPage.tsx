@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { FaArrowLeft, FaBan, FaCrown, FaFlag, FaList, FaPlus, FaTags, FaThLarge, FaUsers } from 'react-icons/fa';
 import { fetchAllTasksForProjectWithNoParent } from '../../../services/taskService';
@@ -10,8 +10,7 @@ import { useAuth } from '../../../hooks/useAuth';
 import { Task } from '../../../types/task';
 import { MilestonesManagerPage } from './taskComponents/milestones/MilestonesManaggerPage';
 import { LabelsManagerPage } from './taskComponents/labels/LabelsManagger';
-import { getAllMilestonesForProject, getAllTaskForMilestoneWithSubtasks } from '../../../services/milestonesService';
-import toast from 'react-hot-toast';
+import { getAllMilestonesForProject } from '../../../services/milestonesService';
 
 export const TasksManagerPage: React.FC = () => {
     const { projectId } = useParams<{ projectId: string }>();
@@ -20,65 +19,35 @@ export const TasksManagerPage: React.FC = () => {
     const { authState } = useAuth();
     const navigate = useNavigate();
     const [tasks, setTasks] = useState<Task[]>([]);
-
     const [milestones, setMilestones] = useState<Milestone[]>([]);
     const [selectedMilestone, setSelectedMilestone] = useState<string | null>(null);
-    const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
-
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [view, setView] = useState<'board' | 'list' | 'milestones' | 'labels'>('board');
     const [canManageTasks, setCanManageTasks] = useState(false);
 
+    // Derive filtered tasks from main tasks state
+    const filteredTasks = useMemo(() => {
+        if (!selectedMilestone || selectedMilestone === 'all') {
+            return tasks;
+        }
+        return tasks.filter(task => task.milestone_id === selectedMilestone);
+    }, [tasks, selectedMilestone]);
+
     useEffect(() => {
         const searchParams = new URLSearchParams(location.search);
         if (searchParams.has('milestones')) {
             setView('milestones');
-            // Clean the URL by replacing it without the query parameters
             navigate(location.pathname, { replace: true });
         } else if (searchParams.has('labels')) {
             setView('labels');
-            // Clean the URL by replacing it without the query parameters
             navigate(location.pathname, { replace: true });
         }
     }, [location.search, location.pathname, navigate]);
 
-    // Load tasks when milestone selection changes
-    useEffect(() => {
-        const loadTasksForMilestone = async () => {
-            setLoading(true);
-            if (!selectedMilestone || selectedMilestone === 'all') {
-                setFilteredTasks(tasks);
-                setLoading(false);
-                return;
-            }
-
-            try {
-                const milestoneTasks = await getAllTaskForMilestoneWithSubtasks(
-                    selectedMilestone,
-                    projectId!,
-                    authState.accessToken!,
-                    "priority",
-                    "asc"
-                );
-                setFilteredTasks(milestoneTasks);
-                console.log(milestoneTasks);
-            } catch (error) {
-                console.error("Failed to load tasks for milestone:", error);
-                toast.error("Failed to load tasks for milestone");
-                setFilteredTasks([]);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        loadTasksForMilestone();
-    }, [selectedMilestone, projectId, authState.accessToken]);
-
     const selectDefaultMilestone = (milestones: Milestone[]) => {
         if (milestones.length === 0) return null;
 
-        // Find milestones with future due dates
         const futureMilestones = milestones.filter(m =>
             m.due_date && new Date(m.due_date) > new Date()
         ).sort((a, b) =>
@@ -88,7 +57,6 @@ export const TasksManagerPage: React.FC = () => {
         if (futureMilestones.length > 0) {
             return futureMilestones[0].id;
         } else {
-            // If no future milestones, sort by creation date (newest first)
             const sortedByCreation = [...milestones].sort((a, b) =>
                 new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
             );
@@ -96,7 +64,6 @@ export const TasksManagerPage: React.FC = () => {
         }
     };
 
-    // Set initial milestone selection
     useEffect(() => {
         if (milestones.length > 0 && !selectedMilestone) {
             const defaultMilestone = selectDefaultMilestone(milestones);
@@ -108,35 +75,22 @@ export const TasksManagerPage: React.FC = () => {
         setSelectedMilestone(null);
     }, [view]);
 
-    // Update filtered tasks when main tasks change and no specific milestone is selected
-    useEffect(() => {
-        if (!selectedMilestone || selectedMilestone === 'all') {
-            setFilteredTasks(tasks);
-        }
-    }, [tasks]);
-
     useEffect(() => {
         const loadTasks = async () => {
             try {
-
                 const [projectData, allTasks, allMilestones] = await Promise.all([
                     fetchProjectById(projectId!, authState.accessToken!),
                     fetchAllTasksForProjectWithNoParent(projectId!, authState.accessToken!, "priority", "asc"),
                     getAllMilestonesForProject(projectId!, authState.accessToken!),
                 ]);
 
-
-
-                setLoading(true);
                 setProject(projectData);
                 setTasks(allTasks);
                 setMilestones(allMilestones);
 
-                // Check if current user is owner or admin
                 if (projectData.owner_id === authState.user?.id) {
                     setCanManageTasks(true);
                 } else {
-                    // Check if user is admin
                     const members = await getProjectMembers(projectId!, authState.accessToken!);
                     const [activeMembers = []] = members;
                     const currentUserMember = activeMembers.find(
@@ -163,6 +117,10 @@ export const TasksManagerPage: React.FC = () => {
                 task.id === updatedTask.id ? updatedTask : task
             )
         );
+    };
+
+    const handleTaskDelete = (deletedTaskId: string) => {
+        setTasks(currentTasks => currentTasks.filter(task => task.id !== deletedTaskId));
     };
 
     return (
@@ -280,9 +238,18 @@ export const TasksManagerPage: React.FC = () => {
                 ) : (
                     <div className="animate-fade-in">
                         {view === 'board' ? (
-                            <TaskBoard tasks={tasks} setTasks={setTasks} onTaskUpdate={handleTaskUpdate} canManageTasks={canManageTasks} project={project} />
+                            <TaskBoard tasks={filteredTasks} setTasks={setTasks} onTaskUpdate={handleTaskUpdate} canManageTasks={canManageTasks} project={project} />
                         ) : view === 'list' ? (
-                            <TaskList filteredTasks={filteredTasks} setTasks={setTasks} canManageTasks={canManageTasks} project={project} milestones={milestones} selectedMilestone={selectedMilestone} onMilestoneChange={setSelectedMilestone} />
+                            <TaskList
+                                tasks={filteredTasks}
+                                setTasks={setTasks}
+                                canManageTasks={canManageTasks}
+                                project={project}
+                                milestones={milestones}
+                                selectedMilestone={selectedMilestone}
+                                onMilestoneChange={setSelectedMilestone}
+                                onTaskDelete={handleTaskDelete}
+                            />
                         ) : view === 'milestones' ? (
                             <MilestonesManagerPage project={project} />
                         ) : (
