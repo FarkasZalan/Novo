@@ -698,16 +698,42 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                                     {/* Right section with delete button and arrow */}
                                     <div className="flex items-center space-x-2 self-center">
                                         {canManage && !project?.read_only && (
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    onRemoveTask(task.id);
-                                                }}
-                                                className="p-2 cursor-pointer text-gray-400 hover:text-red-500 dark:hover:text-red-400 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                                                title="Remove from milestone"
-                                            >
-                                                <FaTrash className="w-4 h-4" />
-                                            </button>
+                                            <div className="relative">
+                                                {task.parent_task_id ? (
+                                                    <div className="group/delete relative p-2">
+                                                        <button
+                                                            disabled
+                                                            className="p-2 text-gray-300 dark:text-gray-500 cursor-not-allowed rounded-full"
+                                                            aria-label="Cannot remove subtask from milestone"
+                                                        >
+                                                            <FaTrash className="w-4 h-4" />
+                                                        </button>
+                                                        <div className="absolute z-50 hidden group-hover/delete:block bottom-full mb-2 right-0 min-w-[180px] max-w-[240px] sm:max-w-[280px] bg-white dark:bg-gray-800 shadow-lg rounded-md p-2 border border-gray-200 dark:border-gray-700 text-xs">
+                                                            <div className="flex items-start gap-2">
+                                                                <FaBan className="text-red-500 dark:text-red-400 mt-0.5 flex-shrink-0" />
+                                                                <div>
+                                                                    <p className="font-medium text-gray-800 dark:text-gray-100">Subtask cannot be removed</p>
+                                                                    <p className="text-gray-500 dark:text-gray-400">
+                                                                        Manage this task through its parent task
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                            <div className="absolute -bottom-1 right-3 w-3 h-3 bg-white dark:bg-gray-800 border-r border-b border-gray-200 dark:border-gray-700 transform rotate-45 -z-10"></div>
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            onRemoveTask(task.id);
+                                                        }}
+                                                        className="p-2 cursor-pointer text-gray-400 hover:text-red-500 dark:hover:text-red-400 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                                                        title="Remove from milestone"
+                                                    >
+                                                        <FaTrash className="w-4 h-4" />
+                                                    </button>
+                                                )}
+                                            </div>
                                         )}
 
                                         <div className="flex items-center h-full">

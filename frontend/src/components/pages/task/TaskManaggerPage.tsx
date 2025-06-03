@@ -238,7 +238,16 @@ export const TasksManagerPage: React.FC = () => {
                 ) : (
                     <div className="animate-fade-in">
                         {view === 'board' ? (
-                            <TaskBoard tasks={filteredTasks} setTasks={setTasks} onTaskUpdate={handleTaskUpdate} canManageTasks={canManageTasks} project={project} />
+                            <TaskBoard
+                                tasks={filteredTasks}
+                                setTasks={setTasks}
+                                onTaskUpdate={handleTaskUpdate}
+                                canManageTasks={canManageTasks}
+                                project={project}
+                                milestones={milestones}
+                                selectedMilestone={selectedMilestone}
+                                onMilestoneChange={setSelectedMilestone}
+                            />
                         ) : view === 'list' ? (
                             <TaskList
                                 tasks={filteredTasks}

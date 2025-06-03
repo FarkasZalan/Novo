@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { NextFunction } from "connect";
-import { addMilestoneToTaskQuery, createMilestoneQuery, deleteMilestoneFromTaskQuery, deleteMilestoneQuery, getAllMilestonesForProjectQuery, getAllTaskForMilestoneQuery, getAllTaskForMilestoneWithSubtasksQuery, getAllUnassignedTaskForMilestoneQuery, getMilestoneByIdQuery, recalculateAllTasksInMilestoneQuery, recalculateCompletedTasksInMilestoneQuery, updateMilestoneQuery } from "../models/milestonesModel";
+import { addMilestoneToTaskQuery, createMilestoneQuery, deleteMilestoneFromTaskQuery, deleteMilestoneQuery, getAllMilestonesForProjectQuery, getAllTaskForMilestoneQuery, getAllUnassignedTaskForMilestoneQuery, getMilestoneByIdQuery, recalculateAllTasksInMilestoneQuery, recalculateCompletedTasksInMilestoneQuery, updateMilestoneQuery } from "../models/milestonesModel";
 import { getParentTaskForSubtaskQuery, getTaskByIdQuery } from "../models/task.Model";
 import { getLabelsForTaskQuery } from "../models/labelModel";
 import { getProjectByIdQuery } from "../models/projectModel";
@@ -132,24 +132,6 @@ export const getAllTaskForMilestone = async (req: Request, res: Response, next: 
     }
 }
 
-export const getAllTaskForMilestoneWithSubtasks = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-        const projectId = req.params.projectId;
-        const milestone_id = req.params.milestoneId;
-        const orderBy = typeof req.query.order_by === 'string' ? req.query.order_by : "updated_at";
-        const order = typeof req.query.order === 'string' ? req.query.order : "desc";
-        const tasks = await getAllTaskForMilestoneWithSubtasksQuery(projectId, orderBy, order, milestone_id); // get all tasks for the project;
-
-        for (const task of tasks) {
-            const taskLabels = await getLabelsForTaskQuery(task.id);
-            task.labels = taskLabels;
-        }
-        handleResponse(res, 200, "Tasks fetched successfully", tasks);
-    } catch (error) {
-        next(error);
-    }
-}
-
 export const getAllUnassignedTaskForMilestone = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const tasks = await getAllUnassignedTaskForMilestoneQuery(req.params.projectId);
@@ -184,6 +166,17 @@ export const deleteMilestoneFromTask = async (req: Request, res: Response, next:
 
         if (project.read_only) {
             handleResponse(res, 400, "Project is read-only", null);
+            return;
+        }
+
+        const task = await getTaskByIdQuery(taskId);
+        if (!task) {
+            handleResponse(res, 404, "Task not found", null);
+            return;
+        }
+
+        if (task.parent_task_id) {
+            handleResponse(res, 400, "Task is a subtask", null);
             return;
         }
 

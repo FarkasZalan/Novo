@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { FaEdit, FaCircle, FaClock, FaCheckCircle, FaPlus, FaTasks, FaTrash, FaPaperclip, FaFlag, FaTag, FaChevronDown } from 'react-icons/fa';
-import { isPast, isToday, isTomorrow } from 'date-fns';
+import { format, isPast, isToday, isTomorrow } from 'date-fns';
 import { ConfirmationDialog } from '../../../project/ConfirmationDialog';
 import { deleteTask } from '../../../../../services/taskService';
 import { useAuth } from '../../../../../hooks/useAuth';
@@ -235,29 +235,31 @@ export const TaskList: React.FC<TaskListProps> = React.memo(({
                 <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">Tasks</h2>
 
                 {/* Milestone Selector Dropdown */}
-                <div className="w-full sm:w-auto">
-                    <div ref={milestoneWrapperRef} className="relative z-50 w-full sm:w-48 md:w-56">
+                <div className="w-full sm:w-auto" ref={milestoneWrapperRef}>
+                    <div className="relative z-50 w-full sm:w-56">
                         {/* Dropdown Button */}
                         <button
                             onClick={() => setIsMilestoneDropdownOpen(!isMilestoneDropdownOpen)}
-                            className="w-full inline-flex cursor-pointer items-center justify-between px-4 py-2 text-sm text-gray-700 dark:text-gray-200 font-medium rounded-lg bg-white dark:bg-gray-700 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600 transition-colors"
+                            className="w-full inline-flex items-center justify-between px-4 py-2.5 text-sm font-medium rounded-lg transition-colors cursor-pointer bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200"
                         >
                             <span className="flex items-center max-w-[calc(100%-24px)] truncate">
                                 <FaFlag
-                                    className="flex-shrink-0 mr-2"
+                                    className="flex-shrink-0 mr-2.5"
                                     style={{
                                         color: selectedMilestone && selectedMilestone !== 'all'
-                                            ? milestones.find(m => m.id === selectedMilestone)?.color || '#6b7280'
-                                            : '#6b7280'
+                                            ? milestones.find(m => m.id === selectedMilestone)?.color || '#8b5cf6'
+                                            : '#8b5cf6'
                                     }}
                                 />
                                 <span className="truncate">
                                     {selectedMilestone === 'all'
-                                        ? 'All Tasks'
+                                        ? 'All Milestones'
                                         : milestones.find(m => m.id === selectedMilestone)?.name || 'Select Milestone'}
                                 </span>
                             </span>
-                            <FaChevronDown className={`ml-2 h-3 w-3 flex-shrink-0 transition-transform ${isMilestoneDropdownOpen ? 'transform rotate-180' : ''}`} />
+                            <FaChevronDown
+                                className={`ml-2 h-3 w-3 flex-shrink-0 transition-transform ${isMilestoneDropdownOpen ? 'transform rotate-180' : ''}`}
+                            />
                         </button>
 
                         {/* Dropdown Menu */}
@@ -268,19 +270,19 @@ export const TaskList: React.FC<TaskListProps> = React.memo(({
                                     <button
                                         onClick={() => {
                                             onMilestoneChange('all')
-                                            setIsMilestoneDropdownOpen(!isMilestoneDropdownOpen)
+                                            setIsMilestoneDropdownOpen(false)
                                         }}
-                                        className={`flex cursor-pointer items-center w-full px-4 py-2 text-sm ${selectedMilestone === 'all'
-                                            ? 'bg-indigo-50 dark:bg-indigo-900/30 text-gray-800 dark:text-gray-100'
-                                            : 'text-gray-800 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-600'}`}
+                                        className={`flex w-full cursor-pointer items-center px-4 py-2.5 text-sm text-left transition-colors ${selectedMilestone === 'all'
+                                            ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300'
+                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'}`}
                                     >
-                                        <FaTasks className="mr-2 opacity-70 flex-shrink-0" />
-                                        <span className="text-left">All Tasks</span>
+                                        <FaTasks className="mr-3 opacity-70 flex-shrink-0" />
+                                        <span>All Tasks</span>
                                     </button>
 
                                     {/* Milestone Options */}
                                     {milestones.map(milestone => {
-                                        const milestoneColor = milestone.color || '#6366f1';
+                                        const milestoneColor = milestone.color || '#8b5cf6';
                                         const isActive = selectedMilestone === milestone.id;
 
                                         return (
@@ -288,9 +290,9 @@ export const TaskList: React.FC<TaskListProps> = React.memo(({
                                                 key={milestone.id}
                                                 onClick={() => {
                                                     onMilestoneChange(milestone.id)
-                                                    setIsMilestoneDropdownOpen(!isMilestoneDropdownOpen)
+                                                    setIsMilestoneDropdownOpen(false)
                                                 }}
-                                                className={`flex cursor-pointer items-center w-full px-4 py-2 text-sm text-left transition-colors ${isActive
+                                                className={`flex w-full cursor-pointer items-center px-4 py-2.5 text-sm text-left transition-colors ${isActive
                                                     ? 'bg-indigo-50 dark:bg-indigo-900/30'
                                                     : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'}`}
                                                 style={isActive ? {
@@ -299,15 +301,15 @@ export const TaskList: React.FC<TaskListProps> = React.memo(({
                                                     borderLeft: `3px solid ${milestoneColor}`,
                                                 } : undefined}
                                             >
-                                                <FaFlag className="mr-2 flex-shrink-0" style={{ color: milestoneColor }} />
-                                                <span className="truncate flex-1 text-gray-800 dark:text-gray-100">
-                                                    {milestone.name}
-                                                </span>
-                                                {milestone.due_date && (
-                                                    <span className="ml-2 text-xs text-gray-600 dark:text-gray-300 flex-shrink-0">
-                                                        {new Date(milestone.due_date).toLocaleDateString()}
-                                                    </span>
-                                                )}
+                                                <FaFlag className="mr-3 flex-shrink-0" style={{ color: milestoneColor }} />
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="truncate text-gray-800 dark:text-gray-100">{milestone.name}</p>
+                                                    {milestone.due_date && (
+                                                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                                            Due {format(new Date(milestone.due_date), 'MMM d, yyyy')}
+                                                        </p>
+                                                    )}
+                                                </div>
                                             </button>
                                         );
                                     })}

@@ -64,24 +64,6 @@ export const getAllTaskForMilestone = async (milestoneId: string, projectId: str
     }
 }
 
-export const getAllTaskForMilestoneWithSubtasks = async (milestoneId: string, projectId: string, token: string, order_by: string, order: string) => {
-    try {
-        const response = await axios.get(`${API_URL}/project/${projectId}/milestone/${milestoneId}/tasks-with-subtasks`, {
-            params: {
-                order_by: order_by,
-                order: order
-            },
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        });
-        return response.data.data;
-    } catch (error) {
-        console.error("Error fetching tasks for milestone:", error);
-        throw error;
-    }
-}
-
 export const getMilestoneById = async (milestoneId: string, projectId: string, token: string) => {
     try {
         const response = await axios.get(`${API_URL}/project/${projectId}/milestone/${milestoneId}`, {
