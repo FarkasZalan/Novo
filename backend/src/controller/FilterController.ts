@@ -418,13 +418,11 @@ export const getAllUnassignedTaskForMilestone = async (req: Request, res: Respon
     try {
         const title = req.query.title as string || '';
 
-
-
         if (title.length < 2) {
             handleResponse(res, 400, "Title should be at least 2 characters long", null);
             return;
         }
-        const tasks = await FilterAllUnassignedTaskForMilestoneQuery(req.params.projectId, title);
+        const tasks = await FilterAllUnassignedTaskForMilestoneQuery(req.params.projectId, title, 'priority', 'asc');
 
         for (const task of tasks) {
             const taskLabels = await getLabelsForTaskQuery(task.id);

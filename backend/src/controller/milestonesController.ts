@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { NextFunction } from "connect";
-import { addMilestoneToTaskQuery, createMilestoneQuery, deleteMilestoneFromTaskQuery, deleteMilestoneQuery, getAllMilestonesForProjectQuery, getAllTaskForMilestoneQuery, getAllUnassignedTaskForMilestoneQuery, getMilestoneByIdQuery, recalculateAllTasksInMilestoneQuery, recalculateCompletedTasksInMilestoneQuery, updateMilestoneQuery } from "../models/milestonesModel";
-import { getParentTaskForSubtaskQuery, getTaskByIdQuery } from "../models/task.Model";
+import { addMilestoneToTaskQuery, createMilestoneQuery, deleteMilestoneFromTaskQuery, deleteMilestoneQuery, getAllMilestonesForProjectQuery, getAllTaskForMilestoneWithSubtasksQuery, getAllUnassignedTaskForMilestoneQuery, getMilestoneByIdQuery, recalculateAllTasksInMilestoneQuery, recalculateCompletedTasksInMilestoneQuery, updateMilestoneQuery } from "../models/milestonesModel";
+import { getParentTaskForSubtaskQuery, getSubtasksForTaskQuery, getTaskByIdQuery } from "../models/task.Model";
 import { getLabelsForTaskQuery } from "../models/labelModel";
 import { getProjectByIdQuery } from "../models/projectModel";
 import { DEFAULT_COLORS } from "../utils/default-colors";
@@ -100,6 +100,11 @@ export const addMilestoneToTask = async (req: Request, res: Response, next: Next
                 return;
             }
 
+            const subtasks = await getSubtasksForTaskQuery(taskId);
+            for (const subtask of subtasks) {
+                await addMilestoneToTaskQuery(subtask.subtask_id, milestone_id);
+            }
+
             await recalculateAllTasksInMilestoneQuery(projectId, milestone_id)
             await recalculateCompletedTasksInMilestoneQuery(projectId, milestone_id)
             updatedTasks.push(updateTask);
@@ -114,7 +119,9 @@ export const addMilestoneToTask = async (req: Request, res: Response, next: Next
 
 export const getAllTaskForMilestone = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const tasks = await getAllTaskForMilestoneQuery(req.params.milestoneId);
+        const projectId = req.params.projectId;
+        const milestone_id = req.params.milestoneId;
+        const tasks = await getAllTaskForMilestoneWithSubtasksQuery(projectId, 'priority', 'asc', milestone_id);
 
         for (const task of tasks) {
             const taskLabels = await getLabelsForTaskQuery(task.id);
@@ -134,17 +141,12 @@ export const getAllTaskForMilestone = async (req: Request, res: Response, next: 
 
 export const getAllUnassignedTaskForMilestone = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const tasks = await getAllUnassignedTaskForMilestoneQuery(req.params.projectId);
+        const projectId = req.params.projectId;
+        const tasks = await getAllUnassignedTaskForMilestoneQuery(projectId, 'priority', 'asc');
 
         for (const task of tasks) {
             const taskLabels = await getLabelsForTaskQuery(task.id);
             task.labels = taskLabels;
-
-            task.parent_task_id = await getParentTaskForSubtaskQuery(task.id) || null;
-            if (task.parent_task_id) {
-                const parentTask = await getTaskByIdQuery(task.parent_task_id) || null;
-                task.parent_task_name = parentTask.title || null;
-            }
         }
         handleResponse(res, 200, "Tasks fetched successfully", tasks);
     } catch (error) {
@@ -178,6 +180,11 @@ export const deleteMilestoneFromTask = async (req: Request, res: Response, next:
         if (task.parent_task_id) {
             handleResponse(res, 400, "Task is a subtask", null);
             return;
+        }
+
+        const subtasks = await getSubtasksForTaskQuery(taskId);
+        for (const subtask of subtasks) {
+            await deleteMilestoneFromTaskQuery(subtask.subtask_id);
         }
 
         await deleteMilestoneFromTaskQuery(taskId);

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { FaTrash, FaPlus, FaSpinner, FaTimes, FaSearch, FaCheck, FaPaperclip, FaCalendarDay, FaTag, FaChevronRight, FaBan } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Task } from '../../../../../types/task';
@@ -9,6 +9,7 @@ import { format, isPast, isToday, isTomorrow } from 'date-fns';
 import { CommentComponent } from '../taskDetails/Comments/Comments';
 import { useAuth } from '../../../../../hooks/useAuth';
 import { filterAllUnassignedTaskByTitleForMilestone } from '../../../../../services/filterService';
+import { ConfirmationDialog } from '../../../project/ConfirmationDialog';
 
 interface MilestoneTasksProps {
     milestone: Milestone;
@@ -41,6 +42,9 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
     const { projectId } = useParams<{ projectId: string }>();
     const { authState } = useAuth();
     const MIN_SEARCH_LENGTH = 2;
+    const [milestoneTasksSearchQuery, setMilestoneTasksSearchQuery] = useState('');
+    const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
+    const [taskToRemove, setTaskToRemove] = useState<Task | null>(null);
 
     useEffect(() => {
         // Initialize available tasks
@@ -95,6 +99,16 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
             setIsSearching(false);
         }
     };
+
+    const filteredMilestoneTasks = useMemo(() => {
+        if (!milestoneTasksSearchQuery) return milestoneTasks;
+        const query = milestoneTasksSearchQuery.toLowerCase();
+        return milestoneTasks.filter(task =>
+            task.title.toLowerCase().includes(query) ||
+            (task.description && task.description.toLowerCase().includes(query)) ||
+            (task.labels && task.labels.some(label => label.name.toLowerCase().includes(query)))
+        );
+    }, [milestoneTasks, milestoneTasksSearchQuery]);
 
     const handleAddTasks = async () => {
         if (selectedTaskIds.length === 0) {
@@ -455,6 +469,16 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                                                                 compactMode={true}
                                                                 project={project}
                                                             />
+
+                                                            {/* Subtask count */}
+                                                            {task.subtasks && task.subtasks.length > 0 && (
+                                                                <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+                                                                    <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                                                    </svg>
+                                                                    {task.subtasks.length} subtask{task.subtasks.length !== 1 ? 's' : ''}
+                                                                </span>
+                                                            )}
                                                         </div>
 
                                                         {renderParentTaskInfo(task)}
@@ -510,13 +534,36 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
 
             {/* Task List */}
             <div className="p-6">
-                <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">
-                    Assigned Tasks ({milestoneTasks.length})
-                </h4>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                    <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Assigned Tasks ({filteredMilestoneTasks.length}/{milestoneTasks.length})
+                    </h4>
 
-                {milestoneTasks.length > 0 ? (
+                    <div className="relative w-full sm:w-64">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <FaSearch className="text-gray-400" size={14} />
+                        </div>
+                        <input
+                            type="text"
+                            value={milestoneTasksSearchQuery}
+                            onChange={(e) => setMilestoneTasksSearchQuery(e.target.value)}
+                            placeholder="Search assigned tasks..."
+                            className="block w-full pl-9 pr-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                        />
+                        {milestoneTasksSearchQuery && (
+                            <button
+                                onClick={() => setMilestoneTasksSearchQuery('')}
+                                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                            >
+                                <FaTimes size={12} />
+                            </button>
+                        )}
+                    </div>
+                </div>
+
+                {filteredMilestoneTasks.length > 0 ? (
                     <div className="space-y-4">
-                        {milestoneTasks.map(task => (
+                        {filteredMilestoneTasks.map(task => (
                             <motion.div
                                 key={task.id}
                                 initial={{ opacity: 0, y: -5 }}
@@ -673,6 +720,16 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                                                     </span>
                                                 )}
 
+                                                {/* Subtask count */}
+                                                {task.subtasks && task.subtasks.length > 0 && (
+                                                    <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+                                                        <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                                        </svg>
+                                                        {task.subtasks.length} subtask{task.subtasks.length !== 1 ? 's' : ''}
+                                                    </span>
+                                                )}
+
                                                 {/* Comments */}
                                                 <CommentComponent
                                                     taskId={task.id}
@@ -725,7 +782,8 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                                                     <button
                                                         onClick={(e) => {
                                                             e.stopPropagation();
-                                                            onRemoveTask(task.id);
+                                                            setTaskToRemove(task);
+                                                            setShowRemoveConfirm(true);
                                                         }}
                                                         className="p-2 cursor-pointer text-gray-400 hover:text-red-500 dark:hover:text-red-400 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                                                         title="Remove from milestone"
@@ -736,6 +794,7 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                                             </div>
                                         )}
 
+                                        {/* Chevron right icon */}
                                         <div className="flex items-center h-full">
                                             <div className="h-8 w-8 rounded-full bg-gray-50 dark:bg-gray-700 flex items-center justify-center group-hover:bg-indigo-100 dark:group-hover:bg-indigo-900/50 transition-colors">
                                                 <FaChevronRight className="text-gray-400 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 transition-colors" size={12} />
@@ -767,6 +826,26 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                     </div>
                 )}
             </div>
+
+            {/* Remove from Milestone Confirmation Dialog */}
+            <ConfirmationDialog
+                isOpen={showRemoveConfirm}
+                onClose={() => setShowRemoveConfirm(false)}
+                onConfirm={() => {
+                    if (taskToRemove) {
+                        onRemoveTask(taskToRemove.id);
+                    }
+                    setShowRemoveConfirm(false);
+                }}
+                title="Remove Task from Milestone?"
+                message={
+                    taskToRemove?.subtasks && taskToRemove.subtasks.length > 0
+                        ? `This task has ${taskToRemove.subtasks.length} subtask(s). Removing it from the milestone will also remove all subtasks. Are you sure?`
+                        : "Are you sure you want to remove this task from the milestone?"
+                }
+                confirmText="Remove Task"
+                confirmColor="red"
+            />
         </div>
     );
 };

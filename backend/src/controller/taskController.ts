@@ -266,7 +266,6 @@ export const updateTaskStatus = async (req: Request, res: Response, next: NextFu
             const subtasks = await getSubtasksForTaskQuery(taskId);
             for (const subtask of subtasks) {
                 await updateTaskStatusQuery("completed", subtask.subtask_id);
-                console.log(subtask)
 
                 if (subtask.milestone_id) {
                     await recalculateAllTasksInMilestoneQuery(projectId, subtask.milestone_id)
