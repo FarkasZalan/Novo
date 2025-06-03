@@ -4,6 +4,7 @@ import { AuthContext, AuthState } from './AuthContext';
 import { useAuthInitializer } from '../hooks/useAuthInitializer';
 import { refreshToken, logout as backendLogout } from '../services/authService';
 import { useNavigate } from 'react-router-dom';
+import { FaLinkedin, FaGithub, FaEnvelope, FaGlobe } from 'react-icons/fa';
 
 // this file is manages the authentication state 
 // so like is the user logged in? what's their token? who are they?
@@ -29,6 +30,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // for navigation
     const navigate = useNavigate();
+
+    // for render server cold start message
+    const [showColdStartMessage, setShowColdStartMessage] = useState(false);
+
+    useEffect(() => {
+        if (!isLoading) return;
+
+        const coldStartTimer = setTimeout(() => {
+            setShowColdStartMessage(true);
+        }, 10000); // 10 seconds
+
+        return () => clearTimeout(coldStartTimer);
+    }, [isLoading]);
 
     // dark mode setup
     useEffect(() => {
@@ -219,72 +233,122 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Show loading screen while authentication is being checked
     if (isLoading) {
         return (
-            <div className={`min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4 ${darkMode ? 'dark' : ''}`
-            }>
-                <div className="w-full max-w-sm text-center" >
-                    <div className="mb-8" >
-                        <h1 className="text-3xl font-bold text-indigo-600 dark:text-indigo-400" > Novo </h1>
-                    </div>
+            <div className={`min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4 ${darkMode ? 'dark' : ''}`}>
+                {showColdStartMessage ? (
+                    // Cold start message after 10 seconds
+                    <div className="w-full max-w-2xl bg-white dark:bg-gray-800 shadow-xl rounded-lg p-8">
+                        <div className="text-center mb-8">
+                            <h1 className="text-3xl font-bold text-indigo-600 dark:text-indigo-400 mb-4">Server Waking Up</h1>
+                            <p className="text-lg text-gray-600 dark:text-gray-300">
+                                Our free hosting service is spinning up the server. This usually takes about 1-2 minutes after periods of inactivity.
+                            </p>
+                            <p className="text-lg text-gray-600 dark:text-gray-300 mt-4">
+                                Please wait a bit longer while we get everything ready for you.
+                            </p>
+                        </div>
 
-                    < div className="bg-white dark:bg-gray-800 shadow-xl rounded-lg p-8" >
-                        <div className="flex flex-col items-center space-y-4" >
-                            <div className="relative" >
-                                <div className="w-12 h-12 rounded-full bg-indigo-100 dark:bg-indigo-900/20 flex items-center justify-center" >
-                                    <svg
-                                        className="animate-spin h-6 w-6 text-indigo-600 dark:text-indigo-400"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <circle
-                                            className="opacity-25"
-                                            cx="12"
-                                            cy="12"
-                                            r="10"
-                                            stroke="currentColor"
-                                            strokeWidth="4"
-                                        > </circle>
-                                        < path
-                                            className="opacity-75"
-                                            fill="currentColor"
-                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                        > </path>
-                                    </svg>
+                        <div className="flex flex-col gap-6 mt-8">
+                            <div className="text-center">
+                                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                                    While you wait, feel free to connect with me:
+                                </h3>
+
+                                <div className="flex justify-center gap-6 flex-wrap">
+                                    <a href="https://www.linkedin.com/in/zalanfarkas/" target="_blank" rel="noopener noreferrer"
+                                        className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400">
+                                        <FaLinkedin className="text-2xl" /> LinkedIn
+                                    </a>
+                                    <a href="https://github.com/FarkasZalan" target="_blank" rel="noopener noreferrer"
+                                        className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400">
+                                        <FaGithub className="text-2xl" /> GitHub
+                                    </a>
+                                    <a href="mailto:farkaszalan2001@gmail.com"
+                                        className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400">
+                                        <FaEnvelope className="text-2xl" /> Email
+                                    </a>
+                                    <a href="https://www.zalan-farkas.xyz/" target="_blank" rel="noopener noreferrer"
+                                        className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400">
+                                        <FaGlobe className="text-2xl" /> Website
+                                    </a>
                                 </div>
-                                < div className="absolute inset-0 rounded-full border-2 border-transparent border-t-indigo-600 dark:border-t-indigo-400 animate-spin" > </div>
-                            </div>
-
-                            < div >
-                                <h2 className="text-lg font-medium text-gray-900 dark:text-white" >
-                                    Securing your session
-                                </h2>
-                                < p className="mt-1 text-sm text-gray-500 dark:text-gray-400" >
-                                    Please wait while we authenticate your credentials
-                                </p>
-                            </div>
-
-                            < div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 mt-4" >
-                                <div
-                                    className="bg-indigo-600 dark:bg-indigo-400 h-1.5 rounded-full animate-pulse"
-                                    style={{ width: '70%' }
-                                    }
-                                > </div>
                             </div>
                         </div>
-                    </div>
 
-                    < div className="mt-6 text-center" >
-                        <p className="text-sm text-gray-500 dark:text-gray-400" >
-                            Taking longer than expected ? {' '}
-                            < button
-                                onClick={() => navigate('/login')}
-                                className="text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
+                        <div className="mt-8 text-center">
+                            <button
+                                onClick={() => window.location.reload()}
+                                className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
                             >
-                                Return to login
+                                Check Again
                             </button>
-                        </p>
+                        </div>
                     </div>
-                </div>
+                ) : (
+                    // Original loading screen
+                    <div className="w-full max-w-sm text-center">
+                        <div className="mb-8">
+                            <h1 className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">Novo</h1>
+                        </div>
+
+                        <div className="bg-white dark:bg-gray-800 shadow-xl rounded-lg p-8">
+                            <div className="flex flex-col items-center space-y-4">
+                                <div className="relative">
+                                    <div className="w-12 h-12 rounded-full bg-indigo-100 dark:bg-indigo-900/20 flex items-center justify-center">
+                                        <svg
+                                            className="animate-spin h-6 w-6 text-indigo-600 dark:text-indigo-400"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <circle
+                                                className="opacity-25"
+                                                cx="12"
+                                                cy="12"
+                                                r="10"
+                                                stroke="currentColor"
+                                                strokeWidth="4"
+                                            />
+                                            <path
+                                                className="opacity-75"
+                                                fill="currentColor"
+                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                            />
+                                        </svg>
+                                    </div>
+                                    <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-indigo-600 dark:border-t-indigo-400 animate-spin" />
+                                </div>
+
+                                <div>
+                                    <h2 className="text-lg font-medium text-gray-900 dark:text-white">
+                                        Securing your session
+                                    </h2>
+                                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                        Please wait while we authenticate your credentials
+                                    </p>
+                                </div>
+
+                                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 mt-4">
+                                    <div
+                                        className="bg-indigo-600 dark:bg-indigo-400 h-1.5 rounded-full animate-pulse"
+                                        style={{ width: '70%' }}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="mt-6 text-center">
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                                Taking longer than expected? {' '}
+                                <button
+                                    onClick={() => navigate('/login')}
+                                    className="text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
+                                >
+                                    Return to login
+                                </button>
+                            </p>
+                        </div>
+                    </div>
+                )}
             </div>
         );
     }
