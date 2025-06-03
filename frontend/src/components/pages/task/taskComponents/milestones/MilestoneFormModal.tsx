@@ -50,6 +50,14 @@ export const MilestoneFormModal: React.FC<MilestoneFormModalProps> = ({
         await onSubmit(form);
     };
 
+    const getTodayDateString = () => {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
     return (
         <Dialog open={isOpen} onClose={onClose} className="relative z-50">
             <div className="fixed inset-0 bg-black/30 backdrop-blur-sm" />
@@ -106,7 +114,17 @@ export const MilestoneFormModal: React.FC<MilestoneFormModalProps> = ({
                                 <input
                                     type="date"
                                     value={form.due_date}
-                                    onChange={e => setForm({ ...form, due_date: e.target.value })}
+                                    onChange={e => {
+                                        const selectedDate = e.target.value;
+                                        const today = new Date(getTodayDateString());
+                                        const selected = new Date(selectedDate);
+
+                                        if (selectedDate && selected < today) {
+                                            return;
+                                        }
+                                        setForm({ ...form, due_date: selectedDate });
+                                    }}
+                                    min={getTodayDateString()} // This prevents selecting past dates in the date picker
                                     className="block w-full rounded-lg border-0 py-2.5 pl-10 pr-4 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-indigo-500 focus:dark:ring-indigo-500 sm:text-sm sm:leading-6"
                                 />
                             </div>

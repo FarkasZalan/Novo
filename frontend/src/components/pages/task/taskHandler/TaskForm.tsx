@@ -353,6 +353,17 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
 
+        // Special validation for dueDate
+        if (name === 'dueDate' && value) {
+            const selectedDate = new Date(value);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // Reset time to compare dates only
+
+            if (selectedDate < today) {
+                return;
+            }
+        }
+
         if (name === 'status') {
             const newStatus = value as 'not-started' | 'in-progress' | 'blocked' | 'completed';
 
@@ -509,6 +520,14 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
         };
     }, []);
 
+    const getTodayDateString = () => {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
     if (isInitialLoading) {
         return (
             <div className="max-w-7xl mx-auto">
@@ -587,11 +606,11 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
                                     type="date"
                                     value={formData.dueDate}
                                     onChange={handleChange}
+                                    min={getTodayDateString()} // This prevents selecting past dates
                                     className="w-full pl-10 cursor-pointer pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent transition-colors"
                                 />
                             </div>
                         </div>
-
                         <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" htmlFor="priority">
                                 Priority
