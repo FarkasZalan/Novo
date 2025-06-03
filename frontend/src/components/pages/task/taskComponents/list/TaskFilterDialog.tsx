@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
-import { FaFilter, FaSortAmountDown, FaTag, FaTimes } from 'react-icons/fa';
-import { useAuth } from '../../../../../hooks/useAuth';
-import { getAllLabelForProject } from '../../../../../services/labelService';
+import { FaFilter, FaSortAmountDown, FaTag, FaTimes, FaCheck } from 'react-icons/fa';
+import { motion } from 'framer-motion';
 
 interface TaskFilterDialogProps {
     isOpen: boolean;
@@ -21,6 +20,7 @@ interface TaskFilterDialogProps {
         orderBy?: 'due_date' | 'updated_at';
         orderDirection?: 'asc' | 'desc';
     };
+    projectLabels: Label[];
     projectId: string;
 }
 
@@ -29,28 +29,15 @@ export const TaskFilterDialog = ({
     onClose,
     onApply,
     initialFilters,
-    projectId
+    projectLabels
 }: TaskFilterDialogProps) => {
-    const { authState } = useAuth();
-    const [labels, setLabels] = useState<Label[]>([]);
-    const [loadingLabels, setLoadingLabels] = useState(false);
     const [filters, setFilters] = useState({
         status: initialFilters?.status || '',
         priority: initialFilters?.priority || '',
         labelIds: initialFilters?.labelIds || [],
         orderBy: initialFilters?.orderBy || 'due_date',
-        orderDirection: initialFilters?.orderDirection || 'desc'
+        orderDirection: initialFilters?.orderDirection || 'desc',
     });
-
-    useEffect(() => {
-        if (isOpen && projectId && authState.accessToken) {
-            setLoadingLabels(true);
-            getAllLabelForProject(projectId, authState.accessToken)
-                .then(setLabels)
-                .catch(console.error)
-                .finally(() => setLoadingLabels(false));
-        }
-    }, [isOpen, projectId, authState.accessToken]);
 
     const handleLabelToggle = (labelId: string) => {
         setFilters(prev => ({
@@ -60,6 +47,17 @@ export const TaskFilterDialog = ({
                 : [...prev.labelIds, labelId]
         }));
     };
+
+    useEffect(() => {
+        setFilters(prev => ({
+            ...prev,
+            status: initialFilters?.status || '',
+            priority: initialFilters?.priority || '',
+            labelIds: initialFilters?.labelIds || [],
+            orderBy: initialFilters?.orderBy || 'due_date',
+            orderDirection: initialFilters?.orderDirection || 'desc'
+        }));
+    }, [initialFilters]);
 
     const handleApply = () => {
         onApply(filters);
@@ -96,222 +94,243 @@ export const TaskFilterDialog = ({
 
     return ReactDOM.createPortal(
         <div className="fixed inset-0 bg-black/30 backdrop-blur-md flex items-center justify-center z-50 px-2 sm:px-4 py-4 overflow-y-auto">
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.2 }}
+                className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-xl mx-auto max-h-[90vh] flex flex-col"
+            >
                 {/* Header */}
-                <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                        <FaFilter className="text-indigo-600 dark:text-indigo-400" />
-                        Filter & Sort Tasks
-                    </h3>
-                    <button
-                        onClick={onClose}
-                        className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400"
-                    >
-                        <FaTimes />
-                    </button>
-                </div>
-
-                {/* Status Filter */}
-                <div className="mb-6">
-                    <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                        Status
-                    </h4>
-                    <div className="grid grid-cols-3 gap-2">
-                        {['not-started', 'in-progress', 'completed'].map(status => (
-                            <button
-                                key={status}
-                                onClick={() =>
-                                    setFilters(prev => ({
-                                        ...prev,
-                                        status: prev.status === status ? '' : status
-                                    }))
-                                }
-                                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${filters.status === status
-                                    ? 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300'
-                                    : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                                    }`}
-                            >
-                                {status === 'not-started'
-                                    ? 'Not Started'
-                                    : status === 'in-progress'
-                                        ? 'In Progress'
-                                        : 'Completed'}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Priority Filter */}
-                <div className="mb-6">
-                    <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                        Priority
-                    </h4>
-                    <div className="grid grid-cols-3 gap-2">
-                        {['low', 'medium', 'high'].map(priority => (
-                            <button
-                                key={priority}
-                                onClick={() =>
-                                    setFilters(prev => ({
-                                        ...prev,
-                                        priority: prev.priority === priority ? '' : priority
-                                    }))
-                                }
-                                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${filters.priority === priority
-                                    ? priority === 'low'
-                                        ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'
-                                        : priority === 'medium'
-                                            ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300'
-                                            : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
-                                    : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                                    }`}
-                            >
-                                {priority.charAt(0).toUpperCase() + priority.slice(1)}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Labels Filter */}
-                <div className="mb-6">
-                    <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                        Labels
-                    </h4>
-                    {loadingLabels ? (
-                        <div className="flex justify-center py-4">
-                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600 dark:border-indigo-400"></div>
+                <div className="px-6 py-5 border-b border-gray-200 dark:border-gray-700">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                                <FaFilter className="text-indigo-600 dark:text-indigo-400" />
+                                Filter & Sort Tasks
+                            </h3>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                Apply filters to narrow down your tasks
+                            </p>
                         </div>
-                    ) : labels.length > 0 ? (
-                        <div className="flex flex-wrap gap-2">
-                            {labels.map(label => {
-                                const hexColor = label.color.startsWith('#') ? label.color : `#${label.color}`;
-                                const textColor = getLabelTextColor(hexColor);
+                        <button
+                            onClick={onClose}
+                            className="p-2 cursor-pointer rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400"
+                        >
+                            <FaTimes />
+                        </button>
+                    </div>
+                </div>
 
-                                return (
+                {/* Main Content */}
+                <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6">
+                    {/* Status Filter */}
+                    <div>
+                        <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Status</h4>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                            {[
+                                { value: 'not-started', label: 'Not Started' },
+                                { value: 'in-progress', label: 'In Progress' },
+                                { value: 'blocked', label: 'Blocked' },
+                                { value: 'completed', label: 'Completed' },
+                            ].map(({ value, label }) => (
+                                <button
+                                    key={value}
+                                    onClick={() =>
+                                        setFilters(prev => ({
+                                            ...prev,
+                                            status: prev.status === value ? '' : value,
+                                        }))
+                                    }
+                                    className={`w-full cursor-pointer px-2 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-1.5 ${filters.status === value
+                                        ? 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-700'
+                                        : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 border border-transparent'
+                                        }`}
+                                >
+                                    {filters.status === value && <FaCheck className="h-3 w-3" />}
+                                    <span>{label}</span>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Priority Filter */}
+                    <div>
+                        <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                            Priority
+                        </h4>
+                        <div className="grid grid-cols-3 gap-2">
+                            {[
+                                { value: 'low', label: 'Low', color: 'blue' },
+                                { value: 'medium', label: 'Medium', color: 'yellow' },
+                                { value: 'high', label: 'High', color: 'red' }
+                            ].map(({ value, label, color }) => (
+                                <button
+                                    key={value}
+                                    onClick={() =>
+                                        setFilters(prev => ({
+                                            ...prev,
+                                            priority: prev.priority === value ? '' : value
+                                        }))
+                                    }
+                                    className={`px-3 py-2 cursor-pointer rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2 ${filters.priority === value
+                                        ? `bg-${color}-100 text-${color}-800 dark:bg-${color}-900/30 dark:text-${color}-300 border border-${color}-200 dark:border-${color}-700`
+                                        : `bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 border border-transparent`
+                                        }`}
+                                >
+                                    {filters.priority === value && <FaCheck className="h-3 w-3" />}
+                                    {label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Labels Filter */}
+                    <div>
+                        <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                            Labels
+                        </h4>
+                        {projectLabels && projectLabels.length > 0 ? (
+                            <div className="flex flex-wrap gap-2">
+                                {projectLabels.map(label => {
+                                    const hexColor = label.color.startsWith('#') ? label.color : `#${label.color}`;
+                                    const textColor = getLabelTextColor(hexColor);
+
+                                    return (
+                                        <motion.button
+                                            key={label.id}
+                                            whileTap={{ scale: 0.95 }}
+                                            onClick={() => handleLabelToggle(label.id)}
+                                            className={`inline-flex cursor-pointer items-center px-3 py-1.5 rounded-full text-xs font-medium transition-all ${filters.labelIds.includes(label.id)
+                                                ? 'ring-2 ring-offset-1 ring-indigo-500 dark:ring-indigo-400'
+                                                : ''
+                                                }`}
+                                            style={{
+                                                backgroundColor: hexColor,
+                                                color: textColor === 'text-gray-900' ? '#111827' : '#fff'
+                                            }}
+                                        >
+                                            <FaTag className="mr-1.5" size={10} />
+                                            {label.name}
+                                            {filters.labelIds.includes(label.id) && (
+                                                <span className="ml-1.5">✓</span>
+                                            )}
+                                        </motion.button>
+                                    );
+                                })}
+                            </div>
+                        ) : (
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                                No labels available for this project
+                            </p>
+                        )}
+                    </div>
+
+                    {/* Sort Options */}
+                    <div>
+                        <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+                            <FaSortAmountDown className="text-indigo-600 dark:text-indigo-400" />
+                            Sort By
+                        </h4>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm text-gray-700 dark:text-gray-300 mb-2">
+                                    Due Date
+                                </label>
+                                <div className="grid grid-cols-2 gap-2">
                                     <button
-                                        key={label.id}
-                                        onClick={() => handleLabelToggle(label.id)}
-                                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium transition-all ${filters.labelIds.includes(label.id)
-                                            ? 'ring-2 ring-offset-1 ring-indigo-500 dark:ring-indigo-400'
-                                            : ''
+                                        onClick={() =>
+                                            setFilters(prev => ({
+                                                ...prev,
+                                                orderBy: 'due_date',
+                                                orderDirection: 'asc'
+                                            }))
+                                        }
+                                        className={`px-3 py-2 cursor-pointer rounded-lg text-xs font-medium flex items-center justify-center gap-2 ${filters.orderBy === 'due_date' && filters.orderDirection === 'asc'
+                                            ? 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-700'
+                                            : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 border border-transparent'
                                             }`}
-                                        style={{
-                                            backgroundColor: hexColor,
-                                            color: textColor === 'text-gray-900' ? '#111827' : '#fff'
-                                        }}
                                     >
-                                        <FaTag className="mr-1" size={10} />
-                                        {label.name}
+                                        {filters.orderBy === 'due_date' && filters.orderDirection === 'asc' && <FaCheck className="h-3 w-3" />}
+                                        Oldest First
                                     </button>
-                                );
-                            })}
-                        </div>
-                    ) : (
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                            No labels available for this project
-                        </p>
-                    )}
-                </div>
-
-                {/* Sort Options */}
-                <div className="mb-8">
-                    <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
-                        <FaSortAmountDown className="text-indigo-600 dark:text-indigo-400" />
-                        Sort By
-                    </h4>
-                    <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                            <label className="text-sm text-gray-700 dark:text-gray-300">
-                                Due Date
-                            </label>
-                            <div className="flex gap-2">
-                                <button
-                                    onClick={() =>
-                                        setFilters(prev => ({
-                                            ...prev,
-                                            orderBy: 'due_date',
-                                            orderDirection: 'asc'
-                                        }))
-                                    }
-                                    className={`px-3 py-1 rounded-md text-xs font-medium ${filters.orderBy === 'due_date' && filters.orderDirection === 'asc'
-                                        ? 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300'
-                                        : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                                        }`}
-                                >
-                                    Oldest First
-                                </button>
-                                <button
-                                    onClick={() =>
-                                        setFilters(prev => ({
-                                            ...prev,
-                                            orderBy: 'due_date',
-                                            orderDirection: 'desc'
-                                        }))
-                                    }
-                                    className={`px-3 py-1 rounded-md text-xs font-medium ${filters.orderBy === 'due_date' && filters.orderDirection === 'desc'
-                                        ? 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300'
-                                        : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                                        }`}
-                                >
-                                    Newest First
-                                </button>
+                                    <button
+                                        onClick={() =>
+                                            setFilters(prev => ({
+                                                ...prev,
+                                                orderBy: 'due_date',
+                                                orderDirection: 'desc'
+                                            }))
+                                        }
+                                        className={`px-3 py-2 cursor-pointer rounded-lg text-xs font-medium flex items-center justify-center gap-2 ${filters.orderBy === 'due_date' && filters.orderDirection === 'desc'
+                                            ? 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-700'
+                                            : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 border border-transparent'
+                                            }`}
+                                    >
+                                        {filters.orderBy === 'due_date' && filters.orderDirection === 'desc' && <FaCheck className="h-3 w-3" />}
+                                        Newest First
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                        <div className="flex items-center justify-between">
-                            <label className="text-sm text-gray-700 dark:text-gray-300">
-                                Last Updated
-                            </label>
-                            <div className="flex gap-2">
-                                <button
-                                    onClick={() =>
-                                        setFilters(prev => ({
-                                            ...prev,
-                                            orderBy: 'updated_at',
-                                            orderDirection: 'asc'
-                                        }))
-                                    }
-                                    className={`px-3 py-1 rounded-md text-xs font-medium ${filters.orderBy === 'updated_at' && filters.orderDirection === 'asc'
-                                        ? 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300'
-                                        : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                                        }`}
-                                >
-                                    Oldest First
-                                </button>
-                                <button
-                                    onClick={() =>
-                                        setFilters(prev => ({
-                                            ...prev,
-                                            orderBy: 'updated_at',
-                                            orderDirection: 'desc'
-                                        }))
-                                    }
-                                    className={`px-3 py-1 rounded-md text-xs font-medium ${filters.orderBy === 'updated_at' && filters.orderDirection === 'desc'
-                                        ? 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300'
-                                        : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                                        }`}
-                                >
-                                    Newest First
-                                </button>
+                            <div>
+                                <label className="block text-sm text-gray-700 dark:text-gray-300 mb-2">
+                                    Last Updated
+                                </label>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <button
+                                        onClick={() =>
+                                            setFilters(prev => ({
+                                                ...prev,
+                                                orderBy: 'updated_at',
+                                                orderDirection: 'asc'
+                                            }))
+                                        }
+                                        className={`px-3 py-2 cursor-pointer rounded-lg text-xs font-medium flex items-center justify-center gap-2 ${filters.orderBy === 'updated_at' && filters.orderDirection === 'asc'
+                                            ? 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-700'
+                                            : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 border border-transparent'
+                                            }`}
+                                    >
+                                        {filters.orderBy === 'updated_at' && filters.orderDirection === 'asc' && <FaCheck className="h-3 w-3" />}
+                                        Oldest First
+                                    </button>
+                                    <button
+                                        onClick={() =>
+                                            setFilters(prev => ({
+                                                ...prev,
+                                                orderBy: 'updated_at',
+                                                orderDirection: 'desc'
+                                            }))
+                                        }
+                                        className={`px-3 py-2 cursor-pointer rounded-lg text-xs font-medium flex items-center justify-center gap-2 ${filters.orderBy === 'updated_at' && filters.orderDirection === 'desc'
+                                            ? 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-700'
+                                            : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 border border-transparent'
+                                            }`}
+                                    >
+                                        {filters.orderBy === 'updated_at' && filters.orderDirection === 'desc' && <FaCheck className="h-3 w-3" />}
+                                        Newest First
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Action Buttons */}
-                <div className="flex justify-between gap-4">
+                {/* Footer */}
+                <div className="px-6 py-4 border-t cursor-pointer border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
                     <button
                         onClick={handleReset}
-                        className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex-1"
+                        className="px-6 py-3.5 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-sm font-medium"
                     >
                         Reset All
                     </button>
                     <button
                         onClick={handleApply}
-                        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white rounded-lg font-medium transition-colors flex-1"
+                        className="px-6 py-3.5 cursor-pointer bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white rounded-lg font-medium transition-colors text-sm shadow-md"
                     >
                         Apply Filters
                     </button>
                 </div>
-            </div>
+            </motion.div>
         </div>,
         document.body
     );

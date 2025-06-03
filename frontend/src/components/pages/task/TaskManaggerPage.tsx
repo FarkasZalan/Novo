@@ -11,6 +11,7 @@ import { Task } from '../../../types/task';
 import { MilestonesManagerPage } from './taskComponents/milestones/MilestonesManaggerPage';
 import { LabelsManagerPage } from './taskComponents/labels/LabelsManagger';
 import { getAllMilestonesForProject } from '../../../services/milestonesService';
+import { getAllLabelForProject } from '../../../services/labelService';
 
 export const TasksManagerPage: React.FC = () => {
     const { projectId } = useParams<{ projectId: string }>();
@@ -25,14 +26,64 @@ export const TasksManagerPage: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [view, setView] = useState<'board' | 'list' | 'milestones' | 'labels'>('board');
     const [canManageTasks, setCanManageTasks] = useState(false);
+    const [projectLabels, setProjectLabels] = useState<Label[]>([]);
+    const [activeFilters, setActiveFilters] = useState<Filter>({
+        status: '',
+        priority: '',
+        labelIds: [],
+        orderBy: 'due_date',
+        orderDirection: 'desc'
+    });
 
     // Derive filtered tasks from main tasks state
     const filteredTasks = useMemo(() => {
-        if (!selectedMilestone || selectedMilestone === 'all') {
-            return tasks;
+        let result = [...tasks];
+
+        // Apply milestone filter first
+        if (selectedMilestone && selectedMilestone !== 'all') {
+            result = result.filter(task => task.milestone_id === selectedMilestone);
         }
-        return tasks.filter(task => task.milestone_id === selectedMilestone);
-    }, [tasks, selectedMilestone]);
+
+        // Apply status filter
+        if (activeFilters.status) {
+            result = result.filter(task => task.status === activeFilters.status);
+        }
+
+        // Apply priority filter
+        if (activeFilters.priority) {
+            result = result.filter(task => task.priority === activeFilters.priority);
+        }
+
+        // Apply label filter
+        if (activeFilters.labelIds && activeFilters.labelIds.length > 0) {
+            result = result.filter(task => {
+                const taskLabelIds = task.labels?.map(label => label.id) || [];
+                return activeFilters.labelIds!.every(id => taskLabelIds.includes(id))
+            });
+        }
+
+        // Apply sorting
+        if (activeFilters.orderBy) {
+            const orderDirection = activeFilters.orderDirection === 'asc' ? 1 : -1;
+
+            result.sort((a, b) => {
+                switch (activeFilters.orderBy) {
+                    case 'due_date':
+                        const aDate = a.due_date ? new Date(a.due_date).getTime() : Infinity;
+                        const bDate = b.due_date ? new Date(b.due_date).getTime() : Infinity;
+                        return (aDate - bDate) * orderDirection;
+
+                    case 'updated_at':
+                        return (new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime()) * orderDirection;
+
+                    default:
+                        return 0;
+                }
+            });
+        }
+
+        return result;
+    }, [tasks, selectedMilestone, activeFilters]);
 
     useEffect(() => {
         const searchParams = new URLSearchParams(location.search);
@@ -73,20 +124,23 @@ export const TasksManagerPage: React.FC = () => {
 
     useEffect(() => {
         setSelectedMilestone(null);
+        setActiveFilters({ status: '', priority: '', labelIds: [], orderBy: 'due_date', orderDirection: 'desc' });
     }, [view]);
 
     useEffect(() => {
         const loadTasks = async () => {
             try {
-                const [projectData, allTasks, allMilestones] = await Promise.all([
+                const [projectData, allTasks, allMilestones, projectLabels] = await Promise.all([
                     fetchProjectById(projectId!, authState.accessToken!),
                     fetchAllTasksForProjectWithNoParent(projectId!, authState.accessToken!, "priority", "asc"),
                     getAllMilestonesForProject(projectId!, authState.accessToken!),
+                    getAllLabelForProject(projectId!, authState.accessToken!),
                 ]);
 
                 setProject(projectData);
                 setTasks(allTasks);
                 setMilestones(allMilestones);
+                setProjectLabels(projectLabels);
 
                 if (projectData.owner_id === authState.user?.id) {
                     setCanManageTasks(true);
@@ -258,6 +312,10 @@ export const TasksManagerPage: React.FC = () => {
                                 selectedMilestone={selectedMilestone}
                                 onMilestoneChange={setSelectedMilestone}
                                 onTaskDelete={handleTaskDelete}
+                                activeFilters={activeFilters}
+                                setActiveFilters={setActiveFilters}
+                                onFilterChange={setActiveFilters}
+                                projectLabels={projectLabels}
                             />
                         ) : view === 'milestones' ? (
                             <MilestonesManagerPage project={project} />

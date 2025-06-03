@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { FaEdit, FaCircle, FaClock, FaCheckCircle, FaPlus, FaTasks, FaTrash, FaPaperclip, FaFlag, FaTag, FaChevronDown, FaFilter } from 'react-icons/fa';
+import { FaEdit, FaCircle, FaClock, FaCheckCircle, FaPlus, FaTasks, FaTrash, FaPaperclip, FaFlag, FaTag, FaChevronDown, FaFilter, FaBan } from 'react-icons/fa';
 import { format, isPast, isToday, isTomorrow } from 'date-fns';
 import { ConfirmationDialog } from '../../../project/ConfirmationDialog';
 import { deleteTask } from '../../../../../services/taskService';
@@ -21,6 +21,10 @@ interface TaskListProps {
     selectedMilestone: string | null;
     onMilestoneChange: (milestoneId: string | null) => void;
     onTaskDelete?: (taskId: string) => void;
+    activeFilters: Filter;
+    setActiveFilters: React.Dispatch<React.SetStateAction<Filter>>;
+    onFilterChange: (filters: Filter) => void;
+    projectLabels: Label[]
 }
 
 export const TaskList: React.FC<TaskListProps> = React.memo(({
@@ -31,7 +35,11 @@ export const TaskList: React.FC<TaskListProps> = React.memo(({
     milestones,
     selectedMilestone,
     onMilestoneChange,
-    onTaskDelete
+    onTaskDelete,
+    activeFilters,
+    setActiveFilters,
+    onFilterChange,
+    projectLabels
 }) => {
     const navigate = useNavigate();
     const { projectId } = useParams<{ projectId: string }>();
@@ -44,22 +52,6 @@ export const TaskList: React.FC<TaskListProps> = React.memo(({
     const milestoneWrapperRef = useRef<HTMLDivElement>(null);
 
     const [showFilterDialog, setShowFilterDialog] = useState(false);
-
-    type Filter = {
-        status?: string;
-        priority?: string;
-        labelIds?: string[];
-        orderBy?: 'due_date' | 'updated_at';
-        orderDirection?: 'asc' | 'desc';
-    };
-
-    const [activeFilters, setActiveFilters] = useState<Filter>({
-        status: '',
-        priority: '',
-        labelIds: [],
-        orderBy: 'due_date',
-        orderDirection: 'desc'
-    });
 
     useEffect(() => {
         if (!isMilestoneDropdownOpen) return;
@@ -94,6 +86,8 @@ export const TaskList: React.FC<TaskListProps> = React.memo(({
                 return <FaCheckCircle className="text-green-500" />;
             case 'in-progress':
                 return <FaClock className="text-yellow-500" />;
+            case 'blocked':
+                return <FaBan className="text-red-500" />;
             default:
                 return <FaCircle className="text-gray-400" />;
         }
@@ -351,6 +345,101 @@ export const TaskList: React.FC<TaskListProps> = React.memo(({
                 </div>
             </div>
 
+            {/* Active Filters */}
+            {(activeFilters.status! || activeFilters.priority! || activeFilters.labelIds!.length > 0) && (
+                <div className="flex flex-wrap gap-2 px-6 py-3 bg-gray-50 dark:bg-gray-700/30 rounded-xl mb-4 border border-gray-200 dark:border-gray-700">
+                    <span className="text-sm font-medium text-gray-500 dark:text-gray-400 mr-2">Active filters:</span>
+
+                    {activeFilters.status && (
+                        <span
+                            onClick={() => setActiveFilters(prev => ({ ...prev, status: '' }))}
+                            className={`
+                                    inline-flex cursor-pointer cursor-pointer items-center px-3 py-1 rounded-full text-xs font-medium
+                                    ${activeFilters.status === 'completed' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' :
+                                    activeFilters.status === 'in-progress' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300' :
+                                        activeFilters.status === 'not-started' ? 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300' :
+                                            activeFilters.status === 'blocked' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300' :
+                                                'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300'}
+                                    `}
+                        >
+                            Status: {getStatusText(activeFilters.status)}
+                            <button
+                                onClick={() => setActiveFilters(prev => ({ ...prev, status: '' }))}
+                                className="ml-1.5 p-0.5 rounded-full cursor-pointer dark:hover:bg-opacity-75"
+                            >
+                                ×
+                            </button>
+                        </span>
+                    )}
+
+                    {activeFilters.priority && (
+                        <span
+                            onClick={() => setActiveFilters(prev => ({ ...prev, priority: '' }))}
+                            className={`
+                                    inline-flex cursor-pointer items-center px-3 py-1 rounded-full text-xs font-medium
+                                    ${activeFilters.priority === 'low' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' :
+                                    activeFilters.priority === 'medium' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300' :
+                                        activeFilters.priority === 'high' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300' :
+                                            'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300'}
+                                    `}
+                        >
+                            Priority: {activeFilters.priority.charAt(0).toUpperCase() + activeFilters.priority.slice(1)}
+                            <button
+                                onClick={() => setActiveFilters(prev => ({ ...prev, priority: '' }))}
+                                className="ml-1.5 p-0.5 cursor-pointer rounded-full hover:bg-opacity-75 dark:hover:bg-opacity-75"
+                            >
+                                ×
+                            </button>
+                        </span>
+                    )}
+
+                    {activeFilters.labelIds?.map(labelId => {
+                        const label = projectLabels.find(l => l.id === labelId);
+                        if (!label) return null;
+
+                        const hexColor = label.color.startsWith('#') ? label.color : `#${label.color}`;
+                        const textColor = getLabelTextColor(hexColor);
+
+                        return (
+                            <span
+                                key={labelId}
+                                className={`inline-flex cursor-pointer items-center px-3 py-1 rounded-full text-xs font-medium ${textColor}`}
+                                style={{ backgroundColor: hexColor }}
+                                onClick={() => setActiveFilters(prev => ({
+                                    ...prev,
+                                    labelIds: prev.labelIds?.filter(id => id !== labelId)
+                                }))}
+                            >
+                                <FaTag className="mr-1" size={10} />
+                                {label.name}
+                                <button
+                                    onClick={() => setActiveFilters(prev => ({
+                                        ...prev,
+                                        labelIds: prev.labelIds?.filter(id => id !== labelId)
+                                    }))}
+                                    className={`ml-1.5 p-0.5 cursor-pointer rounded-full hover:bg-${textColor === 'text-gray-900' ? 'gray-300' : 'black/20'}`}
+                                >
+                                    ×
+                                </button>
+                            </span>
+                        );
+                    })}
+
+                    <button
+                        onClick={() => setActiveFilters({
+                            status: '',
+                            priority: '',
+                            labelIds: [],
+                            orderBy: 'due_date',
+                            orderDirection: 'desc'
+                        })}
+                        className="text-xs cursor-pointer text-indigo-600 dark:text-indigo-400 hover:underline ml-2"
+                    >
+                        Clear all
+                    </button>
+                </div>
+            )}
+
             {/* Task List */}
             {tasks.length === 0 ? (
                 <div className="text-center p-12">
@@ -504,7 +593,15 @@ export const TaskList: React.FC<TaskListProps> = React.memo(({
 
                                         {/* Status */}
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+                                            <span className={`
+            inline-flex items-center px-3 py-1 rounded-full text-xs font-medium
+            ${task.status === 'completed' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' :
+                                                    task.status === 'in-progress' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300' :
+                                                        task.status === 'not-started' ? 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300' :
+                                                            task.status === 'blocked' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300' :
+                                                                'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300'}
+        `}
+                                            >
                                                 {getStatusText(task.status)}
                                             </span>
                                         </td>
@@ -659,12 +756,11 @@ export const TaskList: React.FC<TaskListProps> = React.memo(({
                 isOpen={showFilterDialog}
                 onClose={() => setShowFilterDialog(false)}
                 onApply={(filters) => {
-
-                    // You'll need to implement the actual filtering/sorting logic here
-                    // This might involve calling your API with the filter parameters
-                    // or filtering the existing tasks client-side
+                    onFilterChange(filters);
+                    setShowFilterDialog(false);
                 }}
                 initialFilters={activeFilters}
+                projectLabels={projectLabels}
                 projectId={projectId!}
             />
         </div>
