@@ -33,6 +33,8 @@ import { AuthProvider } from "./context/AuthProvider";
 import { MilestoneDetailsPage } from "./components/pages/task/taskComponents/milestones/milestoneDetails/MilestoneDetails";
 import { TaskEditReadOnlyRoute } from "./components/routes/TaskEditForReadOnlyRoute";
 import { AllFilteredLogsComponent } from "./components/pages/project/AllLog";
+import { useEffect, useState } from "react";
+import { BotCheck } from "./components/BotCheck";
 
 function RootRedirect() {
   const { isAuthenticated } = useAuth();
@@ -45,6 +47,37 @@ function RootRedirect() {
 }
 
 function App() {
+  const [passedBotCheck, setPassedBotCheck] = useState(false);
+  const [shouldAskBotCheck, setShouldAskBotCheck] = useState(false);
+  const SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY
+
+  useEffect(() => {
+    const flag = localStorage.getItem("passedBotCheck");
+    if (flag === "true") {
+      setPassedBotCheck(true);
+      setShouldAskBotCheck(false);
+    } else {
+      setShouldAskBotCheck(true);
+    }
+  }, []);
+
+  const handleBotVerified = () => {
+    localStorage.setItem("passedBotCheck", "true");
+    setPassedBotCheck(true);
+    setShouldAskBotCheck(false);
+  };
+
+  // If user hasn’t passed the CAPTCHA yet, show the overlay and exit early
+  if (!passedBotCheck && shouldAskBotCheck) {
+    return (
+      <BotCheck
+        siteKey={SITE_KEY}
+        onVerified={handleBotVerified}
+      />
+    );
+  }
+
+  // Once the CAPTCHA is passed, render the normal app
   return (
     <AuthProvider>
       <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
@@ -53,17 +86,14 @@ function App() {
         <main className="flex-grow bg-transparent">
           <Routes>
             {/* Public routes */}
-
-            {/* Root path that redirects based on auth status */}
             <Route path="/" element={<RootRedirect />} />
-
             <Route path="/home" element={<Home />} />
             <Route path="/about" element={<About />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/terms" element={<TermsOfService />} />
             <Route path="/contact" element={<Contact />} />
 
-            {/* Auth-related public routes (only accessible when not logged in) */}
+            {/* Auth-related public routes (only when NOT logged in) */}
             <Route element={<PublicRoute />}>
               <Route path="/register" element={<Register />} />
               <Route path="/login" element={<Login />} />
@@ -72,31 +102,27 @@ function App() {
               <Route path="/verify-email" element={<VerifyEmail />} />
             </Route>
 
-            {/* Protected routes (only accessible when logged in) */}
+            {/* Protected routes (only when logged in) */}
             <Route element={<ProtectedRoute />}>
-              {/* OAuth callback route */}
-              {/* need to move outside from publicRoutes, 
-              becasue when the user authState is updatedt to authenticated, 
-              the route is redirect to "/" because of the public route but in the protected route if the user is somehow not authenticated 
-              the route is not redirect to "/login" else on success login/register the route is redirect to "/dashboard  */}
               <Route path="/oauth-callback" element={<OAuthCallback />} />
-
-              {/* User routes */}
               <Route path="/profile" element={<Profile />} />
               <Route path="/profile-settings" element={<ProfileSettings />} />
-
-              {/* Project routes */}
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/new" element={<CreateProject />} />
               <Route path="/projects/:projectId" element={<ProjectPage />} />
               <Route path="/projects/:projectId/files" element={<FilesTab />} />
-              <Route path="/projects/:projectId/milestones/:milestoneId" element={<MilestoneDetailsPage />} />
-
-              { /* Task routes */}
-              <Route path="/projects/:projectId/tasks" element={<TasksManagerPage />} />
-              <Route path="/projects/:projectId/tasks/:taskId" element={<TaskDetails />} />
-
-              {/* Logs */}
+              <Route
+                path="/projects/:projectId/milestones/:milestoneId"
+                element={<MilestoneDetailsPage />}
+              />
+              <Route
+                path="/projects/:projectId/tasks"
+                element={<TasksManagerPage />}
+              />
+              <Route
+                path="/projects/:projectId/tasks/:taskId"
+                element={<TaskDetails />}
+              />
               <Route path="/all-log" element={<AllFilteredLogsComponent />} />
             </Route>
 
@@ -105,18 +131,23 @@ function App() {
             </Route>
 
             <Route element={<ProtectedProjectForTaskManagement />}>
-              <Route path="/projects/:projectId/tasks/new" element={<CreateTaskPage />} />
+              <Route
+                path="/projects/:projectId/tasks/new"
+                element={<CreateTaskPage />}
+              />
             </Route>
 
             <Route element={<TaskEditReadOnlyRoute />}>
-              <Route path="/projects/:projectId/tasks/:taskId/edit" element={<UpdateTaskPage />} />
+              <Route
+                path="/projects/:projectId/tasks/:taskId/edit"
+                element={<UpdateTaskPage />}
+              />
             </Route>
 
             {/* 404 fallback */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
-        {/* Footer */}
         <Footer />
       </div>
     </AuthProvider>
