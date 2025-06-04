@@ -12,3 +12,9 @@ interface User {
     user_cancelled_premium: boolean;
     provider: string;
 }
+
+interface RegisteredUser {
+    name: string;
+    email: string;
+    password: string;
+}

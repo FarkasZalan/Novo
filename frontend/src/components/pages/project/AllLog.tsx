@@ -5,29 +5,6 @@ import { format } from "date-fns";
 import { Link, useNavigate } from "react-router-dom";
 import { fetchAllFilteredLogForUser } from "../../../services/filterService";
 
-interface ProjectLog {
-    id: string;
-    table_name: string;
-    operation: string;
-    old_data: any;
-    new_data: any;
-    changed_by_name: string;
-    changed_by_email: string;
-    created_at: string;
-    assignment: any;
-    comment: any;
-    milestone: any;
-    file: any;
-    projectMember: any;
-    task_label: any;
-    task: any;
-    user: any;
-    projectName?: string;
-    project_id?: string;
-    task_title?: string;
-    task_id?: string;
-}
-
 const DEFAULT_TABLES = [
     'projects',
     'tasks',
@@ -43,7 +20,7 @@ const DEFAULT_TABLES = [
 
 export const AllFilteredLogsComponent = () => {
     const { authState } = useAuth();
-    const [logs, setLogs] = useState<ProjectLog[]>([]);
+    const [logs, setLogs] = useState<AllLog[]>([]);
     const [loading, setLoading] = useState(true);
     const [loadingMore, setLoadingMore] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -273,7 +250,7 @@ export const AllFilteredLogsComponent = () => {
         }
     };
 
-    const getChangedItemName = (log: ProjectLog) => {
+    const getChangedItemName = (log: AllLog) => {
         if (log.table_name === 'assignments') {
             const userName = log.assignment?.user_name || "Unknown User";
             return log.assignment?.user_id === authState.user?.id ? "you" : userName;
@@ -291,7 +268,7 @@ export const AllFilteredLogsComponent = () => {
         return "item";
     };
 
-    const getChangedItemType = (log: ProjectLog) => {
+    const getChangedItemType = (log: AllLog) => {
         switch (log.table_name) {
             case 'projects':
                 return 'Project';
@@ -318,7 +295,7 @@ export const AllFilteredLogsComponent = () => {
         }
     };
 
-    const renderProjectLink = (log: ProjectLog) => {
+    const renderProjectLink = (log: AllLog) => {
         if (!log.projectName) return null;
         return (
             <Link
@@ -330,7 +307,7 @@ export const AllFilteredLogsComponent = () => {
         );
     };
 
-    const renderTaskLink = (log: ProjectLog) => {
+    const renderTaskLink = (log: AllLog) => {
         const project_id = log.new_data?.project_id || log.old_data?.project_id || null;
         const task_title = log.assignment?.task_title || log.task?.task_title || log.task_label?.task_title || log.comment?.task_title || log.file?.task_title || log.new_data?.task_title || log.old_data?.task_title;
         const task_id = log.assignment?.task_id || log.task?.task_id || log.task_label?.task_id || log.comment?.task_id || log.file?.task_id || log.new_data?.task_id || log.old_data?.task_id;
@@ -346,7 +323,7 @@ export const AllFilteredLogsComponent = () => {
         );
     };
 
-    const renderMilestoneLink = (log: ProjectLog) => {
+    const renderMilestoneLink = (log: AllLog) => {
         const project_id = log.new_data?.project_id || log.old_data?.project_id;
         const milestone_title = log.milestone?.title || log.new_data?.title || log.old_data?.title;
         const milestone_id = log.milestone?.id || log.new_data?.id || log.old_data?.id;
@@ -363,7 +340,7 @@ export const AllFilteredLogsComponent = () => {
         );
     };
 
-    const renderFileLink = (log: ProjectLog) => {
+    const renderFileLink = (log: AllLog) => {
         const title = log.file.title || "Unnamed File";
         const fileId = log.file?.id;
         const projectId = log.file?.project_id;
@@ -385,7 +362,7 @@ export const AllFilteredLogsComponent = () => {
         );
     };
 
-    const renderLabelLink = (log: ProjectLog) => {
+    const renderLabelLink = (log: AllLog) => {
         const title = log.task_label.label_name || "Unnamed Label";
         const projectId = log.task_label?.project_id;
 
@@ -403,7 +380,7 @@ export const AllFilteredLogsComponent = () => {
         );
     };
 
-    const getChangedByDisplay = (log: ProjectLog) => {
+    const getChangedByDisplay = (log: AllLog) => {
         if (log.table_name === 'users') {
             return "You";
         }
@@ -427,7 +404,7 @@ export const AllFilteredLogsComponent = () => {
         return "Unknown user";
     };
 
-    const renderParentTaskConnection = (log: ProjectLog) => {
+    const renderParentTaskConnection = (log: AllLog) => {
         if (!log.task?.parent_task_id) return null;
         const project_id = log.new_data?.project_id || log.old_data?.project_id;
 
@@ -487,7 +464,7 @@ export const AllFilteredLogsComponent = () => {
         );
     };
 
-    const getActionDescription = (log: ProjectLog) => {
+    const getActionDescription = (log: AllLog) => {
         const itemName = getChangedItemName(log);
         const itemType = getChangedItemType(log);
 
@@ -1236,7 +1213,7 @@ export const AllFilteredLogsComponent = () => {
         }
     };
 
-    const getAdditionalDetails = (log: ProjectLog) => {
+    const getAdditionalDetails = (log: AllLog) => {
         if (log.table_name === 'assignments') {
             const assignedByName = log.assignment?.assigned_by_name || "Unknown";
             const assignedAt = log.new_data?.assigned_at ? format(new Date(log.new_data.assigned_at), 'MMM d, yyyy h:mm a') : null;
@@ -1434,7 +1411,7 @@ export const AllFilteredLogsComponent = () => {
                                                             htmlFor={`filter-${table}`}
                                                             className="ml-3 text-sm text-gray-700 dark:text-gray-300 cursor-pointer select-none"
                                                         >
-                                                            {getChangedItemType({ table_name: table } as ProjectLog)}
+                                                            {getChangedItemType({ table_name: table } as AllLog)}
                                                         </label>
                                                     </div>
                                                 ))}
@@ -1456,7 +1433,7 @@ export const AllFilteredLogsComponent = () => {
                             key={table}
                             className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-200"
                         >
-                            {getChangedItemType({ table_name: table } as ProjectLog)}
+                            {getChangedItemType({ table_name: table } as AllLog)}
                             <button
                                 onClick={() => toggleTableFilter(table)}
                                 className="ml-2 -mr-1 cursor-pointer text-indigo-500 hover:text-indigo-700 dark:hover:text-indigo-400"

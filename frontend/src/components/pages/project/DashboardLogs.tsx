@@ -5,31 +5,9 @@ import { format } from "date-fns";
 import { fetchDashboardLogForUser } from "../../../services/changeLogService";
 import { Link, useNavigate } from "react-router-dom";
 
-interface ProjectLog {
-    id: string;
-    table_name: string;
-    operation: string;
-    old_data: any;
-    new_data: any;
-    changed_by_name: string;
-    changed_by_email: string;
-    created_at: string;
-    assignment: any;
-    comment: any;
-    milestone: any;
-    file: any;
-    projectMember: any;
-    task_label: any;
-    task: any;
-    projectName?: string;
-    project_id?: string;
-    task_title?: string;
-    task_id?: string;
-}
-
 export const DashboardLogsComponent = () => {
     const { authState } = useAuth();
-    const [logs, setLogs] = useState<ProjectLog[]>([]);
+    const [logs, setLogs] = useState<DashboardLog[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const navigate = useNavigate();
@@ -106,7 +84,7 @@ export const DashboardLogsComponent = () => {
         }
     };
 
-    const getChangedItemName = (log: ProjectLog) => {
+    const getChangedItemName = (log: DashboardLog) => {
         if (log.table_name === 'assignments') {
             const userName = log.assignment?.user_name || "Unknown User";
             return log.assignment?.user_id === authState.user?.id ? "you" : userName;
@@ -124,7 +102,7 @@ export const DashboardLogsComponent = () => {
         return "item";
     };
 
-    const getChangedItemType = (log: ProjectLog) => {
+    const getChangedItemType = (log: DashboardLog) => {
         switch (log.table_name) {
             case 'projects':
                 return 'Project';
@@ -149,7 +127,7 @@ export const DashboardLogsComponent = () => {
         }
     };
 
-    const renderProjectLink = (log: ProjectLog) => {
+    const renderProjectLink = (log: DashboardLog) => {
         if (!log.projectName) return null;
         return (
             <Link
@@ -161,7 +139,7 @@ export const DashboardLogsComponent = () => {
         );
     };
 
-    const renderTaskLink = (log: ProjectLog) => {
+    const renderTaskLink = (log: DashboardLog) => {
         const project_id = log.new_data?.project_id || log.old_data?.project_id || null;
         const task_title = log.assignment?.task_title || log.task?.task_title || log.task_label?.task_title || log.comment?.task_title || log.file?.task_title || log.new_data?.task_title || log.old_data?.task_title;
         const task_id = log.assignment?.task_id || log.task?.task_id || log.task_label?.task_id || log.comment?.task_id || log.file?.task_id || log.new_data?.task_id || log.old_data?.task_id;
@@ -177,7 +155,7 @@ export const DashboardLogsComponent = () => {
         );
     };
 
-    const renderMilestoneLink = (log: ProjectLog) => {
+    const renderMilestoneLink = (log: DashboardLog) => {
         const project_id = log.new_data?.project_id || log.old_data?.project_id;
         const milestone_title = log.milestone?.title || log.new_data?.title || log.old_data?.title;
         const milestone_id = log.milestone?.id || log.new_data?.id || log.old_data?.id;
@@ -194,7 +172,7 @@ export const DashboardLogsComponent = () => {
         );
     };
 
-    const renderFileLink = (log: ProjectLog) => {
+    const renderFileLink = (log: DashboardLog) => {
         const title = log.file.title || "Unnamed File";
         const fileId = log.file?.id;
         const projectId = log.file?.project_id;
@@ -216,7 +194,7 @@ export const DashboardLogsComponent = () => {
         );
     };
 
-    const renderLabelLink = (log: ProjectLog) => {
+    const renderLabelLink = (log: DashboardLog) => {
         const title = log.task_label.label_name || "Unnamed Label";
         const projectId = log.task_label?.project_id;
 
@@ -234,7 +212,7 @@ export const DashboardLogsComponent = () => {
         );
     };
 
-    const getChangedByDisplay = (log: ProjectLog) => {
+    const getChangedByDisplay = (log: DashboardLog) => {
         let name = log.changed_by_name;
         let email = log.changed_by_email;
 
@@ -254,7 +232,7 @@ export const DashboardLogsComponent = () => {
         return "Unknown user";
     };
 
-    const renderParentTaskConnection = (log: ProjectLog) => {
+    const renderParentTaskConnection = (log: DashboardLog) => {
         if (!log.task?.parent_task_id) return null;
         const project_id = log.new_data?.project_id || log.old_data?.project_id;
 
@@ -314,7 +292,7 @@ export const DashboardLogsComponent = () => {
         );
     };
 
-    const getActionDescription = (log: ProjectLog) => {
+    const getActionDescription = (log: DashboardLog) => {
         const itemName = getChangedItemName(log);
         const itemType = getChangedItemType(log);
 
@@ -958,7 +936,7 @@ export const DashboardLogsComponent = () => {
         }
     };
 
-    const getAdditionalDetails = (log: ProjectLog) => {
+    const getAdditionalDetails = (log: DashboardLog) => {
         if (log.table_name === 'assignments') {
             const assignedByName = log.assignment?.assigned_by_name || "Unknown";
             const assignedAt = log.new_data?.assigned_at ? format(new Date(log.new_data.assigned_at), 'MMM d, yyyy h:mm a') : null;

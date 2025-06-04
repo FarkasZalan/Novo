@@ -9,3 +9,10 @@ interface Milestone {
     completed_tasks_count: number = 0
     color?: string
 }
+
+interface MilestoneFormValues {
+    name: string;
+    description: string;
+    due_date: string;
+    color: string;
+}

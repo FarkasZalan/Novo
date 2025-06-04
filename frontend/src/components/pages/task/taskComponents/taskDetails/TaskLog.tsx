@@ -5,21 +5,6 @@ import { format } from "date-fns";
 import { fetchTaskLog } from "../../../../../services/changeLogService";
 import { Link, useNavigate } from "react-router-dom";
 
-interface TaskLog {
-    id: string;
-    table_name: string;
-    operation: string;
-    old_data: any;
-    new_data: any;
-    changed_by_name: string;
-    changed_by_email: string;
-    created_at: string;
-    assignment: any;
-    file: any;
-    task_label: any;
-    task: any;
-}
-
 interface TaskLogProps {
     projectId: string;
     taskId: string;

@@ -22,13 +22,6 @@ import { MilestoneTasks } from './MilestoneTasks';
 import { MilestoneFormModal } from './MilestoneFormModal';
 import { AnimatePresence, motion } from 'framer-motion';
 
-interface MilestoneFormValues {
-    name: string;
-    description: string;
-    due_date: string;
-    color: string
-}
-
 export const MilestonesManagerPage: React.FC<{ project: Project | null }> = React.memo(({ project }) => {
     const { projectId, milestoneId } = useParams<{ projectId: string; milestoneId?: string }>();
     const { authState } = useAuth();

@@ -6,3 +6,9 @@ interface Label {
     project_id: string
     task_count: number
 }
+
+interface LabelFormValues {
+    name: string;
+    description: string;
+    color: string;
+}

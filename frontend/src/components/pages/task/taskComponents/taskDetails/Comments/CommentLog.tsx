@@ -4,18 +4,6 @@ import { FaInfoCircle, FaComment } from "react-icons/fa";
 import { format } from "date-fns";
 import { fetchCommentLog } from "../../../../../../services/changeLogService";
 
-interface CommentLog {
-    id: string;
-    table_name: string;
-    operation: string;
-    old_data: any;
-    new_data: any;
-    changed_by_name: string;
-    changed_by_email: string;
-    created_at: string;
-    comment: any;
-}
-
 interface CommentLogProps {
     projectId: string;
     taskId: string;

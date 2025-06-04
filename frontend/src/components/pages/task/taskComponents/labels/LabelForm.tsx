@@ -3,12 +3,6 @@ import { useState, useEffect } from 'react';
 import { FaSpinner, FaTimes, FaPalette, FaCheck, FaEyeDropper } from 'react-icons/fa';
 import { DEFAULT_COLORS } from '../../../../utils/DefaultColors';
 
-interface LabelFormValues {
-    name: string;
-    description: string;
-    color: string;
-}
-
 interface LabelFormModalProps {
     isOpen: boolean;
     onClose: () => void;

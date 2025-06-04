@@ -4,12 +4,6 @@ import { FaUser, FaEnvelope, FaLock, FaGoogle, FaGithub } from "react-icons/fa";
 import { initiateGithubLogin, initiateGoogleLogin, register } from "../../../services/authService";
 import { fetchAllRegisteredUsers } from "../../../services/userService";
 
-interface RegisteredUser {
-    name: string;
-    email: string;
-    password: string;
-}
-
 export const Register = () => {
     const [formData, setFormData] = useState({
         name: "",

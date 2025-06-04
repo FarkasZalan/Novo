@@ -15,7 +15,6 @@ interface TaskFilesProps {
     project: Project | null
 }
 
-
 export const TaskFiles: React.FC<TaskFilesProps> = React.memo(({ canManageFiles, displayNoFileIfEmpty, selectedFiles, setSelectedFiles, project }) => {
     const { projectId } = useParams<{ projectId: string }>();
     const { taskId } = useParams<{ taskId: string }>();

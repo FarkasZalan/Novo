@@ -3,13 +3,6 @@ import { useState, useEffect } from 'react';
 import { FaSpinner, FaCalendarAlt, FaTimes, FaCheck } from 'react-icons/fa';
 import { DEFAULT_COLORS } from '../../../../utils/DefaultColors';
 
-interface MilestoneFormValues {
-    name: string;
-    description: string;
-    due_date: string;
-    color: string;
-}
-
 interface MilestoneFormModalProps {
     isOpen: boolean;
     onClose: () => void;

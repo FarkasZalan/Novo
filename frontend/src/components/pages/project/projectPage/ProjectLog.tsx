@@ -5,28 +5,6 @@ import { format } from "date-fns";
 import { fetchProjectLog } from "../../../../services/changeLogService";
 import { Link, useNavigate } from "react-router-dom";
 
-interface ProjectLog {
-    id: string;
-    table_name: string;
-    operation: string;
-    old_data: any;
-    new_data: any;
-    changed_by_name: string;
-    changed_by_email: string;
-    created_at: string;
-    assignment: any;
-    comment: any;
-    milestone: any;
-    file: any;
-    projectMember: any;
-    task_label: any;
-    task: any;
-    projectName?: string;
-    project_id?: string;
-    task_title?: string;
-    task_id?: string;
-}
-
 interface ProjectLogProps {
     projectId: string;
 }

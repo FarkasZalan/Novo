@@ -11,12 +11,6 @@ import { LabelCard } from './LabelCard';
 import { LabelFormModal } from './LabelForm';
 import { AnimatePresence, motion } from 'framer-motion';
 
-interface LabelFormValues {
-    name: string;
-    description: string;
-    color: string;
-}
-
 export const LabelsManagerPage: React.FC<{ project: Project | null }> = React.memo(({ project }) => {
     const { projectId } = useParams<{ projectId: string; }>();
     const { authState } = useAuth();
