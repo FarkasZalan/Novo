@@ -51,6 +51,11 @@ export const TaskList: React.FC<TaskListProps> = React.memo(({
     const [isMilestoneDropdownOpen, setIsMilestoneDropdownOpen] = useState(false);
     const milestoneWrapperRef = useRef<HTMLDivElement>(null);
 
+    const [visibleTasks, setVisibleTasks] = useState<Task[]>([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const tasksPerPage = 5;
+    const [showAllTasks, setShowAllTasks] = useState(false);
+
     const [showFilterDialog, setShowFilterDialog] = useState(false);
 
     useEffect(() => {
@@ -72,6 +77,19 @@ export const TaskList: React.FC<TaskListProps> = React.memo(({
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, [isMilestoneDropdownOpen]);
+
+    useEffect(() => {
+        if (showAllTasks) {
+            setVisibleTasks(tasks);
+        } else {
+            const endIndex = currentPage * tasksPerPage;
+            setVisibleTasks(tasks.slice(0, endIndex));
+        }
+    }, [tasks, currentPage, tasksPerPage, showAllTasks]);
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [activeFilters, selectedMilestone]);
 
     const toggleTaskExpansion = (taskId: string) => {
         setExpandedTasks(prev => ({
@@ -441,7 +459,7 @@ export const TaskList: React.FC<TaskListProps> = React.memo(({
             )}
 
             {/* Task List */}
-            {tasks.length === 0 ? (
+            {visibleTasks.length === 0 ? (
                 <div className="text-center p-12">
                     <FaTasks className="mx-auto text-4xl text-gray-400 dark:text-gray-500 mb-4" />
                     <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
@@ -501,7 +519,7 @@ export const TaskList: React.FC<TaskListProps> = React.memo(({
                             </tr>
                         </thead>
                         <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                            {tasks.map(task => (
+                            {visibleTasks.map(task => (
                                 <React.Fragment key={task.id}>
                                     <tr
                                         className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer"
@@ -733,6 +751,36 @@ export const TaskList: React.FC<TaskListProps> = React.memo(({
                             ))}
                         </tbody>
                     </table>
+
+                    {/* Pagination controls */}
+                    {tasks.length > tasksPerPage && (
+                        <div className="flex justify-center py-4 gap-2">
+                            <div className="flex items-center justify-center gap-3">
+                                {/* Show "Load More" button only when not showing all tasks and there are more to load */}
+                                {!showAllTasks && tasks.length > visibleTasks.length && (
+                                    <button
+                                        onClick={() => setCurrentPage(prev => prev + 1)}
+                                        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white cursor-pointer rounded-lg font-medium transition-all duration-200 hover:scale-105 active:scale-95 whitespace-nowrap shadow-lg"
+                                    >
+                                        Load More ({tasks.length - visibleTasks.length} remaining)
+                                    </button>
+                                )}
+
+                                {/* Show "Show Less" button when showing more than the initial page */}
+                                {(showAllTasks || currentPage > 1) && (
+                                    <button
+                                        onClick={() => {
+                                            setShowAllTasks(false);
+                                            setCurrentPage(1);
+                                        }}
+                                        className="px-4 py-2 bg-gray-600 hover:bg-gray-700 dark:bg-gray-600 dark:hover:bg-gray-700 text-white cursor-pointer rounded-lg font-medium transition-all duration-200 hover:scale-105 active:scale-95 whitespace-nowrap shadow-lg"
+                                    >
+                                        Show Less
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
 

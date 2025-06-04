@@ -46,6 +46,11 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
     const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
     const [taskToRemove, setTaskToRemove] = useState<Task | null>(null);
 
+    const [visibleTasks, setVisibleTasks] = useState<Task[]>([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const tasksPerPage = 4;
+    const [showAllTasks, setShowAllTasks] = useState(false);
+
     useEffect(() => {
         // Initialize available tasks
         setAvailableTasks(tasks.filter(task => !milestoneTasks.some(mt => mt.id === task.id)));
@@ -109,6 +114,19 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
             (task.labels && task.labels.some(label => label.name.toLowerCase().includes(query)))
         );
     }, [milestoneTasks, milestoneTasksSearchQuery]);
+
+    useEffect(() => {
+        if (showAllTasks) {
+            setVisibleTasks(filteredMilestoneTasks);
+        } else {
+            const endIndex = currentPage * tasksPerPage;
+            setVisibleTasks(filteredMilestoneTasks.slice(0, endIndex));
+        }
+    }, [filteredMilestoneTasks, currentPage, tasksPerPage, showAllTasks]);
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [milestoneTasksSearchQuery]);
 
     const handleAddTasks = async () => {
         if (selectedTaskIds.length === 0) {
@@ -563,7 +581,7 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
 
                 {filteredMilestoneTasks.length > 0 ? (
                     <div className="space-y-4">
-                        {filteredMilestoneTasks.map(task => (
+                        {visibleTasks.map(task => (
                             <motion.div
                                 key={task.id}
                                 initial={{ opacity: 0, y: -5 }}
@@ -804,6 +822,36 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                                 </div>
                             </motion.div>
                         ))}
+
+                        {/* Pagination controls */}
+                        {filteredMilestoneTasks.length > tasksPerPage && (
+                            <div className="flex justify-center py-4 gap-2">
+                                <div className="flex items-center justify-center gap-3">
+                                    {/* Load More button (when not showing all) */}
+                                    {!showAllTasks && filteredMilestoneTasks.length > visibleTasks.length && (
+                                        <button
+                                            onClick={() => setCurrentPage(prev => prev + 1)}
+                                            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white cursor-pointer rounded-lg font-medium transition-all duration-200 hover:scale-105 active:scale-95 whitespace-nowrap shadow-lg"
+                                        >
+                                            Load More ({filteredMilestoneTasks.length - visibleTasks.length} remaining)
+                                        </button>
+                                    )}
+
+                                    {/* Show Less button (when showing more than initial page) */}
+                                    {(showAllTasks || currentPage > 1) && (
+                                        <button
+                                            onClick={() => {
+                                                setShowAllTasks(false);
+                                                setCurrentPage(1);
+                                            }}
+                                            className="px-4 py-2 bg-gray-600 hover:bg-gray-700 dark:bg-gray-600 dark:hover:bg-gray-700 text-white cursor-pointer rounded-lg font-medium transition-all duration-200 hover:scale-105 active:scale-95 whitespace-nowrap shadow-lg"
+                                        >
+                                            Show Less
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 ) : (
                     <div className="text-center py-8 text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700/20 rounded-lg border border-dashed border-gray-300 dark:border-gray-600">
