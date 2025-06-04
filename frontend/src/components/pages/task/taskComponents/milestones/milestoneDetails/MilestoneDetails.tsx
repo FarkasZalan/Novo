@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../../../../hooks/useAuth';
-import { FaArrowLeft, FaEdit, FaTrash, FaFlag, FaTasks, FaCalendarAlt, FaCheck, FaBan, FaUsers, FaCrown } from 'react-icons/fa';
+import { FaArrowLeft, FaEdit, FaTrash, FaFlag, FaTasks, FaCalendarAlt, FaCheck, FaBan, FaUsers, FaCrown, FaExclamationCircle } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     getMilestoneById,
@@ -213,18 +213,25 @@ export const MilestoneDetailsPage: React.FC = () => {
         );
     }
 
-    if (error) {
+    if (error || !milestone) {
         return (
-            <div className="p-4 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg max-w-2xl mx-auto mt-8">
-                {error}
-            </div>
-        );
-    }
-
-    if (!milestone) {
-        return (
-            <div className="p-4 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 rounded-lg max-w-2xl mx-auto mt-8">
-                Milestone not found
+            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
+                <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg max-w-md w-full p-6 text-center">
+                    <FaExclamationCircle className="mx-auto text-red-500 text-5xl mb-4" />
+                    <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                        Oops! Something went wrong
+                    </h2>
+                    <p className="text-gray-600 dark:text-gray-400 mb-6">
+                        We couldn’t load the milestone you were looking for. Try refreshing or go back to your dashboard.
+                    </p>
+                    <button
+                        onClick={() => navigate('/dashboard', { replace: true })}
+                        className="inline-flex items-center cursor-pointer justify-center px-5 py-2 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white font-medium rounded-lg shadow-sm transition-colors"
+                    >
+                        <FaArrowLeft className="mr-2" />
+                        Go to Dashboard
+                    </button>
+                </div>
             </div>
         );
     }

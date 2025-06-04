@@ -483,6 +483,14 @@ export const Profile = () => {
                                                     placeholder={`Type "${user?.email}" to confirm`}
                                                     value={deleteConfirmation}
                                                     onChange={(e) => setDeleteConfirmation(e.target.value)}
+                                                    onPaste={(e) => {
+                                                        e.preventDefault();
+                                                        toast.error("Pasting is not allowed for security reasons");
+                                                    }}
+                                                    onCopy={(e) => {
+                                                        e.preventDefault();
+                                                        toast.error("Copying is not allowed for security reasons");
+                                                    }}
                                                 />
                                             </div>
 
@@ -499,7 +507,7 @@ export const Profile = () => {
                                                         setDeleteConfirmation("");
                                                         setDeleteError("");
                                                     }}
-                                                    className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors duration-200"
+                                                    className="px-4 py-2 border cursor-pointer border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors duration-200"
                                                 >
                                                     Cancel
                                                 </button>

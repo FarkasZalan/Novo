@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { NextFunction } from "connect";
 import { getUserByIdQuery } from "../models/userModel";
 import { getAllProjectForUsersQuery, getProjectNameQuery } from "../models/projectModel";
-import { getAllLogForUserQuery, getChangeLogsForCommentQuery, getChangeLogsForDashboardQuery, getChangeLogsForMilestoneQuery, getChangeLogsForProjectQuery, getChangeLogsForTaskQuery, getChangeLogsForUserQuery } from "../models/changeLogModel";
+import { getChangeLogsForCommentQuery, getChangeLogsForDashboardQuery, getChangeLogsForMilestoneQuery, getChangeLogsForProjectQuery, getChangeLogsForTaskQuery, getChangeLogsForUserQuery } from "../models/changeLogModel";
 import { getAssignmentForLogsQuery } from "../models/assignmentModel";
 import { getTaskByIdQuery, getTaskNameForLogsQuery } from "../models/task.Model";
 import { deleteLogQuery } from "../models/changeLogModel";

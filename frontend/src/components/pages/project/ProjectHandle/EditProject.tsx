@@ -11,6 +11,7 @@ import {
 } from "react-icons/fa";
 import { updateProject, deleteProject, fetchProjectById } from "../../../../services/projectService";
 import { useAuth } from "../../../../hooks/useAuth";
+import toast from "react-hot-toast";
 
 export const EditProject = () => {
     const { projectId } = useParams<{ projectId: string }>();
@@ -393,6 +394,14 @@ export const EditProject = () => {
                                         placeholder={`Type "${project?.name}" to confirm`}
                                         value={deleteConfirmation}
                                         onChange={(e) => setDeleteConfirmation(e.target.value)}
+                                        onPaste={(e) => {
+                                            e.preventDefault();
+                                            toast.error("Pasting is not allowed for security reasons");
+                                        }}
+                                        onCopy={(e) => {
+                                            e.preventDefault();
+                                            toast.error("Copying is not allowed for security reasons");
+                                        }}
                                     />
                                     <button
                                         onClick={handleDeleteProject}
