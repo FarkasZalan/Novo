@@ -19,7 +19,7 @@ const handleResponse = (res: Response, status: number, message: string, data: an
 export const createMilestone = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const project_id = req.params.projectId;
-        const { name, description, due_date } = req.body;
+        const { name, description, due_date, color } = req.body;
 
         const project = await getProjectByIdQuery(project_id);
         if (!project) {
@@ -32,19 +32,32 @@ export const createMilestone = async (req: Request, res: Response, next: NextFun
             return;
         }
 
-        // Get existing milestone colors in the project
         const existingMilestones = await getAllMilestonesForProjectQuery(project_id);
-        const usedColors = new Set(existingMilestones.map((m: any) => m.color));
 
-        // Filter available colors
-        const availableColors = DEFAULT_COLORS.filter(c => !usedColors.has(c.color));
+        const milestoneNameExists = existingMilestones.some((m: any) => m.name.toLowerCase() === name.toLowerCase());
+        if (milestoneNameExists) {
+            handleResponse(res, 400, "Milestone name already exists", null);
+            return;
+        }
 
-        // Select a color
-        const selectedColor = availableColors.length > 0
-            ? availableColors[Math.floor(Math.random() * availableColors.length)].color
-            : DEFAULT_COLORS[Math.floor(Math.random() * DEFAULT_COLORS.length)].color;
+        let selectedColor = '';
+        if (color === '') {
+            // Get existing milestone colors in the project
+            const usedColors = new Set(existingMilestones.map((m: any) => m.color));
 
-        const newMilestone = await createMilestoneQuery(project_id, name, description, due_date, selectedColor);
+            // Filter available colors
+            const availableColors = DEFAULT_COLORS.filter(c => !usedColors.has(c.color));
+
+            // Select a color
+            selectedColor = availableColors.length > 0
+                ? availableColors[Math.floor(Math.random() * availableColors.length)].color
+                : DEFAULT_COLORS[Math.floor(Math.random() * DEFAULT_COLORS.length)].color;
+        } else {
+            selectedColor = color;
+        }
+
+        const uppercasedName = name.charAt(0).toUpperCase() + name.slice(1);
+        const newMilestone = await createMilestoneQuery(project_id, uppercasedName, description, due_date, selectedColor);
         handleResponse(res, 201, "Milestone created successfully", newMilestone);
     } catch (error: Error | any) {
         // Check for unique constraint violation (duplicate email)
@@ -210,7 +223,7 @@ export const updateMilestone = async (req: Request, res: Response, next: NextFun
     try {
         const milestone_id = req.params.milestoneId;
         const projectId = req.params.projectId;
-        const { name, description, due_date } = req.body;
+        const { name, description, due_date, color } = req.body;
 
         const project = await getProjectByIdQuery(projectId);
         if (!project) {
@@ -229,12 +242,21 @@ export const updateMilestone = async (req: Request, res: Response, next: NextFun
             return;
         }
 
-        if (oldMilestone.name === name && oldMilestone.description === description && datesEqual(oldMilestone.due_date, due_date)) {
+        const existingMilestones = await getAllMilestonesForProjectQuery(projectId);
+
+        const milestoneNameExists = existingMilestones.some((m: any) => m.name.toLowerCase() === name.toLowerCase() && m.id !== oldMilestone.id);
+        if (milestoneNameExists) {
+            handleResponse(res, 400, "Milestone name already exists", null);
+            return;
+        }
+
+        if (oldMilestone.name === name && oldMilestone.description === description && datesEqual(oldMilestone.due_date, due_date) && oldMilestone.color === color) {
             handleResponse(res, 200, "No changes detected", oldMilestone);
             return;
         }
 
-        const updatedMilestone = await updateMilestoneQuery(milestone_id, name, description, due_date);
+        const uppercasedName = name.charAt(0).toUpperCase() + name.slice(1);
+        const updatedMilestone = await updateMilestoneQuery(milestone_id, uppercasedName, description, due_date, color);
 
         updatedMilestone.labels = await getLabelsForTaskQuery(updatedMilestone.id)
         handleResponse(res, 200, "Milestone updated successfully", updatedMilestone);

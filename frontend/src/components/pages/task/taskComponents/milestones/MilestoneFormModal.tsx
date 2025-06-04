@@ -1,11 +1,13 @@
 import { Dialog } from '@headlessui/react';
 import { useState, useEffect } from 'react';
-import { FaSpinner, FaCalendarAlt, FaTimes } from 'react-icons/fa';
+import { FaSpinner, FaCalendarAlt, FaTimes, FaCheck } from 'react-icons/fa';
+import { DEFAULT_COLORS } from '../../../../utils/DefaultColors';
 
 interface MilestoneFormValues {
     name: string;
     description: string;
     due_date: string;
+    color: string;
 }
 
 interface MilestoneFormModalProps {
@@ -27,6 +29,7 @@ export const MilestoneFormModal: React.FC<MilestoneFormModalProps> = ({
         name: '',
         description: '',
         due_date: '',
+        color: DEFAULT_COLORS[0],
     });
 
     useEffect(() => {
@@ -35,12 +38,14 @@ export const MilestoneFormModal: React.FC<MilestoneFormModalProps> = ({
                 name: initialData.name,
                 description: initialData.description || '',
                 due_date: initialData.due_date ? initialData.due_date.slice(0, 10) : '',
+                color: initialData.color || DEFAULT_COLORS[0],
             });
         } else {
             setForm({
                 name: '',
                 description: '',
                 due_date: '',
+                color: DEFAULT_COLORS[0],
             });
         }
     }, [initialData]);
@@ -124,9 +129,33 @@ export const MilestoneFormModal: React.FC<MilestoneFormModalProps> = ({
                                         }
                                         setForm({ ...form, due_date: selectedDate });
                                     }}
-                                    min={getTodayDateString()} // This prevents selecting past dates in the date picker
+                                    min={getTodayDateString()}
                                     className="block w-full rounded-lg border-0 py-2.5 pl-10 pr-4 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-indigo-500 focus:dark:ring-indigo-500 sm:text-sm sm:leading-6"
                                 />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Color
+                            </label>
+                            <div className="grid grid-cols-8 gap-2">
+                                {DEFAULT_COLORS.map(color => (
+                                    <button
+                                        key={color}
+                                        type="button"
+                                        onClick={() => setForm({ ...form, color })}
+                                        className={`relative w-full aspect-square rounded-md cursor-pointer transition-all 
+                                            hover:ring-2 hover:ring-offset-1 hover:ring-gray-400 dark:hover:ring-gray-500
+                                            ${form.color === color ? 'ring-2 ring-offset-1 ring-gray-600 dark:ring-gray-300' : ''}`}
+                                        style={{ backgroundColor: color }}
+                                        title={`Color ${color}`}
+                                    >
+                                        {form.color === color && (
+                                            <FaCheck className="absolute inset-0 m-auto text-white/90 drop-shadow-md" />
+                                        )}
+                                    </button>
+                                ))}
                             </div>
                         </div>
 

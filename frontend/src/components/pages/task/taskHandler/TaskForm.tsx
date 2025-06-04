@@ -173,6 +173,7 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
                 authState.accessToken!,
                 milestoneSearchTerm.trim(),
                 '', // Empty description
+                '', // Empty color
             );
 
             setMilestones([...milestones, newMilestone]);

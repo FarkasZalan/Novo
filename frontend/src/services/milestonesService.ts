@@ -2,12 +2,13 @@ import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_BACKEND_URL;
 
-export const createMilestone = async (projectId: string, token: string, name: string, description: string, due_date?: Date) => {
+export const createMilestone = async (projectId: string, token: string, name: string, description: string, color: string, due_date?: Date) => {
     try {
         const response = await axios.post(`${API_URL}/project/${projectId}/milestone/new`, {
             name,
             description,
-            due_date
+            due_date,
+            color
         }, {
             headers: {
                 Authorization: `Bearer ${token}`
@@ -106,12 +107,13 @@ export const deleteMilestoneFromTask = async (milestoneId: string, projectId: st
     }
 }
 
-export const updateMilestone = async (milestoneId: string, projectId: string, token: string, name: string, description: string, due_date?: Date) => {
+export const updateMilestone = async (milestoneId: string, projectId: string, token: string, name: string, description: string, color: string, due_date?: Date) => {
     try {
         const response = await axios.put(`${API_URL}/project/${projectId}/milestone/${milestoneId}/update`, {
             name,
             description,
-            due_date
+            due_date,
+            color
         }, {
             headers: {
                 Authorization: `Bearer ${token}`

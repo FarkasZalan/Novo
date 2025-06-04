@@ -251,7 +251,7 @@ export const TaskList: React.FC<TaskListProps> = React.memo(({
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
                     {/* Milestone Selector Dropdown */}
                     <div className="w-full sm:w-auto" ref={milestoneWrapperRef}>
-                        <div className="relative z-50 w-full sm:w-56">
+                        <div className="relative w-full sm:w-56">
                             {/* Dropdown Button */}
                             <button
                                 onClick={() => setIsMilestoneDropdownOpen(!isMilestoneDropdownOpen)}

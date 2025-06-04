@@ -95,7 +95,7 @@ export const MilestoneDetailsPage: React.FC = () => {
         });
     };
 
-    const handleUpdateMilestone = async (form: { name: string; description: string; due_date: string }) => {
+    const handleUpdateMilestone = async (form: { name: string; description: string; due_date: string; color: string }) => {
         try {
             setIsSubmitting(true);
             const dueDateObj = form.due_date ? new Date(form.due_date) : undefined;
@@ -106,6 +106,7 @@ export const MilestoneDetailsPage: React.FC = () => {
                 authState.accessToken!,
                 form.name,
                 form.description,
+                form.color,
                 dueDateObj
             );
 
@@ -113,9 +114,19 @@ export const MilestoneDetailsPage: React.FC = () => {
             setMilestone(updated);
             setIsEditModalOpen(false);
             toast.success('Milestone updated successfully');
-        } catch (err) {
+        } catch (err: any) {
             console.error(err);
-            toast.error('Failed to update milestone');
+
+            if (err.response?.status === 400) {
+                // Check the exact structure from your error response
+                if (err.response.data?.message === "Milestone name already exists") {
+                    toast.error('Milestone name already exists');
+                } else {
+                    toast.error('Failed to save milestone');
+                }
+            } else {
+                toast.error('Failed to save milestone');
+            }
         } finally {
             setIsSubmitting(false);
         }

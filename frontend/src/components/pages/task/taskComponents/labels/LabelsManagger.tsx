@@ -109,9 +109,19 @@ export const LabelsManagerPage: React.FC<{ project: Project | null }> = React.me
             const updated = await getAllLabelForProject(projectId!, authState.accessToken!);
             setLabels(updated);
             setIsModalOpen(false);
-        } catch (err) {
+        } catch (err: any) {
             console.error(err);
-            toast.error('Failed to save label');
+
+            if (err.response?.status === 400) {
+                // Check the exact structure from your error response
+                if (err.response.data?.message === "Label name already exists") {
+                    toast.error('Label name already exists');
+                } else {
+                    toast.error('Failed to save label');
+                }
+            } else {
+                toast.error('Failed to save label');
+            }
         } finally {
             setIsSubmitting(false);
         }

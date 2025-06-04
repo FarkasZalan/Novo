@@ -289,7 +289,7 @@ export const TaskBoard: React.FC<TaskBoardProps> = React.memo(({ tasks, setTasks
 
                     {/* Right side - Milestone Selector */}
                     <div className="w-full sm:w-auto" ref={milestoneWrapperRef}>
-                        <div className="relative z-50 w-full sm:w-56">
+                        <div className="relative w-full sm:w-56">
                             {/* Dropdown Button */}
                             <button
                                 onClick={() => setIsMilestoneDropdownOpen(!isMilestoneDropdownOpen)}

@@ -29,7 +29,14 @@ export const createLabel = async (req: Request, res: Response, next: NextFunctio
             return;
         }
 
-        const label = await createLabelQuery(name, description, project_id, color);
+        const labels = await getAllLabelForProjectQuery(project_id);
+        if (labels.some(label => label.name.toLowerCase() === name.toLowerCase())) {
+            handleResponse(res, 400, "Label name already exists", null);
+            return;
+        }
+
+        const uppercasedName = name.charAt(0).toUpperCase() + name.slice(1);
+        const label = await createLabelQuery(uppercasedName, description, project_id, color);
         handleResponse(res, 200, "Label created successfully", label);
     } catch (error: any) {
         next(error);
@@ -60,12 +67,20 @@ export const updateLabel = async (req: Request, res: Response, next: NextFunctio
             return;
         }
 
+        const labels = await getAllLabelForProjectQuery(project_id);
+        if (labels.some(label => label.name.toLowerCase() === name.toLowerCase() && label.id !== label_id)) {
+            handleResponse(res, 400, "Label name already exists", null);
+            return;
+        }
+
         if (oldLabel.name === name && oldLabel.description === description && oldLabel.color === color) {
             handleResponse(res, 200, "No changes detected", oldLabel);
             return;
         }
 
-        const label = await updateLabelQuery(name, description, color, label_id);
+        const uppercasedName = name.charAt(0).toUpperCase() + name.slice(1);
+
+        const label = await updateLabelQuery(uppercasedName, description, color, label_id);
         handleResponse(res, 200, "Label updated successfully", label);
     } catch (error: any) {
         next(error);

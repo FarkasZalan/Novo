@@ -26,6 +26,7 @@ interface MilestoneFormValues {
     name: string;
     description: string;
     due_date: string;
+    color: string
 }
 
 export const MilestonesManagerPage: React.FC<{ project: Project | null }> = React.memo(({ project }) => {
@@ -124,6 +125,7 @@ export const MilestonesManagerPage: React.FC<{ project: Project | null }> = Reac
                     authState.accessToken!,
                     form.name,
                     form.description,
+                    form.color,
                     dueDateObj
                 );
                 toast.success('Milestone updated successfully');
@@ -133,6 +135,7 @@ export const MilestonesManagerPage: React.FC<{ project: Project | null }> = Reac
                     authState.accessToken!,
                     form.name,
                     form.description,
+                    form.color,
                     dueDateObj
                 );
                 toast.success('Milestone created successfully');
@@ -141,9 +144,19 @@ export const MilestonesManagerPage: React.FC<{ project: Project | null }> = Reac
             const updated = await getAllMilestonesForProject(projectId!, authState.accessToken!);
             setMilestones(updated);
             setIsModalOpen(false);
-        } catch (err) {
+        } catch (err: any) {
             console.error(err);
-            toast.error('Failed to save milestone');
+
+            if (err.response?.status === 400) {
+                // Check the exact structure from your error response
+                if (err.response.data?.message === "Milestone name already exists") {
+                    toast.error('Milestone name already exists');
+                } else {
+                    toast.error('Failed to save milestone');
+                }
+            } else {
+                toast.error('Failed to save milestone');
+            }
         } finally {
             setIsSubmitting(false);
         }
