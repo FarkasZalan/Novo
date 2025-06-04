@@ -382,6 +382,15 @@ export const AllFilteredLogsComponent = () => {
         );
     };
 
+    const renderProfileLink = ({ children }: { children: React.ReactNode }) => (
+        <Link
+            to="/profile"
+            className="underline hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+        >
+            {children}
+        </Link>
+    );
+
     const getChangedByDisplay = (log: AllLog) => {
         if (log.table_name === 'users') {
             return "You";
@@ -1110,29 +1119,49 @@ export const AllFilteredLogsComponent = () => {
 
                 // User creation
                 if (log.operation.toLowerCase() === 'insert') {
-                    return `${userRefYou} created an account`;
+                    return (
+                        <>{userRefYou} created an {renderProfileLink({ children: "account" })}</>
+                    );
                 }
 
                 // User deletion
                 if (log.operation.toLowerCase() === 'delete') {
-                    return `${userRefYou} deleted ${userRef} account`;
+                    return (
+                        <>{userRefYou} deleted {renderProfileLink({ children: `${userRef} account` })}</>
+                    );
                 }
 
                 // Premium subscription changes
                 if (log.old_data?.is_premium !== log.new_data?.is_premium) {
                     if (log.new_data?.is_premium) {
-                        return `${userRefYou} upgraded to Premium`;
+                        return (
+                            <>
+                                {userRefYou} upgraded to {renderProfileLink({ children: "Premium" })}
+                            </>
+                        )
                     } else {
-                        return `${userRefYou} downgraded to Free plan`;
+                        return (
+                            <>
+                                {userRefYou} downgraded to {renderProfileLink({ children: "Free plan" })}
+                            </>
+                        )
                     }
                 }
 
                 // Premium cancellation
                 if (log.old_data?.user_cancelled_premium !== log.new_data?.user_cancelled_premium) {
                     if (log.new_data?.user_cancelled_premium) {
-                        return `${userRefYou} cancelled ${userRefYour} Premium subscription`;
+                        return (
+                            <>
+                                {userRefYou} cancelled {userRefYour} {renderProfileLink({ children: "Premium" })} subscription
+                            </>
+                        )
                     } else {
-                        return `${userRefYou} reactivated ${userRefYour} Premium subscription`;
+                        return (
+                            <>
+                                {userRefYou} reactivated {userRefYour} {renderProfileLink({ children: "Premium" })} subscription
+                            </>
+                        )
                     }
                 }
 
@@ -1172,12 +1201,16 @@ export const AllFilteredLogsComponent = () => {
                 }
 
                 if (changedFields.length === 0) {
-                    return `${userRefYou} updated ${userRef} profile`;
+                    return (
+                        <>{userRefYou} updated {userRef} {renderProfileLink({ children: `profile` })}</>
+                    );
                 }
 
                 return (
                     <div className="space-y-1">
-                        <span className="font-medium">{userRefYou} updated {userRef} profile:</span>
+                        <span className="font-medium">
+                            {userRefYou} updated {userRef} {renderProfileLink({ children: `profile` })}:
+                        </span>
                         <ul className="list-disc list-inside space-y-1 pl-2 text-sm">
                             {changedFields.map((change, index) => (
                                 <li key={index} className="flex flex-wrap items-baseline">
