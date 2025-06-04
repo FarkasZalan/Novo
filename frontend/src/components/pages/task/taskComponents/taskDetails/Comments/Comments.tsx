@@ -26,6 +26,7 @@ export const CommentComponent: React.FC<CommentProps> = ({ projectId, taskId, ca
     const [editedComment, setEditedComment] = useState('');
     const [showTaskDeleteConfirm, setShowTaskDeleteConfirm] = useState(false);
     const [commentToDelete, setCommentToDelete] = useState<string | null>(null);
+    const textareaRef = React.useRef<HTMLTextAreaElement>(null);
 
     useEffect(() => {
         const fetchComments = async () => {
@@ -45,6 +46,15 @@ export const CommentComponent: React.FC<CommentProps> = ({ projectId, taskId, ca
 
         fetchComments();
     }, [projectId, taskId, authState.accessToken]);
+
+    useEffect(() => {
+        if (editingCommentId && textareaRef.current) {
+            const textarea = textareaRef.current;
+            textarea.focus();
+            // Set cursor to end
+            textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+        }
+    }, [editingCommentId]);
 
     const handleSubmitComment = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -414,6 +424,7 @@ export const CommentComponent: React.FC<CommentProps> = ({ projectId, taskId, ca
                                         {editingCommentId === comment.id ? (
                                             <div className="mt-2">
                                                 <textarea
+                                                    ref={textareaRef}
                                                     value={editedComment}
                                                     onChange={(e) => setEditedComment(e.target.value)}
                                                     className="w-full px-3 py-2 bg-white text-gray-900 dark:text-gray-100 dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:focus:ring-indigo-600 dark:focus:border-indigo-600 resize-none"

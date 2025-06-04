@@ -55,48 +55,57 @@ export const getAllFilteredLogForUser = async (req: Request, res: Response, next
     try {
         const userId = req.user.id;
 
-        let tableFilter: string[] = []
-
+        // Table filter
+        let tableFilter: string[] = [];
         if (req.query.tables) {
             if (Array.isArray(req.query.tables)) {
-                // Handle case where tables is an array (e.g., ?tables=projects&tables=tasks)
                 tableFilter = req.query.tables as string[];
             } else if (typeof req.query.tables === 'string') {
-                // Handle comma-separated string (e.g., ?tables=projects,tasks)
                 tableFilter = req.query.tables.split(',');
             }
         }
 
-        const haveFilters = tableFilter.length > 0
+        const haveFilters = tableFilter.length > 0;
+        const requestedLimit = req.query.limit ? parseInt(req.query.limit as string) : 20;
+        const limit = requestedLimit + 1
 
-        const limit = req.query.limit ? parseInt(req.query.limit as string) : 20;
+        // Get all related project IDs
+        const allProjectsForUser = await getAllProjectForUsersQuery(userId);
+        const projectIds = allProjectsForUser.map((project) => project.id);
 
-        const allProjectForUser = await getAllProjectForUsersQuery(userId);
+        // Get all logs across these project IDs with global limit
+        const logs = await getAllLogForUserQuery(projectIds, limit, userId, tableFilter);
+        const logsToProcess = logs.slice(0, requestedLimit);
 
-        const projectIds = allProjectForUser.map((project) => project.id);
+        const changeLogs: any[] = [];
 
-        let changeLogs: any[] = [];
-        let hasMore = true;
+        for (const log of logsToProcess) {
+            const { table_name, operation } = log;
+            let projectId = '';
+            if (table_name === 'projects') {
+                projectId = log.new_data?.id || log.old_data?.id;
+            } else {
+                projectId = log.new_data?.project_id || log.old_data?.project_id || '';
+            }
 
-        for (let projectId of projectIds) {
+            let projectName = '';
+            if (projectId !== '') {
+                projectName = await getProjectNameQuery(projectId);
+            }
 
-            const logs: any = await getAllLogForUserQuery(projectId, limit, userId, tableFilter);
+            if (shouldDeleteLog(log)) {
+                await deleteLogQuery(log.id);
+                continue;
+            }
 
-            for (const log of logs) {
-                // Skip if we have filters and this table isn't in them
-                if (haveFilters && !tableFilter.includes(log.table_name)) {
-                    continue;
-                }
+            const include = !haveFilters || tableFilter.includes(table_name);
+            if (!include) continue;
 
-                if (shouldDeleteLog(log)) {
-                    await deleteLogQuery(log.id);
-                    continue;
-                }
-
-                const projectName = await getProjectNameQuery(projectId);
-                if (log.table_name === "assignments" && !haveFilters || log.table_name === "assignments" && tableFilter.includes("assignments")) {
+            // Process each table
+            switch (table_name) {
+                case "assignments": {
                     let assignmentDetails: any;
-                    if (log.operation === "DELETE") {
+                    if (operation === "DELETE") {
                         const assigned_by = await getUserByIdQuery(log.old_data.assigned_by);
                         const user = await getUserByIdQuery(log.old_data.user_id);
 
@@ -108,14 +117,12 @@ export const getAllFilteredLogForUser = async (req: Request, res: Response, next
                             assigned_by_email: assigned_by.email || assigned_by.name || "Unknown",
                             user_name: user.name || user.email || "Unknown",
                             user_email: user.email || user.name || "Unknown"
-                        }
+                        };
                     } else {
                         assignmentDetails = await getAssignmentForLogsQuery(log.new_data.task_id, log.new_data.user_id);
-
-                        if (assignmentDetails.length === 0) {
+                        if (!assignmentDetails.length) {
                             const assigned_by = await getUserByIdQuery(log.new_data.assigned_by);
                             const user = await getUserByIdQuery(log.new_data.user_id);
-
                             assignmentDetails = {
                                 task_id: log.new_data.task_id,
                                 user_id: log.new_data.user_id,
@@ -124,242 +131,188 @@ export const getAllFilteredLogForUser = async (req: Request, res: Response, next
                                 assigned_by_email: assigned_by.email || assigned_by.name || "Unknown",
                                 user_name: user.name || user.email || "Unknown",
                                 user_email: user.email || user.name || "Unknown"
-                            }
+                            };
                         }
                     }
-
-                    const assignment = assignmentDetails[0] || assignmentDetails;
+                    const assignment = Array.isArray(assignmentDetails) ? assignmentDetails[0] : assignmentDetails;
                     changeLogs.push({ ...log, assignment, projectName });
-                } else if (log.table_name === "comments" && !haveFilters || log.table_name === "comments" && tableFilter.includes("comments")) {
-                    let commentDetails: any;
-                    if (log.operation === "DELETE") {
-                        const user = await getUserByIdQuery(log.old_data.author_id);
-                        commentDetails = {
-                            user_id: log.old_data.author_id,
-                            user_name: user.name || user.email || "Unknown",
-                            user_email: user.email || user.name || "Unknown",
-                            comment: log.old_data.comment,
-                            task_title: await getTaskNameForLogsQuery(log.old_data.task_id) || 'Deleted'
-                        }
-                    } else {
-                        const user = await getUserByIdQuery(log.new_data.author_id);
-                        commentDetails = {
-                            user_id: log.new_data.author_id,
-                            user_name: user.name || user.email || "Unknown",
-                            user_email: user.email || user.name || "Unknown",
-                            comment: log.new_data.comment,
-                            task_title: await getTaskNameForLogsQuery(log.new_data.task_id) || 'Deleted'
-                        }
-                    }
+                    break;
+                }
+
+                case "comments": {
+                    const data = operation === "DELETE" ? log.old_data : log.new_data;
+                    const user = await getUserByIdQuery(data.author_id);
+                    const commentDetails = {
+                        user_id: data.author_id,
+                        user_name: user.name || user.email || "Unknown",
+                        user_email: user.email || user.name || "Unknown",
+                        comment: data.comment,
+                        task_title: await getTaskNameForLogsQuery(data.task_id) || 'Deleted'
+                    };
                     changeLogs.push({ ...log, comment: commentDetails, projectName });
-                } else if (log.table_name === "milestones" && !haveFilters || log.table_name === "milestones" && tableFilter.includes("milestones")) {
-                    let milestoneDetails: any;
+                    break;
+                }
 
-                    if (log.operation === "DELETE") {
-                        milestoneDetails = {
-                            title: log.old_data.name,
-                            id: log.old_data.id,
-                            project_id: log.old_data.project_id
-                        }
-                    } else {
-                        milestoneDetails = {
-                            title: log.new_data.name,
-                            id: log.new_data.id,
-                            project_id: log.new_data.project_id
-                        }
-                    }
-                    changeLogs.push({ ...log, milestone: milestoneDetails, projectName });
-                } else if (log.table_name === "files" && !haveFilters || log.table_name === "files" && tableFilter.includes("files")) {
-                    let fileDetails: any;
-                    if (log.operation === "DELETE") {
-                        let taskName = "";
-                        if (log.old_data.task_id !== null) {
-                            taskName = await getTaskNameForLogsQuery(log.old_data.task_id);
-                        }
+                case "milestones": {
+                    const data = operation === "DELETE" ? log.old_data : log.new_data;
+                    changeLogs.push({
+                        ...log,
+                        milestone: {
+                            title: data.name,
+                            id: data.id,
+                            project_id: data.project_id
+                        },
+                        projectName
+                    });
+                    break;
+                }
 
-                        fileDetails = {
-                            title: log.old_data.file_name,
-                            id: log.old_data.id,
-                            project_id: log.old_data.project_id,
-                            task_id: log.old_data.task_id,
-                            task_title: taskName || 'Deleted'
-                        }
-                    } else {
-                        let taskName = "";
-                        if (log.new_data.task_id !== null) {
-                            taskName = await getTaskNameForLogsQuery(log.new_data.task_id);
-                        }
-                        fileDetails = {
-                            title: log.new_data.file_name,
-                            id: log.new_data.id,
-                            project_id: log.new_data.project_id,
-                            task_id: log.new_data.task_id,
-                            task_title: taskName || 'Deleted'
-                        }
+                case "files": {
+                    const data = operation === "DELETE" ? log.old_data : log.new_data;
+                    let taskTitle = '';
+                    if (data.task_id) {
+                        taskTitle = await getTaskNameForLogsQuery(data.task_id);
                     }
-                    changeLogs.push({ ...log, file: fileDetails, projectName });
-                } else if (log.table_name === "project_members" && !haveFilters || log.table_name === "project_members" && tableFilter.includes("project_members")) {
-                    let projectMemberDetails: any;
-                    if (log.operation === "DELETE") {
-                        const user = await getUserByIdQuery(log.old_data.user_id);
-                        const inviter = await getUserByIdQuery(log.old_data.inviter_user_id);
-                        projectMemberDetails = {
-                            user_id: log.old_data.user_id,
+                    changeLogs.push({
+                        ...log,
+                        file: {
+                            title: data.file_name,
+                            id: data.id,
+                            project_id: data.project_id,
+                            task_id: data.task_id,
+                            task_title: taskTitle || 'Deleted'
+                        },
+                        projectName
+                    });
+                    break;
+                }
+
+                case "project_members": {
+                    const data = operation === "DELETE" ? log.old_data : log.new_data;
+                    const user = await getUserByIdQuery(data.user_id);
+                    const inviter = await getUserByIdQuery(data.inviter_user_id);
+
+                    if (user.id === inviter.id && operation !== "DELETE") {
+                        await deleteLogQuery(log.id);
+                        continue;
+                    }
+
+                    changeLogs.push({
+                        ...log,
+                        projectMember: {
+                            user_id: data.user_id,
                             user_name: user.name || user.email || "Unknown",
                             user_email: user.email || user.name || "Unknown",
-                            project_id: log.old_data.project_id,
-                            inviter_user_id: log.old_data.inviter_user_id,
+                            project_id: data.project_id,
+                            inviter_user_id: data.inviter_user_id,
                             inviter_user_name: inviter.name || inviter.email || "Unknown",
                             inviter_user_email: inviter.email || inviter.name || "Unknown"
-                        }
-                    } else {
-                        const user = await getUserByIdQuery(log.new_data.user_id);
-                        const inviter = await getUserByIdQuery(log.new_data.inviter_user_id);
-                        if (user.id === inviter.id) {
-                            await deleteLogQuery(log.id);
-                        }
+                        },
+                        projectName
+                    });
+                    break;
+                }
 
-                        projectMemberDetails = {
-                            user_id: log.new_data.user_id,
-                            user_name: user.name || user.email || "Unknown",
-                            user_email: user.email || user.name || "Unknown",
-                            project_id: log.new_data.project_id,
-                            inviter_user_id: log.new_data.inviter_user_id,
-                            inviter_user_name: inviter.name || inviter.email || "Unknown",
-                            inviter_user_email: inviter.email || inviter.name || "Unknown"
-                        }
+                case "pending_project_invitations": {
+                    if (operation === "DELETE" && !log.changed_by) {
+                        await deleteLogQuery(log.id);
+                        continue;
                     }
-                    changeLogs.push({ ...log, projectMember: projectMemberDetails, projectName });
-                } else if (log.table_name === "pending_project_invitations" && !haveFilters || log.table_name === "pending_project_invitations" && tableFilter.includes("pending_project_invitations")) {
-                    // because when a user accepts the invitation the invitation is deleted and 
-                    // the user is added to the project_members table so it don't need to log
-                    if (log.operation === "DELETE") {
-                        if (!log.changed_by) {
-                            await deleteLogQuery(log.id);
-                        }
-                    } else {
-                        changeLogs.push({ ...log, projectName });
-                    }
-                } else if (log.table_name === "task_labels" && !haveFilters || log.table_name === "task_labels" && tableFilter.includes("task_labels")) {
-                    let taskLabelDetails: any;
+                    changeLogs.push({ ...log, projectName });
+                    break;
+                }
 
-                    if (log.operation === "DELETE") {
-                        let task = await getTaskNameForLogsQuery(log.old_data.task_id);
-                        let label = await getLabelQuery(log.old_data.label_id);
-
-                        taskLabelDetails = {
-                            task_id: log.old_data.task_id,
-                            task_title: task || 'Deleted',
-                            label_id: log.old_data.label_id,
+                case "task_labels": {
+                    const data = operation === "DELETE" ? log.old_data : log.new_data;
+                    const taskTitle = await getTaskNameForLogsQuery(data.task_id);
+                    const label = await getLabelQuery(data.label_id);
+                    changeLogs.push({
+                        ...log,
+                        task_label: {
+                            task_id: data.task_id,
+                            task_title: taskTitle || 'Deleted',
+                            label_id: data.label_id,
                             label_name: label ? label.name : 'Deleted',
-                            project_id: log.old_data.project_id
-                        }
-                    } else {
-                        let task = await getTaskNameForLogsQuery(log.new_data.task_id);
-                        let label = await getLabelQuery(log.new_data.label_id);
+                            project_id: data.project_id
+                        },
+                        projectName
+                    });
+                    break;
+                }
 
-                        taskLabelDetails = {
-                            task_id: log.new_data.task_id,
-                            task_title: task || 'Deleted',
-                            label_id: log.new_data.label_id,
-                            label_name: label ? label.name : 'Deleted',
-                            project_id: log.new_data.project_id
-                        }
-                    }
-                    changeLogs.push({ ...log, task_label: taskLabelDetails, projectName });
-                } else if (log.table_name === "projects" && !haveFilters || log.table_name === "projects" && tableFilter.includes("projects")) {
-                    if (log.operation === "UPDATE") {
+                case "projects": {
+                    if (operation === "UPDATE") {
                         if (log.new_data.name === log.old_data.name && log.new_data.description === log.old_data.description) {
                             await deleteLogQuery(log.id);
+                            continue;
                         }
                     }
                     changeLogs.push({ ...log, projectName });
-                } else if (log.table_name === "tasks" && !haveFilters || log.table_name === "tasks" && tableFilter.includes("tasks")) {
+                    break;
+                }
+
+                case "tasks": {
+                    const data = operation === "DELETE" ? log.old_data : log.new_data;
+                    const milestone = await getMilestoneByIdQuery(data.milestone_id);
                     let taskDetails: any;
 
-                    if (log.operation === "DELETE") {
-                        const milestone = await getMilestoneByIdQuery(log.old_data.milestone_id);
-                        if (log.old_data.parent_task_id) {
-                            const parentTask = await getTaskByIdQuery(log.old_data.parent_task_id);
-                            taskDetails = {
-                                task_id: log.old_data.id,
-                                task_title: await getTaskNameForLogsQuery(log.old_data.id) || 'Deleted',
-                                project_id: log.old_data.project_id,
-                                milestone_id: log.old_data.milestone_id,
-                                milestone_name: milestone?.name,
-                                parent_task_id: log.old_data.parent_task_id,
-                                parent_task_title: parentTask?.title || 'Deleted'
-                            }
-                        } else {
-                            taskDetails = {
-                                task_id: log.old_data.id,
-                                task_title: 'Deleted',
-                                project_id: log.old_data.project_id,
-                                milestone_id: log.old_data.milestone_id,
-                                milestone_name: milestone?.name
-                            }
-                        }
+                    if (data.parent_task_id) {
+                        const parent = await getTaskByIdQuery(data.parent_task_id);
+                        taskDetails = {
+                            task_id: data.id,
+                            task_title: await getTaskNameForLogsQuery(data.id) || 'Deleted',
+                            project_id: data.project_id,
+                            milestone_id: data.milestone_id,
+                            milestone_name: milestone?.name,
+                            parent_task_id: data.parent_task_id,
+                            parent_task_title: parent?.title || 'Deleted'
+                        };
                     } else {
-                        const milestone = await getMilestoneByIdQuery(log.new_data.milestone_id);
-
-                        if (log.new_data.parent_task_id) {
-                            const parentTask = await getTaskByIdQuery(log.new_data.parent_task_id);
-                            taskDetails = {
-                                task_id: log.new_data.id,
-                                task_title: await getTaskNameForLogsQuery(log.new_data.id) || 'Deleted',
-                                project_id: log.new_data.project_id,
-                                milestone_id: log.new_data.milestone_id,
-                                milestone_name: milestone?.name,
-                                parent_task_id: log.new_data.parent_task_id,
-                                parent_task_title: parentTask?.title || 'Deleted'
-                            }
-                        } else {
-                            taskDetails = {
-                                task_id: log.new_data.id,
-                                task_title: await getTaskNameForLogsQuery(log.new_data.id) || 'Deleted',
-                                project_id: log.new_data.project_id,
-                                milestone_id: log.new_data.milestone_id,
-                                milestone_name: milestone?.name
-                            }
-                        }
+                        taskDetails = {
+                            task_id: data.id,
+                            task_title: await getTaskNameForLogsQuery(data.id) || 'Deleted',
+                            project_id: data.project_id,
+                            milestone_id: data.milestone_id,
+                            milestone_name: milestone?.name
+                        };
                     }
+
                     changeLogs.push({ ...log, task: taskDetails, projectName });
-                } else if (log.table_name === "users" && !haveFilters || log.table_name === "users" && tableFilter.includes("users")) {
+                    break;
+                }
+
+                case "users": {
                     if (shouldDeleteLogForUserTable(log)) {
                         await deleteLogQuery(log.id);
                         continue;
                     }
 
-                    let userDetails: any;
-                    if (log.operation === "DELETE") {
-                        const user = await getUserByIdQuery(log.old_data.id);
-                        userDetails = {
-                            id: log.old_data.id,
+                    const data = operation === "DELETE" ? log.old_data : log.new_data;
+                    const user = await getUserByIdQuery(data.id);
+                    changeLogs.push({
+                        ...log,
+                        user: {
+                            id: data.id,
                             name: user.name || user.email || "Unknown",
                             email: user.email || user.name || "Unknown"
                         }
-                    } else {
-                        const user = await getUserByIdQuery(log.new_data.id);
-                        userDetails = {
-                            id: log.new_data.id,
-                            name: user.name || user.email || "Unknown",
-                            email: user.email || user.name || "Unknown"
-                        }
-                    }
-
-                    changeLogs.push({ ...log, user: userDetails });
+                    });
+                    break;
                 }
+
+                default:
+                    break;
             }
         }
 
-        hasMore = changeLogs.length > limit;
-        const logs = [changeLogs, hasMore]
-        handleResponse(res, 200, "Project change logs successfully fetched", logs);
-    } catch (error: Error | any) {
-        console.log(error);
+        const hasMore = logs.length > requestedLimit;
+        handleResponse(res, 200, "Project change logs successfully fetched", [changeLogs, hasMore]);
+    } catch (error: any) {
+        console.error(error);
         next(error);
     }
 };
+
 
 export const getAllUserByNameOrEmail = async (req: Request, res: Response, next: NextFunction) => {
     try {

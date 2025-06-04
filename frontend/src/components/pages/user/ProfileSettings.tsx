@@ -194,18 +194,6 @@ export const ProfileSettings = () => {
                     </p>
                 </div>
 
-                {error && (
-                    <div className="mb-6 p-3 bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 rounded-lg text-sm">
-                        {error}
-                    </div>
-                )}
-
-                {success && (
-                    <div className="mb-6 p-3 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 rounded-lg text-sm">
-                        {success}
-                    </div>
-                )}
-
                 <div className="bg-white dark:bg-gray-800 shadow-xl rounded-lg p-8 relative">
                     <div className="flex justify-end">
                         <button
@@ -259,8 +247,8 @@ export const ProfileSettings = () => {
                                     value={formData.email}
                                     readOnly
                                     className={`block w-full pl-10 pr-3 py-3 cursor-not-allowed border ${fieldErrors.email
-                                            ? "border-red-500 dark:border-red-400"
-                                            : "border-gray-300 dark:border-gray-600"
+                                        ? "border-red-500 dark:border-red-400"
+                                        : "border-gray-300 dark:border-gray-600"
                                         } rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500`}
                                     placeholder="you@example.com"
                                 />
@@ -369,6 +357,18 @@ export const ProfileSettings = () => {
                                         )}
                                     </div>
                                 </div>
+                            </div>
+                        )}
+
+                        {error && (
+                            <div className="mb-6 p-3 bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 rounded-lg text-sm">
+                                {error}
+                            </div>
+                        )}
+
+                        {success && (
+                            <div className="mb-6 p-3 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 rounded-lg text-sm">
+                                {success}
                             </div>
                         )}
 
