@@ -222,7 +222,7 @@ export const UserLogsComponent = () => {
             {logs.length > 0 && (
                 <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 text-center">
                     <Link
-                        to="/all-user-activity"
+                        to="/all-log"
                         className="inline-flex items-center text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 hover:underline transition-colors"
                     >
                         View all activity

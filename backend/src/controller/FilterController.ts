@@ -251,7 +251,7 @@ export const getAllFilteredLogForUser = async (req: Request, res: Response, next
                             task_id: log.old_data.task_id,
                             task_title: task || 'Deleted',
                             label_id: log.old_data.label_id,
-                            label_name: label.name,
+                            label_name: label ? label.name : 'Deleted',
                             project_id: log.old_data.project_id
                         }
                     } else {
@@ -262,7 +262,7 @@ export const getAllFilteredLogForUser = async (req: Request, res: Response, next
                             task_id: log.new_data.task_id,
                             task_title: task || 'Deleted',
                             label_id: log.new_data.label_id,
-                            label_name: label.name,
+                            label_name: label ? label.name : 'Deleted',
                             project_id: log.new_data.project_id
                         }
                     }
@@ -352,7 +352,7 @@ export const getAllFilteredLogForUser = async (req: Request, res: Response, next
             }
         }
 
-        hasMore = changeLogs.length === limit;
+        hasMore = changeLogs.length > limit;
         const logs = [changeLogs, hasMore]
         handleResponse(res, 200, "Project change logs successfully fetched", logs);
     } catch (error: Error | any) {

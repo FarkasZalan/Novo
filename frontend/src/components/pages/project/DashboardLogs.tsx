@@ -129,9 +129,10 @@ export const DashboardLogsComponent = () => {
 
     const renderProjectLink = (log: DashboardLog) => {
         if (!log.projectName) return null;
+        const projectId = log.new_data?.project_id || log.old_data?.project_id || log.new_data?.id || log.old_data?.id || null;
         return (
             <Link
-                to={`/projects/${log.new_data?.project_id || log.old_data?.project_id}`}
+                to={`/projects/${projectId}`}
                 className="underline hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
             >
                 {log.projectName}

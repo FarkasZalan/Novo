@@ -213,7 +213,7 @@ export const getDahboardLogForUser = async (req: Request, res: Response, next: N
                             task_id: log.old_data.task_id,
                             task_title: task || 'Deleted',
                             label_id: log.old_data.label_id,
-                            label_name: label.name,
+                            label_name: label ? label.name : 'Deleted',
                             project_id: log.old_data.project_id
                         }
                     } else {
@@ -224,7 +224,7 @@ export const getDahboardLogForUser = async (req: Request, res: Response, next: N
                             task_id: log.new_data.task_id,
                             task_title: task || 'Deleted',
                             label_id: log.new_data.label_id,
-                            label_name: label.name,
+                            label_name: label ? label.name : 'Deleted',
                             project_id: log.new_data.project_id
                         }
                     }
@@ -291,8 +291,13 @@ export const getDahboardLogForUser = async (req: Request, res: Response, next: N
         }
 
 
+        // 🔽 Sort all logs by timestamp (assuming you have `created_at` or similar field)
+        changeLogs.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
-        handleResponse(res, 200, "Project change logs successfully fetched", changeLogs);
+        // 🔽 Keep only the first 5
+        const topFiveLogs = changeLogs.slice(0, 5);
+
+        handleResponse(res, 200, "Project change logs successfully fetched", topFiveLogs);
     } catch (error: Error | any) {
         console.log(error);
         next(error);
@@ -469,7 +474,7 @@ export const getProjectLogs = async (req: Request, res: Response, next: NextFunc
                         task_id: log.old_data.task_id,
                         task_title: task || 'Deleted',
                         label_id: log.old_data.label_id,
-                        label_name: label.name,
+                        label_name: label ? label.name : 'Deleted',
                         project_id: log.old_data.project_id
                     }
                 } else {
@@ -480,7 +485,7 @@ export const getProjectLogs = async (req: Request, res: Response, next: NextFunc
                         task_id: log.new_data.task_id,
                         task_title: task || 'Deleted',
                         label_id: log.new_data.label_id,
-                        label_name: label.name,
+                        label_name: label ? label.name : 'Deleted',
                         project_id: log.new_data.project_id
                     }
                 }
@@ -641,7 +646,7 @@ export const getTaskLogs = async (req: Request, res: Response, next: NextFunctio
                         task_id: log.old_data.task_id,
                         task_title: task || 'Deleted',
                         label_id: log.old_data.label_id,
-                        label_name: label.name,
+                        label_name: label ? label.name : 'Deleted',
                         project_id: log.old_data.project_id
                     }
                 } else {
@@ -652,7 +657,7 @@ export const getTaskLogs = async (req: Request, res: Response, next: NextFunctio
                         task_id: log.new_data.task_id,
                         task_title: task || 'Deleted',
                         label_id: log.new_data.label_id,
-                        label_name: label.name,
+                        label_name: label ? label.name : 'Deleted',
                         project_id: log.new_data.project_id
                     }
                 }

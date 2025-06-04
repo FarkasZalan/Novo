@@ -1,6 +1,6 @@
 import express from "express";
 import { createTask, deleteTask, getAllTasks, getAllTasksWithNoParent, getTaskById, getTaskCountForProject, updateTask, updateTaskStatus } from "../controller/taskController";
-import { validateProject, validateTask } from "../middlewares/inputValidator";
+import { validateTask } from "../middlewares/inputValidator";
 import { authenticateToken } from "../middlewares/authenticate";
 import { authorizeProject, authorizeTask, authorizeTaskForOwnerAndAdmin } from "../middlewares/authorization";
 
