@@ -6,6 +6,7 @@ import { sendTaskCommentEmail } from "../services/emailService";
 import { getTaskByIdQuery } from "../models/task.Model";
 import { getProjectByIdQuery } from "../models/projectModel";
 import { getUserByIdQuery } from "../models/userModel";
+import { Project } from "../schemas/types/projectTyoe";
 
 // Standardized response function
 // it's a function that returns a response to the client when a request is made (CRUD operations)
@@ -23,7 +24,7 @@ export const createComment = async (req: Request, res: Response, next: NextFunct
         const projectId = req.params.projectId;
         const { author_id, comment } = req.body;
 
-        const project = await getProjectByIdQuery(projectId);
+        const project: Project = await getProjectByIdQuery(projectId);
         if (!project) {
             handleResponse(res, 404, "Project not found", null);
             return;
@@ -72,7 +73,7 @@ export const updateComment = async (req: Request, res: Response, next: NextFunct
         const projectId = req.params.projectId;
         const { commentId, comment } = req.body;
 
-        const project = await getProjectByIdQuery(projectId);
+        const project: Project = await getProjectByIdQuery(projectId);
         if (!project) {
             handleResponse(res, 404, "Project not found", null);
             return;
@@ -106,7 +107,7 @@ export const deleteComment = async (req: Request, res: Response, next: NextFunct
         const commentId = req.body.commentId;
         const projectId = req.params.projectId;
 
-        const project = await getProjectByIdQuery(projectId);
+        const project: Project = await getProjectByIdQuery(projectId);
         if (!project) {
             handleResponse(res, 404, "Project not found", null);
             return;

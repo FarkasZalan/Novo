@@ -4,6 +4,8 @@ import { getUserByIdQuery } from "../models/userModel";
 import { inviteToProjectQuery, addUserToProjectQuery, getProjectMembersQuery, deleteUserFromProjectQuery, deletePendingUserQuery, getProjectMemberQuery, getPendingUsersQuery, getPendingUserQuery, updateProjectMemberRoleQuery, updatePendingUserRoleQuery } from "../models/projectMemberModel";
 import { sendProjectInviteExistingUserEmail, sendProjectInviteNewUserEmail } from "../services/emailService";
 import { getProjectByIdQuery, updateProjectReadOnlyQuery } from "../models/projectModel";
+import { User } from "../schemas/types/userType";
+import { Project } from "../schemas/types/projectTyoe";
 
 // Standardized response function
 // it's a function that returns a response to the client when a request is made (CRUD operations)
@@ -20,9 +22,9 @@ export const addUsersToProject = async (req: Request, res: Response, next: NextF
         const projectId = req.params.projectId;
         const { users, currentUserId } = req.body;
 
-        const currentUser = await getUserByIdQuery(currentUserId);
+        const currentUser: User = await getUserByIdQuery(currentUserId);
 
-        const project = await getProjectByIdQuery(projectId);
+        const project: Project = await getProjectByIdQuery(projectId);
         if (!project) {
             handleResponse(res, 404, "Project not found", null);
             return;
@@ -33,7 +35,7 @@ export const addUsersToProject = async (req: Request, res: Response, next: NextF
             return;
         }
 
-        const owner = await getUserByIdQuery(project.owner_id);
+        const owner: User = await getUserByIdQuery(project.owner_id);
 
         const currentProjectMembers = await getProjectMembersQuery(projectId);
         const pendingUsers = await getPendingUsersQuery(projectId);
@@ -90,7 +92,7 @@ export const resendProjectInvite = async (req: Request, res: Response, next: Nex
         const projectId = req.params.projectId;
         const { inviteUserId, currentUserId } = req.body.data;
 
-        const project = await getProjectByIdQuery(projectId);
+        const project: Project = await getProjectByIdQuery(projectId);
         if (!project) {
             handleResponse(res, 404, "Project not found", null);
             return;
@@ -101,7 +103,7 @@ export const resendProjectInvite = async (req: Request, res: Response, next: Nex
             return;
         }
 
-        const user = await getUserByIdQuery(currentUserId);
+        const user: User = await getUserByIdQuery(currentUserId);
 
         if (!user) {
             handleResponse(res, 404, "User not found", null);
@@ -128,7 +130,7 @@ export const getAllProjectMembers = async (req: Request, res: Response, next: Ne
         const projectId = req.params.projectId;
         const usersFromProject = await getProjectMembersQuery(projectId);
 
-        const users = await Promise.all(
+        const users: User[] = await Promise.all(
             usersFromProject.map(async (user) => {
                 const userData = await getUserByIdQuery(user.user_id);
                 return { ...user, user: userData };
@@ -153,7 +155,7 @@ export const updateProjectMemberRole = async (req: Request, res: Response, next:
         const projectId = req.params.projectId;
         const { userId, currentUserId, role } = req.body.data;
 
-        const project = await getProjectByIdQuery(projectId);
+        const project: Project = await getProjectByIdQuery(projectId);
         if (!project) {
             handleResponse(res, 404, "Project not found", null);
             return;
@@ -234,7 +236,7 @@ export const removeUserFromProject = async (req: Request, res: Response, next: N
                 await deleteUserFromProjectQuery(projectId, userId);
             }
 
-            const project = await getProjectByIdQuery(projectId);
+            const project: Project = await getProjectByIdQuery(projectId);
 
             if (!project) {
                 handleResponse(res, 404, "Project not found", null);

@@ -8,6 +8,7 @@ import { Label } from "../schemas/labelSchema";
 import { sendTaskStatusChangeEmail } from "../services/emailService";
 import { getAssignmentsForTaskQuery } from "../models/assignmentModel";
 import { getUserByIdQuery } from "../models/userModel";
+import { Project } from "../schemas/types/projectTyoe";
 
 // Standardized response function
 // it's a function that returns a response to the client when a request is made (CRUD operations)
@@ -245,7 +246,7 @@ export const updateTaskStatus = async (req: Request, res: Response, next: NextFu
         const taskId = req.params.taskId;
         const { status } = req.body;
 
-        const project = await getProjectByIdQuery(projectId);
+        const project: Project = await getProjectByIdQuery(projectId);
         if (!project) {
             handleResponse(res, 404, "Project not found", null);
             return;
@@ -274,12 +275,11 @@ export const updateTaskStatus = async (req: Request, res: Response, next: NextFu
             }
         }
 
-        const projectData = await getProjectByIdQuery(projectId);
         const assignedUsers = await getAssignmentsForTaskQuery(taskId);
         const currentUser = await getUserByIdQuery(req.user.id);
         for (const user of assignedUsers) {
             if (user.user_id === req.user.id) continue;
-            sendTaskStatusChangeEmail(user.user_email, currentUser.name, currentUser.email, updateTask.title, projectData.name, updateTask.status, status, taskId, projectId);
+            sendTaskStatusChangeEmail(user.user_email, currentUser.name, currentUser.email, updateTask.title, project.name, updateTask.status, status, taskId, projectId);
         }
 
         if (updateTask.milestone_id) {
@@ -311,7 +311,7 @@ export const deleteTask = async (req: Request, res: Response, next: NextFunction
         const taskId = req.params.taskId;
         const projectId = req.params.projectId;
 
-        const project = await getProjectByIdQuery(projectId);
+        const project: Project = await getProjectByIdQuery(projectId);
         if (!project) {
             handleResponse(res, 404, "Project not found", null);
             return;

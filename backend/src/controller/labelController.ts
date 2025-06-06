@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { NextFunction } from "connect";
 import { createLabelQuery, deleteLabelQuery, getAllLabelForProjectQuery, getLabelQuery, getLabelsForTaskQuery, updateLabelQuery } from "../models/labelModel";
 import { getProjectByIdQuery } from "../models/projectModel";
+import { Project } from "../schemas/types/projectTyoe";
 
 // Standardized response function
 // it's a function that returns a response to the client when a request is made (CRUD operations)
@@ -18,7 +19,7 @@ export const createLabel = async (req: Request, res: Response, next: NextFunctio
         const project_id = req.params.projectId;
         const { name, description, color } = req.body;
 
-        const project = await getProjectByIdQuery(project_id);
+        const project: Project = await getProjectByIdQuery(project_id);
         if (!project) {
             handleResponse(res, 404, "Project not found", null);
             return;
@@ -50,7 +51,7 @@ export const updateLabel = async (req: Request, res: Response, next: NextFunctio
 
         const { name, description, color } = req.body;
 
-        const project = await getProjectByIdQuery(project_id);
+        const project: Project = await getProjectByIdQuery(project_id);
         if (!project) {
             handleResponse(res, 404, "Project not found", null);
             return;
@@ -92,7 +93,7 @@ export const deleteLabel = async (req: Request, res: Response, next: NextFunctio
         const label_id = req.params.labelId;
         const project_id = req.params.projectId;
 
-        const project = await getProjectByIdQuery(project_id);
+        const project: Project = await getProjectByIdQuery(project_id);
         if (!project) {
             handleResponse(res, 404, "Project not found", null);
             return;

@@ -20,6 +20,7 @@ import crypto from 'crypto';
 import { redisClient } from "../config/redis";
 import { getUserByIdQuery } from "../models/userModel";
 import { getPendingProjectsForPendingUserByEmailQuery, addUserToProjectQuery, deletePendingUserQuery } from "../models/projectMemberModel";
+import { User } from "../schemas/types/userType";
 
 dotenv.config();
 
@@ -61,7 +62,7 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
         const { email, password } = req.body;
 
         // check if email exists
-        const user = await findByEmail(email);
+        const user: User = await findByEmail(email);
         if (!user) {
             handleResponse(res, 404, "Invalid email", null);
             return;
@@ -80,7 +81,7 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
         }
 
         // check if password is correct
-        const validPassword = await bcryptjs.compare(password, user.password);
+        const validPassword = await bcryptjs.compare(password, user.password!);
         if (!validPassword) {
             handleResponse(res, 400, "Invalid password", null);
             return;
@@ -122,7 +123,7 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
 
 export const logoutUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const user = await findByEmail(req.body.email);
+        const user: User = await findByEmail(req.body.email);
 
         // Remove the refresh token cookie
         res.clearCookie("refresh_token", {
@@ -202,7 +203,7 @@ export const requestPasswordReset = async (req: Request, res: Response, next: Ne
         }
 
         // Find the user by email
-        const user = await findByEmail(email);
+        const user: User = await findByEmail(email);
 
         // If user not found, still return success to prevent email enumeration
         if (!user) {
@@ -310,7 +311,7 @@ export const verifyEmail = async (req: Request, res: Response, next: NextFunctio
         }
 
         // Find user with this verification token
-        const user = await findUserByVerificationToken(token);
+        const user: User = await findUserByVerificationToken(token);
 
         if (!user) {
             handleResponse(res, 400, "Invalid or expired verification token", null);
@@ -349,7 +350,7 @@ export const resendVerificationEmail = async (req: Request, res: Response, next:
         }
 
         // Find the user by email
-        const user = await findByEmail(email);
+        const user: User = await findByEmail(email);
         if (!user) {
             handleResponse(res, 400, "If this email is registered, you will receive a verification email", null);
             return;

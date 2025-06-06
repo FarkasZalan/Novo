@@ -1,6 +1,8 @@
 import pool from "../config/db";
 
 export const getChangeLogsForDashboardQuery = async (projectIds: string[], limit: number) => {
+    if (!projectIds.length) return [];
+
     let query = `
     SELECT 
       change_logs.*, 

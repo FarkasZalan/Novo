@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { deleteUserQuery, getAllUsersQuery, getUserByIdQuery, updateUserQuery } from "../models/userModel";
 import { NextFunction } from "connect";
 import bcrypt from "bcryptjs";
+import { User } from "../schemas/types/userType";
 
 // Standardized response function
 // it's a function that returns a response to the client when a request is made (CRUD operations)
@@ -25,7 +26,7 @@ export const getAllUsers = async (req: Request, res: Response, next: NextFunctio
 export const getUserProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const userId = req.user.id;
-        const user = await getUserByIdQuery(userId);
+        const user: User = await getUserByIdQuery(userId);
         if (!user) {
             handleResponse(res, 404, "User not found", null);
             return;
@@ -43,7 +44,7 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
         const userId = req.user.id;
 
         // Get current user data
-        const currentUser = await getUserByIdQuery(userId);
+        const currentUser: User = await getUserByIdQuery(userId);
         if (!currentUser) {
             handleResponse(res, 404, "User not found", null);
             return;
@@ -80,7 +81,7 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
 export const deleteUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const userId = req.user.id;
-        const deletedUser = await deleteUserQuery(userId);
+        const deletedUser: User = await deleteUserQuery(userId);
         if (!deletedUser) {
             handleResponse(res, 404, "User not found", null);
             return;

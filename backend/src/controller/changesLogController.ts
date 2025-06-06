@@ -8,6 +8,7 @@ import { getTaskByIdQuery, getTaskNameForLogsQuery } from "../models/task.Model"
 import { deleteLogQuery } from "../models/changeLogModel";
 import { getLabelQuery } from "../models/labelModel";
 import { getMilestoneByIdQuery } from "../models/milestonesModel";
+import { AssignmentDetails, BaseLog, ChangeLog, CommentDetails, FileDetails, MilestoneDetails, ProjectMemberDetails, TaskDetails, TaskLabelDetails, UserDetails } from "../schemas/types/changeLogType";
 
 // Standardized response function
 // it's a function that returns a response to the client when a request is made (CRUD operations)
@@ -42,12 +43,14 @@ export const getDahboardLogForUser = async (req: Request, res: Response, next: N
 
         // Get all related project IDs
         const allProjectsForUser = await getAllProjectForUsersQuery(userId);
-        const projectIds = allProjectsForUser.map((project) => project.id);
+        const projectIds = allProjectsForUser.map((project) => project.id) || [];
 
         // Get all logs across these project IDs with global limit
-        const logs = await getChangeLogsForDashboardQuery(projectIds, 5);
+        const logs: BaseLog[] = await getChangeLogsForDashboardQuery(projectIds, 5);
 
-        const changeLogs: any[] = [];
+        // new_data and old_data is whole row from the table that changed
+        // so the project table new_data and old_data is the whole row from the project table
+        const changeLogs: ChangeLog[] = [];
 
         for (const log of logs) {
             const { table_name, operation } = log;
@@ -71,7 +74,7 @@ export const getDahboardLogForUser = async (req: Request, res: Response, next: N
             // Process each table
             switch (table_name) {
                 case "assignments": {
-                    let assignmentDetails: any;
+                    let assignmentDetails: AssignmentDetails | AssignmentDetails[] = [];
                     if (operation === "DELETE") {
                         const assigned_by = await getUserByIdQuery(log.old_data.assigned_by);
                         const user = await getUserByIdQuery(log.old_data.user_id);
@@ -87,19 +90,17 @@ export const getDahboardLogForUser = async (req: Request, res: Response, next: N
                         };
                     } else {
                         assignmentDetails = await getAssignmentForLogsQuery(log.new_data.task_id, log.new_data.user_id);
-                        if (!assignmentDetails.length) {
-                            const assigned_by = await getUserByIdQuery(log.new_data.assigned_by);
-                            const user = await getUserByIdQuery(log.new_data.user_id);
-                            assignmentDetails = {
-                                task_id: log.new_data.task_id,
-                                user_id: log.new_data.user_id,
-                                task_title: await getTaskNameForLogsQuery(log.new_data.task_id) || 'Deleted',
-                                assigned_by_name: assigned_by.name || assigned_by.email || "Unknown",
-                                assigned_by_email: assigned_by.email || assigned_by.name || "Unknown",
-                                user_name: user.name || user.email || "Unknown",
-                                user_email: user.email || user.name || "Unknown"
-                            };
-                        }
+                        const assigned_by = await getUserByIdQuery(log.new_data.assigned_by);
+                        const user = await getUserByIdQuery(log.new_data.user_id);
+                        assignmentDetails = {
+                            task_id: log.new_data.task_id,
+                            user_id: log.new_data.user_id,
+                            task_title: await getTaskNameForLogsQuery(log.new_data.task_id) || 'Deleted',
+                            assigned_by_name: assigned_by.name || assigned_by.email || "Unknown",
+                            assigned_by_email: assigned_by.email || assigned_by.name || "Unknown",
+                            user_name: user.name || user.email || "Unknown",
+                            user_email: user.email || user.name || "Unknown"
+                        };
                     }
                     const assignment = Array.isArray(assignmentDetails) ? assignmentDetails[0] : assignmentDetails;
                     changeLogs.push({ ...log, assignment, projectName });
@@ -109,7 +110,7 @@ export const getDahboardLogForUser = async (req: Request, res: Response, next: N
                 case "comments": {
                     const data = operation === "DELETE" ? log.old_data : log.new_data;
                     const user = await getUserByIdQuery(data.author_id);
-                    const commentDetails = {
+                    const commentDetails: CommentDetails = {
                         user_id: data.author_id,
                         user_name: user.name || user.email || "Unknown",
                         user_email: user.email || user.name || "Unknown",
@@ -221,7 +222,7 @@ export const getDahboardLogForUser = async (req: Request, res: Response, next: N
                 case "tasks": {
                     const data = operation === "DELETE" ? log.old_data : log.new_data;
                     const milestone = await getMilestoneByIdQuery(data.milestone_id);
-                    let taskDetails: any;
+                    let taskDetails: TaskDetails;
 
                     if (data.parent_task_id) {
                         const parent = await getTaskByIdQuery(data.parent_task_id);
@@ -283,8 +284,11 @@ export const getProjectLogs = async (req: Request, res: Response, next: NextFunc
     try {
         const projectId = req.params.projectId;
 
-        let changeLogs: any[] = [];
-        const logs: any = await getChangeLogsForProjectQuery(projectId, 5);
+        let changeLogs: ChangeLog[] = [];
+
+        // new_data and old_data is whole row from the table that changed
+        // so the project table new_data and old_data is the whole row from the project table
+        const logs = await getChangeLogsForProjectQuery(projectId, 5);
 
         for (const log of logs) {
             if (shouldDeleteLog(log)) {
@@ -293,7 +297,7 @@ export const getProjectLogs = async (req: Request, res: Response, next: NextFunc
             }
 
             if (log.table_name === "assignments") {
-                let assignmentDetails: any;
+                let assignmentDetails: AssignmentDetails | AssignmentDetails[];
                 if (log.operation === "DELETE") {
                     const assigned_by = await getUserByIdQuery(log.old_data.assigned_by);
                     const user = await getUserByIdQuery(log.old_data.user_id);
@@ -306,30 +310,25 @@ export const getProjectLogs = async (req: Request, res: Response, next: NextFunc
                         assigned_by_email: assigned_by.email || assigned_by.name || "Unknown",
                         user_name: user.name || user.email || "Unknown",
                         user_email: user.email || user.name || "Unknown"
-                    }
+                    };
                 } else {
                     assignmentDetails = await getAssignmentForLogsQuery(log.new_data.task_id, log.new_data.user_id);
-
-                    if (assignmentDetails.length === 0) {
-                        const assigned_by = await getUserByIdQuery(log.new_data.assigned_by);
-                        const user = await getUserByIdQuery(log.new_data.user_id);
-
-                        assignmentDetails = {
-                            task_id: log.new_data.task_id,
-                            user_id: log.new_data.user_id,
-                            task_title: await getTaskNameForLogsQuery(log.new_data.task_id) || 'Deleted',
-                            assigned_by_name: assigned_by.name || assigned_by.email || "Unknown",
-                            assigned_by_email: assigned_by.email || assigned_by.name || "Unknown",
-                            user_name: user.name || user.email || "Unknown",
-                            user_email: user.email || user.name || "Unknown"
-                        }
-                    }
+                    const assigned_by = await getUserByIdQuery(log.new_data.assigned_by);
+                    const user = await getUserByIdQuery(log.new_data.user_id);
+                    assignmentDetails = {
+                        task_id: log.new_data.task_id,
+                        user_id: log.new_data.user_id,
+                        task_title: await getTaskNameForLogsQuery(log.new_data.task_id) || 'Deleted',
+                        assigned_by_name: assigned_by.name || assigned_by.email || "Unknown",
+                        assigned_by_email: assigned_by.email || assigned_by.name || "Unknown",
+                        user_name: user.name || user.email || "Unknown",
+                        user_email: user.email || user.name || "Unknown"
+                    };
                 }
-
-                const assignment = assignmentDetails[0] || assignmentDetails;
+                const assignment = Array.isArray(assignmentDetails) ? assignmentDetails[0] : assignmentDetails;
                 changeLogs.push({ ...log, assignment });
             } else if (log.table_name === "comments") {
-                let commentDetails: any;
+                let commentDetails: CommentDetails;
                 if (log.operation === "DELETE") {
                     const user = await getUserByIdQuery(log.old_data.author_id);
                     commentDetails = {
@@ -351,7 +350,7 @@ export const getProjectLogs = async (req: Request, res: Response, next: NextFunc
                 }
                 changeLogs.push({ ...log, comment: commentDetails });
             } else if (log.table_name === "milestones") {
-                let milestoneDetails: any;
+                let milestoneDetails: MilestoneDetails;
 
                 if (log.operation === "DELETE") {
                     milestoneDetails = {
@@ -368,7 +367,7 @@ export const getProjectLogs = async (req: Request, res: Response, next: NextFunc
                 }
                 changeLogs.push({ ...log, milestone: milestoneDetails });
             } else if (log.table_name === "files") {
-                let fileDetails: any;
+                let fileDetails: FileDetails;
                 if (log.operation === "DELETE") {
                     let taskName = "";
                     if (log.old_data.task_id !== null) {
@@ -397,7 +396,7 @@ export const getProjectLogs = async (req: Request, res: Response, next: NextFunc
                 }
                 changeLogs.push({ ...log, file: fileDetails });
             } else if (log.table_name === "project_members") {
-                let projectMemberDetails: any;
+                let projectMemberDetails: ProjectMemberDetails;
                 if (log.operation === "DELETE") {
                     const user = await getUserByIdQuery(log.old_data.user_id);
                     const inviter = await getUserByIdQuery(log.old_data.inviter_user_id);
@@ -439,7 +438,7 @@ export const getProjectLogs = async (req: Request, res: Response, next: NextFunc
                     changeLogs.push({ ...log });
                 }
             } else if (log.table_name === "task_labels") {
-                let taskLabelDetails: any;
+                let taskLabelDetails: TaskLabelDetails;
 
                 if (log.operation === "DELETE") {
                     let task = await getTaskNameForLogsQuery(log.old_data.task_id);
@@ -473,7 +472,7 @@ export const getProjectLogs = async (req: Request, res: Response, next: NextFunc
                 }
                 changeLogs.push({ ...log });
             } else if (log.table_name === "tasks") {
-                let taskDetails: any;
+                let taskDetails: TaskDetails;
 
                 if (log.operation === "DELETE") {
                     const milestone = await getMilestoneByIdQuery(log.old_data.milestone_id);
@@ -536,8 +535,11 @@ export const getTaskLogs = async (req: Request, res: Response, next: NextFunctio
     try {
         const taskId = req.params.taskId;
 
-        let changeLogs: any[] = [];
-        const logs: any = await getChangeLogsForTaskQuery(taskId, 5);
+        let changeLogs: ChangeLog[] = [];
+
+        // new_data and old_data is whole row from the table that changed
+        // so the project table new_data and old_data is the whole row from the project table
+        const logs = await getChangeLogsForTaskQuery(taskId, 5);
 
         for (const log of logs) {
             if (shouldDeleteLog(log)) {
@@ -546,7 +548,7 @@ export const getTaskLogs = async (req: Request, res: Response, next: NextFunctio
             }
 
             if (log.table_name === "assignments") {
-                let assignmentDetails: any;
+                let assignmentDetails: AssignmentDetails | AssignmentDetails[];
                 if (log.operation === "DELETE") {
                     const assigned_by = await getUserByIdQuery(log.old_data.assigned_by);
                     const user = await getUserByIdQuery(log.old_data.user_id);
@@ -559,27 +561,22 @@ export const getTaskLogs = async (req: Request, res: Response, next: NextFunctio
                         assigned_by_email: assigned_by.email || assigned_by.name || "Unknown",
                         user_name: user.name || user.email || "Unknown",
                         user_email: user.email || user.name || "Unknown"
-                    }
+                    };
                 } else {
                     assignmentDetails = await getAssignmentForLogsQuery(log.new_data.task_id, log.new_data.user_id);
-
-                    if (assignmentDetails.length === 0) {
-                        const assigned_by = await getUserByIdQuery(log.new_data.assigned_by);
-                        const user = await getUserByIdQuery(log.new_data.user_id);
-
-                        assignmentDetails = {
-                            task_id: log.new_data.task_id,
-                            user_id: log.new_data.user_id,
-                            task_title: await getTaskNameForLogsQuery(log.new_data.task_id) || 'Deleted',
-                            assigned_by_name: assigned_by.name || assigned_by.email || "Unknown",
-                            assigned_by_email: assigned_by.email || assigned_by.name || "Unknown",
-                            user_name: user.name || user.email || "Unknown",
-                            user_email: user.email || user.name || "Unknown"
-                        }
-                    }
+                    const assigned_by = await getUserByIdQuery(log.new_data.assigned_by);
+                    const user = await getUserByIdQuery(log.new_data.user_id);
+                    assignmentDetails = {
+                        task_id: log.new_data.task_id,
+                        user_id: log.new_data.user_id,
+                        task_title: await getTaskNameForLogsQuery(log.new_data.task_id) || 'Deleted',
+                        assigned_by_name: assigned_by.name || assigned_by.email || "Unknown",
+                        assigned_by_email: assigned_by.email || assigned_by.name || "Unknown",
+                        user_name: user.name || user.email || "Unknown",
+                        user_email: user.email || user.name || "Unknown"
+                    };
                 }
-
-                const assignment = assignmentDetails[0] || assignmentDetails;
+                const assignment = Array.isArray(assignmentDetails) ? assignmentDetails[0] : assignmentDetails;
                 changeLogs.push({ ...log, assignment });
             } else if (log.table_name === "files") {
                 let fileDetails: any;
@@ -638,7 +635,7 @@ export const getTaskLogs = async (req: Request, res: Response, next: NextFunctio
                 }
                 changeLogs.push({ ...log, task_label: taskLabelDetails });
             } else if (log.table_name === "tasks") {
-                let taskDetails: any;
+                let taskDetails: TaskDetails;
 
                 if (log.operation === "DELETE") {
                     const milestone = await getMilestoneByIdQuery(log.old_data.milestone_id);
@@ -701,8 +698,11 @@ export const getCommentLogs = async (req: Request, res: Response, next: NextFunc
     try {
         const commentId = req.params.commentId;
 
-        let changeLogs: any[] = [];
-        const logs: any = await getChangeLogsForCommentQuery(commentId);
+        let changeLogs: ChangeLog[] = [];
+
+        // new_data and old_data is whole row from the table that changed
+        // so the project table new_data and old_data is the whole row from the project table
+        const logs = await getChangeLogsForCommentQuery(commentId);
 
         for (const log of logs) {
             if (shouldDeleteLog(log)) {
@@ -710,7 +710,7 @@ export const getCommentLogs = async (req: Request, res: Response, next: NextFunc
                 continue;
             }
 
-            let commentDetails: any;
+            let commentDetails: CommentDetails;
             if (log.operation === "DELETE") {
                 const user = await getUserByIdQuery(log.old_data.author_id);
                 commentDetails = {
@@ -743,10 +743,12 @@ export const getCommentLogs = async (req: Request, res: Response, next: NextFunc
 export const getMilestoneLogs = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const milestoneId = req.params.milestoneId;
-        const milestone = await getMilestoneByIdQuery(milestoneId);
 
-        let changeLogs: any[] = [];
-        const logs: any = await getChangeLogsForMilestoneQuery(milestoneId, 5);
+        let changeLogs: ChangeLog[] = [];
+
+        // new_data and old_data is whole row from the table that changed
+        // so the project table new_data and old_data is the whole row from the project table
+        const logs = await getChangeLogsForMilestoneQuery(milestoneId, 5);
 
         for (const log of logs) {
             if (shouldDeleteLog(log)) {
@@ -754,7 +756,7 @@ export const getMilestoneLogs = async (req: Request, res: Response, next: NextFu
                 continue;
             }
 
-            let milestoneDetails: any;
+            let milestoneDetails: MilestoneDetails;
 
             if (log.operation === "DELETE") {
                 milestoneDetails = {
@@ -782,6 +784,8 @@ export const getMilestoneLogs = async (req: Request, res: Response, next: NextFu
 const shouldDeleteLogForUserTable = (log: any): boolean => {
     const criticalFields = ['name', 'email', 'password', 'is_premium', 'premium_start_date', 'premium_end_date', 'premium_session_id', 'user_cancelled_premium'];
 
+    // new_data and old_data is whole row from the table that changed
+    // so the project table new_data and old_data is the whole row from the project table
     const oldData = log.old_data || {};
     const newData = log.new_data || {};
 
@@ -798,9 +802,11 @@ export const getUserLog = async (req: Request, res: Response, next: NextFunction
     try {
         const userId = req.user.id;
 
-        let changeLogs: any[] = [];
+        let changeLogs: ChangeLog[] = [];
 
-        const logs: any = await getChangeLogsForUserQuery(userId, 5);
+        // new_data and old_data is whole row from the table that changed
+        // so the project table new_data and old_data is the whole row from the project table
+        const logs = await getChangeLogsForUserQuery(userId, 5);
 
         for (const log of logs) {
             if (shouldDeleteLog(log)) {
@@ -813,7 +819,7 @@ export const getUserLog = async (req: Request, res: Response, next: NextFunction
                 continue;
             }
 
-            let userDetails: any;
+            let userDetails: UserDetails;
             if (log.operation === "DELETE") {
                 const user = await getUserByIdQuery(log.old_data.id);
                 userDetails = {

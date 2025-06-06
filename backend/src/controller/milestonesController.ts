@@ -5,6 +5,7 @@ import { getParentTaskForSubtaskQuery, getSubtasksForTaskQuery, getTaskByIdQuery
 import { getLabelsForTaskQuery } from "../models/labelModel";
 import { getProjectByIdQuery } from "../models/projectModel";
 import { DEFAULT_COLORS } from "../utils/default-colors";
+import { Project } from "../schemas/types/projectTyoe";
 
 // Standardized response function
 // it's a function that returns a response to the client when a request is made (CRUD operations)
@@ -21,7 +22,7 @@ export const createMilestone = async (req: Request, res: Response, next: NextFun
         const project_id = req.params.projectId;
         const { name, description, due_date, color } = req.body;
 
-        const project = await getProjectByIdQuery(project_id);
+        const project: Project = await getProjectByIdQuery(project_id);
         if (!project) {
             handleResponse(res, 404, "Project not found", null);
             return;
@@ -94,7 +95,7 @@ export const addMilestoneToTask = async (req: Request, res: Response, next: Next
         const { taskIds } = req.body;
         const milestone_id = req.params.milestoneId;
 
-        const project = await getProjectByIdQuery(projectId);
+        const project: Project = await getProjectByIdQuery(projectId);
         if (!project) {
             handleResponse(res, 404, "Project not found", null);
             return;
@@ -173,7 +174,7 @@ export const deleteMilestoneFromTask = async (req: Request, res: Response, next:
         const milestone_id = req.params.milestoneId;
         const taskId = req.body.taskId;
 
-        const project = await getProjectByIdQuery(projectId);
+        const project: Project = await getProjectByIdQuery(projectId);
         if (!project) {
             handleResponse(res, 404, "Project not found", null);
             return;
@@ -225,7 +226,7 @@ export const updateMilestone = async (req: Request, res: Response, next: NextFun
         const projectId = req.params.projectId;
         const { name, description, due_date, color } = req.body;
 
-        const project = await getProjectByIdQuery(projectId);
+        const project: Project = await getProjectByIdQuery(projectId);
         if (!project) {
             handleResponse(res, 404, "Project not found", null);
             return;
@@ -271,7 +272,7 @@ export const deleteMilestone = async (req: Request, res: Response, next: NextFun
         const milestoneId = req.params.milestoneId;
         const projectId = req.params.projectId;
 
-        const project = await getProjectByIdQuery(projectId);
+        const project: Project = await getProjectByIdQuery(projectId);
         if (!project) {
             handleResponse(res, 404, "Project not found", null);
             return;

@@ -5,6 +5,8 @@ import { getUserByIdQuery } from "../models/userModel";
 import { sendTaskAssignmentEmail } from "../services/emailService";
 import { getTaskByIdQuery } from "../models/task.Model";
 import { getProjectByIdQuery } from "../models/projectModel";
+import { User } from "../schemas/types/userType";
+import { Project } from "../schemas/types/projectTyoe";
 
 // Standardized response function
 // it's a function that returns a response to the client when a request is made (CRUD operations)
@@ -23,13 +25,13 @@ export const createAssignmentMyself = async (req: Request, res: Response, next: 
         const user_id = req.user.id
         const assigned_by = req.user.id;
 
-        const currentUser = await getUserByIdQuery(assigned_by);
+        const currentUser: User = await getUserByIdQuery(assigned_by);
         if (!currentUser) {
             handleResponse(res, 404, "User not found", null);
             return;
         }
 
-        const project = await getProjectByIdQuery(project_id);
+        const project: Project = await getProjectByIdQuery(project_id);
         if (!project) {
             handleResponse(res, 404, "Project not found", null);
             return;
@@ -55,7 +57,7 @@ export const createAssignmentForUsers = async (req: Request, res: Response, next
         const assigned_by = req.user.id;
         const { users } = req.body;
 
-        const currentUser = await getUserByIdQuery(assigned_by);
+        const currentUser: User = await getUserByIdQuery(assigned_by);
         if (!currentUser) {
             handleResponse(res, 404, "User not found", null);
             return;
@@ -67,7 +69,7 @@ export const createAssignmentForUsers = async (req: Request, res: Response, next
 
         const addedUsers = [];
         const task = await getTaskByIdQuery(task_id);
-        const project = await getProjectByIdQuery(project_id);
+        const project: Project = await getProjectByIdQuery(project_id);
 
         if (!project) {
             handleResponse(res, 404, "Project not found", null);
@@ -124,7 +126,7 @@ export const deleteAssignmentsFromTask = async (req: Request, res: Response, nex
         const user_id = req.body.user_id
         const project_id = req.params.projectId
 
-        const project = await getProjectByIdQuery(project_id);
+        const project: Project = await getProjectByIdQuery(project_id);
         if (!project) {
             handleResponse(res, 404, "Project not found", null);
             return;

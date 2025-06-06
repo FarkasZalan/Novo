@@ -3,6 +3,7 @@ import { NextFunction } from "connect";
 import { uploadFileForProjectQuery, deleteFileQuery, downloadFileQuery, getAllFilesForTaskQuery, getAllFilesQuery, getFileByIdQuery, uploadFileForTaskQuery } from "../models/filesModel";
 import { getProjectByIdQuery, recalculateTaskAttachmentsCountForProjectQuery } from "../models/projectModel";
 import { getTaskByIdQuery, recalculateTaskAttachmentsCountForTaskQuery } from "../models/task.Model";
+import { Project } from "../schemas/types/projectTyoe";
 
 // Standardized response function
 // it's a function that returns a response to the client when a request is made (CRUD operations)
@@ -17,7 +18,7 @@ const handleResponse = (res: Response, status: number, message: string, data: an
 // project files controller functions
 export const getFilesForProject = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const project = await getProjectByIdQuery(req.params.projectId);
+        const project: Project = await getProjectByIdQuery(req.params.projectId);
 
         if (!project) {
             handleResponse(res, 404, "Project not found", null);
@@ -42,7 +43,7 @@ export const uploadProjectFile = async (req: Request, res: Response, next: NextF
             return;
         }
 
-        const project = await getProjectByIdQuery(projectId);
+        const project: Project = await getProjectByIdQuery(projectId);
         if (!project) {
             handleResponse(res, 404, "Project not found", null);
             return;
@@ -67,7 +68,7 @@ export const deleteFileFromProject = async (req: Request, res: Response, next: N
         const projectId = req.params.projectId;
         const fileId = req.params.fileId;
 
-        const project = await getProjectByIdQuery(projectId);
+        const project: Project = await getProjectByIdQuery(projectId);
         if (!project) {
             handleResponse(res, 404, "Project not found", null);
             return;
@@ -96,7 +97,7 @@ export const deleteFileFromProject = async (req: Request, res: Response, next: N
 // task files controller functions
 export const getAllFilesForTask = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const project = await getProjectByIdQuery(req.params.projectId);
+        const project: Project = await getProjectByIdQuery(req.params.projectId);
 
         if (!project) {
             handleResponse(res, 404, "Project not found", null);
@@ -129,7 +130,7 @@ export const uploadTaskFile = async (req: Request, res: Response, next: NextFunc
             return;
         }
 
-        const project = await getProjectByIdQuery(projectId);
+        const project: Project = await getProjectByIdQuery(projectId);
         if (!project) {
             handleResponse(res, 404, "Project not found", null);
             return;
@@ -163,7 +164,7 @@ export const deleteFileFromTask = async (req: Request, res: Response, next: Next
         const taskId = req.params.taskId;
         const fileId = req.params.fileId;
 
-        const project = await getProjectByIdQuery(projectId);
+        const project: Project = await getProjectByIdQuery(projectId);
         if (!project) {
             handleResponse(res, 404, "Project not found", null);
             return;
@@ -209,7 +210,7 @@ export const downloadFile = async (req: Request, res: Response, next: NextFuncti
             return;
         }
 
-        const project = await getProjectByIdQuery(projectId);
+        const project: Project = await getProjectByIdQuery(projectId);
         if (!project) {
             handleResponse(res, 404, "Project not found", null);
             return;

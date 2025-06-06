@@ -1,13 +1,15 @@
 import { Request, Response } from "express";
 import { NextFunction } from "connect";
 import { getAssignmentForLogsQuery } from "../models/assignmentModel";
-import { getChangeLogsForProjectQuery, deleteLogQuery, getAllLogForUserQuery } from "../models/changeLogModel";
+import { deleteLogQuery, getAllLogForUserQuery } from "../models/changeLogModel";
 import { getLabelQuery, getLabelsForTaskQuery } from "../models/labelModel";
 import { getMilestoneByIdQuery } from "../models/milestonesModel";
 import { getAllProjectForUsersQuery, getProjectNameQuery } from "../models/projectModel";
 import { getTaskNameForLogsQuery, getTaskByIdQuery, getParentTaskForSubtaskQuery } from "../models/task.Model";
 import { getUserByIdQuery } from "../models/userModel";
 import { FilterAllUnassignedTaskForMilestoneQuery, filterTaskByTitleBasedOnMilestoneQuery, filterUserByNameOrEmailQuery } from "../models/filterModel";
+import { AssignmentDetails, BaseLog, ChangeLog, CommentDetails, TaskDetails } from "../schemas/types/changeLogType";
+import { User } from "../schemas/types/userType";
 
 // Standardized response function
 // it's a function that returns a response to the client when a request is made (CRUD operations)
@@ -71,13 +73,16 @@ export const getAllFilteredLogForUser = async (req: Request, res: Response, next
 
         // Get all related project IDs
         const allProjectsForUser = await getAllProjectForUsersQuery(userId);
-        const projectIds = allProjectsForUser.map((project) => project.id);
+        const projectIds = allProjectsForUser.map((project) => project.id) || [];
 
         // Get all logs across these project IDs with global limit
-        const logs = await getAllLogForUserQuery(projectIds, limit, userId, tableFilter);
-        const logsToProcess = logs.slice(0, requestedLimit);
+        const logs: BaseLog[] = await getAllLogForUserQuery(projectIds, limit, userId, tableFilter);
+        const logsToProcess: BaseLog[] = logs.slice(0, requestedLimit);
 
-        const changeLogs: any[] = [];
+        const changeLogs: ChangeLog[] = [];
+
+        // new_data and old_data is whole row from the table that changed
+        // so the project table new_data and old_data is the whole row from the project table
 
         for (const log of logsToProcess) {
             const { table_name, operation } = log;
@@ -104,7 +109,7 @@ export const getAllFilteredLogForUser = async (req: Request, res: Response, next
             // Process each table
             switch (table_name) {
                 case "assignments": {
-                    let assignmentDetails: any;
+                    let assignmentDetails: AssignmentDetails | AssignmentDetails[];
                     if (operation === "DELETE") {
                         const assigned_by = await getUserByIdQuery(log.old_data.assigned_by);
                         const user = await getUserByIdQuery(log.old_data.user_id);
@@ -120,19 +125,17 @@ export const getAllFilteredLogForUser = async (req: Request, res: Response, next
                         };
                     } else {
                         assignmentDetails = await getAssignmentForLogsQuery(log.new_data.task_id, log.new_data.user_id);
-                        if (!assignmentDetails.length) {
-                            const assigned_by = await getUserByIdQuery(log.new_data.assigned_by);
-                            const user = await getUserByIdQuery(log.new_data.user_id);
-                            assignmentDetails = {
-                                task_id: log.new_data.task_id,
-                                user_id: log.new_data.user_id,
-                                task_title: await getTaskNameForLogsQuery(log.new_data.task_id) || 'Deleted',
-                                assigned_by_name: assigned_by.name || assigned_by.email || "Unknown",
-                                assigned_by_email: assigned_by.email || assigned_by.name || "Unknown",
-                                user_name: user.name || user.email || "Unknown",
-                                user_email: user.email || user.name || "Unknown"
-                            };
-                        }
+                        const assigned_by = await getUserByIdQuery(log.new_data.assigned_by);
+                        const user = await getUserByIdQuery(log.new_data.user_id);
+                        assignmentDetails = {
+                            task_id: log.new_data.task_id,
+                            user_id: log.new_data.user_id,
+                            task_title: await getTaskNameForLogsQuery(log.new_data.task_id) || 'Deleted',
+                            assigned_by_name: assigned_by.name || assigned_by.email || "Unknown",
+                            assigned_by_email: assigned_by.email || assigned_by.name || "Unknown",
+                            user_name: user.name || user.email || "Unknown",
+                            user_email: user.email || user.name || "Unknown"
+                        };
                     }
                     const assignment = Array.isArray(assignmentDetails) ? assignmentDetails[0] : assignmentDetails;
                     changeLogs.push({ ...log, assignment, projectName });
@@ -142,7 +145,7 @@ export const getAllFilteredLogForUser = async (req: Request, res: Response, next
                 case "comments": {
                     const data = operation === "DELETE" ? log.old_data : log.new_data;
                     const user = await getUserByIdQuery(data.author_id);
-                    const commentDetails = {
+                    const commentDetails: CommentDetails = {
                         user_id: data.author_id,
                         user_name: user.name || user.email || "Unknown",
                         user_email: user.email || user.name || "Unknown",
@@ -254,7 +257,7 @@ export const getAllFilteredLogForUser = async (req: Request, res: Response, next
                 case "tasks": {
                     const data = operation === "DELETE" ? log.old_data : log.new_data;
                     const milestone = await getMilestoneByIdQuery(data.milestone_id);
-                    let taskDetails: any;
+                    let taskDetails: TaskDetails;
 
                     if (data.parent_task_id) {
                         const parent = await getTaskByIdQuery(data.parent_task_id);
@@ -322,7 +325,7 @@ export const getAllUserByNameOrEmail = async (req: Request, res: Response, next:
             handleResponse(res, 400, "Name or email should be at least 2 characters long", null);
             return;
         }
-        const users = await filterUserByNameOrEmailQuery(nameOrEmail);
+        const users: User[] = await filterUserByNameOrEmailQuery(nameOrEmail);
 
         handleResponse(res, 200, "Users successfully fetched", users);
     } catch (error: Error | any) {

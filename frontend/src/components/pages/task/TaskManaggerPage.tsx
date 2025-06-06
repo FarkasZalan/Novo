@@ -99,14 +99,17 @@ export const TasksManagerPage: React.FC = () => {
     const selectDefaultMilestone = (milestones: Milestone[]) => {
         if (milestones.length === 0) return null;
 
-        const futureMilestones = milestones.filter(m =>
-            m.due_date && new Date(m.due_date) > new Date()
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Set time to 00:00:00
+
+        const futureOrTodayMilestones = milestones.filter(m =>
+            m.due_date && new Date(m.due_date) >= today
         ).sort((a, b) =>
             new Date(a.due_date!).getTime() - new Date(b.due_date!).getTime()
         );
 
-        if (futureMilestones.length > 0) {
-            return futureMilestones[0].id;
+        if (futureOrTodayMilestones.length > 0) {
+            return futureOrTodayMilestones[0].id;
         } else {
             const sortedByCreation = [...milestones].sort((a, b) =>
                 new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
