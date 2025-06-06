@@ -1,4 +1,4 @@
-interface TaskFile {
+interface File {
     id: string;
     file_name: string;
     file_path: string;
@@ -6,6 +6,6 @@ interface TaskFile {
     size: number;
     uploaded_by_name: string;
     uploaded_by_email: string;
-    task_id: string;
+    task_id?: string;
     created_at: string;
 }

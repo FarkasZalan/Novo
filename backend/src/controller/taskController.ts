@@ -9,6 +9,9 @@ import { sendTaskStatusChangeEmail } from "../services/emailService";
 import { getAssignmentsForTaskQuery } from "../models/assignmentModel";
 import { getUserByIdQuery } from "../models/userModel";
 import { Project } from "../schemas/types/projectTyoe";
+import { Task } from "../schemas/types/taskType";
+import { Assignment } from "../schemas/types/assignmentType";
+import { User } from "../schemas/types/userType";
 
 // Standardized response function
 // it's a function that returns a response to the client when a request is made (CRUD operations)
@@ -36,7 +39,7 @@ export const createTask = async (req: Request, res: Response, next: NextFunction
             return;
         }
 
-        const newTask = await createTaskQuery(title, description, projectId, due_date, priority, status, parent_task_id);
+        const newTask: Task = await createTaskQuery(title, description, projectId, due_date, priority, status, parent_task_id);
 
         if (newTask.milestone_id) {
             await recalculateAllTasksInMilestoneQuery(projectId, newTask.milestone_id)
@@ -70,7 +73,7 @@ export const getAllTasks = async (req: Request, res: Response, next: NextFunctio
         const projectId = req.params.projectId;
         const orderBy = typeof req.query.order_by === 'string' ? req.query.order_by : "updated_at";
         const order = typeof req.query.order === 'string' ? req.query.order : "desc";
-        const tasks = await getAllTaskForProjectQuery(projectId, orderBy, order); // get all tasks for the project;
+        const tasks: Task[] = await getAllTaskForProjectQuery(projectId, orderBy, order); // get all tasks for the project;
 
         for (const task of tasks) {
             const taskLabels = await getLabelsForTaskQuery(task.id);
@@ -93,7 +96,7 @@ export const getAllTasksWithNoParent = async (req: Request, res: Response, next:
         const projectId = req.params.projectId;
         const orderBy = typeof req.query.order_by === 'string' ? req.query.order_by : "updated_at";
         const order = typeof req.query.order === 'string' ? req.query.order : "desc";
-        const tasks = await getAllTaskForProjectWithNoParentQuery(projectId, orderBy, order); // get all tasks for the project;
+        const tasks: Task[] = await getAllTaskForProjectWithNoParentQuery(projectId, orderBy, order); // get all tasks for the project;
 
         for (const task of tasks) {
             const taskLabels = await getLabelsForTaskQuery(task.id);
@@ -107,13 +110,13 @@ export const getAllTasksWithNoParent = async (req: Request, res: Response, next:
 
 export const getTaskById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const task = await getTaskByIdQuery(req.params.taskId);
+        const task: Task = await getTaskByIdQuery(req.params.taskId);
         if (!task) {
             handleResponse(res, 404, "Task not found", null);
             return;
         }
 
-        const taskLabels = await getLabelsForTaskQuery(task.id);
+        const taskLabels: Label[] = await getLabelsForTaskQuery(task.id);
         task.labels = taskLabels;
 
         task.parent_task_id = await getParentTaskForSubtaskQuery(task.id) || null;
@@ -154,13 +157,13 @@ export const updateTask = async (req: Request, res: Response, next: NextFunction
             return;
         }
 
-        const task = await getTaskByIdQuery(taskId);
+        const task: Task = await getTaskByIdQuery(taskId);
         if (!task) {
             handleResponse(res, 404, "Task not found", null);
             return;
         }
 
-        const taskLabels = await getLabelsForTaskQuery(task.id);
+        const taskLabels: Label[] = await getLabelsForTaskQuery(task.id);
         task.labels = taskLabels;
 
         if (task.title === title && task.description === description && datesEqual(task.due_date, due_date) && task.priority === priority && task.status === status) {
@@ -182,7 +185,7 @@ export const updateTask = async (req: Request, res: Response, next: NextFunction
             }
         }
 
-        const updateTask = await updateTaskQuery(title, description, projectId, due_date, priority, taskId, status);
+        const updateTask: Task = await updateTaskQuery(title, description, projectId, due_date, priority, taskId, status);
 
         if (status !== task.status) {
             const projectData = await getProjectByIdQuery(projectId);
@@ -205,7 +208,7 @@ export const updateTask = async (req: Request, res: Response, next: NextFunction
         }
 
         // check if there are any labels to remove or add based on the new and existing labels
-        const existingLabels = await getLabelsForTaskQuery(updateTask.id);
+        const existingLabels: Label[] = await getLabelsForTaskQuery(updateTask.id);
         const existingLabelIds = existingLabels.map((label) => label.id);
         const newLabelsIds = labels.map((label: Label) => label.id);
 
@@ -257,7 +260,7 @@ export const updateTaskStatus = async (req: Request, res: Response, next: NextFu
             return;
         }
 
-        const updateTask = await updateTaskStatusQuery(status, taskId);
+        const updateTask: Task = await updateTaskStatusQuery(status, taskId);
         if (!updateTask) {
             handleResponse(res, 404, "Task not found", null);
             return;
@@ -275,8 +278,8 @@ export const updateTaskStatus = async (req: Request, res: Response, next: NextFu
             }
         }
 
-        const assignedUsers = await getAssignmentsForTaskQuery(taskId);
-        const currentUser = await getUserByIdQuery(req.user.id);
+        const assignedUsers: Assignment[] = await getAssignmentsForTaskQuery(taskId);
+        const currentUser: User = await getUserByIdQuery(req.user.id);
         for (const user of assignedUsers) {
             if (user.user_id === req.user.id) continue;
             sendTaskStatusChangeEmail(user.user_email, currentUser.name, currentUser.email, updateTask.title, project.name, updateTask.status, status, taskId, projectId);

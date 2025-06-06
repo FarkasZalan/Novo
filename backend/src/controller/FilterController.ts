@@ -325,7 +325,7 @@ export const getAllUserByNameOrEmail = async (req: Request, res: Response, next:
             handleResponse(res, 400, "Name or email should be at least 2 characters long", null);
             return;
         }
-        const users: User[] = await filterUserByNameOrEmailQuery(nameOrEmail);
+        const users = await filterUserByNameOrEmailQuery(nameOrEmail);
 
         handleResponse(res, 200, "Users successfully fetched", users);
     } catch (error: Error | any) {

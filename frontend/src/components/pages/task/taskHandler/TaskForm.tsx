@@ -318,7 +318,7 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
         // Wait for all of them
         const results = await Promise.all(uploadPromises);
 
-        const successfulUploads: TaskFile[] = [];
+        const successfulUploads: File[] = [];
         results.forEach(result => {
             if (result.status === "fulfilled") {
                 successfulUploads.push(result.value);

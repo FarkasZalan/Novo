@@ -7,6 +7,9 @@ import { getTaskByIdQuery } from "../models/task.Model";
 import { getProjectByIdQuery } from "../models/projectModel";
 import { getUserByIdQuery } from "../models/userModel";
 import { Project } from "../schemas/types/projectTyoe";
+import { Assignment } from "../schemas/types/assignmentType";
+import { User } from "../schemas/types/userType";
+import { Comment } from "../schemas/types/commentType";
 
 // Standardized response function
 // it's a function that returns a response to the client when a request is made (CRUD operations)
@@ -35,16 +38,14 @@ export const createComment = async (req: Request, res: Response, next: NextFunct
             return;
         }
 
-        const createdComment = await createCommentQuery(comment, taskId, author_id, projectId);
-        const newComment = await getCommentByIdQuery(createdComment.id);
-        const projectOwner = await getUserByIdQuery(project.owner_id);
+        const createdComment: Comment = await createCommentQuery(comment, taskId, author_id, projectId);
+        const newComment: Comment = await getCommentByIdQuery(createdComment.id);
+        const projectOwner: User = await getUserByIdQuery(project.owner_id);
 
         if (projectOwner.is_premium) {
-
-
             const taskData = await getTaskByIdQuery(taskId);
             const projectData = await getProjectByIdQuery(projectId);
-            const assignedUsers = await getAssignmentsForTaskQuery(taskId);
+            const assignedUsers: Assignment[] = await getAssignmentsForTaskQuery(taskId);
             for (const user of assignedUsers) {
                 if (user.user_id === author_id) continue;
                 sendTaskCommentEmail(user.user_email, newComment.author_name, newComment.author_email, taskData.title, projectData.name, newComment.comment, taskId, projectId);
@@ -60,7 +61,7 @@ export const createComment = async (req: Request, res: Response, next: NextFunct
 export const getAllCommentsForTask = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const taskId = req.params.taskId;
-        const comments = await getAllCommentsForTaskQuery(taskId);
+        const comments: Comment[] = await getAllCommentsForTaskQuery(taskId);
         handleResponse(res, 200, "Comments fetched successfully", comments);
     } catch (error: any) {
         next(error);
@@ -84,7 +85,7 @@ export const updateComment = async (req: Request, res: Response, next: NextFunct
             return;
         }
 
-        const commentData = await getCommentByIdQuery(commentId);
+        const commentData: Comment = await getCommentByIdQuery(commentId);
         if (commentData.author_id !== userId) {
             handleResponse(res, 403, "You are not authorized to update this comment", null);
             return;
@@ -94,8 +95,8 @@ export const updateComment = async (req: Request, res: Response, next: NextFunct
             handleResponse(res, 200, "Comment is already up to date", commentData);
             return;
         }
-        const updatedComment = await updateCommentQuery(comment, commentId);
-        const updatedCommentData = await getCommentByIdQuery(updatedComment.id);
+        const updatedComment: Comment = await updateCommentQuery(comment, commentId);
+        const updatedCommentData: Comment = await getCommentByIdQuery(updatedComment.id);
         handleResponse(res, 200, "Comment updated successfully", updatedCommentData);
     } catch (error: any) {
         next(error);

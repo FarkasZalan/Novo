@@ -3,6 +3,7 @@ import { NextFunction } from "connect";
 import { createLabelQuery, deleteLabelQuery, getAllLabelForProjectQuery, getLabelQuery, getLabelsForTaskQuery, updateLabelQuery } from "../models/labelModel";
 import { getProjectByIdQuery } from "../models/projectModel";
 import { Project } from "../schemas/types/projectTyoe";
+import { Label } from "../schemas/types/labelType";
 
 // Standardized response function
 // it's a function that returns a response to the client when a request is made (CRUD operations)
@@ -30,14 +31,14 @@ export const createLabel = async (req: Request, res: Response, next: NextFunctio
             return;
         }
 
-        const labels = await getAllLabelForProjectQuery(project_id);
+        const labels: Label[] = await getAllLabelForProjectQuery(project_id);
         if (labels.some(label => label.name.toLowerCase() === name.toLowerCase())) {
             handleResponse(res, 400, "Label name already exists", null);
             return;
         }
 
         const uppercasedName = name.charAt(0).toUpperCase() + name.slice(1);
-        const label = await createLabelQuery(uppercasedName, description, project_id, color);
+        const label: Label = await createLabelQuery(uppercasedName, description, project_id, color);
         handleResponse(res, 200, "Label created successfully", label);
     } catch (error: any) {
         next(error);
@@ -62,13 +63,13 @@ export const updateLabel = async (req: Request, res: Response, next: NextFunctio
             return;
         }
 
-        const oldLabel = await getLabelQuery(label_id);
+        const oldLabel: Label = await getLabelQuery(label_id);
         if (!oldLabel) {
             handleResponse(res, 404, "Label not found", null);
             return;
         }
 
-        const labels = await getAllLabelForProjectQuery(project_id);
+        const labels: Label[] = await getAllLabelForProjectQuery(project_id);
         if (labels.some(label => label.name.toLowerCase() === name.toLowerCase() && label.id !== label_id)) {
             handleResponse(res, 400, "Label name already exists", null);
             return;
@@ -81,7 +82,7 @@ export const updateLabel = async (req: Request, res: Response, next: NextFunctio
 
         const uppercasedName = name.charAt(0).toUpperCase() + name.slice(1);
 
-        const label = await updateLabelQuery(uppercasedName, description, color, label_id);
+        const label: Label = await updateLabelQuery(uppercasedName, description, color, label_id);
         handleResponse(res, 200, "Label updated successfully", label);
     } catch (error: any) {
         next(error);
@@ -114,7 +115,7 @@ export const deleteLabel = async (req: Request, res: Response, next: NextFunctio
 export const getAllLabelForProject = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const project_id = req.params.projectId;
-        const labels = await getAllLabelForProjectQuery(project_id);
+        const labels: Label[] = await getAllLabelForProjectQuery(project_id);
         handleResponse(res, 200, "Labels fetched successfully", labels);
     } catch (error: any) {
         next(error);
@@ -126,7 +127,7 @@ export const getAllLabelForProject = async (req: Request, res: Response, next: N
 export const getAllLabelForTask = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const task_id = req.params.taskId;
-        const labels = await getLabelsForTaskQuery(task_id);
+        const labels: Label[] = await getLabelsForTaskQuery(task_id);
         handleResponse(res, 200, "Labels fetched successfully", labels);
     } catch (error: any) {
         next(error);

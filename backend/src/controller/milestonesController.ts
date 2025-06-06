@@ -6,6 +6,8 @@ import { getLabelsForTaskQuery } from "../models/labelModel";
 import { getProjectByIdQuery } from "../models/projectModel";
 import { DEFAULT_COLORS } from "../utils/default-colors";
 import { Project } from "../schemas/types/projectTyoe";
+import { Task } from "../schemas/types/taskType";
+import { Milestone } from "../schemas/types/milestonesType";
 
 // Standardized response function
 // it's a function that returns a response to the client when a request is made (CRUD operations)
@@ -58,7 +60,7 @@ export const createMilestone = async (req: Request, res: Response, next: NextFun
         }
 
         const uppercasedName = name.charAt(0).toUpperCase() + name.slice(1);
-        const newMilestone = await createMilestoneQuery(project_id, uppercasedName, description, due_date, selectedColor);
+        const newMilestone: Milestone = await createMilestoneQuery(project_id, uppercasedName, description, due_date, selectedColor);
         handleResponse(res, 201, "Milestone created successfully", newMilestone);
     } catch (error: Error | any) {
         // Check for unique constraint violation (duplicate email)
@@ -73,7 +75,7 @@ export const createMilestone = async (req: Request, res: Response, next: NextFun
 
 export const getAllMilestonesForProject = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const milestones = await getAllMilestonesForProjectQuery(req.params.projectId);
+        const milestones: Milestone[] = await getAllMilestonesForProjectQuery(req.params.projectId);
         handleResponse(res, 200, "Milestones fetched successfully", milestones);
     } catch (error) {
         next(error);
@@ -82,7 +84,7 @@ export const getAllMilestonesForProject = async (req: Request, res: Response, ne
 
 export const getMilestoneById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const milestone = await getMilestoneByIdQuery(req.params.milestoneId);
+        const milestone: Milestone = await getMilestoneByIdQuery(req.params.milestoneId);
         handleResponse(res, 200, "Milestone fetched successfully", milestone);
     } catch (error) {
         next(error);
@@ -108,7 +110,7 @@ export const addMilestoneToTask = async (req: Request, res: Response, next: Next
 
         const updatedTasks = [];
         for (const taskId of taskIds) {
-            const updateTask = await addMilestoneToTaskQuery(taskId, milestone_id);
+            const updateTask: Task = await addMilestoneToTaskQuery(taskId, milestone_id);
             if (!updateTask) {
                 handleResponse(res, 404, "Task not found", null);
                 return;
@@ -135,7 +137,7 @@ export const getAllTaskForMilestone = async (req: Request, res: Response, next: 
     try {
         const projectId = req.params.projectId;
         const milestone_id = req.params.milestoneId;
-        const tasks = await getAllTaskForMilestoneWithSubtasksQuery(projectId, 'priority', 'asc', milestone_id);
+        const tasks: Task[] = await getAllTaskForMilestoneWithSubtasksQuery(projectId, 'priority', 'asc', milestone_id);
 
         for (const task of tasks) {
             const taskLabels = await getLabelsForTaskQuery(task.id);
@@ -143,8 +145,8 @@ export const getAllTaskForMilestone = async (req: Request, res: Response, next: 
 
             task.parent_task_id = await getParentTaskForSubtaskQuery(task.id) || null;
             if (task.parent_task_id) {
-                const parentTask = await getTaskByIdQuery(task.parent_task_id) || null;
-                task.parent_task_name = parentTask.title || null;
+                const parentTask: Task = await getTaskByIdQuery(task.parent_task_id) || null;
+                task.parent_task_name = parentTask.title || undefined;
             }
         }
         handleResponse(res, 200, "Tasks fetched successfully", tasks);
@@ -156,7 +158,7 @@ export const getAllTaskForMilestone = async (req: Request, res: Response, next: 
 export const getAllUnassignedTaskForMilestone = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const projectId = req.params.projectId;
-        const tasks = await getAllUnassignedTaskForMilestoneQuery(projectId, 'priority', 'asc');
+        const tasks: Task[] = await getAllUnassignedTaskForMilestoneQuery(projectId, 'priority', 'asc');
 
         for (const task of tasks) {
             const taskLabels = await getLabelsForTaskQuery(task.id);
@@ -185,7 +187,7 @@ export const deleteMilestoneFromTask = async (req: Request, res: Response, next:
             return;
         }
 
-        const task = await getTaskByIdQuery(taskId);
+        const task: Task = await getTaskByIdQuery(taskId);
         if (!task) {
             handleResponse(res, 404, "Task not found", null);
             return;
@@ -243,7 +245,7 @@ export const updateMilestone = async (req: Request, res: Response, next: NextFun
             return;
         }
 
-        const existingMilestones = await getAllMilestonesForProjectQuery(projectId);
+        const existingMilestones: Milestone[] = await getAllMilestonesForProjectQuery(projectId);
 
         const milestoneNameExists = existingMilestones.some((m: any) => m.name.toLowerCase() === name.toLowerCase() && m.id !== oldMilestone.id);
         if (milestoneNameExists) {
@@ -257,7 +259,7 @@ export const updateMilestone = async (req: Request, res: Response, next: NextFun
         }
 
         const uppercasedName = name.charAt(0).toUpperCase() + name.slice(1);
-        const updatedMilestone = await updateMilestoneQuery(milestone_id, uppercasedName, description, due_date, color);
+        const updatedMilestone: Milestone = await updateMilestoneQuery(milestone_id, uppercasedName, description, due_date, color);
 
         updatedMilestone.labels = await getLabelsForTaskQuery(updatedMilestone.id)
         handleResponse(res, 200, "Milestone updated successfully", updatedMilestone);

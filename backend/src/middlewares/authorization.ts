@@ -3,6 +3,7 @@ import { getProjectByIdQuery } from '../models/projectModel';
 import { getTaskByIdQuery } from '../models/task.Model';
 import { Project } from '../schemas/projectSchema';
 import { getProjectMembersQuery } from '../models/projectMemberModel';
+import { Task } from '../schemas/types/taskType';
 
 // authorization for projects and tasks
 export const authorizeProject = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -87,7 +88,7 @@ export const authorizeTask = async (req: Request, res: Response, next: NextFunct
         return
     }
 
-    const task = await getTaskByIdQuery(taskId);
+    const task: Task = await getTaskByIdQuery(taskId);
     if (!task) {
         res.status(404).json({ status: 404, message: "Task not found" });
         return
@@ -115,7 +116,7 @@ export const authorizeTaskForOwnerAndAdmin = async (req: Request, res: Response,
         return
     }
 
-    const task = await getTaskByIdQuery(taskId);
+    const task: Task = await getTaskByIdQuery(taskId);
     if (!task) {
         res.status(404).json({ status: 404, message: "Task not found" });
         return
@@ -143,7 +144,7 @@ export const authorizeAssignmentsForMember = async (req: Request, res: Response,
         return
     }
 
-    const task = await getTaskByIdQuery(taskId);
+    const task: Task = await getTaskByIdQuery(taskId);
     if (!task) {
         res.status(404).json({ status: 404, message: "Task not found" });
         return
@@ -156,7 +157,6 @@ export const authorizeAssignmentsForMember = async (req: Request, res: Response,
 export const authorizeAssignmentsForOwnerAndAdmin = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const requestingUserId = req.user.id;
     const { projectId, taskId } = req.params;
-    const users = req.body
 
     const project: Project = await getProjectByIdQuery(projectId);
 

@@ -4,6 +4,8 @@ import { uploadFileForProjectQuery, deleteFileQuery, downloadFileQuery, getAllFi
 import { getProjectByIdQuery, recalculateTaskAttachmentsCountForProjectQuery } from "../models/projectModel";
 import { getTaskByIdQuery, recalculateTaskAttachmentsCountForTaskQuery } from "../models/task.Model";
 import { Project } from "../schemas/types/projectTyoe";
+import { Task } from "../schemas/types/taskType";
+import { File } from "../schemas/types/fileType";
 
 // Standardized response function
 // it's a function that returns a response to the client when a request is made (CRUD operations)
@@ -24,7 +26,7 @@ export const getFilesForProject = async (req: Request, res: Response, next: Next
             handleResponse(res, 404, "Project not found", null);
             return;
         }
-        const files = await getAllFilesQuery(project.id)
+        const files: File[] = await getAllFilesQuery(project.id)
 
         handleResponse(res, 200, "Files fetched successfully", files);
     } catch (error) {
@@ -54,7 +56,7 @@ export const uploadProjectFile = async (req: Request, res: Response, next: NextF
             return;
         }
 
-        const newFile = await uploadFileForProjectQuery(projectId, file.originalname, file.mimetype, file.size, uploaded_by, file.buffer);
+        const newFile: File = await uploadFileForProjectQuery(projectId, file.originalname, file.mimetype, file.size, uploaded_by, file.buffer);
         await recalculateTaskAttachmentsCountForProjectQuery(projectId);
 
         handleResponse(res, 201, "File uploaded and saved to DB", newFile);
@@ -80,7 +82,7 @@ export const deleteFileFromProject = async (req: Request, res: Response, next: N
         }
 
 
-        const file = await getFileByIdQuery(fileId);
+        const file: File = await getFileByIdQuery(fileId);
 
         if (!file) {
             handleResponse(res, 404, "File not found", null);
@@ -104,14 +106,14 @@ export const getAllFilesForTask = async (req: Request, res: Response, next: Next
             return;
         }
 
-        const task = await getTaskByIdQuery(req.params.taskId);
+        const task: Task = await getTaskByIdQuery(req.params.taskId);
 
         if (!task) {
             handleResponse(res, 404, "Task not found", null);
             return;
         }
         const taskId = req.params.taskId;
-        const files = await getAllFilesForTaskQuery(taskId);
+        const files: File[] = await getAllFilesForTaskQuery(taskId);
 
         handleResponse(res, 200, "Files fetched successfully", files);
     } catch (error) {
@@ -141,14 +143,14 @@ export const uploadTaskFile = async (req: Request, res: Response, next: NextFunc
             return;
         }
 
-        const task = await getTaskByIdQuery(task_id);
+        const task: Task = await getTaskByIdQuery(task_id);
 
         if (!task) {
             handleResponse(res, 404, "Task not found", null);
             return;
         }
 
-        const newFile = await uploadFileForTaskQuery(projectId, file.originalname, file.mimetype, file.size, uploaded_by, task_id, file.buffer);
+        const newFile: File = await uploadFileForTaskQuery(projectId, file.originalname, file.mimetype, file.size, uploaded_by, task_id, file.buffer);
 
         await recalculateTaskAttachmentsCountForTaskQuery(task_id);
 
@@ -175,14 +177,14 @@ export const deleteFileFromTask = async (req: Request, res: Response, next: Next
             return;
         }
 
-        const task = await getTaskByIdQuery(taskId);
+        const task: Task = await getTaskByIdQuery(taskId);
 
         if (!task) {
             handleResponse(res, 404, "Task not found", null);
             return;
         }
 
-        const file = await getFileByIdQuery(fileId);
+        const file: File = await getFileByIdQuery(fileId);
 
         if (!file) {
             handleResponse(res, 404, "File not found", null);
@@ -203,7 +205,7 @@ export const downloadFile = async (req: Request, res: Response, next: NextFuncti
         const fileId = req.params.fileId;
         const projectId = req.params.projectId;
 
-        const file = await downloadFileQuery(fileId);
+        const file: File = await downloadFileQuery(fileId);
 
         if (!file) {
             handleResponse(res, 404, "File not found", null);

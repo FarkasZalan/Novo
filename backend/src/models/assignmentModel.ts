@@ -45,10 +45,10 @@ export const getAssignmentForLogsQuery = async (task_id: string, user_id: string
 
 export const createAssignmentQuery = async (task_id: string, user_id: string, project_id: string, assigned_by: string) => {
     const result = await pool.query("INSERT INTO assignments (task_id, user_id, project_id, assigned_at, assigned_by) VALUES ($1, $2, $3, $4, $5);", [task_id, user_id, project_id, new Date(), assigned_by]); // send a query to the database with one of the open connection from the pool
-    return result.rows
+    return result.rows[0]
 }
 
 export const deleteAssignmentQuery = async (task_id: string, user_id: string) => {
     const result = await pool.query("DELETE FROM assignments WHERE task_id = $1 AND user_id = $2;", [task_id, user_id]); // send a query to the database with one of the open connection from the pool
-    return result.rows
+    return result.rows[0]
 }
