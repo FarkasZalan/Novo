@@ -10,7 +10,6 @@ import { getAssignmentsForTaskQuery } from "../models/assignmentModel";
 import { getUserByIdQuery } from "../models/userModel";
 import { Project } from "../schemas/types/projectTyoe";
 import { Task } from "../schemas/types/taskType";
-import { Assignment } from "../schemas/types/assignmentType";
 import { User } from "../schemas/types/userType";
 
 // Standardized response function
@@ -278,7 +277,7 @@ export const updateTaskStatus = async (req: Request, res: Response, next: NextFu
             }
         }
 
-        const assignedUsers: Assignment[] = await getAssignmentsForTaskQuery(taskId);
+        const assignedUsers = await getAssignmentsForTaskQuery(taskId);
         const currentUser: User = await getUserByIdQuery(req.user.id);
         for (const user of assignedUsers) {
             if (user.user_id === req.user.id) continue;

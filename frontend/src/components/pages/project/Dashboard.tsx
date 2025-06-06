@@ -125,7 +125,8 @@ export const Dashboard = () => {
             return (
                 <button
                     className="p-2 rounded-full text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-200 cursor-pointer"
-                    onClick={() => {
+                    onClick={(e) => {
+                        e.stopPropagation();
                         setProjectToLeave(project.id!);
                         setShowLeaveConfirm(true);
                     }}
