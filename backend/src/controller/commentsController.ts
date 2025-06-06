@@ -7,7 +7,6 @@ import { getTaskByIdQuery } from "../models/task.Model";
 import { getProjectByIdQuery } from "../models/projectModel";
 import { getUserByIdQuery } from "../models/userModel";
 import { Project } from "../schemas/types/projectTyoe";
-import { Assignment } from "../schemas/types/assignmentType";
 import { User } from "../schemas/types/userType";
 import { Comment } from "../schemas/types/commentType";
 
@@ -45,7 +44,7 @@ export const createComment = async (req: Request, res: Response, next: NextFunct
         if (projectOwner.is_premium) {
             const taskData = await getTaskByIdQuery(taskId);
             const projectData = await getProjectByIdQuery(projectId);
-            const assignedUsers: Assignment[] = await getAssignmentsForTaskQuery(taskId);
+            const assignedUsers = await getAssignmentsForTaskQuery(taskId);
             for (const user of assignedUsers) {
                 if (user.user_id === author_id) continue;
                 sendTaskCommentEmail(user.user_email, newComment.author_name, newComment.author_email, taskData.title, projectData.name, newComment.comment, taskId, projectId);

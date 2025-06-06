@@ -128,6 +128,7 @@ export const TaskAssignments: React.FC<TaskAssignmentsProps> = ({
     const showAssignSelfButton = authState.user;
 
     const getUserInitials = (name: string) => {
+        if (!name) return '';
         return name.split(' ').map(n => n[0]).join('').toUpperCase();
     };
 
