@@ -160,6 +160,7 @@ export const getOAuthState = async (req: Request, res: Response, next: NextFunct
         }
 
         const stateData = await redisClient.get(`oauth_state:${state}`);
+        console.log(stateData);
 
 
         if (!stateData) {
