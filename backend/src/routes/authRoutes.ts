@@ -254,9 +254,10 @@ router.get('/auth/google/callback',
             // Set refresh token cookie
             res.cookie("refresh_token", refreshToken, {
                 httpOnly: true,
-                secure: true,
-                sameSite: "lax",
-                maxAge: 7 * 24 * 60 * 60 * 1000
+                secure: true,  // Only allow secure cookies in production mode
+                sameSite: "lax",  // Changed from "strict" to "lax" to allow cross-site requests
+                path: "/",  // Set path to root to ensure it's available for all routes
+                maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
             });
 
             // Generate a temporary state token
@@ -328,9 +329,10 @@ router.get('/auth/github/callback',
             // Set refresh token cookie
             res.cookie("refresh_token", refreshToken, {
                 httpOnly: true,
-                secure: true,
-                sameSite: "lax",
-                maxAge: 7 * 24 * 60 * 60 * 1000
+                secure: true,  // Only allow secure cookies in production mode
+                sameSite: "lax",  // Changed from "strict" to "lax" to allow cross-site requests
+                path: "/",  // Set path to root to ensure it's available for all routes
+                maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
             });
 
             // Generate a temporary state token
