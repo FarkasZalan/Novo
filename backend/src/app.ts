@@ -77,7 +77,7 @@ configurePassport();
 
 // CORS = it's a security feature that denies browsers from making requests to other domains, ports, or protocols
 app.use(cors({
-    origin: [process.env.FRONTEND_URL || "http://localhost:5173"], // frontend url
+    origin: true, // frontend url
     credentials: true, // allow cookies
     exposedHeaders: ['set-cookie'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
