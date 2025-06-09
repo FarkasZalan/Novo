@@ -90,7 +90,7 @@ export const deleteUser = async (req: Request, res: Response, next: NextFunction
         // Remove the refresh token cookie before deleting the user
         res.clearCookie("refresh_token", {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production", // Only allow secure cookies in production mode
+            secure: true, // Only allow secure cookies in production mode
             sameSite: "lax",
             path: "/"
         });

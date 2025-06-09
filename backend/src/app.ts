@@ -52,7 +52,7 @@ app.use(session({
 
     // session cookie to store session ID
     cookie: {
-        secure: process.env.NODE_ENV === 'production',
+        secure: true,
         httpOnly: true,
         sameSite: 'lax',
         maxAge: 5 * 60 * 1000 // 5 min

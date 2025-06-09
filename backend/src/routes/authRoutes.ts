@@ -254,7 +254,7 @@ router.get('/auth/google/callback',
             // Set refresh token cookie
             res.cookie("refresh_token", refreshToken, {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === "production",
+                secure: true,
                 sameSite: "strict",
                 maxAge: 7 * 24 * 60 * 60 * 1000
             });
@@ -328,7 +328,7 @@ router.get('/auth/github/callback',
             // Set refresh token cookie
             res.cookie("refresh_token", refreshToken, {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === "production",
+                secure: true,
                 sameSite: "strict",
                 maxAge: 7 * 24 * 60 * 60 * 1000
             });
