@@ -13,6 +13,7 @@ import { User } from "../schemas/types/userType";
 import { Label } from "../schemas/types/labelType";
 import { Milestone } from "../schemas/types/milestonesType";
 import { Task } from "../schemas/types/taskType";
+import { Project } from "../schemas/types/projectTyoe";
 
 // Standardized response function
 // it's a function that returns a response to the client when a request is made (CRUD operations)
@@ -47,7 +48,7 @@ export const getDahboardLogForUser = async (req: Request, res: Response, next: N
 
         // Get all related project IDs
         const allProjectsForUser = await getAllProjectForUsersQuery(userId);
-        const projectIds = allProjectsForUser.map((project) => project.id) || [];
+        const projectIds = allProjectsForUser.map((project: Project) => project.id) || [];
 
         // Get all logs across these project IDs with global limit
         const logs: BaseLog[] = await getChangeLogsForDashboardQuery(projectIds, 5);
