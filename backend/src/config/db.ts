@@ -39,7 +39,10 @@ const pool = new Pool({
     host: process.env.DB_HOST,
     database: process.env.DATABASE,
     password: process.env.DB_PASSWORD,
-    port: parseInt(process.env.DB_PORT || "5432")
+    port: parseInt(process.env.DB_PORT || "5432"),
+    ssl: {
+        rejectUnauthorized: false
+    }
 })
 
 // Create tables when the app starts
