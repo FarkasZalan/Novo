@@ -240,7 +240,7 @@ router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 
  */
 router.get('/auth/google/callback',
     passport.authenticate('google', { session: false, failureRedirect: '/login' }),
-    async (req, res) => {
+    async (req: Request, res: Response) => {
         try {
             const user = req.user; // get from passport where create the user (see config/passport.ts and then findOrCreateOAuthUser function)
 
@@ -314,7 +314,7 @@ router.get('/auth/github', passport.authenticate('github', { scope: ['user:email
  */
 router.get('/auth/github/callback',
     passport.authenticate('github', { session: false, failureRedirect: '/login' }),
-    async (req, res) => {
+    async (req: Request, res: Response) => {
         try {
             const user = req.user; // get from passport where create the user (see config/passport.ts and then findOrCreateOAuthUser function)
 

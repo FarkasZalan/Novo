@@ -4,6 +4,7 @@ import { getTaskByIdQuery } from '../models/task.Model';
 import { Project } from '../schemas/projectSchema';
 import { getProjectMembersQuery } from '../models/projectMemberModel';
 import { Task } from '../schemas/types/taskType';
+import { ProjectMember } from '../schemas/types/projectMemberType';
 
 // authorization for projects and tasks
 export const authorizeProject = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -12,7 +13,7 @@ export const authorizeProject = async (req: Request, res: Response, next: NextFu
 
     const projectMembers = await getProjectMembersQuery(projectId);
 
-    if (!projectMembers.find(member => member.user_id === requestingUserId)) {
+    if (!projectMembers.find((member: ProjectMember) => member.user_id === requestingUserId)) {
         res.status(403).json({ status: 403, message: "Unauthorized" });
         return
     }
@@ -61,7 +62,7 @@ export const authorizeProjectForOwnerAndAdmin = async (req: Request, res: Respon
 
     const projectMembers = await getProjectMembersQuery(projectId);
 
-    if (!projectMembers.find(member => member.user_id === requestingUserId && (member.role === "owner" || member.role === "admin"))) {
+    if (!projectMembers.find((member: ProjectMember) => member.user_id === requestingUserId && (member.role === "owner" || member.role === "admin"))) {
         res.status(403).json({ status: 403, message: "Unauthorized" });
         return
     }
@@ -83,7 +84,7 @@ export const authorizeTask = async (req: Request, res: Response, next: NextFunct
 
     const projectMembers = await getProjectMembersQuery(projectId);
 
-    if (!projectMembers.find(member => member.user_id === requestingUserId)) {
+    if (!projectMembers.find((member: ProjectMember) => member.user_id === requestingUserId)) {
         res.status(403).json({ status: 403, message: "Unauthorized" });
         return
     }
@@ -111,7 +112,7 @@ export const authorizeTaskForOwnerAndAdmin = async (req: Request, res: Response,
 
     const projectMembers = await getProjectMembersQuery(projectId);
 
-    if (!projectMembers.find(member => member.user_id === requestingUserId && (member.role === "owner" || member.role === "admin"))) {
+    if (!projectMembers.find((member: ProjectMember) => member.user_id === requestingUserId && (member.role === "owner" || member.role === "admin"))) {
         res.status(403).json({ status: 403, message: "Unauthorized" });
         return
     }
@@ -139,7 +140,7 @@ export const authorizeAssignmentsForMember = async (req: Request, res: Response,
 
     const projectMembers = await getProjectMembersQuery(projectId);
 
-    if (!projectMembers.find(member => member.user_id === requestingUserId)) {
+    if (!projectMembers.find((member: ProjectMember) => member.user_id === requestingUserId)) {
         res.status(403).json({ status: 403, message: "Unauthorized" });
         return
     }
@@ -167,7 +168,7 @@ export const authorizeAssignmentsForOwnerAndAdmin = async (req: Request, res: Re
 
     const projectMembers = await getProjectMembersQuery(projectId);
 
-    if (!projectMembers.find(member => member.user_id === requestingUserId && (member.role === "owner" || member.role === "admin"))) {
+    if (!projectMembers.find((member: ProjectMember) => member.user_id === requestingUserId && (member.role === "owner" || member.role === "admin"))) {
         res.status(403).json({ status: 403, message: "Unauthorized" });
         return
     }
