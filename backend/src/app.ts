@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Request, Response } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import pool, { initializeDatabase } from "./config/db";
@@ -122,7 +122,7 @@ initializeDatabase().then(() => {
 }).catch((error) => console.error("Error initializing database tables:", error));
 
 // Testing postgres connection
-app.get("/", async (_req, res) => {
+app.get("/", async (_req: Request, res: Response) => {
     const result = await pool.query("SELECT current_database()");
     res.send("Connected to database: " + result.rows[0].current_database);
 });

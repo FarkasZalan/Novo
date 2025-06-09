@@ -51,9 +51,9 @@ export const FilterAllUnassignedTaskForMilestoneQuery = async (projectId: string
     const tasks = tasksResult.rows;
     const subtasks = subtasksResult.rows;
 
-    const tasksWithSubtasks = tasks.map(task => ({
+    const tasksWithSubtasks = tasks.map((task: any) => ({
         ...task,
-        subtasks: subtasks.filter(subtask => subtask.task_id === task.id)
+        subtasks: subtasks.filter((subtask: any) => subtask.task_id === task.id)
     }));
 
     return tasksWithSubtasks;

@@ -76,7 +76,7 @@ export const getAllFilteredLogForUser = async (req: Request, res: Response, next
 
         // Get all related project IDs
         const allProjectsForUser = await getAllProjectForUsersQuery(userId);
-        const projectIds = allProjectsForUser.map((project) => project.id) || [];
+        const projectIds = allProjectsForUser.map((project: any) => project.id) || [];
 
         // Get all logs across these project IDs with global limit
         const logs: BaseLog[] = await getAllLogForUserQuery(projectIds, limit, userId, tableFilter);

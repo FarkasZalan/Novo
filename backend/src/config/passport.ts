@@ -7,6 +7,7 @@ import dotenv from 'dotenv';
 import { VerifyCallback } from 'passport-oauth2';
 import pool from '../config/db';
 import { addUserToProjectQuery, deletePendingUserQuery, getPendingProjectsForPendingUserByEmailQuery } from '../models/projectMemberModel';
+import { User } from '../schemas/types/userType';
 
 dotenv.config();
 
@@ -118,15 +119,15 @@ export const configurePassport = () => {
     }));
 
     // Serialize and deserialize user
-    passport.serializeUser((user, done) => {
+    passport.serializeUser((user: any, done: any) => {
         done(null, user.id); // Store only user ID in the session
     });
 
     // Retrieve user from the session
-    passport.deserializeUser(async (id: string, done) => {
+    passport.deserializeUser(async (id: string, done: any) => {
         try {
             const result = await pool.query("SELECT * FROM users WHERE id = $1", [id]);
-            const user = result.rows[0];
+            const user: User = result.rows[0];
             done(null, user); // Attach user object to the req.user
         } catch (error) {
             done(error);

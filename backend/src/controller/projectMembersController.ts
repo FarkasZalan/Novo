@@ -131,7 +131,7 @@ export const getAllProjectMembers = async (req: Request, res: Response, next: Ne
         const usersFromProject = await getProjectMembersQuery(projectId);
 
         const users: User[] = await Promise.all(
-            usersFromProject.map(async (user) => {
+            usersFromProject.map(async (user: any) => {
                 const userData = await getUserByIdQuery(user.user_id);
                 return { ...user, user: userData };
             })

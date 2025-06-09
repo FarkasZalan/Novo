@@ -52,10 +52,10 @@ export const getAllTaskForProjectQuery = async (id: string, order_by: string, or
         subtask.labels = await getLabelsForTaskQuery(subtask.id);
     }
 
-    const tasksWithSubtasks = tasks.map(task => {
+    const tasksWithSubtasks = tasks.map((task: any) => {
         return {
             ...task,
-            subtasks: subtasks.filter(subtask => subtask.task_id === task.id)
+            subtasks: subtasks.filter((subtask: any) => subtask.task_id === task.id)
         };
     });
 
@@ -100,10 +100,10 @@ export const getAllTaskForProjectWithNoParentQuery = async (id: string, order_by
         subtask.labels = await getLabelsForTaskQuery(subtask.id);
     }
 
-    const tasksWithSubtasks = tasks.map(task => {
+    const tasksWithSubtasks = tasks.map((task: any) => {
         return {
             ...task,
-            subtasks: subtasks.filter(subtask => subtask.task_id === task.id)
+            subtasks: subtasks.filter((subtask: any) => subtask.task_id === task.id)
         };
     });
 
@@ -131,10 +131,10 @@ export const getTaskByIdQuery = async (id: string) => {
         subtask.labels = await getLabelsForTaskQuery(subtask.id);
     }
 
-    const tasksWithSubtasks = tasks.map(task => {
+    const tasksWithSubtasks = tasks.map((task: any) => {
         return {
             ...task,
-            subtasks: subtasks.filter(subtask => subtask.task_id === task.id)
+            subtasks: subtasks.filter((subtask: any) => subtask.task_id === task.id)
         };
     });
 
