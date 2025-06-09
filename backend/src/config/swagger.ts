@@ -2,6 +2,7 @@ import swaggerJsdoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
 import { Express } from "express";
 
+const BACKEND_URL = process.env.BACKEND_URL!;
 const options: swaggerJsdoc.Options = {
     definition: {
         openapi: "3.0.0",
@@ -12,7 +13,7 @@ const options: swaggerJsdoc.Options = {
         },
         servers: [
             {
-                url: "http://localhost:5000/api", // Ensure this matches your server
+                url: BACKEND_URL, // Ensure this matches your server
                 description: "Local server",
             },
         ],
