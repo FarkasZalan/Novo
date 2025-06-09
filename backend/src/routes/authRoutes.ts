@@ -255,7 +255,7 @@ router.get('/auth/google/callback',
             res.cookie("refresh_token", refreshToken, {
                 httpOnly: true,
                 secure: true,
-                sameSite: "strict",
+                sameSite: "lax",
                 maxAge: 7 * 24 * 60 * 60 * 1000
             });
 
@@ -329,7 +329,7 @@ router.get('/auth/github/callback',
             res.cookie("refresh_token", refreshToken, {
                 httpOnly: true,
                 secure: true,
-                sameSite: "strict",
+                sameSite: "lax",
                 maxAge: 7 * 24 * 60 * 60 * 1000
             });
 
