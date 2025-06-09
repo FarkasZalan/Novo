@@ -32,7 +32,7 @@ export const uploadFileForProjectQuery = async (project_id: string, file_name: s
         let maxNumber = 0;
         const numberRegex = /\((\d+)\)/;
 
-        existingFiles.rows.forEach(file => {
+        existingFiles.rows.forEach((file: any) => {
             const match = file.file_name.match(numberRegex);
             if (match) {
                 const num = parseInt(match[1], 10);
@@ -68,7 +68,7 @@ export const uploadFileForTaskQuery = async (project_id: string, file_name: stri
         let maxNumber = 0;
         const numberRegex = /\((\d+)\)/;
 
-        existingFiles.rows.forEach(file => {
+        existingFiles.rows.forEach((file: any) => {
             const match = file.file_name.match(numberRegex);
             if (match) {
                 const num = parseInt(match[1], 10);
