@@ -29,7 +29,7 @@ export const configurePassport = () => {
     passport.use(new GoogleStrategy({
         clientID: process.env.GOOGLE_CLIENT_ID!,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-        callbackURL: '/api/auth/google/callback', // What Google sends users after login
+        callbackURL: process.env.GOOGLE_CALLBACK_URL || '/api/auth/google/callback', // What Google sends users after login
         scope: ['profile', 'email'] // What user data we requesting
     }, async (
         _accessToken: string, // if need to call Google API e.g. get Google Calendar events then need to use it, but now it's unused
@@ -79,7 +79,7 @@ export const configurePassport = () => {
     passport.use(new GitHubStrategy({
         clientID: process.env.GITHUB_CLIENT_ID!,
         clientSecret: process.env.GITHUB_CLIENT_SECRET!,
-        callbackURL: '/api/auth/github/callback',
+        callbackURL: process.env.GITHUB_CALLBACK_URL || '/api/auth/github/callback',
         scope: ['user:email']
     }, async (
         _accessToken: string,
