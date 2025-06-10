@@ -46,16 +46,14 @@ app.use(session({
         client: redisClient,
         prefix: 'session:'
     }),
-    secret: process.env.SESSION_SECRET as string, // Session ID, random long string
-    resave: false, // Don't save session if unmodified
-    saveUninitialized: false, // Don't create session for unauthenticated users
-
-    // session cookie to store session ID
+    secret: process.env.SESSION_SECRET as string,
+    resave: false,
+    saveUninitialized: false,
     cookie: {
         secure: true,
         httpOnly: true,
         sameSite: 'none',
-        maxAge: 5 * 60 * 1000 // 5 min
+        maxAge: 30 * 60 * 1000
     }
 }));
 
@@ -77,12 +75,14 @@ configurePassport();
 
 // CORS = it's a security feature that denies browsers from making requests to other domains, ports, or protocols
 app.use(cors({
-    origin: [process.env.FRONTEND_URL! || "http://localhost:5173"], // frontend url
-    credentials: true, // allow cookies
+    origin: [process.env.FRONTEND_URL! || "http://localhost:5173"],
+    credentials: true,
     exposedHeaders: ['set-cookie'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
-})); // Enable CORS
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Origin', 'X-Requested-With'],
+    preflightContinue: false,
+    optionsSuccessStatus: 204
+}));
 
 app.enable('trust proxy');
 

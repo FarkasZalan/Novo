@@ -105,9 +105,9 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
         // 4. Store refresh token in a HTTP-only cookie
         res.cookie("refresh_token", refreshToken, {
             httpOnly: true,
-            secure: true,  // Only allow secure cookies in production mode
-            sameSite: "lax",  // Changed from "strict" to "lax" to allow cross-site requests
-            path: "/",  // Set path to root to ensure it's available for all routes
+            secure: true,
+            sameSite: "none",  // Changed from "lax" to "none" for consistency
+            path: "/",
             maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
         });
 
