@@ -255,7 +255,7 @@ router.get('/auth/google/callback',
             res.cookie("refresh_token", refreshToken, {
                 httpOnly: true,
                 secure: true,  // Only allow secure cookies in production mode
-                sameSite: "lax",  // Changed from "strict" to "lax" to allow cross-site requests
+                sameSite: "none",  // Changed from "strict" to "lax" to allow cross-site requests
                 path: "/",  // Set path to root to ensure it's available for all routes
                 maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
             });
@@ -330,7 +330,7 @@ router.get('/auth/github/callback',
             res.cookie("refresh_token", refreshToken, {
                 httpOnly: true,
                 secure: true,  // Only allow secure cookies in production mode
-                sameSite: "lax",  // Changed from "strict" to "lax" to allow cross-site requests
+                sameSite: "none",  // Changed from "strict" to "lax" to allow cross-site requests
                 path: "/",  // Set path to root to ensure it's available for all routes
                 maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
             });

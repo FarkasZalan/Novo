@@ -43,7 +43,6 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
 export const refreshAccessToken = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const refreshToken = req.cookies.refresh_token; // Get refresh token from cookie
-        console.log(req.cookies);
         if (!refreshToken) {
             console.error('No refresh token found in cookies');
             res.status(400).json({
