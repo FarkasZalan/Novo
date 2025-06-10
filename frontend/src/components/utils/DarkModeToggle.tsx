@@ -5,53 +5,35 @@ export const DarkModeToggle = () => {
     const [darkMode, setDarkMode] = useState<boolean | null>(null);
 
     useEffect(() => {
-        // Check if a theme is already saved in localStorage
         const savedTheme = localStorage.getItem('darkMode');
         const prefersDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        let initialMode = false;
+        let initialMode = savedTheme === null ? prefersDarkMode : savedTheme === 'true';
 
-        if (!savedTheme && !prefersDarkMode) {
-            initialMode = false;
-        } else if (!savedTheme && prefersDarkMode) {
-            initialMode = true;
-        } else if (savedTheme === 'true') {
-            initialMode = true;
-        }
-
-        // Apply theme to document and meta tag
         applyTheme(initialMode);
         setDarkMode(initialMode);
         localStorage.setItem('darkMode', initialMode.toString());
     }, []);
 
     const applyTheme = (isDark: boolean) => {
-        // Apply to HTML class
+        const html = document.documentElement;
+
         if (isDark) {
-            document.documentElement.classList.add('dark');
+            html.classList.add('dark');
         } else {
-            document.documentElement.classList.remove('dark');
+            html.classList.remove('dark');
         }
 
-        // Update theme-color meta tag
-        const themeColor = isDark ? '#111827' : '#ffffff'; // Match your navbar colors
-        let metaThemeColor = document.querySelector("meta[name=theme-color]");
-
-        if (!metaThemeColor) {
-            metaThemeColor = document.createElement('meta');
-            metaThemeColor.setAttribute('name', 'theme-color');
-            document.head.appendChild(metaThemeColor);
+        // Update theme-color for Android Chrome and similar
+        const metaThemeColor = document.querySelector("meta[name=theme-color]");
+        if (metaThemeColor) {
+            metaThemeColor.setAttribute('content', isDark ? '#111827' : '#ffffff');
         }
 
-        metaThemeColor.setAttribute('content', themeColor);
-
-        // For iOS
-        let appleMeta = document.querySelector("meta[name=apple-mobile-web-app-status-bar-style]");
-        if (!appleMeta) {
-            appleMeta = document.createElement('meta');
-            appleMeta.setAttribute('name', 'apple-mobile-web-app-status-bar-style');
-            document.head.appendChild(appleMeta);
+        // Update iOS Safari status bar
+        const appleStatusBar = document.querySelector("meta[name=apple-mobile-web-app-status-bar-style]");
+        if (appleStatusBar) {
+            appleStatusBar.setAttribute('content', isDark ? 'black' : 'default');
         }
-        appleMeta.setAttribute('content', isDark ? 'black' : 'default');
     };
 
     const toggleTheme = () => {
@@ -61,9 +43,7 @@ export const DarkModeToggle = () => {
         localStorage.setItem('darkMode', newMode.toString());
     };
 
-    if (darkMode === null) {
-        return null;
-    }
+    if (darkMode === null) return null;
 
     return (
         <button
