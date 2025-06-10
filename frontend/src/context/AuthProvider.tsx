@@ -46,13 +46,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // dark mode setup
     useEffect(() => {
-        // Check if a theme is already saved in localStorage
         const savedTheme = localStorage.getItem('darkMode');
-
-        // If there's no saved theme, use the browser preference
         const prefersDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
-        // If a saved theme exists, use it
+        // Determine initial mode
         let initialMode = false;
         if (savedTheme === 'true') {
             initialMode = true;
@@ -62,30 +59,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             initialMode = true;
         }
 
-        // add or remove the dark class from the html tags
+        // Apply theme
         if (initialMode) {
             document.documentElement.classList.add('dark');
         } else {
             document.documentElement.classList.remove('dark');
         }
 
-        // Set the state to ensure the button icon and aria-label are correct
         setDarkMode(initialMode);
-
-        // Save theme mode choice to localStorage
         localStorage.setItem('darkMode', String(initialMode));
     }, []);
 
-
-    // toggle dark mode
+    // Provide toggle function through context
     const toggleDarkMode = () => {
         const newMode = !darkMode!;
         setDarkMode(newMode);
 
+        // Update HTML class
         if (newMode) {
             document.documentElement.classList.add('dark');
         } else {
             document.documentElement.classList.remove('dark');
+        }
+
+        // Update theme-color meta tag
+        const metaThemeColor = document.querySelector("meta[name=theme-color]");
+        if (metaThemeColor) {
+            metaThemeColor.setAttribute('content', newMode ? '#111827' : '#ffffff');
         }
 
         localStorage.setItem('darkMode', String(newMode));
