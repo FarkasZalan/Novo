@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { FaEnvelope, FaLock, FaGoogle, FaGithub } from "react-icons/fa";
+import { FaEnvelope, FaLock, FaGoogle, FaGithub, FaInfoCircle } from "react-icons/fa";
 import { initiateGithubLogin, initiateGoogleLogin, login, resendVerificationEmail } from "../../../services/authService";
 import { useAuth } from "../../../hooks/useAuth";
 
@@ -16,13 +16,25 @@ export const Login = () => {
     const [resendSuccess, setResendSuccess] = useState("");
     const navigate = useNavigate();
     const { setAuthState } = useAuth();
+    const [isIOS, setIsIOS] = useState(false);
+
+    useEffect(() => {
+        // Check if the device is iOS
+        const userAgent = window.navigator.userAgent.toLowerCase();
+        const isIOSDevice = /iphone|ipad|ipod|macintosh/.test(userAgent);
+        setIsIOS(isIOSDevice);
+    }, []);
 
     const handleGoogleLogin = () => {
-        initiateGoogleLogin();
+        if (!isIOS) {
+            initiateGoogleLogin();
+        }
     };
 
     const handleGithubLogin = () => {
-        initiateGithubLogin();
+        if (!isIOS) {
+            initiateGithubLogin();
+        }
     };
 
     useEffect(() => {
@@ -271,25 +283,46 @@ export const Login = () => {
                             </div>
                         </div>
 
-                        <div className="mt-6 grid grid-cols-2 gap-3">
-                            <button
-                                type="button"
-                                onClick={handleGoogleLogin}
-                                className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors cursor-pointer"
-                            >
-                                <FaGoogle className="h-5 w-5" />
-                                <span className="ml-2">Google</span>
-                            </button>
+                        {isIOS ? (
+                            <div className="mt-6 bg-indigo-50 dark:bg-indigo-900/10 border border-indigo-200 dark:border-indigo-800 rounded-lg p-4">
+                                <div className="flex items-start">
+                                    <FaInfoCircle className="mt-1 mr-3 flex-shrink-0 text-indigo-500 dark:text-indigo-400" />
+                                    <div>
+                                        <h4 className="text-sm font-medium text-indigo-800 dark:text-indigo-200">
+                                            Heads up, Apple user!
+                                        </h4>
+                                        <p className="mt-1 text-sm text-indigo-700 dark:text-indigo-300">
+                                            We'd love to offer Google and GitHub login, but Apple devices sometimes
+                                            make this tricky. No worries though! You can still sign in with your
+                                            email or try from another device if you prefer social login.
+                                        </p>
+                                        <p className="mt-2 text-xs text-indigo-600 dark:text-indigo-400">
+                                            We're working on making this smoother for you in the future!
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="mt-6 grid grid-cols-2 gap-3">
+                                <button
+                                    type="button"
+                                    onClick={handleGoogleLogin}
+                                    className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors cursor-pointer"
+                                >
+                                    <FaGoogle className="h-5 w-5" />
+                                    <span className="ml-2">Google</span>
+                                </button>
 
-                            <button
-                                type="button"
-                                onClick={handleGithubLogin}
-                                className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors cursor-pointer"
-                            >
-                                <FaGithub className="h-5 w-5 text-gray-800 dark:text-gray-200" />
-                                <span className="ml-2">GitHub</span>
-                            </button>
-                        </div>
+                                <button
+                                    type="button"
+                                    onClick={handleGithubLogin}
+                                    className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors cursor-pointer"
+                                >
+                                    <FaGithub className="h-5 w-5 text-gray-800 dark:text-gray-200" />
+                                    <span className="ml-2">GitHub</span>
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

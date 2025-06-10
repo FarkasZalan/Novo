@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FaUser, FaEnvelope, FaLock, FaGoogle, FaGithub } from "react-icons/fa";
+import { FaUser, FaEnvelope, FaLock, FaGoogle, FaGithub, FaInfoCircle } from "react-icons/fa";
 import { initiateGithubLogin, initiateGoogleLogin, register } from "../../../services/authService";
 import { fetchAllRegisteredUsers } from "../../../services/userService";
 
@@ -20,14 +20,26 @@ export const Register = () => {
         password: "",
         confirmPassword: ""
     });
+    const [isIOS, setIsIOS] = useState(false);
     const navigate = useNavigate();
 
+    useEffect(() => {
+        // Check if the device is iOS
+        const userAgent = window.navigator.userAgent.toLowerCase();
+        const isIOSDevice = /iphone|ipad|ipod|macintosh/.test(userAgent);
+        setIsIOS(isIOSDevice);
+    }, []);
+
     const handleGoogleSignup = () => {
-        initiateGoogleLogin();
+        if (!isIOS) {
+            initiateGoogleLogin();
+        }
     };
 
     const handleGithubSignup = () => {
-        initiateGithubLogin();
+        if (!isIOS) {
+            initiateGithubLogin();
+        }
     };
 
     const validateField = (name: string, value: string) => {
@@ -353,25 +365,46 @@ export const Register = () => {
                                 </div>
                             </div>
 
-                            <div className="mt-6 grid grid-cols-2 gap-3">
-                                <button
-                                    type="button"
-                                    onClick={handleGoogleSignup}
-                                    className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors cursor-pointer"
-                                >
-                                    <FaGoogle className="h-5 w-5" />
-                                    <span className="ml-2">Google</span>
-                                </button>
+                            {isIOS ? (
+                                <div className="mt-6 bg-indigo-50 dark:bg-indigo-900/10 border border-indigo-200 dark:border-indigo-800 rounded-lg p-4">
+                                    <div className="flex items-start">
+                                        <FaInfoCircle className="mt-1 mr-3 flex-shrink-0 text-indigo-500 dark:text-indigo-400" />
+                                        <div>
+                                            <h4 className="text-sm font-medium text-indigo-800 dark:text-indigo-200">
+                                                Heads up, Apple user!
+                                            </h4>
+                                            <p className="mt-1 text-sm text-indigo-700 dark:text-indigo-300">
+                                                We'd love to offer Google and GitHub sign up, but Apple devices sometimes
+                                                make this tricky. No worries though! You can still create an account with
+                                                your email or try from another device if you prefer social login.
+                                            </p>
+                                            <p className="mt-2 text-xs text-indigo-600 dark:text-indigo-400">
+                                                We're working on making this smoother for you in the future!
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="mt-6 grid grid-cols-2 gap-3">
+                                    <button
+                                        type="button"
+                                        onClick={handleGoogleSignup}
+                                        className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors cursor-pointer"
+                                    >
+                                        <FaGoogle className="h-5 w-5" />
+                                        <span className="ml-2">Google</span>
+                                    </button>
 
-                                <button
-                                    type="button"
-                                    onClick={handleGithubSignup}
-                                    className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors cursor-pointer"
-                                >
-                                    <FaGithub className="h-5 w-5 text-gray-800 dark:text-gray-200" />
-                                    <span className="ml-2">GitHub</span>
-                                </button>
-                            </div>
+                                    <button
+                                        type="button"
+                                        onClick={handleGithubSignup}
+                                        className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors cursor-pointer"
+                                    >
+                                        <FaGithub className="h-5 w-5 text-gray-800 dark:text-gray-200" />
+                                        <span className="ml-2">GitHub</span>
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
                 )}
