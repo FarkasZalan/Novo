@@ -247,6 +247,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                             </p>
                         </div>
 
+                        {/* Loading spinner */}
+                        <div className="flex justify-center my-8">
+                            <div className="relative">
+                                <div className="w-12 h-12 rounded-full bg-indigo-100 dark:bg-indigo-900/20 flex items-center justify-center">
+                                    <svg
+                                        className="animate-spin h-6 w-6 text-indigo-600 dark:text-indigo-400"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <circle
+                                            className="opacity-25"
+                                            cx="12"
+                                            cy="12"
+                                            r="10"
+                                            stroke="currentColor"
+                                            strokeWidth="4"
+                                        />
+                                        <path
+                                            className="opacity-75"
+                                            fill="currentColor"
+                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                        />
+                                    </svg>
+                                </div>
+                                <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-indigo-600 dark:border-t-indigo-400 animate-spin" />
+                            </div>
+                        </div>
+
+                        {/* Progress bar similar to original */}
+                        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 mt-6 mb-8">
+                            <div
+                                className="bg-indigo-600 dark:bg-indigo-400 h-1.5 rounded-full animate-pulse"
+                                style={{ width: '70%' }}
+                            />
+                        </div>
+
                         <div className="flex flex-col gap-6 mt-8">
                             <div className="text-center">
                                 <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
@@ -277,7 +314,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                         <div className="mt-8 text-center">
                             <button
                                 onClick={() => window.location.reload()}
-                                className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
+                                className="px-4 py-2 cursor-pointer bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
                             >
                                 Check Again
                             </button>
