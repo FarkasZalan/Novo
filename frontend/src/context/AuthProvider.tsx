@@ -311,16 +311,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                             </div>
                         </div>
 
-                        <div className="mt-8 text-center">
+                        <div className="mt-8 text-center flex flex-col items-center gap-2">
                             <p className="text-sm text-gray-500 dark:text-gray-400">
-                                Taking longer than expected? {' '}
-                                <button
-                                    onClick={() => window.location.reload()}
-                                    className="px-4 py-2 cursor-pointer bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
-                                >
-                                    Check Again
-                                </button>
+                                Taking longer than expected?
                             </p>
+                            <button
+                                onClick={() => window.location.reload()}
+                                className="px-4 py-2 cursor-pointer bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
+                            >
+                                Check Again
+                            </button>
                         </div>
                     </div>
                 ) : (

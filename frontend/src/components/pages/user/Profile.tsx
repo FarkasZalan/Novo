@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { FaUser, FaCog, FaCalendarAlt, FaSignOutAlt, FaExclamationTriangle, FaTrash, FaCrown, FaCheck, FaTimes, FaChevronLeft } from "react-icons/fa";
+import { FaUser, FaCog, FaCalendarAlt, FaSignOutAlt, FaExclamationTriangle, FaTrash, FaCrown, FaCheck, FaTimes, FaChevronLeft, FaInfoCircle } from "react-icons/fa";
 import { useAuth } from "../../../hooks/useAuth";
 import { useEffect, useState } from "react";
 import { cancelPremiumPlan, createPayment, deleteAccount, reactivatePremiumPlan } from "../../../services/userService";
@@ -17,6 +17,14 @@ export const Profile = () => {
     const [deleteError, setDeleteError] = useState("");
     const [deleteLoading, setDeleteLoading] = useState(false);
     const navigate = useNavigate();
+    const [isIOS, setIsIOS] = useState(false);
+
+    useEffect(() => {
+        // Check if the device is iOS
+        const userAgent = window.navigator.userAgent.toLowerCase();
+        const isIOSDevice = /iphone|ipad|ipod|macintosh/.test(userAgent);
+        setIsIOS(isIOSDevice);
+    }, []);
 
     //stripe checkout open loading
     const [paymentLoading, setPaymentLoading] = useState(false);
@@ -394,13 +402,33 @@ export const Profile = () => {
                                             {user.user_cancelled_premium ? 'Membership Ending Soon' : 'Manage Membership'}
                                         </button>
                                     ) : (
-                                        <button
-                                            className="w-full mt-4 px-6 py-3 bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-600 dark:hover:bg-yellow-700 text-white font-medium rounded-lg transition-colors duration-200 flex items-center justify-center cursor-pointer"
-                                            onClick={() => setShowPremiumDialog(true)}
-                                        >
-                                            <FaCrown className="mr-2" />
-                                            Upgrade to Premium - 2499 Huf/month
-                                        </button>
+                                        isIOS ? (
+                                            <div className="mt-4 bg-indigo-50 dark:bg-indigo-900/10 border border-indigo-200 dark:border-indigo-800 rounded-lg p-4">
+                                                <div className="flex items-start">
+                                                    <FaInfoCircle className="mt-1 mr-3 flex-shrink-0 text-indigo-500 dark:text-indigo-400" />
+                                                    <div>
+                                                        <h4 className="text-sm font-medium text-indigo-800 dark:text-indigo-200">
+                                                            Device Notice
+                                                        </h4>
+                                                        <p className="mt-1 text-sm text-indigo-700 dark:text-indigo-300">
+                                                            For the best payment experience, we recommend upgrading to premium
+                                                            from a non-Apple device. You'll still enjoy all features on iOS after upgrading!
+                                                        </p>
+                                                        <p className="mt-2 text-xs text-indigo-600 dark:text-indigo-400">
+                                                            Need help? Contact our support team.
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <button
+                                                className="w-full mt-4 px-6 py-3 bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-600 dark:hover:bg-yellow-700 text-white font-medium rounded-lg transition-colors duration-200 flex items-center justify-center cursor-pointer"
+                                                onClick={() => setShowPremiumDialog(true)}
+                                            >
+                                                <FaCrown className="mr-2" />
+                                                Upgrade to Premium - 2499 Huf/month
+                                            </button>
+                                        )
                                     )}
                                 </div>
                             </div>
@@ -430,18 +458,35 @@ export const Profile = () => {
                                     </button>
 
                                     {/* Manage Membership */}
-                                    <button
-                                        className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200 text-left cursor-pointer"
-                                        onClick={() => user?.is_premium ? setShowPremiumManagement(true) : setShowPremiumDialog(true)}
-                                    >
-                                        <div className="flex items-center text-indigo-600 dark:text-indigo-400">
-                                            <FaCrown className="mr-2" />
-                                            <h3 className="font-medium">{user?.is_premium ? "Manage Membership" : "Upgrade Membership"}</h3>
+                                    {isIOS && !user?.is_premium ? (
+                                        <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-indigo-50 dark:bg-indigo-900/10 border-l-4 border-indigo-400 dark:border-indigo-600">
+                                            <div className="flex items-start">
+                                                <FaInfoCircle className="mt-1 mr-3 flex-shrink-0 text-indigo-500 dark:text-indigo-400" />
+                                                <div>
+                                                    <h3 className="font-medium text-indigo-800 dark:text-indigo-200 flex items-center">
+                                                        <FaCrown className="mr-2" />
+                                                        Upgrade Available
+                                                    </h3>
+                                                    <p className="text-sm text-indigo-700 dark:text-indigo-300 mt-1">
+                                                        Please use a non-Apple device to upgrade your membership.
+                                                    </p>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                            {user?.is_premium ? "Manage your premium subscription" : "Access premium features"}
-                                        </p>
-                                    </button>
+                                    ) : (
+                                        <button
+                                            className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200 text-left cursor-pointer"
+                                            onClick={() => user?.is_premium ? setShowPremiumManagement(true) : setShowPremiumDialog(true)}
+                                        >
+                                            <div className="flex items-center text-indigo-600 dark:text-indigo-400">
+                                                <FaCrown className="mr-2" />
+                                                <h3 className="font-medium">{user?.is_premium ? "Manage Membership" : "Upgrade Membership"}</h3>
+                                            </div>
+                                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                                {user?.is_premium ? "Manage your premium subscription" : "Access premium features"}
+                                            </p>
+                                        </button>
+                                    )}
                                 </div>
                             </div>
 
