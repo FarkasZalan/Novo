@@ -84,6 +84,8 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Authorization']
 })); // Enable CORS
 
+app.enable('trust proxy');
+
 // Cookie parser middleware
 app.use(cookieParser());
 
