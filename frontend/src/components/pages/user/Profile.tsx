@@ -393,33 +393,16 @@ export const Profile = () => {
                                         </div>
                                     </div>
 
-                                    {user?.is_premium ? (
-                                        <button
-                                            className="w-full mt-4 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white font-medium rounded-lg transition-colors duration-200 flex items-center justify-center cursor-pointer"
-                                            onClick={() => setShowPremiumManagement(true)}
-                                        >
-                                            <FaCog className="mr-2" />
-                                            {user.user_cancelled_premium ? 'Membership Ending Soon' : 'Manage Membership'}
-                                        </button>
-                                    ) : (
-                                        isIOS ? (
-                                            <div className="mt-4 bg-indigo-50 dark:bg-indigo-900/10 border border-indigo-200 dark:border-indigo-800 rounded-lg p-4">
-                                                <div className="flex items-start">
-                                                    <FaInfoCircle className="mt-1 mr-3 flex-shrink-0 text-indigo-500 dark:text-indigo-400" />
-                                                    <div>
-                                                        <h4 className="text-sm font-medium text-indigo-800 dark:text-indigo-200">
-                                                            Device Notice
-                                                        </h4>
-                                                        <p className="mt-1 text-sm text-indigo-700 dark:text-indigo-300">
-                                                            For the best payment experience, we recommend upgrading to premium
-                                                            from a non-Apple device. You'll still enjoy all features on iOS after upgrading!
-                                                        </p>
-                                                        <p className="mt-2 text-xs text-indigo-600 dark:text-indigo-400">
-                                                            Need help? Contact our support team.
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                    {/* Membership Actions (Only show if NOT iOS) */}
+                                    {!isIOS && (
+                                        user?.is_premium ? (
+                                            <button
+                                                className="w-full mt-4 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white font-medium rounded-lg transition-colors duration-200 flex items-center justify-center cursor-pointer"
+                                                onClick={() => setShowPremiumManagement(true)}
+                                            >
+                                                <FaCog className="mr-2" />
+                                                {user.user_cancelled_premium ? 'Membership Ending Soon' : 'Manage Membership'}
+                                            </button>
                                         ) : (
                                             <button
                                                 className="w-full mt-4 px-6 py-3 bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-600 dark:hover:bg-yellow-700 text-white font-medium rounded-lg transition-colors duration-200 flex items-center justify-center cursor-pointer"
@@ -430,6 +413,28 @@ export const Profile = () => {
                                             </button>
                                         )
                                     )}
+
+                                    {/* iOS Notice (Only for non-premium iOS users) */}
+                                    {isIOS && !user?.is_premium && (
+                                        <div className="mt-4 bg-indigo-50 dark:bg-indigo-900/10 border border-indigo-200 dark:border-indigo-800 rounded-lg p-4">
+                                            <div className="flex items-start">
+                                                <FaInfoCircle className="mt-1 mr-3 flex-shrink-0 text-indigo-500 dark:text-indigo-400" />
+                                                <div>
+                                                    <h4 className="text-sm font-medium text-indigo-800 dark:text-indigo-200">
+                                                        Device Notice
+                                                    </h4>
+                                                    <p className="mt-1 text-sm text-indigo-700 dark:text-indigo-300">
+                                                        For the best payment experience, we recommend upgrading to premium
+                                                        from a non-Apple device. You'll still enjoy all features on iOS after upgrading!
+                                                    </p>
+                                                    <p className="mt-2 text-xs text-indigo-600 dark:text-indigo-400">
+                                                        Need help? Contact our support team.
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
                                 </div>
                             </div>
 
@@ -457,8 +462,24 @@ export const Profile = () => {
                                         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Log out of your account</p>
                                     </button>
 
-                                    {/* Manage Membership */}
-                                    {isIOS && !user?.is_premium ? (
+                                    {/* Manage or Upgrade Membership (Non-iOS only) */}
+                                    {!isIOS && (
+                                        <button
+                                            className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200 text-left cursor-pointer"
+                                            onClick={() => user?.is_premium ? setShowPremiumManagement(true) : setShowPremiumDialog(true)}
+                                        >
+                                            <div className="flex items-center text-indigo-600 dark:text-indigo-400">
+                                                <FaCrown className="mr-2" />
+                                                <h3 className="font-medium">{user?.is_premium ? "Manage Membership" : "Upgrade Membership"}</h3>
+                                            </div>
+                                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                                {user?.is_premium ? "Manage your premium subscription" : "Access premium features"}
+                                            </p>
+                                        </button>
+                                    )}
+
+                                    {/* iOS Info Message for Non-Premium Users Only */}
+                                    {isIOS && !user?.is_premium && (
                                         <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-indigo-50 dark:bg-indigo-900/10 border-l-4 border-indigo-400 dark:border-indigo-600">
                                             <div className="flex items-start">
                                                 <FaInfoCircle className="mt-1 mr-3 flex-shrink-0 text-indigo-500 dark:text-indigo-400" />
@@ -473,19 +494,6 @@ export const Profile = () => {
                                                 </div>
                                             </div>
                                         </div>
-                                    ) : (
-                                        <button
-                                            className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200 text-left cursor-pointer"
-                                            onClick={() => user?.is_premium ? setShowPremiumManagement(true) : setShowPremiumDialog(true)}
-                                        >
-                                            <div className="flex items-center text-indigo-600 dark:text-indigo-400">
-                                                <FaCrown className="mr-2" />
-                                                <h3 className="font-medium">{user?.is_premium ? "Manage Membership" : "Upgrade Membership"}</h3>
-                                            </div>
-                                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                                {user?.is_premium ? "Manage your premium subscription" : "Access premium features"}
-                                            </p>
-                                        </button>
                                     )}
                                 </div>
                             </div>
