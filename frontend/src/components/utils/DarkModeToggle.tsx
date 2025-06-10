@@ -2,16 +2,14 @@ import { useState, useEffect } from "react";
 import { FaSun, FaMoon } from "react-icons/fa";
 
 export const DarkModeToggle = () => {
-    const [darkMode, setDarkMode] = useState<boolean | null>(null); // Start with null to delay render until theme is applied
+    const [darkMode, setDarkMode] = useState<boolean | null>(null);
 
     useEffect(() => {
         // Check if a theme is already saved in localStorage
         const savedTheme = localStorage.getItem('darkMode');
-
-        // If there's no saved theme, fallback to system's preference
         const prefersDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        let initialMode = false
-        // If a saved theme exists, use it, otherwise use the system preference
+        let initialMode = false;
+
         if (!savedTheme && !prefersDarkMode) {
             initialMode = false;
         } else if (!savedTheme && prefersDarkMode) {
@@ -20,37 +18,51 @@ export const DarkModeToggle = () => {
             initialMode = true;
         }
 
-        // Apply the theme to the document element immediately
-        if (initialMode) {
+        // Apply theme to document and meta tag
+        applyTheme(initialMode);
+        setDarkMode(initialMode);
+        localStorage.setItem('darkMode', initialMode.toString());
+    }, []);
+
+    const applyTheme = (isDark: boolean) => {
+        // Apply to HTML class
+        if (isDark) {
             document.documentElement.classList.add('dark');
         } else {
             document.documentElement.classList.remove('dark');
         }
 
-        // Set the state to ensure the button icon and aria-label are correct
-        setDarkMode(initialMode);
+        // Update theme-color meta tag
+        const themeColor = isDark ? '#111827' : '#ffffff'; // Match your navbar colors
+        let metaThemeColor = document.querySelector("meta[name=theme-color]");
 
-        // Save preference to localStorage
-        localStorage.setItem('darkMode', initialMode.toString());
-    }, []);
+        if (!metaThemeColor) {
+            metaThemeColor = document.createElement('meta');
+            metaThemeColor.setAttribute('name', 'theme-color');
+            document.head.appendChild(metaThemeColor);
+        }
+
+        metaThemeColor.setAttribute('content', themeColor);
+
+        // For iOS
+        let appleMeta = document.querySelector("meta[name=apple-mobile-web-app-status-bar-style]");
+        if (!appleMeta) {
+            appleMeta = document.createElement('meta');
+            appleMeta.setAttribute('name', 'apple-mobile-web-app-status-bar-style');
+            document.head.appendChild(appleMeta);
+        }
+        appleMeta.setAttribute('content', isDark ? 'black' : 'default');
+    };
 
     const toggleTheme = () => {
         const newMode = !darkMode!;
         setDarkMode(newMode);
-
-        // Apply the new theme to the document element
-        if (newMode) {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-
-        // Save the new theme preference to localStorage
+        applyTheme(newMode);
         localStorage.setItem('darkMode', newMode.toString());
     };
 
     if (darkMode === null) {
-        return null; // Don't render anything until the theme is applied
+        return null;
     }
 
     return (
