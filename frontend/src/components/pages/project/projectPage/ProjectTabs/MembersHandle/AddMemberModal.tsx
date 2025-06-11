@@ -30,12 +30,13 @@ export const AddMemberDialog = ({ project, onClose, onInvite }: AddMemberModalPr
     const [searchQuery, setSearchQuery] = useState("");
     const [isSearching, setIsSearching] = useState(false);
     const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
-    const MIN_SEARCH_LENGTH = 2;
+    const MIN_SEARCH_LENGTH = 2; // Require 2 characters to search
 
     const [potentialMembers, setPotentialMembers] = useState<User[]>([]);
     const [showSearchResults, setShowSearchResults] = useState(false);
-    const [projectMemberIds, setProjectMemberIds] = useState<string[]>([]);
-    const [projectMemberEmails, setProjectMemberEmails] = useState<string[]>([]);
+    // hold the IDs of users already in the project
+    const [projectMemberIds, setProjectMemberIds] = useState<string[]>([]); // for active project members
+    const [projectMemberEmails, setProjectMemberEmails] = useState<string[]>([]); // for pending project members
     const { authState } = useAuth();
 
     const modalRef = useRef<HTMLDivElement>(null);
@@ -43,8 +44,14 @@ export const AddMemberDialog = ({ project, onClose, onInvite }: AddMemberModalPr
     const emailAlreadyInProject = projectMemberEmails.includes(manualEmail);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const [premiumError, setPremiumError] = useState<{ show: boolean; isOwner: boolean; message: string; ownerDetails?: { name: string; email: string } }>({ show: false, isOwner: false, message: "" });
+    const [premiumError, setPremiumError] = useState<{
+        show: boolean;
+        isOwner: boolean;
+        message: string;
+        ownerDetails?: { name: string; email: string };
+    }>({ show: false, isOwner: false, message: "" });
 
+    // Close modal when clicking outside
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
@@ -55,14 +62,20 @@ export const AddMemberDialog = ({ project, onClose, onInvite }: AddMemberModalPr
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, [onClose]);
 
+    // Fetch project members and store their IDs for quick lookup
     useEffect(() => {
         const loadProjectMembers = async () => {
             try {
                 const membersResponse = await getProjectMembers(project.id!, authState.accessToken!);
+                // Assuming membersResponse is structured as: [ registeredMembersArray, invitedMembersArray ]
                 const registeredMembers = membersResponse[0];
                 const invitedMembers = membersResponse[1];
+
+                // Extract IDs from registered members (from the nested user object)
                 const registeredIds = registeredMembers.map((member: any) => member.user.id);
                 setProjectMemberIds(registeredIds);
+
+                // Extract emails from invited (pending) members
                 const invitedEmails = invitedMembers.map((member: any) => member.email);
                 setProjectMemberEmails(invitedEmails);
             } catch (error) {
@@ -83,7 +96,7 @@ export const AddMemberDialog = ({ project, onClose, onInvite }: AddMemberModalPr
                 return;
             }
             allEmails.push(manualEmail);
-            roles.push("member");
+            roles.push("member"); // manual users default to member
             registeredStatus.push(false);
         }
 
@@ -93,12 +106,17 @@ export const AddMemberDialog = ({ project, onClose, onInvite }: AddMemberModalPr
         }
 
         setError(null);
-        setIsSubmitting(true);
+        setIsSubmitting(true); // Start loading
 
         try {
             await addMembersToProject(
                 project.id!,
-                selectedUsers.map(user => ({ id: user.id, email: user.email, name: user.name, role: user.role })),
+                selectedUsers.map(user => ({
+                    id: user.id,
+                    email: user.email,
+                    name: user.name,
+                    role: user.role
+                })),
                 authState.accessToken!,
                 authState.user!.id
             );
@@ -106,6 +124,8 @@ export const AddMemberDialog = ({ project, onClose, onInvite }: AddMemberModalPr
             onClose();
         } catch (error: any) {
             console.error("Failed to add members:", error);
+
+            // Check if error is related to premium limitations
             if (error.response?.data?.message?.includes("Premium")) {
                 const isOwner = authState.user?.id === project.owner_id;
                 setPremiumError({
@@ -123,12 +143,15 @@ export const AddMemberDialog = ({ project, onClose, onInvite }: AddMemberModalPr
                 setError("Failed to send invitations. Please try again.");
             }
         } finally {
-            setIsSubmitting(false);
+            setIsSubmitting(false); // End loading
         }
     };
 
     const handleSelectUser = (user: User) => {
-        if (projectMemberIds.includes(user.id)) return;
+        // Prevent adding if the user is already in the project (either registered or invited)
+        if (projectMemberIds.includes(user.id)) {
+            return;
+        }
         if (!selectedUsers.some(selected => selected.id === user.id)) {
             setSelectedUsers([...selectedUsers, { ...user, role: "member" }]);
         }
@@ -144,14 +167,14 @@ export const AddMemberDialog = ({ project, onClose, onInvite }: AddMemberModalPr
             setError("Please enter a valid email address");
             return;
         }
+
         if (selectedUsers.some(user => user.email === manualEmail)) {
             setError("This email is already selected");
             return;
         }
 
-        // Use email as unique id for manual invites
         setSelectedUsers([...selectedUsers, {
-            id: manualEmail,
+            id: '',
             name: manualEmail.split('@')[0],
             email: manualEmail,
             is_registered: false,
@@ -167,15 +190,28 @@ export const AddMemberDialog = ({ project, onClose, onInvite }: AddMemberModalPr
         searchInputRef.current?.focus();
     };
 
+
+
     const handleSearch = useCallback(async (query: string) => {
         if (query.trim().length < MIN_SEARCH_LENGTH) {
             setPotentialMembers([]);
             return;
         }
+
         try {
             setIsSearching(true);
-            const users = await filterAllUserByNameOrEmail(authState.accessToken!, project.id!, query);
-            setPotentialMembers(users.map((user: any) => ({ id: user.id, name: user.name, email: user.email, is_registered: true })));
+            const users = await filterAllUserByNameOrEmail(
+                authState.accessToken!,
+                project.id!,
+                query
+            );
+
+            setPotentialMembers(users.map((user: any) => ({
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                is_registered: true
+            })));
         } catch (err) {
             console.error("Search failed:", err);
             setError("Failed to search users. Please try again.");
@@ -184,24 +220,48 @@ export const AddMemberDialog = ({ project, onClose, onInvite }: AddMemberModalPr
         }
     }, [authState.accessToken, project.id]);
 
+
+
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setManualEmail(value);
         setSearchQuery(value);
         setError(null);
-        if (searchTimeout) clearTimeout(searchTimeout);
+
+        // Clear previous timeout
+        if (searchTimeout) {
+            clearTimeout(searchTimeout);
+        }
+
+        // Only set new timeout if we have enough characters
         if (value.trim().length >= MIN_SEARCH_LENGTH) {
             setShowSearchResults(true);
-            setSearchTimeout(setTimeout(() => handleSearch(value), 300));
+            setSearchTimeout(
+                setTimeout(() => {
+                    handleSearch(value);
+                }, 300) // 300ms debounce delay
+            );
         } else {
             setShowSearchResults(false);
             setPotentialMembers([]);
         }
     };
 
-    useEffect(() => () => { if (searchTimeout) clearTimeout(searchTimeout); }, [searchTimeout]);
+    // Clean up timeout on unmount
+    useEffect(() => {
+        return () => {
+            if (searchTimeout) {
+                clearTimeout(searchTimeout);
+            }
+        };
+    }, [searchTimeout]);
 
-    const filteredUsers = potentialMembers.filter(user => !selectedUsers.some(selected => selected.id === user.id));
+
+    // Filter potential members based on search while excluding those already selected.
+    const filteredUsers = potentialMembers.filter(user =>
+        !selectedUsers.some(selected => selected.id === user.id)
+    );
+
     const hasValidEmail = manualEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(manualEmail);
     const showEmailOption = hasValidEmail && !selectedUsers.some(u => u.email === manualEmail);
 
@@ -307,9 +367,7 @@ export const AddMemberDialog = ({ project, onClose, onInvite }: AddMemberModalPr
                     {selectedUsers.length > 0 && (
                         <div className="flex flex-wrap gap-2 mb-4">
                             {selectedUsers.map(user => (
-                                <div
-                                    key={user.id || `email-${user.email}`}  // Use email if id is empty
-                                    className="bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 rounded-full pl-3 pr-2 py-1 flex items-center text-sm">
+                                <div key={user.id} className="bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 rounded-full pl-3 pr-2 py-1 flex items-center text-sm">
                                     <span className="flex items-center">
                                         <span className="h-5 w-5 rounded-full bg-indigo-100 dark:bg-indigo-800 flex items-center justify-center text-indigo-600 dark:text-indigo-300 font-medium text-xs mr-2">
                                             {user.name.split(' ').map(n => n[0]).join('').toUpperCase()}
