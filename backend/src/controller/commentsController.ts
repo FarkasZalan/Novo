@@ -97,6 +97,7 @@ export const updateComment = async (req: Request, res: Response, next: NextFunct
         }
 
         const updatedComment: Comment = await updateCommentQuery(comment, commentId);
+        const updatedCommentData: Comment = await getCommentByIdQuery(updatedComment.id);
 
         const projectOwner: User = await getUserByIdQuery(project.owner_id);
 
@@ -106,11 +107,11 @@ export const updateComment = async (req: Request, res: Response, next: NextFunct
             const assignedUsers = await getAssignmentsForTaskQuery(taskId);
             for (const user of assignedUsers) {
                 if (user.user_id === userId) continue;
-                sendUpdatedTaskCommentEmail(user.user_email, updatedComment.author_name, updatedComment.author_email, taskData.title, projectData.name, commentData.comment, comment, taskId, projectId, updatedComment.updated_at);
+                sendUpdatedTaskCommentEmail(user.user_email, updatedCommentData.author_name, updatedCommentData.author_email, taskData.title, projectData.name, commentData.comment, comment, taskId, projectId, updatedCommentData.updated_at);
             }
         }
 
-        handleResponse(res, 200, "Comment updated successfully", updatedComment);
+        handleResponse(res, 200, "Comment updated successfully", updatedCommentData);
     } catch (error: any) {
         next(error);
     }
