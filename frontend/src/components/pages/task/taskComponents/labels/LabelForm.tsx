@@ -178,21 +178,21 @@ export const LabelFormModal: React.FC<LabelFormModalProps> = ({
                             </div>
                         </div>
 
-                        <div className="mt-6 flex justify-end space-x-3">
+                        <div className="mt-6 flex flex-col-reverse sm:flex-row justify-end gap-3">
                             <button
                                 type="button"
                                 onClick={onClose}
                                 disabled={isSubmitting}
-                                className="inline-flex justify-center rounded-lg cursor-pointer border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors"
+                                className="inline-flex justify-center rounded-lg cursor-pointer border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors w-full sm:w-auto"
                             >
                                 Cancel
                             </button>
                             <button
                                 type="submit"
                                 disabled={!form.name || isSubmitting}
-                                className={`inline-flex justify-center rounded-lg px-4 py-2.5 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors ${!form.name || isSubmitting
-                                    ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed'
-                                    : 'bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 cursor-pointer'
+                                className={`inline-flex justify-center rounded-lg px-4 py-2.5 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors w-full sm:w-auto ${!form.name || isSubmitting
+                                        ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed'
+                                        : 'bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 cursor-pointer'
                                     }`}
                             >
                                 {isSubmitting ? (

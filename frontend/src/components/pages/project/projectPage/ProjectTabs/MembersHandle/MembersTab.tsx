@@ -121,21 +121,25 @@ export const MembersTab = ({
 
     return (
         <div className="p-6">
-            <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-                    Team Members
+            <div className="flex flex-col space-y-4 sm:flex-row sm:justify-between sm:items-center sm:space-y-0 mb-6">
+                <div className="flex-1 min-w-0">
+                    <div className="flex flex-col sm:flex-row sm:items-center">
+                        <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2 sm:mb-0">
+                            Team Members
+                        </h2>
+                        <span className="inline-flex items-center text-xs sm:text-sm bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 px-2 py-1 rounded-full sm:ml-3 self-start">
+                            {members.length} {members.length === 1 ? 'member' : 'members'}
+                        </span>
+                    </div>
+                </div>
 
-                    <span className="ml-2 text-sm bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 px-2 py-1 rounded-full">
-                        {members.length} {members.length === 1 ? 'member' : 'members'}
-                    </span>
-                </h2>
                 {canManageMembers && !project.read_only && (
                     <button
                         onClick={() => setShowAddMember(true)}
-                        className="px-4 py-2 bg-indigo-600 cursor-pointer hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white rounded-lg font-medium transition-colors duration-200 flex items-center cursor-pointer"
+                        className="px-3 py-2 sm:px-4 sm:py-2 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white rounded-lg font-medium transition-colors duration-200 flex items-center justify-center cursor-pointer text-sm sm:text-base w-full sm:w-auto"
                     >
-                        <FaUserPlus className="mr-2" />
-                        Add Member
+                        <FaUserPlus className="mr-2 text-sm" />
+                        <span className="sm:inline">Add Member</span>
                     </button>
                 )}
             </div>

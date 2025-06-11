@@ -245,27 +245,27 @@ export const MilestoneDetailsPage: React.FC = () => {
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {/* Header with breadcrumbs */}
-                <div className="flex items-center justify-between mb-8">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
                     <button
                         onClick={() => navigate(`/projects/${projectId}/tasks?milestones`)}
-                        className="flex items-center cursor-pointer text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 transition-colors"
+                        className="flex items-center text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 transition-colors"
                     >
                         <FaArrowLeft className="mr-2" />
                         Back to Milestones
                     </button>
 
                     {canManage && !project?.read_only && (
-                        <div className="flex space-x-3">
+                        <div className="flex flex-col sm:flex-row gap-2">
                             <button
                                 onClick={() => setIsEditModalOpen(true)}
-                                className="flex items-center cursor-pointer px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors shadow hover:shadow-md"
+                                className="flex items-center justify-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors shadow hover:shadow-md"
                             >
                                 <FaEdit className="mr-2" />
                                 Edit
                             </button>
                             <button
                                 onClick={() => setIsDeleteConfirmOpen(true)}
-                                className="flex items-center px-4 cursor-pointer py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors shadow hover:shadow-md"
+                                className="flex items-center justify-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors shadow hover:shadow-md"
                             >
                                 <FaTrash className="mr-2" />
                                 Delete
@@ -273,6 +273,7 @@ export const MilestoneDetailsPage: React.FC = () => {
                         </div>
                     )}
                 </div>
+
 
                 {/* Read-only Warning Banner */}
                 {project?.read_only && (
@@ -348,16 +349,16 @@ export const MilestoneDetailsPage: React.FC = () => {
                             </div>
 
                             <div className="flex-1">
-                                <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100">
+                                <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100 break-words">
                                     {milestone.name}
                                 </h1>
-                                <p className="text-gray-600 dark:text-gray-300 mt-2">
+                                <p className="text-gray-600 dark:text-gray-300 mt-2 break-words">
                                     {milestone.description || 'No description provided'}
                                 </p>
                             </div>
                         </div>
 
-                        <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
                             <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
                                 <div className="flex items-center space-x-2 text-gray-500 dark:text-gray-400">
                                     <FaCalendarAlt />

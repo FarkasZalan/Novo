@@ -164,44 +164,44 @@ export const LabelsManagerPage: React.FC<{ project: Project | null }> = React.me
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
                 {/* Main content area */}
                 {filteredLabels.length === 0 && !searchTerm ? (
                     // Empty state when there are no labels
-                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md dark:shadow-gray-700/50 p-8 text-center">
-                        <div className="mx-auto w-24 h-24 bg-indigo-100 dark:bg-indigo-900/30 rounded-full flex items-center justify-center mb-6">
-                            <FaTags className="text-indigo-600 dark:text-indigo-300 text-3xl" />
+                    <div className="bg-white dark:bg-gray-800 rounded-lg md:rounded-xl shadow-md dark:shadow-gray-700/50 p-6 md:p-8 text-center">
+                        <div className="mx-auto w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-indigo-100 dark:bg-indigo-900/30 rounded-full flex items-center justify-center mb-4 sm:mb-6">
+                            <FaTags className="text-indigo-600 dark:text-indigo-300 text-xl sm:text-2xl md:text-3xl" />
                         </div>
-                        <h3 className="text-2xl font-medium text-gray-900 dark:text-gray-100 mb-2">
+                        <h3 className="text-xl sm:text-2xl font-medium text-gray-900 dark:text-gray-100 mb-2">
                             No labels yet
                         </h3>
-                        <p className="text-gray-600 dark:text-gray-300 mb-6 max-w-md mx-auto">
+                        <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 mb-4 sm:mb-6 max-w-md mx-auto">
                             Create your first label to categorize and organize your project tasks
                         </p>
                         {canManage && !project?.read_only && (
                             <button
                                 onClick={openNewModal}
-                                className="inline-flex cursor-pointer items-center px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors shadow-lg hover:shadow-xl"
+                                className="inline-flex cursor-pointer items-center px-4 py-2 sm:px-5 sm:py-2.5 md:px-6 md:py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors shadow-lg hover:shadow-xl text-sm sm:text-base"
                             >
                                 <FaPlus className="mr-2" /> Create First Label
                             </button>
                         )}
                     </div>
                 ) : (
-                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md dark:shadow-gray-700/50 p-6 transition-colors duration-200">
+                    <div className="bg-white dark:bg-gray-800 rounded-lg md:rounded-xl shadow-md dark:shadow-gray-700/50 p-4 sm:p-6 transition-colors duration-200">
                         {/* Header */}
-                        <div className="flex flex-col gap-4 mb-6">
-                            <div className="flex justify-between items-center">
+                        <div className="flex flex-col gap-3 sm:gap-4 md:gap-6 mb-4 sm:mb-6">
+                            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
                                 <div>
-                                    <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Project Labels</h2>
-                                    <p className="text-gray-600 dark:text-gray-400">
+                                    <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100">Project Labels</h2>
+                                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                                         {labels.length} {labels.length === 1 ? 'label' : 'labels'} total
                                     </p>
                                 </div>
                                 {canManage && !project?.read_only && (
                                     <button
                                         onClick={openNewModal}
-                                        className="inline-flex cursor-pointer items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors"
+                                        className="inline-flex cursor-pointer items-center px-3 py-1.5 sm:px-4 sm:py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors text-sm sm:text-base"
                                     >
                                         <FaPlus className="mr-2" /> New Label
                                     </button>
@@ -209,13 +209,13 @@ export const LabelsManagerPage: React.FC<{ project: Project | null }> = React.me
                             </div>
 
                             {/* Enhanced Search Bar */}
-                            <div className="relative max-w-md">
+                            <div className="relative w-full sm:max-w-md">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <FaSearch className="text-gray-400" />
+                                    <FaSearch className="text-gray-400 text-sm" />
                                 </div>
                                 <input
                                     type="text"
-                                    className="block w-full pl-10 pr-10 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                    className="block w-full pl-9 pr-8 py-1.5 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm sm:text-base"
                                     placeholder="Search labels..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
@@ -225,14 +225,14 @@ export const LabelsManagerPage: React.FC<{ project: Project | null }> = React.me
                                         onClick={clearSearch}
                                         className="absolute cursor-pointer inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                                     >
-                                        <FaTimes />
+                                        <FaTimes className="text-sm" />
                                     </button>
                                 )}
                             </div>
                         </div>
 
                         {/* Labels list */}
-                        <div className="space-y-3">
+                        <div className="space-y-2 sm:space-y-3">
                             {filteredLabels.length > 0 ? (
                                 <AnimatePresence>
                                     {filteredLabels.map((label) => (
@@ -254,14 +254,14 @@ export const LabelsManagerPage: React.FC<{ project: Project | null }> = React.me
                                     ))}
                                 </AnimatePresence>
                             ) : (
-                                <div className="text-center py-8">
-                                    <div className="mx-auto w-16 h-16 bg-indigo-100 dark:bg-indigo-900/30 rounded-full flex items-center justify-center mb-4">
-                                        <FaTags className="text-indigo-600 dark:text-indigo-300 text-xl" />
+                                <div className="text-center py-6 sm:py-8">
+                                    <div className="mx-auto w-12 h-12 sm:w-16 sm:h-16 bg-indigo-100 dark:bg-indigo-900/30 rounded-full flex items-center justify-center mb-3 sm:mb-4">
+                                        <FaTags className="text-indigo-600 dark:text-indigo-300 text-lg sm:text-xl" />
                                     </div>
-                                    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+                                    <h3 className="text-base sm:text-lg font-medium text-gray-900 dark:text-gray-100 mb-1 sm:mb-2">
                                         No matching labels
                                     </h3>
-                                    <p className="text-gray-600 dark:text-gray-300">
+                                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">
                                         Try adjusting your search criteria
                                     </p>
                                 </div>

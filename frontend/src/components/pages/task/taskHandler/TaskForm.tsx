@@ -1065,17 +1065,26 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
                 )}
 
                 {/* Action Buttons */}
-                <div className="mt-8 flex flex-col sm:flex-row gap-2 sm:gap-2 justify-end sm:space-x-4">
-                    <button type="button" onClick={() => navigate(-1)} className="px-4 cursor-pointer py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center">
+                <div className="mt-8 flex flex-col sm:flex-row justify-end gap-2 sm:gap-4">
+                    {/* Cancel Button */}
+                    <button
+                        type="button"
+                        onClick={() => navigate(-1)}
+                        className="w-full sm:w-auto px-4 py-2 border cursor-pointer border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center justify-center"
+                    >
                         <FaTimes className="mr-2" /> Cancel
                     </button>
+
+                    {/* Submit Button */}
                     <button
                         type="submit"
                         disabled={isLoading || hasOversizedFiles}
-                        className={`px-6 py-2 rounded-lg font-medium shadow-sm flex items-center justify-center ${isLoading || hasOversizedFiles ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer'
-                            } ${hasOversizedFiles ?
-                                'bg-gray-500 dark:bg-gray-600 text-white' :
-                                'bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white'
+                        className={`w-full sm:w-auto px-6 py-2 rounded-lg font-medium shadow-sm flex items-center justify-center transition-colors ${isLoading || hasOversizedFiles
+                            ? 'opacity-70 cursor-not-allowed'
+                            : 'cursor-pointer'
+                            } ${hasOversizedFiles
+                                ? 'bg-gray-500 dark:bg-gray-600 text-white'
+                                : 'bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white'
                             }`}
                     >
                         {isLoading ? (
@@ -1093,25 +1102,36 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
                         )}
                     </button>
                 </div>
+
             </form>
 
             {/* Danger Zone Section */}
             {isEdit && (
                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden border border-red-200 dark:border-red-900/50 mt-8">
+                    {/* Header */}
                     <div className="px-6 py-4 bg-red-50 dark:bg-red-900/10 border-b border-red-200 dark:border-red-900/50">
                         <h2 className="text-xl font-semibold text-red-600 dark:text-red-400 flex items-center">
                             <FaExclamationTriangle className="mr-2" /> Danger Zone
                         </h2>
                     </div>
+
+                    {/* Content */}
                     <div className="px-6 py-4">
-                        <div className="flex flex-col md:flex-row md:items-center justify-between">
-                            <div className="mb-4 md:mb-0">
-                                <h3 className="font-medium text-gray-900 dark:text-gray-100">Delete this task</h3>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">This will permanently delete the task. This action cannot be undone.</p>
+                        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                            {/* Text Section */}
+                            <div className="flex-1">
+                                <h3 className="font-medium text-gray-900 dark:text-gray-100">
+                                    Delete this task
+                                </h3>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">
+                                    This will permanently delete the task. This action cannot be undone.
+                                </p>
                             </div>
+
+                            {/* Delete Button */}
                             <button
                                 onClick={() => setShowDeleteConfirm(true)}
-                                className="px-4 py-2 bg-red-600 hover:bg-red-700 cursor-pointer dark:bg-red-700 dark:hover:bg-red-800 text-white rounded-lg font-medium flex items-center transition-colors"
+                                className="w-full md:w-auto px-4 cursor-pointer py-2 bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800 text-white rounded-lg font-medium flex items-center justify-center transition-colors"
                                 disabled={isLoading}
                             >
                                 <FaTrash className="mr-2" /> Delete Task

@@ -208,7 +208,7 @@ export const AddTaskAssignmentDialog = ({
 
                     {/* Members List */}
                     <div className="space-y-4">
-                        <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <h4 className="text-sm sm:text-base font-medium text-gray-700 dark:text-gray-300">
                             Team Members ({filteredUsers.length})
                         </h4>
 
@@ -224,7 +224,7 @@ export const AddTaskAssignmentDialog = ({
                                         animate={{ opacity: 1 }}
                                         className="text-center py-8"
                                     >
-                                        <div className="flex flex-col items-center py-2">
+                                        <div className="flex flex-col items-center py-2 px-4">
                                             <div className="rounded-full bg-gray-100 dark:bg-gray-700 p-4 mb-4">
                                                 <FaSearch className="h-6 w-6 text-gray-500 dark:text-gray-400" />
                                             </div>
@@ -243,19 +243,21 @@ export const AddTaskAssignmentDialog = ({
                                             return (
                                                 <li
                                                     key={user.id}
-                                                    className={`py-3 ${isAssigned ? 'cursor-not-allowed' : 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50'}`}
+                                                    className={`py-3 transition hover:bg-gray-50 dark:hover:bg-gray-700/50 ${isAssigned ? 'cursor-not-allowed' : 'cursor-pointer'
+                                                        }`}
                                                 >
-                                                    <div className={`w-full flex items-center px-3 py-2 rounded-lg transition-colors ${isSelected ? 'bg-indigo-50 dark:bg-indigo-900/10' : ''}`}>
+                                                    <div className={`flex flex-col sm:flex-row items-start sm:items-center px-3 py-2 rounded-lg gap-y-2 sm:gap-y-0 transition-colors ${isSelected ? 'bg-indigo-50 dark:bg-indigo-900/10' : ''
+                                                        }`}>
                                                         <div
                                                             onClick={isAssigned ? undefined : () => handleSelectUser(user)}
-                                                            className="flex-1 flex items-center"
+                                                            className="flex items-center flex-1 w-full min-w-0"
                                                         >
-                                                            <div className="relative">
-                                                                <div className={`h-10 w-10 rounded-full flex items-center justify-center font-medium text-sm mr-3 ${user.id === authState.user?.id
-                                                                    ? 'bg-indigo-200 dark:bg-indigo-800 text-indigo-700 dark:text-indigo-300'
-                                                                    : isSelected
-                                                                        ? 'bg-indigo-600 text-white'
-                                                                        : 'bg-indigo-100 dark:bg-indigo-800 text-indigo-600 dark:text-indigo-300'
+                                                            <div className="relative mr-3 shrink-0">
+                                                                <div className={`h-10 w-10 rounded-full flex items-center justify-center font-medium text-sm ${user.id === authState.user?.id
+                                                                        ? 'bg-indigo-200 dark:bg-indigo-800 text-indigo-700 dark:text-indigo-300'
+                                                                        : isSelected
+                                                                            ? 'bg-indigo-600 text-white'
+                                                                            : 'bg-indigo-100 dark:bg-indigo-800 text-indigo-600 dark:text-indigo-300'
                                                                     }`}>
                                                                     {getUserInitials(user.name)}
                                                                     {user.id === authState.user?.id && (
@@ -265,47 +267,53 @@ export const AddTaskAssignmentDialog = ({
                                                                     )}
                                                                 </div>
                                                             </div>
-                                                            <div className="text-left flex-1 min-w-0">
-                                                                <p className={`text-sm font-medium ${user.id === authState.user?.id
-                                                                    ? 'text-indigo-800 dark:text-indigo-200'
-                                                                    : isSelected
-                                                                        ? 'text-indigo-700 dark:text-indigo-300'
-                                                                        : 'text-gray-900 dark:text-gray-100'
-                                                                    } truncate`}>
+                                                            <div className="text-left min-w-0">
+                                                                <p className={`text-sm font-medium truncate ${user.id === authState.user?.id
+                                                                        ? 'text-indigo-800 dark:text-indigo-200'
+                                                                        : isSelected
+                                                                            ? 'text-indigo-700 dark:text-indigo-300'
+                                                                            : 'text-gray-900 dark:text-gray-100'
+                                                                    }`}>
                                                                     {user.name}
                                                                     {user.id === authState.user?.id && (
                                                                         <span className="ml-1 text-xs text-indigo-600 dark:text-indigo-300">(You)</span>
                                                                     )}
                                                                 </p>
-                                                                <p className={`text-xs truncate ${isSelected ? 'text-indigo-500 dark:text-indigo-400' : 'text-gray-500 dark:text-gray-400'}`}>
+                                                                <p className={`text-xs truncate ${isSelected
+                                                                        ? 'text-indigo-500 dark:text-indigo-400'
+                                                                        : 'text-gray-500 dark:text-gray-400'
+                                                                    }`}>
                                                                     {user.email}
                                                                 </p>
                                                             </div>
                                                         </div>
 
-                                                        {isAssigned ? (
-                                                            <div className="flex items-center gap-2">
-                                                                <span className="text-xs bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-200 px-2 py-1 rounded-full whitespace-nowrap">
-                                                                    {user.id === authState.user?.id ? 'You are assigned' : 'Assigned'}
-                                                                </span>
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => handleUnassignUser(user.id)}
-                                                                    className="p-1.5 cursor-pointer text-gray-400 hover:text-red-500 rounded-full hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
-                                                                    title="Unassign"
+                                                        {/* Right-side Controls */}
+                                                        <div className="mt-2 sm:mt-0 sm:ml-3 shrink-0 flex items-center">
+                                                            {isAssigned ? (
+                                                                <div className="flex items-center gap-2">
+                                                                    <span className="text-xs bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-200 px-2 py-1 rounded-full whitespace-nowrap">
+                                                                        {user.id === authState.user?.id ? 'You are assigned' : 'Assigned'}
+                                                                    </span>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => handleUnassignUser(user.id)}
+                                                                        className="p-1.5 cursor-pointer text-gray-400 hover:text-red-500 rounded-full hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+                                                                        title="Unassign"
+                                                                    >
+                                                                        <FaTrash className="h-4 w-4 text-red-600" />
+                                                                    </button>
+                                                                </div>
+                                                            ) : (
+                                                                <div
+                                                                    onClick={() => handleSelectUser(user)}
+                                                                    className={`h-5 w-5 rounded border cursor-pointer flex items-center justify-center transition-colors ${isSelected ? 'bg-indigo-600 border-indigo-600' : 'border-gray-300 dark:border-gray-500 hover:border-indigo-500'
+                                                                        }`}
                                                                 >
-                                                                    <FaTrash className="h-4 w-4 text-red-600" />
-                                                                </button>
-                                                            </div>
-                                                        ) : (
-                                                            <div
-                                                                onClick={() => handleSelectUser(user)}
-                                                                className={`h-5 w-5 rounded border cursor-pointer flex items-center justify-center transition-colors ${isSelected ? 'bg-indigo-600 border-indigo-600' : 'border-gray-300 dark:border-gray-500 hover:border-indigo-500'
-                                                                    }`}
-                                                            >
-                                                                {isSelected && <FaCheck className="h-3 w-3 text-white" />}
-                                                            </div>
-                                                        )}
+                                                                    {isSelected && <FaCheck className="h-3 w-3 text-white" />}
+                                                                </div>
+                                                            )}
+                                                        </div>
                                                     </div>
                                                 </li>
                                             );

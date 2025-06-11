@@ -181,87 +181,88 @@ export const TasksManagerPage: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-8 px-4 md:px-12 transition-colors duration-300">
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-6 px-4 sm:px-6 md:px-12 transition-colors duration-300">
             <div className="max-w-screen-2xl mx-auto">
                 {/* Header */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
-                    <div className='flex-1 min-w-0'>
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6 mb-8">
+                    <div className="flex-1 min-w-0">
                         <div className="flex items-center">
                             <button
                                 onClick={() => navigate(`/projects/${projectId}`)}
-                                className="mr-4 p-2 rounded-full cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition"
+                                className="mr-3 p-2 rounded-full cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition"
                             >
                                 <FaArrowLeft />
                             </button>
-                            <div className="flex items-center space-x-3">
-                                <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white">{project?.name}</h1>
+                            <div className="flex items-center space-x-2 sm:space-x-3 flex-wrap">
+                                <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white">{project?.name}</h1>
                                 {project?.read_only && (
-                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/40 border border-red-300 dark:border-red-600 text-red-800 dark:text-red-300">
+                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/40 border border-red-300 dark:border-red-600 text-red-800 dark:text-red-300">
                                         <FaBan className="mr-1" size={10} />
                                         Read Only
                                     </span>
                                 )}
                             </div>
                         </div>
-                        <p className="mt-2 text-gray-600 dark:text-gray-400 ml-10">
+                        <p className="mt-2 text-sm sm:text-base text-gray-600 dark:text-gray-400 ml-10">
                             Managing tasks for <span className="font-semibold">{project?.name}</span>
                         </p>
                     </div>
+
                     {canManageTasks && !project?.read_only && (
                         <button
                             onClick={() => navigate(`/projects/${projectId}/tasks/new`)}
-                            className="inline-flex cursor-pointer items-center px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold shadow transition-all"
+                            className="inline-flex items-center justify-center w-full md:w-auto px-4 py-2.5 text-sm sm:text-base bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold shadow transition-all"
                         >
-                            <FaPlus className="mr-2" /> New Task
+                            <FaPlus className="mr-2" />
+                            New Task
                         </button>
                     )}
                 </div>
 
                 {/* Read-only Warning Banner */}
                 {project?.read_only && (
-                    <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-900/50 rounded-xl p-6 mb-4">
-                        <div className="flex items-start">
-                            <div className="flex-shrink-0">
-                                <FaBan className="h-6 w-6 text-red-600 dark:text-red-400" />
-                            </div>
-                            <div className="ml-3">
+                    <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-900/50 rounded-xl p-4 sm:p-6 mb-6 text-sm sm:text-base">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                            <FaBan className="h-6 w-6 text-red-600 dark:text-red-400 flex-shrink-0" />
+                            <div>
                                 <h3 className="text-lg font-medium text-red-800 dark:text-red-300">Read-Only Project</h3>
-                                <div className="mt-2 text-red-700 dark:text-red-200">
-                                    <p>This project is currently in read-only mode because:</p>
-                                    <ul className="list-disc list-inside mt-2 ml-4">
-                                        <li>The premium subscription for this project has been canceled</li>
-                                        <li>This project is using premium features (more than 5 team members)</li>
-                                    </ul>
+                                <p className="mt-2 text-red-700 dark:text-red-200">
+                                    This project is currently in read-only mode because:
+                                </p>
+                                <ul className="list-disc list-inside mt-2 ml-4 text-red-700 dark:text-red-200">
+                                    <li>The premium subscription for this project has been canceled</li>
+                                    <li>This project is using premium features (more than 5 team members)</li>
+                                </ul>
 
-                                    {authState.user.id === project!.owner_id ? (
-                                        <div className="mt-4">
-                                            <div className="flex items-center mb-3">
-                                                <FaUsers className="mr-2" />
-                                                <p>To unlock task management, reduce the number of project members to 5 or fewer</p>
-                                            </div>
-                                            <button
-                                                onClick={() => navigate('/profile')}
-                                                className="inline-flex cursor-pointer items-center justify-center gap-2 mt-4 px-5 py-2.5 border border-transparent text-white bg-indigo-600 dark:bg-indigo-700 hover:bg-indigo-700 dark:hover:bg-indigo-600 rounded-xl font-medium shadow-sm hover:shadow-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-indigo-400"
-                                            >
-                                                <FaCrown className="text-yellow-300 dark:text-yellow-200" />
-                                                Upgrade to Premium
-                                            </button>
-
+                                {authState.user.id === project!.owner_id ? (
+                                    <div className="mt-4 space-y-3">
+                                        <div className="flex items-start sm:items-center gap-2">
+                                            <FaUsers />
+                                            <p>
+                                                To unlock task management, reduce the number of project members to 5 or fewer
+                                            </p>
                                         </div>
-                                    ) : (
-                                        <div className="mt-4 flex items-center">
-                                            <FaUsers className="mr-2" />
-                                            <p>Contact the project owner to unlock task management</p>
-                                        </div>
-                                    )}
-                                </div>
+                                        <button
+                                            onClick={() => navigate('/profile')}
+                                            className="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 dark:bg-indigo-700 hover:bg-indigo-700 dark:hover:bg-indigo-600 text-white rounded-xl font-medium shadow transition"
+                                        >
+                                            <FaCrown className="text-yellow-300 dark:text-yellow-200" />
+                                            Upgrade to Premium
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className="mt-4 flex items-center gap-2">
+                                        <FaUsers />
+                                        <p>Contact the project owner to unlock task management</p>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
                 )}
 
                 {/* View Toggle */}
-                <div className="flex flex-wrap bg-white dark:bg-gray-800 rounded-xl shadow overflow-hidden mb-8 border border-gray-200 dark:border-gray-700">
+                <div className="flex flex-wrap bg-white dark:bg-gray-800 rounded-xl shadow overflow-hidden mb-6 border border-gray-200 dark:border-gray-700">
                     {[
                         { label: 'Board', icon: <FaThLarge />, key: 'board' },
                         { label: 'List', icon: <FaList />, key: 'list' },
@@ -271,25 +272,25 @@ export const TasksManagerPage: React.FC = () => {
                         <button
                             key={key}
                             onClick={() => setView(key as typeof view)}
-                            className={`flex items-center px-3 sm:px-4 py-2 text-sm sm:text-base font-medium transition-all cursor-pointer flex-1 min-w-[100px] sm:min-w-0 justify-center ${view === key
+                            className={`flex items-center px-3 sm:px-4 py-2 text-sm sm:text-base font-medium transition-all cursor-pointer flex-1 min-w-[100px] justify-center ${view === key
                                 ? 'bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300'
                                 : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                                 }`}
                         >
                             {icon}
-                            <span className="ml-1 sm:ml-2">{label}</span>
+                            <span className="ml-2">{label}</span>
                         </button>
                     ))}
                 </div>
 
                 {/* Main Content */}
                 {loading ? (
-                    <div className="flex justify-center items-center h-80 flex-col">
+                    <div className="flex justify-center items-center h-64 sm:h-80 flex-col">
                         <div className="animate-spin rounded-full h-10 w-10 border-4 border-indigo-500 border-t-transparent"></div>
-                        <p className="mt-4 text-gray-500 dark:text-gray-300">Loading tasks...</p>
+                        <p className="mt-4 text-gray-500 dark:text-gray-300 text-sm">Loading tasks...</p>
                     </div>
                 ) : error ? (
-                    <div className="p-6 bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700 rounded-lg text-red-700 dark:text-red-300">
+                    <div className="p-4 sm:p-6 bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700 rounded-lg text-red-700 dark:text-red-300 text-sm sm:text-base">
                         {error}
                     </div>
                 ) : (

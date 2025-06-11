@@ -217,19 +217,19 @@ export const TaskAssignments: React.FC<TaskAssignmentsProps> = ({
 
     return (
         <div className="mb-6">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
                 <div className="flex items-center text-gray-500 dark:text-gray-400">
                     <FaUser className="mr-2" />
                     <h3 className="font-medium">Assigned To</h3>
                 </div>
 
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                     {showAssignSelfButton && !project?.read_only && (
                         <button
                             type="button"
                             onClick={handleAssignMyself}
                             disabled={isAssigningSelf}
-                            className={`flex cursor-pointer items-center text-sm px-3 py-1.5 rounded-lg transition-colors ${isAssignedMyself
+                            className={`flex items-center cursor-pointer text-sm px-3 py-1.5 rounded-lg transition-colors ${isAssignedMyself
                                 ? "bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/40 text-red-700 dark:text-red-200 shadow-sm"
                                 : "bg-indigo-100 dark:bg-indigo-900/30 hover:bg-indigo-200 dark:hover:bg-indigo-900/40 text-indigo-700 dark:text-indigo-200 shadow-sm"
                                 }`}
@@ -266,7 +266,7 @@ export const TaskAssignments: React.FC<TaskAssignmentsProps> = ({
                     {error}
                 </div>
             ) : (
-                <div className="space-y-4">
+                <div className="space-y-6">
                     {/* Pending Assignments */}
                     {isOpenForm && pendingUsers.length > 0 && (
                         <div>
@@ -300,7 +300,7 @@ export const TaskAssignments: React.FC<TaskAssignmentsProps> = ({
                                         <button
                                             type="button"
                                             onClick={() => handleUnassignUser(user.id)}
-                                            className="absolute right-2 cursor-pointer top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-red-500 dark:hover:text-red-400"
+                                            className="absolute cursor-pointer right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-red-500 dark:hover:text-red-400"
                                         >
                                             <FaTimes className="h-3 w-3" />
                                         </button>
@@ -357,7 +357,7 @@ export const TaskAssignments: React.FC<TaskAssignmentsProps> = ({
                                             <button
                                                 type="button"
                                                 onClick={() => handleUnassignUser(user.id)}
-                                                className="absolute right-2 cursor-pointer top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-red-500 dark:hover:text-red-400"
+                                                className="absolute cursor-pointer right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-red-500 dark:hover:text-red-400"
                                             >
                                                 <FaTimes className="h-3 w-3" />
                                             </button>

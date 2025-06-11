@@ -102,17 +102,17 @@ export const CommentLogsComponent = ({ projectId, taskId, commentId }: CommentLo
                             <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                 {change.field}
                             </div>
-                            <div className="flex items-start">
-                                <div className="flex-1 bg-white dark:bg-gray-800 p-2 rounded-l-lg border-r-0 border border-gray-200 dark:border-gray-600">
+                            <div className="flex flex-col sm:flex-row sm:items-start gap-2">
+                                <div className="flex-1 bg-white dark:bg-gray-800 p-2 rounded-lg sm:rounded-l-lg sm:rounded-r-none border border-gray-200 dark:border-gray-600 sm:border-r-0">
                                     <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Before:</div>
-                                    <div className="line-through text-gray-700 dark:text-gray-300">
-                                        {change.oldValue}
+                                    <div className="line-through text-gray-700 dark:text-gray-300 break-words">
+                                        {change.oldValue || <span className="text-gray-400 italic">empty</span>}
                                     </div>
                                 </div>
-                                <div className="flex-1 bg-white dark:bg-gray-800 p-2 rounded-r-lg border border-gray-200 dark:border-gray-600">
+                                <div className="flex-1 bg-white dark:bg-gray-800 p-2 rounded-lg sm:rounded-r-lg sm:rounded-l-none border border-gray-200 dark:border-gray-600">
                                     <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">After:</div>
-                                    <div className="text-green-600 dark:text-green-400">
-                                        {change.newValue}
+                                    <div className="text-green-600 dark:text-green-400 break-words">
+                                        {change.newValue || <span className="text-gray-400 italic">empty</span>}
                                     </div>
                                 </div>
                             </div>
@@ -152,23 +152,34 @@ export const CommentLogsComponent = ({ projectId, taskId, commentId }: CommentLo
                 </p>
             </div>
 
-            {logs.map((log) => (
-                <div key={log.id} className="flex space-x-3 p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg transition-colors duration-200">
-                    <div className="flex-shrink-0">
-                        <div className={`h-10 w-10 rounded-full flex items-center justify-center ${getOperationColor(log.table_name)}`}>
-                            {getOperationIcon(log.table_name)}
+            <div className="space-y-4 px-2 sm:px-0">
+                {logs.map((log) => (
+                    <div key={log.id} className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3 p-3 sm:p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg transition-colors duration-200">
+                        <div className="flex sm:flex-col items-center sm:items-start gap-3">
+                            <div className="flex-shrink-0">
+                                <div className={`h-10 w-10 rounded-full flex items-center justify-center ${getOperationColor(log.table_name)}`}>
+                                    {getOperationIcon(log.table_name)}
+                                </div>
+                            </div>
+                            <div className="sm:text-center">
+                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                    {format(new Date(log.created_at), 'MMM d, yyyy')}
+                                    <br className="hidden sm:block" />
+                                    {format(new Date(log.created_at), 'H:mm')}
+                                </p>
+                            </div>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <div className="text-sm text-gray-900 dark:text-gray-100">
+                                {getActionDescription(log)}
+                            </div>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                                By {getChangedByDisplay(log)}
+                            </p>
                         </div>
                     </div>
-                    <div className="min-w-0 flex-1">
-                        <div className="text-sm text-gray-900 dark:text-gray-100">
-                            {getActionDescription(log)}
-                        </div>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                            By {getChangedByDisplay(log)} • {format(new Date(log.created_at), 'MMM d, yyyy H:mm')}
-                        </p>
-                    </div>
-                </div>
-            ))}
+                ))}
+            </div>
         </div>
     );
 };

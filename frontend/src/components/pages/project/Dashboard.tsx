@@ -241,18 +241,18 @@ export const Dashboard = () => {
                 {/* Projects Section */}
                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md dark:shadow-gray-700/50 overflow-hidden transition-colors duration-200">
                     {/* Projects Header */}
-                    <div className="border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center">
-                        <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2 sm:mb-0">Your Projects</h2>
+                    <div className="border-b border-gray-200 dark:border-gray-700 px-4 sm:px-6 py-4">
+                        <div className="flex flex-col space-y-3 sm:flex-row sm:justify-between sm:items-center sm:space-y-0">
+                            <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100">Your Projects</h2>
 
-                        <div className="flex flex-col sm:flex-row w-full sm:w-auto space-y-2 sm:space-y-0 sm:space-x-4">
-                            {/* Search */}
-                            <div className="relative">
+                            {/* Search - Full width on mobile */}
+                            <div className="relative w-full sm:w-64">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <FaSearch className="text-gray-400" />
+                                    <FaSearch className="text-gray-400 text-sm" />
                                 </div>
                                 <input
                                     type="text"
-                                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                    className="block w-full pl-10 pr-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                                     placeholder="Search projects..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -261,30 +261,42 @@ export const Dashboard = () => {
                         </div>
                     </div>
 
-                    {/* Tabs */}
-                    <div className="border-b border-gray-200 dark:border-gray-700 px-6">
-                        <nav className="-mb-px flex space-x-8 overflow-x-auto pb-2">
+                    {/* Tabs - Horizontal scroll on mobile */}
+                    <div className="border-b border-gray-200 dark:border-gray-700 px-4 sm:px-6">
+                        <nav className="-mb-px flex space-x-4 sm:space-x-8 overflow-x-auto scrollbar-hide">
                             <button
                                 onClick={() => setActiveTab("all")}
-                                className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm cursor-pointer ${activeTab === "all" ? "border-indigo-500 text-indigo-600 dark:text-indigo-400" : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-500"}`}
+                                className={`flex-shrink-0 whitespace-nowrap py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm cursor-pointer ${activeTab === "all"
+                                        ? "border-indigo-500 text-indigo-600 dark:text-indigo-400"
+                                        : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-500"
+                                    }`}
                             >
                                 All Projects
                             </button>
                             <button
                                 onClick={() => setActiveTab("in-progress")}
-                                className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm cursor-pointer ${activeTab === "in-progress" ? "border-yellow-500 text-yellow-600 dark:text-yellow-400" : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-500"}`}
+                                className={`flex-shrink-0 whitespace-nowrap py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm cursor-pointer ${activeTab === "in-progress"
+                                        ? "border-yellow-500 text-yellow-600 dark:text-yellow-400"
+                                        : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-500"
+                                    }`}
                             >
                                 In Progress
                             </button>
                             <button
                                 onClick={() => setActiveTab("completed")}
-                                className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm cursor-pointer ${activeTab === "completed" ? "border-green-500 text-green-600 dark:text-green-400" : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-500"}`}
+                                className={`flex-shrink-0 whitespace-nowrap py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm cursor-pointer ${activeTab === "completed"
+                                        ? "border-green-500 text-green-600 dark:text-green-400"
+                                        : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-500"
+                                    }`}
                             >
                                 Completed
                             </button>
                             <button
                                 onClick={() => setActiveTab("not-started")}
-                                className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm cursor-pointer ${activeTab === "not-started" ? "border-gray-500 text-gray-600 dark:text-gray-400" : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-500"}`}
+                                className={`flex-shrink-0 whitespace-nowrap py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm cursor-pointer ${activeTab === "not-started"
+                                        ? "border-gray-500 text-gray-600 dark:text-gray-400"
+                                        : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-500"
+                                    }`}
                             >
                                 Not Started
                             </button>
@@ -295,86 +307,105 @@ export const Dashboard = () => {
                     <div className="divide-y divide-gray-200 dark:divide-gray-700">
                         {filteredProjects.length > 0 ? (
                             filteredProjects.map((project) => (
-                                <div key={project.id} className="px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200 cursor-pointer"
-                                    onClick={() => navigate(`/projects/${project.id}`)}>
-                                    <div className="flex flex-col md:flex-row md:items-center justify-between">
-                                        <div className="flex-1 min-w-0">
-                                            <div className="flex items-center space-x-3">
-                                                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
-                                                    {project.name}
-                                                </h3>
-                                                <span className="inline-flex items-center">
-                                                    {getStatusIcon(project.status)}
-                                                </span>
-                                                {!isProjectOwner(project) && (
-                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
-                                                        Member
+                                <div
+                                    key={project.id}
+                                    className="px-4 sm:px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200 cursor-pointer"
+                                    onClick={() => navigate(`/projects/${project.id}`)}
+                                >
+                                    <div className="space-y-3">
+                                        {/* Project Header */}
+                                        <div className="flex items-start justify-between">
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center space-x-2 flex-wrap gap-y-1">
+                                                    <h3 className="text-base sm:text-lg font-medium text-gray-900 dark:text-gray-100 truncate">
+                                                        {project.name}
+                                                    </h3>
+                                                    <span className="inline-flex items-center flex-shrink-0">
+                                                        {getStatusIcon(project.status)}
                                                     </span>
-                                                )}
-
-                                                {project.read_only && (
-                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/40 border border-red-300 dark:border-red-600 text-red-800 dark:text-red-300">
-                                                        <FaBan className="mr-1" size={10} />
-                                                        Read Only
-                                                    </span>
-                                                )}
+                                                    {!isProjectOwner(project) && (
+                                                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 flex-shrink-0">
+                                                            Member
+                                                        </span>
+                                                    )}
+                                                    {project.read_only && (
+                                                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/40 border border-red-300 dark:border-red-600 text-red-800 dark:text-red-300 flex-shrink-0">
+                                                            <FaBan className="mr-1" size={8} />
+                                                            Read Only
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 line-clamp-2 sm:truncate">
+                                                    {project.description}
+                                                </p>
                                             </div>
-                                            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 truncate">
-                                                {project.description}
-                                            </p>
-                                            <div className="mt-2 flex flex-wrap gap-4">
-                                                <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
-                                                    <FaUsers className="mr-1.5" />
+
+                                            {/* Action Button - Mobile positioned at top right */}
+                                            <div className="ml-2 flex-shrink-0 sm:hidden">
+                                                {renderActionButtons(project)}
+                                            </div>
+                                        </div>
+
+                                        {/* Project Stats - Stacked on mobile, inline on larger screens */}
+                                        <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+                                            <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-500 dark:text-gray-400">
+                                                <div className="flex items-center">
+                                                    <FaUsers className="mr-1.5 text-xs" />
                                                     <span>{project.memberCount} members</span>
                                                 </div>
-                                                <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
-                                                    <FaTasks className="mr-1.5" />
+                                                <div className="flex items-center">
+                                                    <FaTasks className="mr-1.5 text-xs" />
                                                     <span>{project.completed_tasks}/{project.total_tasks} tasks</span>
                                                 </div>
                                                 {project.attachments_count > 0 && (
-                                                    <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
-                                                        <FaPaperclip className="mr-1.5" />
+                                                    <div className="flex items-center">
+                                                        <FaPaperclip className="mr-1.5 text-xs" />
                                                         <span>{project.attachments_count} files</span>
                                                     </div>
                                                 )}
                                             </div>
-                                        </div>
 
-                                        <div className="mt-4 md:mt-0 md:ml-4 flex items-center space-x-4">
-                                            {/* Progress Bar */}
-                                            <div className="w-32">
-                                                <div className="h-2 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
-                                                    <div
-                                                        className="h-full bg-indigo-600 dark:bg-indigo-500"
-                                                        style={{ width: `${project.total_tasks ? Math.round((project.completed_tasks! / project.total_tasks) * 100) : 0}%` }}
-                                                    />
+                                            {/* Progress Bar and Action Button - Bottom section */}
+                                            <div className="flex items-center justify-between sm:justify-end space-x-4">
+                                                {/* Progress Bar - Wider on mobile */}
+                                                <div className="flex-1 sm:flex-initial sm:w-32">
+                                                    <div className="h-2 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
+                                                        <div
+                                                            className="h-full bg-indigo-600 dark:bg-indigo-500 transition-all duration-300"
+                                                            style={{
+                                                                width: `${project.total_tasks ? Math.round((project.completed_tasks! / project.total_tasks) * 100) : 0}%`
+                                                            }}
+                                                        />
+                                                    </div>
+                                                    <p className="mt-1 text-xs text-center text-gray-500 dark:text-gray-400">
+                                                        {project.total_tasks ? Math.round((project.completed_tasks! / project.total_tasks) * 100) : 0}% complete
+                                                    </p>
                                                 </div>
-                                                <p className="mt-1 text-xs text-center text-gray-500 dark:text-gray-400">
-                                                    {project.total_tasks ? Math.round((project.completed_tasks! / project.total_tasks) * 100) : 0}% complete
-                                                </p>
-                                            </div>
 
-                                            {/* Action Button */}
-                                            {renderActionButtons(project)}
+                                                {/* Action Button - Hidden on mobile, shown on larger screens */}
+                                                <div className="hidden sm:block flex-shrink-0">
+                                                    {renderActionButtons(project)}
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             ))
                         ) : (
-                            <div className="px-6 py-12 text-center">
+                            <div className="px-4 sm:px-6 py-12 text-center">
                                 <div className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500">
                                     <FaProjectDiagram className="w-full h-full" />
                                 </div>
                                 <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">No projects found</h3>
-                                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 px-4">
                                     {searchQuery ? "Try a different search term" : "Get started by creating a new project"}
                                 </p>
                                 <div className="mt-6">
                                     <Link
                                         to="/new"
-                                        className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                        className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200"
                                     >
-                                        <FaPlus className="-ml-1 mr-2 h-5 w-5" />
+                                        <FaPlus className="-ml-1 mr-2 h-4 w-4" />
                                         New Project
                                     </Link>
                                 </div>

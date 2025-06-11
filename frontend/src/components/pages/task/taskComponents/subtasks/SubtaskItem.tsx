@@ -110,18 +110,18 @@ export const SubtaskItem: React.FC<SubtaskItemProps> = ({
     return (
         <>
             <div
-                className={`${isExpanded && !openFromEdit ? 'cursor-default bg-gray-50 dark:bg-gray-700' : 'cursor-pointer '} group p-5 bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 border border-gray-100 dark:border-gray-700 ${subtask.status === 'completed' ? 'bg-green-50/30 dark:bg-green-900/10 border-green-100 dark:border-green-900/20' : ''}`}
+                className={`${isExpanded && !openFromEdit ? 'cursor-default bg-gray-50 dark:bg-gray-700' : 'cursor-pointer '} group p-4 sm:p-5 bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 border border-gray-100 dark:border-gray-700 ${subtask.status === 'completed' ? 'bg-green-50/30 dark:bg-green-900/10 border-green-100 dark:border-green-900/20' : ''}`}
                 onClick={
                     (isExpanded && !openFromEdit) ? undefined : handleClick
                 }
             >
-                <div className="flex items-start justify-between gap-4">
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-4">
                     {/* Left section with completion indicator and title */}
-                    <div className="flex items-start space-x-4 flex-1">
+                    <div className="flex items-start space-x-3 sm:space-x-4 flex-1 min-w-0">
                         {/* Status indicator */}
                         <div
-                            className={`flex-shrink-0 mt-1 h-6 w-6 rounded-md flex items-center justify-center transition-all duration-300 ease-in-out
-              ${subtask.status === "completed"
+                            className={`flex-shrink-0 mt-0.5 sm:mt-1 h-5 w-5 sm:h-6 sm:w-6 rounded-md flex items-center justify-center transition-all duration-300 ease-in-out
+                            ${subtask.status === "completed"
                                     ? "bg-green-100 dark:bg-green-900/40 border border-green-300 dark:border-green-600"
                                     : subtask.status === "in-progress"
                                         ? "bg-yellow-100 dark:bg-yellow-900/40 border border-yellow-300 dark:border-yellow-600"
@@ -140,10 +140,14 @@ export const SubtaskItem: React.FC<SubtaskItemProps> = ({
                         </div>
 
                         {/* Title and metadata */}
-                        <div className="flex-1 min-w-0 space-y-3">
-                            <div className="flex items-center">
+                        <div className="flex-1 min-w-0 space-y-2 sm:space-y-3">
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                                <h3 className={`font-medium text-gray-900 dark:text-gray-100 truncate text-base ${subtask.status === "completed" ? "line-through opacity-70" : ""}`}>
+                                    {subtask.title}
+                                </h3>
+
                                 {canManageTasks && !project?.read_only && !openFromEdit && (
-                                    <div className="flex items-center space-x-2">
+                                    <div className="flex items-center">
                                         <button
                                             type='button'
                                             onClick={(e) => {
@@ -152,9 +156,9 @@ export const SubtaskItem: React.FC<SubtaskItemProps> = ({
                                             }}
                                             aria-expanded={isExpanded ? "true" : "false"}
                                             aria-label={isExpanded ? "Collapse details" : "Expand more options"}
-                                            className="inline-flex cursor-pointer items-center gap-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors focus:outline-none rounded-lg py-2 px-3"
+                                            className="inline-flex cursor-pointer items-center gap-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors focus:outline-none rounded-lg py-1 px-2 text-sm"
                                         >
-                                            <span className="text-sm font-medium">
+                                            <span className="font-medium">
                                                 {isExpanded ? 'Less' : 'More'} Options
                                             </span>
                                             {isExpanded ? (
@@ -165,14 +169,10 @@ export const SubtaskItem: React.FC<SubtaskItemProps> = ({
                                         </button>
                                     </div>
                                 )}
-
-                                <h3 className={`font-medium text-gray-900 dark:text-gray-100 truncate text-base ${subtask.status === "completed" ? "line-through opacity-70" : ""}`}>
-                                    {subtask.title}
-                                </h3>
                             </div>
 
                             {/* Labels and milestone row */}
-                            <div className="flex flex-wrap gap-2">
+                            <div className="flex flex-wrap gap-1 sm:gap-2">
                                 {/* Milestone */}
                                 {subtask.milestone_id && (
                                     <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-indigo-50 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/70"
@@ -182,7 +182,9 @@ export const SubtaskItem: React.FC<SubtaskItemProps> = ({
                                         }}
                                     >
                                         <FaFlag className="mr-1.5" style={{ color: subtask.milestone_color }} />
-                                        {subtask.milestone_name || "Milestone"}
+                                        <span className="truncate max-w-[100px] sm:max-w-none">
+                                            {subtask.milestone_name || "Milestone"}
+                                        </span>
                                     </span>
                                 )}
                                 {/* Labels */}
@@ -202,7 +204,9 @@ export const SubtaskItem: React.FC<SubtaskItemProps> = ({
                                                     }}
                                                 >
                                                     <FaTag className="mr-1" size={10} />
-                                                    {label.name}
+                                                    <span className="truncate max-w-[80px] sm:max-w-none">
+                                                        {label.name}
+                                                    </span>
                                                 </span>
                                             );
                                         })}
@@ -247,10 +251,10 @@ export const SubtaskItem: React.FC<SubtaskItemProps> = ({
                             </div>
 
                             {/* Second row with due date, attachments, assignments */}
-                            <div className="flex flex-wrap items-center gap-2">
+                            <div className="flex flex-wrap items-center gap-1 sm:gap-2">
                                 {/* Due date */}
                                 {subtask.due_date && (
-                                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${getDueDateColor()}`}>
+                                    <span className={`inline-flex items-center px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-xs font-medium ${getDueDateColor()}`}>
                                         {format(new Date(subtask.due_date), 'MMM d')}
                                         {subtask.status !== 'completed' && isToday(new Date(subtask.due_date)) && " • Today"}
                                         {subtask.status !== 'completed' && isTomorrow(new Date(subtask.due_date)) && " • Tomorrow"}
@@ -292,47 +296,49 @@ export const SubtaskItem: React.FC<SubtaskItemProps> = ({
                     </div>
 
                     {/* Right section with priority, delete button (when openFromEdit), and chevron */}
-                    <div className="flex items-center space-x-2 self-center">
-                        {/* Priority Badge */}
+                    <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-3 sm:self-center">
+                        {/* Priority Badge - moved to top on mobile */}
                         {subtask.priority && (
-                            <div className={`px-3 py-1 text-xs rounded-full font-semibold ${getPriorityColor()}`}>
+                            <div className={`px-2 py-0.5 sm:px-3 sm:py-1 text-xs rounded-full font-semibold ${getPriorityColor()}`}>
                                 {subtask.priority}
                             </div>
                         )}
 
-                        {/* Delete button (only shown when openFromEdit is true) */}
-                        {openFromEdit && canManageTasks && (
-                            <button
-                                type='button'
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    setShowDeleteConfirm(true);
-                                }}
-                                className="p-2 cursor-pointer text-gray-400 hover:text-red-500 dark:hover:text-red-400 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                                title="Delete subtask"
-                            >
-                                <FaTrash className="w-4 h-4" />
-                            </button>
-                        )}
+                        <div className="flex items-center gap-2">
+                            {/* Delete button (only shown when openFromEdit is true) */}
+                            {openFromEdit && canManageTasks && (
+                                <button
+                                    type='button'
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setShowDeleteConfirm(true);
+                                    }}
+                                    className="p-1.5 sm:p-2 cursor-pointer text-gray-400 hover:text-red-500 dark:hover:text-red-400 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                                    title="Delete subtask"
+                                >
+                                    <FaTrash className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                </button>
+                            )}
 
-                        {/* Arrow indicator */}
-                        <div className="h-8 w-8 rounded-full bg-gray-50 dark:bg-gray-700 flex items-center justify-center group-hover:bg-indigo-100 dark:group-hover:bg-indigo-900/50 transition-colors">
-                            <FaChevronRight className="text-gray-400 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 transition-colors" size={12} />
+                            {/* Arrow indicator */}
+                            <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-full bg-gray-50 dark:bg-gray-700 flex items-center justify-center group-hover:bg-indigo-100 dark:group-hover:bg-indigo-900/50 transition-colors">
+                                <FaChevronRight className="text-gray-400 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 transition-colors" size={12} />
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 {/* Expanded details (hidden when openFromEdit is true) */}
                 {isExpanded && !openFromEdit && (
-                    <div className="mt-6 ml-10 border-t border-gray-200 dark:border-gray-700 pt-6">
+                    <div className="mt-4 sm:mt-6 ml-0 sm:ml-10 border-t border-gray-200 dark:border-gray-700 pt-4 sm:pt-6">
                         {canManageTasks && (
-                            <div className="space-y-6 text-sm">
+                            <div className="space-y-4 sm:space-y-6 text-sm">
                                 {/* Dropdowns Row */}
-                                <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Fast Actions</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <h3 className="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-200">Fast Actions</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                                     {/* Status */}
                                     <div>
-                                        <label htmlFor="status" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        <label htmlFor="status" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 sm:mb-2">
                                             Status
                                         </label>
                                         <select
@@ -344,7 +350,7 @@ export const SubtaskItem: React.FC<SubtaskItemProps> = ({
                                                 onUpdate({ ...subtask, status: e.target.value });
                                             }}
                                             onClick={(e) => e.stopPropagation()}
-                                            className="w-full cursor-pointer px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent transition"
+                                            className="w-full cursor-pointer px-3 py-1.5 sm:px-4 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent transition text-sm sm:text-base"
                                         >
                                             <option value="not-started">Not Started</option>
                                             <option value="in-progress">In Progress</option>
@@ -355,7 +361,7 @@ export const SubtaskItem: React.FC<SubtaskItemProps> = ({
 
                                     {/* Priority */}
                                     <div>
-                                        <label htmlFor="priority" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        <label htmlFor="priority" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 sm:mb-2">
                                             Priority
                                         </label>
                                         <select
@@ -367,7 +373,7 @@ export const SubtaskItem: React.FC<SubtaskItemProps> = ({
                                                 onUpdate({ ...subtask, priority: e.target.value as 'low' | 'medium' | 'high' });
                                             }}
                                             onClick={(e) => e.stopPropagation()}
-                                            className="w-full cursor-pointer px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent transition"
+                                            className="w-full cursor-pointer px-3 py-1.5 sm:px-4 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent transition text-sm sm:text-base"
                                         >
                                             <option value="low">Low</option>
                                             <option value="medium">Medium</option>
@@ -377,16 +383,16 @@ export const SubtaskItem: React.FC<SubtaskItemProps> = ({
                                 </div>
 
                                 {/* Buttons Row */}
-                                <div className="flex justify-end space-x-3 pt-2">
+                                <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 sm:space-x-3 pt-1 sm:pt-2">
                                     <button
                                         type='button'
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             onEdit(subtask.id);
                                         }}
-                                        className="inline-flex cursor-pointer items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 rounded-lg transition"
+                                        className="inline-flex cursor-pointer items-center justify-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 rounded-lg transition"
                                     >
-                                        <FaEdit size={14} />
+                                        <FaEdit size={12} />
                                         Go to Edit
                                     </button>
                                     <button
@@ -395,9 +401,9 @@ export const SubtaskItem: React.FC<SubtaskItemProps> = ({
                                             e.stopPropagation();
                                             setShowDeleteConfirm(true);
                                         }}
-                                        className="inline-flex cursor-pointer items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 rounded-lg transition"
+                                        className="inline-flex cursor-pointer items-center justify-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 rounded-lg transition"
                                     >
-                                        <FaTrash size={14} />
+                                        <FaTrash size={12} />
                                         Delete
                                     </button>
                                 </div>

@@ -243,13 +243,13 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
     return (
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
             {/* Header */}
-            <div className="p-6 border-b border-gray-100 dark:border-gray-700">
-                <div className="flex items-center justify-between">
+            <div className="p-4 sm:p-6 border-b border-gray-100 dark:border-gray-700">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div>
-                        <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+                        <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-100">
                             Milestone Tasks
                         </h3>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                        <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">
                             {milestone.completed_tasks_count} of {milestone.all_tasks_count} tasks completed
                         </p>
                     </div>
@@ -261,16 +261,16 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                                 setSearchQuery('');
                                 setSelectedTaskIds([]);
                             }}
-                            className="flex items-center px-4 py-2.5 cursor-pointer bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors shadow-sm hover:shadow-md"
+                            className="flex items-center justify-center sm:justify-start px-3 py-2 sm:px-4 sm:py-2.5 cursor-pointer bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors shadow-sm hover:shadow-md text-sm sm:text-base"
                         >
                             {showTaskSelector ? (
                                 <>
-                                    <FaTimes className="mr-2" />
+                                    <FaTimes className="mr-1 sm:mr-2" />
                                     Cancel
                                 </>
                             ) : (
                                 <>
-                                    <FaPlus className="mr-2" />
+                                    <FaPlus className="mr-1 sm:mr-2" />
                                     Add Tasks
                                 </>
                             )}
@@ -289,7 +289,7 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                         transition={{ duration: 0.2 }}
                         className="border-b border-gray-100 dark:border-gray-700"
                     >
-                        <div className="p-6">
+                        <div className="p-4 sm:p-6">
                             <div className="relative mb-4">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <FaSearch className="text-gray-400" />
@@ -300,7 +300,7 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                                     onChange={handleSearchChange}
                                     ref={searchInputRef}
                                     placeholder={`Search tasks (min ${MIN_SEARCH_LENGTH} chars)...`}
-                                    className="block w-full pl-10 pr-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                    className="block w-full pl-10 pr-3 py-2 sm:py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm sm:text-base"
                                     autoFocus
                                 />
                                 {isSearching && (
@@ -322,14 +322,14 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                             </div>
 
                             {isSearching ? (
-                                <div className="text-center py-6 text-gray-500 dark:text-gray-400">
+                                <div className="text-center py-4 sm:py-6 text-gray-500 dark:text-gray-400 text-sm sm:text-base">
                                     <FaSpinner className="animate-spin inline-block mr-2" />
                                     Searching tasks...
                                 </div>
                             ) : searchQuery.length === 1 ? (
-                                <div className="text-center py-6 text-gray-500 dark:text-gray-400">
+                                <div className="text-center py-4 sm:py-6 text-gray-500 dark:text-gray-400 text-xs sm:text-sm">
                                     <div className="flex flex-col items-center">
-                                        <FaSearch className="text-gray-400 mb-2" size={20} />
+                                        <FaSearch className="text-gray-400 mb-2" size={18} />
                                         <p>Type at least 2 characters to start search</p>
                                     </div>
                                 </div>
@@ -340,41 +340,41 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                                             key={task.id}
                                             initial={{ opacity: 0, y: 5 }}
                                             animate={{ opacity: 1, y: 0 }}
-                                            className={`p-4 rounded-xl border cursor-pointer transition-all duration-200 ${selectedTaskIds.includes(task.id)
+                                            className={`p-3 sm:p-4 rounded-xl border cursor-pointer transition-all duration-200 ${selectedTaskIds.includes(task.id)
                                                 ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20 shadow-sm'
                                                 : 'border-gray-200 dark:border-gray-600 hover:border-indigo-300 dark:hover:border-indigo-500 hover:shadow-md'
                                                 }`}
                                             onClick={() => toggleTaskSelection(task.id)}
                                         >
-                                            <div className="flex items-start gap-3">
+                                            <div className="flex items-start gap-2 sm:gap-3">
                                                 {/* Checkbox */}
                                                 <div className="mt-0.5 flex-shrink-0">
                                                     <div
-                                                        className={`flex items-center justify-center h-5 w-5 rounded-md border transition-all ${selectedTaskIds.includes(task.id)
+                                                        className={`flex items-center justify-center h-4 w-4 sm:h-5 sm:w-5 rounded-md border transition-all ${selectedTaskIds.includes(task.id)
                                                             ? 'bg-indigo-600 border-indigo-600 scale-110'
                                                             : 'border-gray-300 dark:border-gray-500 group-hover:border-indigo-400'
                                                             }`}
                                                     >
                                                         {selectedTaskIds.includes(task.id) && (
-                                                            <FaCheck className="h-3 w-3 text-white" />
+                                                            <FaCheck className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-white" />
                                                         )}
                                                     </div>
                                                 </div>
 
                                                 {/* Task Content */}
                                                 <div className="flex-1 min-w-0">
-                                                    <div className="flex flex-col space-y-2">
+                                                    <div className="flex flex-col space-y-1.5 sm:space-y-2">
                                                         {/* Title */}
-                                                        <h4 className={`font-medium text-gray-900 dark:text-gray-100 ${task.status === "completed" ? "line-through opacity-70" : ""
+                                                        <h4 className={`font-medium text-gray-900 dark:text-gray-100 text-sm sm:text-base ${task.status === "completed" ? "line-through opacity-70" : ""
                                                             }`}>
                                                             {task.title}
                                                         </h4>
 
                                                         {/* First row - labels */}
-                                                        <div className="flex flex-wrap items-center gap-2">
+                                                        <div className="flex flex-wrap items-center gap-1 sm:gap-2">
                                                             {/* Labels */}
                                                             {task.labels && task.labels.length > 0 && (
-                                                                <div className="flex flex-wrap items-center gap-1.5">
+                                                                <div className="flex flex-wrap items-center gap-1 sm:gap-1.5">
                                                                     {task.labels.slice(0, 2).map((label: any) => {
                                                                         const hexColor = label.color.startsWith('#') ? label.color : `#${label.color}`;
                                                                         const textColor = getLabelTextColor(hexColor);
@@ -383,14 +383,14 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                                                                         return (
                                                                             <span
                                                                                 key={label.id}
-                                                                                className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${textColor}`}
+                                                                                className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] sm:text-xs font-medium ${textColor}`}
                                                                                 style={{
                                                                                     backgroundColor: hexColor,
                                                                                     border: `1px solid ${borderColor}`,
                                                                                     boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
                                                                                 }}
                                                                             >
-                                                                                <FaTag className="mr-1" size={10} />
+                                                                                <FaTag className="mr-1" size={8} />
                                                                                 {label.name}
                                                                             </span>
                                                                         );
@@ -398,10 +398,10 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
 
                                                                     {task.labels.length > 2 && (
                                                                         <div className="relative inline-block">
-                                                                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 cursor-default hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors peer">
+                                                                            <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] sm:text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 cursor-default hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors peer">
                                                                                 +{task.labels.length - 2}
                                                                             </span>
-                                                                            <div className="absolute z-50 hidden peer-hover:block bottom-full mb-2 left-0 min-w-max bg-white dark:bg-gray-800 shadow-lg rounded-md p-2 border border-gray-200 dark:border-gray-700">
+                                                                            <div className="absolute z-50 hidden peer-hover:block bottom-full mb-2 left-0 min-w-max bg-white dark:bg-gray-800 shadow-lg rounded-md p-2 border border-gray-200 dark:border-gray-700 text-xs">
                                                                                 <div className="flex flex-wrap gap-1">
                                                                                     {task.labels.slice(2).map((label: any) => {
                                                                                         const hexColor = label.color.startsWith('#') ? label.color : `#${label.color}`;
@@ -409,13 +409,13 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                                                                                         return (
                                                                                             <span
                                                                                                 key={label.id}
-                                                                                                className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${textColor}`}
+                                                                                                className={`inline-flex items-center px-1.5 py-0.5 rounded-md text-xs font-medium ${textColor}`}
                                                                                                 style={{
                                                                                                     backgroundColor: hexColor,
                                                                                                     border: `1px solid ${hexColor}80`
                                                                                                 }}
                                                                                             >
-                                                                                                <FaTag className="mr-1" size={10} />
+                                                                                                <FaTag className="mr-1" size={8} />
                                                                                                 {label.name}
                                                                                             </span>
                                                                                         );
@@ -430,8 +430,8 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                                                         </div>
 
                                                         {/* Second row - status and priority */}
-                                                        <div className="flex flex-wrap items-center gap-2">
-                                                            <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${task.status === "completed"
+                                                        <div className="flex flex-wrap items-center gap-1 sm:gap-2">
+                                                            <span className={`inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] sm:text-xs font-medium ${task.status === "completed"
                                                                 ? "bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-200"
                                                                 : task.status === "in-progress"
                                                                     ? "bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-200"
@@ -441,7 +441,7 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                                                                 }`}>
                                                                 {task.status.replace('-', ' ')}
                                                             </span>
-                                                            <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${task.priority === "high"
+                                                            <span className={`inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] sm:text-xs font-medium ${task.priority === "high"
                                                                 ? "bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200"
                                                                 : task.priority === "medium"
                                                                     ? "bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-200"
@@ -452,9 +452,9 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                                                         </div>
 
                                                         {/* Third row - due date, attachments */}
-                                                        <div className="flex flex-wrap items-center gap-2">
+                                                        <div className="flex flex-wrap items-center gap-1 sm:gap-2">
                                                             {task.due_date && (
-                                                                <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${task.status !== 'completed'
+                                                                <span className={`inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] sm:text-xs font-medium ${task.status !== 'completed'
                                                                     ? isPast(new Date(task.due_date)) || isToday(new Date(task.due_date))
                                                                         ? "bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200"
                                                                         : isTomorrow(new Date(task.due_date))
@@ -462,7 +462,7 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                                                                             : "bg-purple-100 dark:bg-purple-900/40 text-purple-800 dark:text-purple-200"
                                                                     : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
                                                                     }`}>
-                                                                    <FaCalendarDay className="mr-1" size={10} />
+                                                                    <FaCalendarDay className="mr-1" size={8} />
                                                                     {format(new Date(task.due_date), 'MMM d')}
                                                                     {task.status !== 'completed' && isToday(new Date(task.due_date)) && (
                                                                         <span className="ml-1">(Today)</span>
@@ -473,8 +473,8 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                                                                 </span>
                                                             )}
                                                             {task.attachments_count > 0 && (
-                                                                <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
-                                                                    <FaPaperclip className="mr-1" size={10} />
+                                                                <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] sm:text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+                                                                    <FaPaperclip className="mr-1" size={8} />
                                                                     {task.attachments_count}
                                                                 </span>
                                                             )}
@@ -490,8 +490,8 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
 
                                                             {/* Subtask count */}
                                                             {task.subtasks && task.subtasks.length > 0 && (
-                                                                <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
-                                                                    <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] sm:text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+                                                                    <svg className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                                                                     </svg>
                                                                     {task.subtasks.length} subtask{task.subtasks.length !== 1 ? 's' : ''}
@@ -507,7 +507,7 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                                     ))}
                                 </div>
                             ) : (
-                                <div className="text-center py-6 text-gray-500 dark:text-gray-400">
+                                <div className="text-center py-4 sm:py-6 text-gray-500 dark:text-gray-400 text-xs sm:text-sm">
                                     {searchQuery.length >= MIN_SEARCH_LENGTH
                                         ? 'No matching tasks found'
                                         : availableTasks.length === 0
@@ -520,26 +520,26 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                                 <motion.div
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
-                                    className="mt-4 flex justify-end space-x-3"
+                                    className="mt-4 flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3"
                                 >
                                     <button
                                         onClick={() => {
                                             setSelectedTaskIds([]);
                                             setSearchQuery('');
                                         }}
-                                        className="px-4 py-2 cursor-pointer border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+                                        className="px-3 py-1.5 sm:px-4 sm:py-2 cursor-pointer border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-sm sm:text-base"
                                     >
                                         Clear
                                     </button>
                                     <button
                                         onClick={handleAddTasks}
                                         disabled={isAdding}
-                                        className="px-4 py-2 cursor-pointer bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium flex items-center"
+                                        className="px-3 py-1.5 sm:px-4 sm:py-2 cursor-pointer bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium flex items-center justify-center text-sm sm:text-base"
                                     >
                                         {isAdding ? (
-                                            <FaSpinner className="animate-spin mr-2" />
+                                            <FaSpinner className="animate-spin mr-1 sm:mr-2" />
                                         ) : (
-                                            <FaPlus className="mr-2" />
+                                            <FaPlus className="mr-1 sm:mr-2" />
                                         )}
                                         Add {selectedTaskIds.length} Task{selectedTaskIds.length !== 1 ? 's' : ''}
                                     </button>
@@ -551,85 +551,85 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
             </AnimatePresence>
 
             {/* Task List */}
-            <div className="p-6">
+            <div className="p-4 sm:p-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-                    <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <h4 className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">
                         Assigned Tasks ({filteredMilestoneTasks.length}/{milestoneTasks.length})
                     </h4>
 
-                    <div className="relative w-full sm:w-64">
+                    <div className="relative w-full sm:w-48 md:w-64">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <FaSearch className="text-gray-400" size={14} />
+                            <FaSearch className="text-gray-400" size={12} />
                         </div>
                         <input
                             type="text"
                             value={milestoneTasksSearchQuery}
                             onChange={(e) => setMilestoneTasksSearchQuery(e.target.value)}
                             placeholder="Search assigned tasks..."
-                            className="block w-full pl-9 pr-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                            className="block w-full pl-8 sm:pl-9 pr-3 py-1.5 sm:py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-xs sm:text-sm"
                         />
                         {milestoneTasksSearchQuery && (
                             <button
                                 onClick={() => setMilestoneTasksSearchQuery('')}
                                 className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                             >
-                                <FaTimes size={12} />
+                                <FaTimes size={10} />
                             </button>
                         )}
                     </div>
                 </div>
 
                 {filteredMilestoneTasks.length > 0 ? (
-                    <div className="space-y-4">
+                    <div className="space-y-3 sm:space-y-4">
                         {visibleTasks.map(task => (
                             <motion.div
                                 key={task.id}
                                 initial={{ opacity: 0, y: -5 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 onClick={(e) => handleTaskClick(task.id, e)}
-                                className="group flex items-start justify-between p-5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors border border-gray-200 dark:border-gray-600 shadow-sm cursor-pointer"
+                                className="group flex items-start justify-between p-3 sm:p-5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors border border-gray-200 dark:border-gray-600 shadow-sm cursor-pointer"
                             >
-                                <div className="flex items-start space-x-4 w-full">
+                                <div className="flex items-start space-x-2 sm:space-x-4 w-full">
                                     {/* Status indicator */}
                                     <div
-                                        className={`flex-shrink-0 mt-1 h-6 w-6 rounded-md flex items-center justify-center transition-all duration-300 ease-in-out
-                                            ${task.status === "completed"
+                                        className={`flex-shrink-0 mt-0.5 h-5 w-5 sm:h-6 sm:w-6 rounded-md flex items-center justify-center transition-all duration-300 ease-in-out
+                                        ${task.status === "completed"
                                                 ? "bg-green-100 dark:bg-green-900/40 border border-green-300 dark:border-green-600"
                                                 : task.status === "in-progress"
                                                     ? "bg-yellow-100 dark:bg-yellow-900/40 border border-yellow-300 dark:border-yellow-600"
                                                     : "bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600"
                                             } 
-                                            `}
+                                        `}
                                     >
                                         {task.status === "completed" ? (
-                                            <svg className="h-4 w-4 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <svg className="h-3 w-3 sm:h-4 sm:w-4 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                                             </svg>
                                         ) : task.status === "in-progress" ? (
-                                            <svg className="h-3.5 w-3.5 text-yellow-600 dark:text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <svg className="h-2.5 w-2.5 sm:h-3.5 sm:w-3.5 text-yellow-600 dark:text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                                             </svg>
                                         ) : task.status === "blocked" ? (
-                                            <FaBan className="h-3.5 w-3.5 text-red-600 dark:text-red-400" />
+                                            <FaBan className="h-2.5 w-2.5 sm:h-3.5 sm:w-3.5 text-red-600 dark:text-red-400" />
                                         ) : (
-                                            <svg className="h-3.5 w-3.5 text-gray-600 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <svg className="h-2.5 w-2.5 sm:h-3.5 sm:w-3.5 text-gray-600 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                             </svg>
                                         )}
                                     </div>
 
                                     <div className="flex-1 min-w-0">
-                                        <div className="flex flex-col space-y-2">
-                                            <h3 className={`font-medium text-gray-900 dark:text-gray-100 truncate text-base ${task.status === "completed" ? "line-through opacity-70" : ""
+                                        <div className="flex flex-col space-y-1.5 sm:space-y-2">
+                                            <h3 className={`font-medium text-gray-900 dark:text-gray-100 truncate text-sm sm:text-base ${task.status === "completed" ? "line-through opacity-70" : ""
                                                 }`}>
                                                 {task.title}
                                             </h3>
 
                                             {/* First row - labels */}
-                                            <div className="flex flex-wrap items-center gap-2">
+                                            <div className="flex flex-wrap items-center gap-1 sm:gap-2">
                                                 {/* Labels */}
                                                 {task.labels && task.labels.length > 0 && (
-                                                    <div className="flex flex-wrap items-center gap-1.5">
+                                                    <div className="flex flex-wrap items-center gap-1 sm:gap-1.5">
                                                         {task.labels.slice(0, 2).map((label: any) => {
                                                             const hexColor = label.color.startsWith('#') ? label.color : `#${label.color}`;
                                                             const textColor = getLabelTextColor(hexColor);
@@ -638,14 +638,14 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                                                             return (
                                                                 <span
                                                                     key={label.id}
-                                                                    className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${textColor}`}
+                                                                    className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] sm:text-xs font-medium ${textColor}`}
                                                                     style={{
                                                                         backgroundColor: hexColor,
                                                                         border: `1px solid ${borderColor}`,
                                                                         boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
                                                                     }}
                                                                 >
-                                                                    <FaTag className="mr-1" size={10} />
+                                                                    <FaTag className="mr-1" size={8} />
                                                                     {label.name}
                                                                 </span>
                                                             );
@@ -653,10 +653,10 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
 
                                                         {task.labels.length > 2 && (
                                                             <div className="relative inline-block">
-                                                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 cursor-default hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors peer">
+                                                                <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] sm:text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 cursor-default hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors peer">
                                                                     +{task.labels.length - 2}
                                                                 </span>
-                                                                <div className="absolute z-50 hidden peer-hover:block bottom-full mb-2 left-0 min-w-max bg-white dark:bg-gray-800 shadow-lg rounded-md p-2 border border-gray-200 dark:border-gray-700">
+                                                                <div className="absolute z-50 hidden peer-hover:block bottom-full mb-2 left-0 min-w-max bg-white dark:bg-gray-800 shadow-lg rounded-md p-2 border border-gray-200 dark:border-gray-700 text-xs">
                                                                     <div className="flex flex-wrap gap-1">
                                                                         {task.labels.slice(2).map((label: any) => {
                                                                             const hexColor = label.color.startsWith('#') ? label.color : `#${label.color}`;
@@ -664,13 +664,13 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                                                                             return (
                                                                                 <span
                                                                                     key={label.id}
-                                                                                    className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${textColor}`}
+                                                                                    className={`inline-flex items-center px-1.5 py-0.5 rounded-md text-xs font-medium ${textColor}`}
                                                                                     style={{
                                                                                         backgroundColor: hexColor,
                                                                                         border: `1px solid ${hexColor}80`
                                                                                     }}
                                                                                 >
-                                                                                    <FaTag className="mr-1" size={10} />
+                                                                                    <FaTag className="mr-1" size={8} />
                                                                                     {label.name}
                                                                                 </span>
                                                                             );
@@ -685,8 +685,8 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                                             </div>
 
                                             {/* Second row - status, priority, and due date */}
-                                            <div className="flex flex-wrap items-center gap-2">
-                                                <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${task.status === "completed"
+                                            <div className="flex flex-wrap items-center gap-1 sm:gap-2">
+                                                <span className={`inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] sm:text-xs font-medium ${task.status === "completed"
                                                     ? "bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-200"
                                                     : task.status === "in-progress"
                                                         ? "bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-200"
@@ -697,7 +697,7 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                                                     {task.status.replace('-', ' ')}
                                                 </span>
 
-                                                <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${task.priority === "high"
+                                                <span className={`inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] sm:text-xs font-medium ${task.priority === "high"
                                                     ? "bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200"
                                                     : task.priority === "medium"
                                                         ? "bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-200"
@@ -707,7 +707,7 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                                                 </span>
 
                                                 {task.due_date && (
-                                                    <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${task.status !== 'completed'
+                                                    <span className={`inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] sm:text-xs font-medium ${task.status !== 'completed'
                                                         ? isPast(new Date(task.due_date)) || isToday(new Date(task.due_date))
                                                             ? "bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200"
                                                             : isTomorrow(new Date(task.due_date))
@@ -715,7 +715,7 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                                                                 : "bg-purple-100 dark:bg-purple-900/40 text-purple-800 dark:text-purple-200"
                                                         : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
                                                         }`}>
-                                                        <FaCalendarDay className="mr-1" size={10} />
+                                                        <FaCalendarDay className="mr-1" size={8} />
                                                         {format(new Date(task.due_date), 'MMM d')}
                                                         {task.status !== 'completed' && isToday(new Date(task.due_date)) && (
                                                             <span className="ml-1">(Today)</span>
@@ -728,20 +728,20 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                                             </div>
 
                                             {/* Third row - attachments, assignments */}
-                                            <div className="flex flex-wrap items-center gap-2">
+                                            <div className="flex flex-wrap items-center gap-1 sm:gap-2">
 
                                                 {/* Attachments */}
                                                 {task.attachments_count > 0 && (
-                                                    <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
-                                                        <FaPaperclip className="mr-1" size={10} />
+                                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] sm:text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+                                                        <FaPaperclip className="mr-1" size={8} />
                                                         {task.attachments_count}
                                                     </span>
                                                 )}
 
                                                 {/* Subtask count */}
                                                 {task.subtasks && task.subtasks.length > 0 && (
-                                                    <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
-                                                        <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] sm:text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+                                                        <svg className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                                                         </svg>
                                                         {task.subtasks.length} subtask{task.subtasks.length !== 1 ? 's' : ''}
@@ -771,17 +771,17 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                                     </div>
 
                                     {/* Right section with delete button and arrow */}
-                                    <div className="flex items-center space-x-2 self-center">
+                                    <div className="flex items-center space-x-1 sm:space-x-2 self-center">
                                         {canManage && !project?.read_only && (
                                             <div className="relative">
                                                 {task.parent_task_id ? (
-                                                    <div className="group/delete relative p-2">
+                                                    <div className="group/delete relative p-1 sm:p-2">
                                                         <button
                                                             disabled
-                                                            className="p-2 text-gray-300 dark:text-gray-500 cursor-not-allowed rounded-full"
+                                                            className="p-1 sm:p-2 text-gray-300 dark:text-gray-500 cursor-not-allowed rounded-full"
                                                             aria-label="Cannot remove subtask from milestone"
                                                         >
-                                                            <FaTrash className="w-4 h-4" />
+                                                            <FaTrash className="w-3 h-3 sm:w-4 sm:h-4" />
                                                         </button>
                                                         <div className="absolute z-50 hidden group-hover/delete:block bottom-full mb-2 right-0 min-w-[180px] max-w-[240px] sm:max-w-[280px] bg-white dark:bg-gray-800 shadow-lg rounded-md p-2 border border-gray-200 dark:border-gray-700 text-xs">
                                                             <div className="flex items-start gap-2">
@@ -803,10 +803,10 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                                                             setTaskToRemove(task);
                                                             setShowRemoveConfirm(true);
                                                         }}
-                                                        className="p-2 cursor-pointer text-gray-400 hover:text-red-500 dark:hover:text-red-400 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                                                        className="p-1 sm:p-2 cursor-pointer text-gray-400 hover:text-red-500 dark:hover:text-red-400 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                                                         title="Remove from milestone"
                                                     >
-                                                        <FaTrash className="w-4 h-4" />
+                                                        <FaTrash className="w-3 h-3 sm:w-4 sm:h-4" />
                                                     </button>
                                                 )}
                                             </div>
@@ -814,8 +814,8 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
 
                                         {/* Chevron right icon */}
                                         <div className="flex items-center h-full">
-                                            <div className="h-8 w-8 rounded-full bg-gray-50 dark:bg-gray-700 flex items-center justify-center group-hover:bg-indigo-100 dark:group-hover:bg-indigo-900/50 transition-colors">
-                                                <FaChevronRight className="text-gray-400 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 transition-colors" size={12} />
+                                            <div className="h-6 w-6 sm:h-8 sm:w-8 rounded-full bg-gray-50 dark:bg-gray-700 flex items-center justify-center group-hover:bg-indigo-100 dark:group-hover:bg-indigo-900/50 transition-colors">
+                                                <FaChevronRight className="text-gray-400 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 transition-colors" size={10} />
                                             </div>
                                         </div>
                                     </div>
@@ -825,13 +825,13 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
 
                         {/* Pagination controls */}
                         {filteredMilestoneTasks.length > tasksPerPage && (
-                            <div className="flex justify-center py-4 gap-2">
-                                <div className="flex items-center justify-center gap-3">
+                            <div className="flex justify-center py-3 sm:py-4 gap-2">
+                                <div className="flex items-center justify-center gap-2 sm:gap-3">
                                     {/* Load More button (when not showing all) */}
                                     {!showAllTasks && filteredMilestoneTasks.length > visibleTasks.length && (
                                         <button
                                             onClick={() => setCurrentPage(prev => prev + 1)}
-                                            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white cursor-pointer rounded-lg font-medium transition-all duration-200 hover:scale-105 active:scale-95 whitespace-nowrap shadow-lg"
+                                            className="px-3 py-1.5 sm:px-4 sm:py-2 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white cursor-pointer rounded-lg font-medium transition-all duration-200 hover:scale-105 active:scale-95 whitespace-nowrap shadow-lg text-xs sm:text-sm"
                                         >
                                             Load More ({filteredMilestoneTasks.length - visibleTasks.length} remaining)
                                         </button>
@@ -844,7 +844,7 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                                                 setShowAllTasks(false);
                                                 setCurrentPage(1);
                                             }}
-                                            className="px-4 py-2 bg-gray-600 hover:bg-gray-700 dark:bg-gray-600 dark:hover:bg-gray-700 text-white cursor-pointer rounded-lg font-medium transition-all duration-200 hover:scale-105 active:scale-95 whitespace-nowrap shadow-lg"
+                                            className="px-3 py-1.5 sm:px-4 sm:py-2 bg-gray-600 hover:bg-gray-700 dark:bg-gray-600 dark:hover:bg-gray-700 text-white cursor-pointer rounded-lg font-medium transition-all duration-200 hover:scale-105 active:scale-95 whitespace-nowrap shadow-lg text-xs sm:text-sm"
                                         >
                                             Show Less
                                         </button>
@@ -854,19 +854,19 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
                         )}
                     </div>
                 ) : (
-                    <div className="text-center py-8 text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700/20 rounded-lg border border-dashed border-gray-300 dark:border-gray-600">
+                    <div className="text-center py-6 sm:py-8 text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700/20 rounded-lg border border-dashed border-gray-300 dark:border-gray-600">
                         <div className="flex flex-col items-center">
-                            <div className="rounded-full bg-gray-100 dark:bg-gray-700 p-3 mb-3">
-                                <FaPlus className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+                            <div className="rounded-full bg-gray-100 dark:bg-gray-700 p-2 sm:p-3 mb-2 sm:mb-3">
+                                <FaPlus className="h-4 w-4 sm:h-5 sm:w-5 text-gray-500 dark:text-gray-400" />
                             </div>
-                            <p className="font-medium">No tasks assigned yet</p>
-                            <p className="text-sm mt-1">Add tasks to track progress</p>
+                            <p className="font-medium text-sm sm:text-base">No tasks assigned yet</p>
+                            <p className="text-xs sm:text-sm mt-1">Add tasks to track progress</p>
                             {canManage && !project?.read_only && (
                                 <button
                                     onClick={() => setShowTaskSelector(true)}
-                                    className="mt-3 flex items-center cursor-pointer px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium"
+                                    className="mt-2 sm:mt-3 flex items-center cursor-pointer px-2.5 py-1 sm:px-3 sm:py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs sm:text-sm font-medium"
                                 >
-                                    <FaPlus className="mr-1.5" />
+                                    <FaPlus className="mr-1 sm:mr-1.5" />
                                     Add Tasks
                                 </button>
                             )}
