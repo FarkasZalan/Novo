@@ -30,13 +30,12 @@ export const AddMemberDialog = ({ project, onClose, onInvite }: AddMemberModalPr
     const [searchQuery, setSearchQuery] = useState("");
     const [isSearching, setIsSearching] = useState(false);
     const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
-    const MIN_SEARCH_LENGTH = 2; // Require 2 characters to search
+    const MIN_SEARCH_LENGTH = 2;
 
     const [potentialMembers, setPotentialMembers] = useState<User[]>([]);
     const [showSearchResults, setShowSearchResults] = useState(false);
-    // hold the IDs of users already in the project
-    const [projectMemberIds, setProjectMemberIds] = useState<string[]>([]); // for active project members
-    const [projectMemberEmails, setProjectMemberEmails] = useState<string[]>([]); // for pending project members
+    const [projectMemberIds, setProjectMemberIds] = useState<string[]>([]);
+    const [projectMemberEmails, setProjectMemberEmails] = useState<string[]>([]);
     const { authState } = useAuth();
 
     const modalRef = useRef<HTMLDivElement>(null);
@@ -44,14 +43,8 @@ export const AddMemberDialog = ({ project, onClose, onInvite }: AddMemberModalPr
     const emailAlreadyInProject = projectMemberEmails.includes(manualEmail);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const [premiumError, setPremiumError] = useState<{
-        show: boolean;
-        isOwner: boolean;
-        message: string;
-        ownerDetails?: { name: string; email: string };
-    }>({ show: false, isOwner: false, message: "" });
+    const [premiumError, setPremiumError] = useState<{ show: boolean; isOwner: boolean; message: string; ownerDetails?: { name: string; email: string } }>({ show: false, isOwner: false, message: "" });
 
-    // Close modal when clicking outside
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
@@ -62,20 +55,14 @@ export const AddMemberDialog = ({ project, onClose, onInvite }: AddMemberModalPr
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, [onClose]);
 
-    // Fetch project members and store their IDs for quick lookup
     useEffect(() => {
         const loadProjectMembers = async () => {
             try {
                 const membersResponse = await getProjectMembers(project.id!, authState.accessToken!);
-                // Assuming membersResponse is structured as: [ registeredMembersArray, invitedMembersArray ]
                 const registeredMembers = membersResponse[0];
                 const invitedMembers = membersResponse[1];
-
-                // Extract IDs from registered members (from the nested user object)
                 const registeredIds = registeredMembers.map((member: any) => member.user.id);
                 setProjectMemberIds(registeredIds);
-
-                // Extract emails from invited (pending) members
                 const invitedEmails = invitedMembers.map((member: any) => member.email);
                 setProjectMemberEmails(invitedEmails);
             } catch (error) {
@@ -96,7 +83,7 @@ export const AddMemberDialog = ({ project, onClose, onInvite }: AddMemberModalPr
                 return;
             }
             allEmails.push(manualEmail);
-            roles.push("member"); // manual users default to member
+            roles.push("member");
             registeredStatus.push(false);
         }
 
@@ -106,17 +93,12 @@ export const AddMemberDialog = ({ project, onClose, onInvite }: AddMemberModalPr
         }
 
         setError(null);
-        setIsSubmitting(true); // Start loading
+        setIsSubmitting(true);
 
         try {
             await addMembersToProject(
                 project.id!,
-                selectedUsers.map(user => ({
-                    id: user.id,
-                    email: user.email,
-                    name: user.name,
-                    role: user.role
-                })),
+                selectedUsers.map(user => ({ id: user.id, email: user.email, name: user.name, role: user.role })),
                 authState.accessToken!,
                 authState.user!.id
             );
@@ -124,8 +106,6 @@ export const AddMemberDialog = ({ project, onClose, onInvite }: AddMemberModalPr
             onClose();
         } catch (error: any) {
             console.error("Failed to add members:", error);
-
-            // Check if error is related to premium limitations
             if (error.response?.data?.message?.includes("Premium")) {
                 const isOwner = authState.user?.id === project.owner_id;
                 setPremiumError({
@@ -143,15 +123,12 @@ export const AddMemberDialog = ({ project, onClose, onInvite }: AddMemberModalPr
                 setError("Failed to send invitations. Please try again.");
             }
         } finally {
-            setIsSubmitting(false); // End loading
+            setIsSubmitting(false);
         }
     };
 
     const handleSelectUser = (user: User) => {
-        // Prevent adding if the user is already in the project (either registered or invited)
-        if (projectMemberIds.includes(user.id)) {
-            return;
-        }
+        if (projectMemberIds.includes(user.id)) return;
         if (!selectedUsers.some(selected => selected.id === user.id)) {
             setSelectedUsers([...selectedUsers, { ...user, role: "member" }]);
         }
@@ -167,14 +144,14 @@ export const AddMemberDialog = ({ project, onClose, onInvite }: AddMemberModalPr
             setError("Please enter a valid email address");
             return;
         }
-
         if (selectedUsers.some(user => user.email === manualEmail)) {
             setError("This email is already selected");
             return;
         }
 
+        // Use email as unique id for manual invites
         setSelectedUsers([...selectedUsers, {
-            id: '',
+            id: manualEmail,
             name: manualEmail.split('@')[0],
             email: manualEmail,
             is_registered: false,
@@ -190,28 +167,15 @@ export const AddMemberDialog = ({ project, onClose, onInvite }: AddMemberModalPr
         searchInputRef.current?.focus();
     };
 
-
-
     const handleSearch = useCallback(async (query: string) => {
         if (query.trim().length < MIN_SEARCH_LENGTH) {
             setPotentialMembers([]);
             return;
         }
-
         try {
             setIsSearching(true);
-            const users = await filterAllUserByNameOrEmail(
-                authState.accessToken!,
-                project.id!,
-                query
-            );
-
-            setPotentialMembers(users.map((user: any) => ({
-                id: user.id,
-                name: user.name,
-                email: user.email,
-                is_registered: true
-            })));
+            const users = await filterAllUserByNameOrEmail(authState.accessToken!, project.id!, query);
+            setPotentialMembers(users.map((user: any) => ({ id: user.id, name: user.name, email: user.email, is_registered: true })));
         } catch (err) {
             console.error("Search failed:", err);
             setError("Failed to search users. Please try again.");
@@ -220,48 +184,24 @@ export const AddMemberDialog = ({ project, onClose, onInvite }: AddMemberModalPr
         }
     }, [authState.accessToken, project.id]);
 
-
-
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setManualEmail(value);
         setSearchQuery(value);
         setError(null);
-
-        // Clear previous timeout
-        if (searchTimeout) {
-            clearTimeout(searchTimeout);
-        }
-
-        // Only set new timeout if we have enough characters
+        if (searchTimeout) clearTimeout(searchTimeout);
         if (value.trim().length >= MIN_SEARCH_LENGTH) {
             setShowSearchResults(true);
-            setSearchTimeout(
-                setTimeout(() => {
-                    handleSearch(value);
-                }, 300) // 300ms debounce delay
-            );
+            setSearchTimeout(setTimeout(() => handleSearch(value), 300));
         } else {
             setShowSearchResults(false);
             setPotentialMembers([]);
         }
     };
 
-    // Clean up timeout on unmount
-    useEffect(() => {
-        return () => {
-            if (searchTimeout) {
-                clearTimeout(searchTimeout);
-            }
-        };
-    }, [searchTimeout]);
+    useEffect(() => () => { if (searchTimeout) clearTimeout(searchTimeout); }, [searchTimeout]);
 
-
-    // Filter potential members based on search while excluding those already selected.
-    const filteredUsers = potentialMembers.filter(user =>
-        !selectedUsers.some(selected => selected.id === user.id)
-    );
-
+    const filteredUsers = potentialMembers.filter(user => !selectedUsers.some(selected => selected.id === user.id));
     const hasValidEmail = manualEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(manualEmail);
     const showEmailOption = hasValidEmail && !selectedUsers.some(u => u.email === manualEmail);
 
@@ -368,17 +308,15 @@ export const AddMemberDialog = ({ project, onClose, onInvite }: AddMemberModalPr
                         <div className="flex flex-wrap gap-2 mb-4">
                             {selectedUsers.map(user => (
                                 <div
-                                    key={user.id}
-                                    className="bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 rounded-full pl-3 pr-2 py-1 flex items-center text-sm max-w-full overflow-hidden"
-                                >
-                                    <span className="flex items-center truncate max-w-[140px] sm:max-w-[200px] md:max-w-none">
-                                        <span className="h-5 w-5 rounded-full bg-indigo-100 dark:bg-indigo-800 flex items-center justify-center text-indigo-600 dark:text-indigo-300 font-medium text-xs mr-2 shrink-0">
+                                    key={user.id || `email-${user.email}`}  // Use email if id is empty
+                                    className="bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 rounded-full pl-3 pr-2 py-1 flex items-center text-sm">
+                                    <span className="flex items-center">
+                                        <span className="h-5 w-5 rounded-full bg-indigo-100 dark:bg-indigo-800 flex items-center justify-center text-indigo-600 dark:text-indigo-300 font-medium text-xs mr-2">
                                             {user.name.split(' ').map(n => n[0]).join('').toUpperCase()}
                                         </span>
-                                        <span className="truncate">{user.email}</span>
+                                        {user.email}
                                     </span>
-
-                                    {/* Editable role badge */}
+                                    {/* Editable role badge with pencil icon */}
                                     <select
                                         value={user.role}
                                         onChange={(e) =>
@@ -388,23 +326,20 @@ export const AddMemberDialog = ({ project, onClose, onInvite }: AddMemberModalPr
                                                 )
                                             )
                                         }
-                                        className="ml-2 cursor-pointer text-xs px-1.5 py-0.5 rounded-lg bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-100 hover:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 transition-colors"
+                                        className="ml-2 cursor-pointer text-xs px-2 py-1 rounded-lg bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-100 hover:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 transition-colors"
                                     >
-                                        <option value="member">Member</option>
-                                        <option value="admin">Admin</option>
+                                        <option value="member" className="bg-white cursor-pointer dark:bg-gray-700 text-gray-800 dark:text-gray-100">Member</option>
+                                        <option value="admin" className="bg-white cursor-pointer dark:bg-gray-700 text-gray-800 dark:text-gray-100">Admin</option>
                                     </select>
-
                                     {/* Badge for unregistered users */}
                                     {!user.is_registered && (
-                                        <span className="ml-1 text-xs bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 px-1 rounded whitespace-nowrap">
+                                        <span className="ml-1 text-xs bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 px-1 rounded">
                                             Invite
                                         </span>
                                     )}
-
-                                    {/* Remove user button */}
                                     <button
                                         onClick={() => handleRemoveUser(user.id)}
-                                        className="ml-1 h-5 w-5 rounded-full cursor-pointer hover:bg-indigo-200 dark:hover:bg-indigo-800 flex items-center justify-center shrink-0"
+                                        className="ml-1 h-5 w-5 rounded-full cursor-pointer hover:bg-indigo-200 dark:hover:bg-indigo-800 flex items-center justify-center"
                                     >
                                         <FaTimes size={10} />
                                     </button>
@@ -412,7 +347,6 @@ export const AddMemberDialog = ({ project, onClose, onInvite }: AddMemberModalPr
                             ))}
                         </div>
                     )}
-
 
                     {/* Search Input */}
                     <div className="relative mb-4">
@@ -451,7 +385,7 @@ export const AddMemberDialog = ({ project, onClose, onInvite }: AddMemberModalPr
 
                         {/* Search Results */}
                         {showSearchResults && (searchQuery || manualEmail) && (
-                            <div className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-700 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 max-h-60 overflow-y-auto">
+                            <div className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-700 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 max-h-50 overflow-y-auto">
                                 {isSearching ? (
                                     <div className="p-4 text-center">
                                         <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600 mx-auto"></div>
@@ -467,7 +401,7 @@ export const AddMemberDialog = ({ project, onClose, onInvite }: AddMemberModalPr
                                             return (
                                                 <li
                                                     key={user.id || user.email}
-                                                    className={`px-4 py-2 flex items-center gap-2 sm:gap-3 ${alreadyInProject
+                                                    className={`px-4 py-2 flex items-center ${alreadyInProject
                                                         ? "bg-gray-100 dark:bg-gray-600 cursor-not-allowed"
                                                         : "cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600"
                                                         }`}
@@ -477,23 +411,23 @@ export const AddMemberDialog = ({ project, onClose, onInvite }: AddMemberModalPr
                                                         }
                                                     }}
                                                 >
-                                                    <div className="h-8 w-8 flex-shrink-0 rounded-full bg-indigo-100 dark:bg-indigo-800 flex items-center justify-center text-indigo-600 dark:text-indigo-300 font-medium text-sm">
+                                                    <div className="h-8 w-8 rounded-full bg-indigo-100 dark:bg-indigo-800 flex items-center justify-center text-indigo-600 dark:text-indigo-300 font-medium text-sm mr-3">
                                                         {user?.name?.split(' ').map(n => n[0]).join('').toUpperCase() || '?'}
                                                     </div>
-                                                    <div className="flex-1 min-w-0">
-                                                        <p className="font-medium dark:text-white truncate">{user.name}</p>
-                                                        <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{user.email}</p>
+                                                    <div className="flex-1">
+                                                        <p className="font-medium dark:text-white">{user.name}</p>
+                                                        <p className="text-sm text-gray-500 dark:text-gray-400">{user.email}</p>
                                                     </div>
                                                     {alreadyInProject ? (
-                                                        <span className="text-xs bg-gray-200 dark:bg-gray-500 text-gray-800 dark:text-gray-200 px-2 py-1 rounded whitespace-nowrap">
+                                                        <span className="text-xs bg-gray-200 dark:bg-gray-500 text-gray-800 dark:text-gray-200 px-2 py-1 rounded">
                                                             Already in project
                                                         </span>
                                                     ) : user.is_registered ? (
-                                                        <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 px-2 py-1 rounded whitespace-nowrap">
+                                                        <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 px-2 py-1 rounded">
                                                             Registered
                                                         </span>
                                                     ) : (
-                                                        <span className="text-xs bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 px-2 py-1 rounded whitespace-nowrap">
+                                                        <span className="text-xs bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 px-2 py-1 rounded">
                                                             Unregistered
                                                         </span>
                                                     )}
@@ -502,19 +436,19 @@ export const AddMemberDialog = ({ project, onClose, onInvite }: AddMemberModalPr
                                         })}
                                     </ul>
                                 ) : (
-                                    <div className="p-4 sm:p-6 text-center">
+                                    <div className="p-6 text-center">
                                         {showEmailOption ? (
-                                            <div className="flex flex-col items-center space-y-3">
-                                                <div className="rounded-full bg-indigo-50 dark:bg-indigo-900/30 p-2">
+                                            <div className="flex flex-col items-center">
+                                                <div className="mb-3 rounded-full bg-indigo-50 dark:bg-indigo-900/30 p-2">
                                                     <FaUser className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
                                                 </div>
-                                                <div className="bg-gray-50 dark:bg-gray-700/50 p-2 rounded w-full overflow-hidden text-ellipsis">
-                                                    <p className="text-gray-700 dark:text-gray-300 font-medium text-sm break-words text-center">{manualEmail}</p>
+                                                <div className="bg-gray-50 dark:bg-gray-700/50 p-2 rounded mb-3 w-full">
+                                                    <p className="text-gray-700 dark:text-gray-300 font-medium text-sm">{manualEmail}</p>
                                                 </div>
                                                 <button
                                                     onClick={handleAddManualEmail}
                                                     disabled={emailAlreadyInProject}
-                                                    className="w-full py-2 px-4 cursor-pointer bg-indigo-600 text-white rounded transition-colors flex items-center justify-center space-x-2 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                                                    className="w-full py-2 px-4 cursor-pointer bg-indigo-600 text-white rounded transition-colors flex items-center justify-center space-x-2 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
                                                 >
                                                     <FaPlus className="h-3 w-3" />
                                                     <span>
@@ -524,13 +458,13 @@ export const AddMemberDialog = ({ project, onClose, onInvite }: AddMemberModalPr
                                             </div>
                                         ) : (
                                             <div className="flex flex-col items-center py-4">
-                                                <svg className="h-10 w-10 sm:h-12 sm:w-12 text-gray-400 dark:text-gray-500 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <svg className="h-12 w-12 text-gray-400 dark:text-gray-500 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                 </svg>
-                                                <p className="text-gray-600 dark:text-gray-300 font-medium text-sm sm:text-base">
+                                                <p className="text-gray-600 dark:text-gray-300 font-medium">
                                                     No users found
                                                 </p>
-                                                <p className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm mt-1 text-center px-2">
+                                                <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
                                                     Try a different search term or enter an email
                                                 </p>
                                             </div>
