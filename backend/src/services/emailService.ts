@@ -333,6 +333,128 @@ const getTaskCommentTemplate = (
   </div>
 `;
 
+const getUpdatedTaskCommentTemplate = (
+  commenterName: string,
+  commenterEmail: string,
+  taskName: string,
+  projectName: string,
+  oldCommentContent: string,
+  newCommentContent: string,
+  taskLink: string,
+  updatedAt: string
+) => {
+  // Simple diff visualization (for more sophisticated diff, consider a library)
+  const renderDiff = (oldText: string, newText: string) => {
+    if (oldText === newText) return newText;
+
+    // This is a simple implementation - consider using a proper diff algorithm for production
+    const oldLines = oldText.split('\n');
+    const newLines = newText.split('\n');
+
+    let diffHtml = '';
+
+    // Compare line by line
+    for (let i = 0; i < Math.max(oldLines.length, newLines.length); i++) {
+      const oldLine = oldLines[i] || '';
+      const newLine = newLines[i] || '';
+
+      if (oldLine !== newLine) {
+        diffHtml += `<div style="margin-bottom: 8px;">
+          <div style="color: #EF4444; text-decoration: line-through; background-color: #FEE2E2; padding: 4px 8px; border-radius: 4px; margin-bottom: 2px;">${oldLine}</div>
+          <div style="color: #10B981; background-color: #D1FAE5; padding: 4px 8px; border-radius: 4px;">${newLine}</div>
+        </div>`;
+      } else {
+        diffHtml += `<div style="color: #4B5563; padding: 4px 8px; margin-bottom: 8px;">${newLine}</div>`;
+      }
+    }
+
+    return diffHtml || newText;
+  };
+
+  return `
+  <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+    <!-- Email Header -->
+    <div style="background-color: #4F46E5; padding: 24px; text-align: center;">
+      <h1 style="color: white; font-size: 24px; font-weight: 700; margin: 0;">Comment Updated on Task</h1>
+    </div>
+    
+    <!-- Email Content -->
+    <div style="padding: 32px;">
+      <h2 style="color: #111827; font-size: 20px; font-weight: 700; margin-bottom: 16px;">
+        ${commenterName} updated their comment on "${taskName}" in ${projectName}
+      </h2>
+      
+      <!-- Updated timestamp -->
+      <p style="color: #6B7280; font-size: 14px; margin-bottom: 16px;">
+        Updated at: ${new Date(updatedAt).toLocaleString()}
+      </p>
+      
+      <!-- Commenter Info -->
+      <table cellpadding="0" cellspacing="0" role="presentation" style="margin-bottom: 16px;">
+        <tr>
+          <td width="40" height="40" align="center" valign="middle"
+              style="background-color: #e0e7ff; border-radius: 50%; font-size: 16px; font-weight: 600; color: #4F46E5;">
+            ${getUserInitials(commenterName)}
+          </td>
+          <td style="padding-left: 12px; vertical-align: middle;">
+            <p style="margin: 0; font-weight: 600; color: #111827;">${commenterName}</p>
+            <p style="margin: 0; font-size: 14px; color: #6B7280;">${commenterEmail}</p>
+          </td>
+        </tr>
+      </table>
+      
+      <!-- Previous Comment -->
+      <div style="margin-bottom: 24px;">
+        <h3 style="color: #6B7280; font-size: 14px; font-weight: 600; margin-bottom: 8px;">PREVIOUS COMMENT</h3>
+        <div style="background-color: #F9FAFB; border-radius: 8px; padding: 16px;">
+          <p style="color: #4B5563; font-size: 16px; line-height: 1.5; margin: 0; white-space: pre-wrap;">${oldCommentContent}</p>
+        </div>
+      </div>
+      
+      <!-- Updated Comment -->
+      <div style="margin-bottom: 24px;">
+        <h3 style="color: #6B7280; font-size: 14px; font-weight: 600; margin-bottom: 8px;">UPDATED COMMENT</h3>
+        <div style="background-color: #F9FAFB; border-radius: 8px; padding: 16px;">
+          <p style="color: #4B5563; font-size: 16px; line-height: 1.5; margin: 0; white-space: pre-wrap;">${newCommentContent}</p>
+        </div>
+      </div>
+      
+      <!-- Changes Highlight -->
+      <div style="margin-bottom: 24px;">
+        <h3 style="color: #6B7280; font-size: 14px; font-weight: 600; margin-bottom: 8px;">CHANGES</h3>
+        <div style="background-color: #F9FAFB; border-radius: 8px; padding: 16px;">
+          ${renderDiff(oldCommentContent, newCommentContent)}
+        </div>
+      </div>
+      
+      <!-- Action Button -->
+      <div style="text-align: center; margin: 32px 0;">
+        <a href="${taskLink}" 
+           style="background-color: #4F46E5; color: white; padding: 12px 24px; 
+                  font-size: 16px; font-weight: 600; text-decoration: none; 
+                  border-radius: 8px; display: inline-block; transition: all 0.2s ease;
+                  box-shadow: 0 4px 6px rgba(79, 70, 229, 0.2);">
+          View Task
+        </a>
+      </div>
+      
+      <div style="border-top: 1px solid #E5E7EB; padding-top: 24px; margin-top: 24px;">
+        <p style="color: #9CA3AF; font-size: 12px; line-height: 1.5; margin: 0;">
+          You're receiving this notification because you're involved with this task.<br>
+        </p>
+      </div>
+    </div>
+    
+    <!-- Email Footer -->
+    <div style="background-color: #F9FAFB; padding: 16px; text-align: center;">
+      <p style="color: #6B7280; font-size: 12px; margin: 0;">
+        © ${new Date().getFullYear()} Novo. All rights reserved.
+      </p>
+    </div>
+  </div>
+`;
+};
+
 const getTaskStatusChangeTemplate = (
   changerName: string,
   changerEmail: string,
@@ -958,6 +1080,34 @@ export const sendTaskCommentEmail = async (email: string, commenterName: string,
     projectName,
     commentContent,
     taskLink
+  );
+
+  return await sendEmail(email, subject, html);
+};
+
+export const sendUpdatedTaskCommentEmail = async (
+  email: string,
+  commenterName: string,
+  commenterEmail: string,
+  taskName: string,
+  projectName: string,
+  oldCommentContent: string,
+  newCommentContent: string,
+  taskId: string,
+  projectId: string,
+  updatedAt: string
+) => {
+  const taskLink = `${process.env.FRONTEND_URL}/projects/${projectId}/tasks/${taskId}`;
+  const subject = `Comment updated on "${taskName}" by ${commenterName}`;
+  const html = getUpdatedTaskCommentTemplate(
+    commenterName,
+    commenterEmail,
+    taskName,
+    projectName,
+    oldCommentContent,
+    newCommentContent,
+    taskLink,
+    updatedAt
   );
 
   return await sendEmail(email, subject, html);
