@@ -386,7 +386,7 @@ const getUpdatedTaskCommentTemplate = (
       
       <!-- Updated timestamp -->
       <p style="color: #6B7280; font-size: 14px; margin-bottom: 16px;">
-        Updated at: ${format(new Date(updatedAt), 'MM/dd/yyyy, H:mm')}
+        Updated at: ${format(new Date(updatedAt), 'MMM d, yyyy H:mm')}}
       </p>
       
       <!-- Commenter Info -->
