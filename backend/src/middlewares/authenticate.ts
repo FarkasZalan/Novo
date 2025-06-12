@@ -109,5 +109,6 @@ export const refreshAccessToken = async (req: Request, res: Response, next: Next
             message: "Invalid refresh token",
             code: "INVALID_REFRESH_TOKEN"
         });
+        return;
     }
 };

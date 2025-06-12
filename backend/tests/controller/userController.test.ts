@@ -12,6 +12,14 @@ describe('User Controller', () => {
     let mockNext: NextFunction;
     let mockUser: User;
 
+    beforeAll(() => {
+        jest.spyOn(console, 'error').mockImplementation(() => { });
+    });
+
+    afterAll(() => {
+        (console.error as jest.Mock).mockRestore();
+    });
+
     beforeEach(() => {
         mockUser = {
             id: '1',

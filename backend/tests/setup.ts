@@ -1,4 +1,3 @@
-// test/setup.ts
 import pool from '../src/config/db';
 import { redisClient } from '../src/config/redis';
 
