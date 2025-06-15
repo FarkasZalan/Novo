@@ -105,8 +105,14 @@ export const deleteLabel = async (req: Request, res: Response, next: NextFunctio
             return;
         }
 
-        await deleteLabelQuery(label_id);
-        handleResponse(res, 200, "Label deleted successfully", null);
+        const label: Label = await deleteLabelQuery(label_id);
+
+        if (!label) {
+            handleResponse(res, 404, "Label not found", null);
+            return;
+        }
+
+        handleResponse(res, 200, "Label deleted successfully", label);
     } catch (error: any) {
         next(error);
     }

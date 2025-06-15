@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for middlewares/authenticate.ts</title>
+    <title>Code coverage report for controller/projectController.ts</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../prettify.css" />
     <link rel="stylesheet" href="../base.css" />
@@ -19,34 +19,34 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../index.html">All files</a> / <a href="index.html">middlewares</a> authenticate.ts</h1>
+        <h1><a href="../index.html">All files</a> / <a href="index.html">controller</a> projectController.ts</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">85.71% </span>
+                <span class="strong">73.75% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>48/56</span>
+                <span class='fraction'>59/80</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">63.63% </span>
+                <span class="strong">66.66% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>7/11</span>
+                <span class='fraction'>8/12</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">53.84% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>5/5</span>
+                <span class='fraction'>7/13</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">84.61% </span>
+                <span class="strong">73.91% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>44/52</span>
+                <span class='fraction'>51/69</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line high'></div>
+    <div class='status-line medium'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -176,231 +176,267 @@
 <a name='L111'></a><a href='#L111'>111</a>
 <a name='L112'></a><a href='#L112'>112</a>
 <a name='L113'></a><a href='#L113'>113</a>
-<a name='L114'></a><a href='#L114'>114</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L114'></a><a href='#L114'>114</a>
+<a name='L115'></a><a href='#L115'>115</a>
+<a name='L116'></a><a href='#L116'>116</a>
+<a name='L117'></a><a href='#L117'>117</a>
+<a name='L118'></a><a href='#L118'>118</a>
+<a name='L119'></a><a href='#L119'>119</a>
+<a name='L120'></a><a href='#L120'>120</a>
+<a name='L121'></a><a href='#L121'>121</a>
+<a name='L122'></a><a href='#L122'>122</a>
+<a name='L123'></a><a href='#L123'>123</a>
+<a name='L124'></a><a href='#L124'>124</a>
+<a name='L125'></a><a href='#L125'>125</a>
+<a name='L126'></a><a href='#L126'>126</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">9x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">13x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">8x</span>
-<span class="cline-any cline-yes">8x</span>
-<span class="cline-any cline-yes">8x</span>
-<span class="cline-any cline-yes">8x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">7x</span>
-<span class="cline-any cline-yes">7x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">7x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">6x</span>
-<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">5x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
-import { generateAccessToken } from '../utils/token-utils';
-import bcrypt from "bcryptjs";
-import { getUserByIdQuery } from '../models/userModel';
-import pool from '../config/db';
-import format from 'pg-format';
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { Request, Response } from "express";
+import { NextFunction } from "connect";
+import { createProjectQuery, deleteProjectQuery, getAllProjectForUsersQuery, getProjectByIdQuery, updateProjectQuery } from "../models/projectModel";
+import { getProjectTotalMemberCountsQuery } from "../models/projectMemberModel";
+import { createLabelQuery } from "../models/labelModel";
+import { DEFAULT_COLORS } from "../utils/default-colors";
+import { Project } from "../schemas/types/projectTyoe";
 &nbsp;
-&nbsp;
-declare module "express-serve-static-core" {
-    interface Request {
-        user: { id: string }; // for req.user
-    }
-}
-&nbsp;
-export const authenticateToken = (req: Request, res: Response, next: NextFunction): void =&gt; {
-    // Bearer token
-    // Bearer token = "Bearer &lt;token&gt;" is a type of access token in HTTP, used to authenticate requests so basically whoever is holding the token can access the resources
-    // no extra verification required
-    const authHeader = req.headers['authorization'];
-    const token = authHeader &amp;&amp; authHeader.split(' ')[1];
-&nbsp;
-    <span class="missing-if-branch" title="if path not taken" >I</span>if (!token) {
-<span class="cstat-no" title="statement not covered" >        res.status(401).json({ message: 'Access token not found' })</span>
-<span class="cstat-no" title="statement not covered" >        return;</span>
-    }
-&nbsp;
-    // Verify access token
-    jwt.verify(token, process.env.JWT_SECRET as string, async (err: any, user: any) =&gt; {
-        <span class="missing-if-branch" title="if path not taken" >I</span>if (err) {
-<span class="cstat-no" title="statement not covered" >            <span class="missing-if-branch" title="if path not taken" >I</span>if (err.name === 'TokenExpiredError') {</span>
-<span class="cstat-no" title="statement not covered" >                return res.status(401).json({ message: 'Access token expired' });</span>
-            }
-<span class="cstat-no" title="statement not covered" >            return res.status(403).json({ message: 'Invalid access token' });</span>
-        }
-        req.user = { id: user.id }; // add user id to request
-        await pool.query(format("SET app.user_id = %L", user.id));
-        next(); // call next middleware
+// Standardized response function
+// it's a function that returns a response to the client when a request is made (CRUD operations)
+const handleResponse = (res: Response, status: number, message: string, data: any) =&gt; {
+    return res.status(status).json({
+        status,
+        message,
+        data
     });
 };
 &nbsp;
-// Refresh token endpoint
-export const refreshAccessToken = async (req: Request, res: Response, next: NextFunction): Promise&lt;void&gt; =&gt; {
+export const createProject = async (req: Request, res: Response, next: NextFunction): Promise&lt;void&gt; =&gt; {
     try {
-        const refreshToken = req.cookies.refresh_token; // Get refresh token from cookie
-        if (!refreshToken) {
-            console.error('No refresh token found in cookies');
-            res.status(400).json({
-                message: "No refresh token found in cookies",
-                code: "NO_REFRESH_TOKEN" // Add specific error code
-            });
+        const { name, description, ownerId } = req.body;
+        const newProject: Project = await createProjectQuery(name, description, ownerId);
+&nbsp;
+        for (const label of DEFAULT_COLORS) {
+            await createLabelQuery(label.name, label.description, newProject.id, label.color);
+        }
+        handleResponse(res, 201, "Project created successfully", newProject);
+    } catch (error: Error | any) {
+        // Check for unique constraint violation (duplicate email)
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (error.code === "23505") {
+<span class="cstat-no" title="statement not covered" >            handleResponse(res, 409, "Project already exists", null);</span>
+        } else {
+            // Pass other errors to the next middleware (errorHandling middleware)
+            next(error);
+        }
+    }
+};
+&nbsp;
+export const getAllProjects = <span class="fstat-no" title="function not covered" >async (r</span>eq: Request, res: Response, next: NextFunction): Promise&lt;void&gt; =&gt;<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" > {</span></span>
+<span class="cstat-no" title="statement not covered" >    try {</span>
+        const ownerId = <span class="cstat-no" title="statement not covered" >req.user.id;</span>
+        const projects: Project[] = <span class="cstat-no" title="statement not covered" >await getAllProjectForUsersQuery(ownerId);</span> // get all projects for the user;
+        const projectsWithMembers = <span class="cstat-no" title="statement not covered" >await Promise.all(projects.map(<span class="fstat-no" title="function not covered" >async (p</span>roject) =&gt;<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" > {</span></span></span>
+            const memberCount = <span class="cstat-no" title="statement not covered" >await getProjectTotalMemberCountsQuery(project.id);</span>
+<span class="cstat-no" title="statement not covered" >            return {</span>
+                ...project,
+                memberCount
+            };
+        }));
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        handleResponse(res, 200, "Projects fetched successfully", projectsWithMembers);</span>
+    } catch (error) {
+<span class="cstat-no" title="statement not covered" >        next(error);</span>
+    }
+};
+&nbsp;
+export const getProjectById = <span class="fstat-no" title="function not covered" >async (r</span>eq: Request, res: Response, next: NextFunction): Promise&lt;void&gt; =&gt;<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" > {</span></span>
+<span class="cstat-no" title="statement not covered" >    try {</span>
+        const project: Project = <span class="cstat-no" title="statement not covered" >await getProjectByIdQuery(req.params.projectId);</span>
+<span class="cstat-no" title="statement not covered" >        <span class="missing-if-branch" title="if path not taken" >I</span>if (!project) {</span>
+<span class="cstat-no" title="statement not covered" >            handleResponse(res, 404, "Project not found", null);</span>
+<span class="cstat-no" title="statement not covered" >            return;</span>
+        }
+<span class="cstat-no" title="statement not covered" >        handleResponse(res, 200, "Project fetched successfully", project);</span>
+    } catch (error) {
+<span class="cstat-no" title="statement not covered" >        next(error);</span>
+    }
+};
+&nbsp;
+export const updateProject = async (req: Request, res: Response, next: NextFunction): Promise&lt;void&gt; =&gt; {
+    try {
+        const { name, description } = req.body;
+        const projectId = req.params.projectId;
+&nbsp;
+        const project: Project = await getProjectByIdQuery(projectId);
+        if (!project) {
+            handleResponse(res, 404, "Project not found", null);
             return;
         }
 &nbsp;
-        // Verify and decode refresh token
-        let decoded: any;
-        try {
-            decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET as string);
-        } catch (jwtError) {
-            res.status(400).json({
-                message: "Invalid refresh token",
-                code: "INVALID_REFRESH_TOKEN"
-            });
+        if (project.read_only) {
+            handleResponse(res, 400, "Project is read-only", null);
+            return;
         }
 &nbsp;
-        // Check if the decoded token has the required properties
-        <span class="missing-if-branch" title="if path not taken" >I</span>if (!decoded.id) {
-<span class="cstat-no" title="statement not covered" >            console.error('Refresh token missing id property');</span>
-<span class="cstat-no" title="statement not covered" >            res.status(403).json({ message: "Invalid refresh token format" });</span>
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (project.name === name &amp;&amp; <span class="branch-1 cbranch-no" title="branch not covered" >project.description === description)</span> {
+<span class="cstat-no" title="statement not covered" >            handleResponse(res, 200, "No changes detected", project);</span>
 <span class="cstat-no" title="statement not covered" >            return;</span>
         }
 &nbsp;
-        // Fetch user from DB
-        const user = await getUserByIdQuery(decoded.id);
-        if (!user) {
-            res.status(404).json({ message: "User not found" });
+        const updateProject: Project = await updateProjectQuery(name, description, projectId);
+        if (!updateProject) {
+            handleResponse(res, 404, "Project not found", null);
             return;
         }
-&nbsp;
-        // Check if user has a refresh session ID
-        if (!user.refresh_session_id) {
-            res.status(403).json({ message: "No refresh session found" });
-            return;
-        }
-&nbsp;
-        // Check if the decoded token has the sessionId property
-        if (!decoded.refreshSessionId) {
-            res.status(403).json({ message: "Invalid refresh token format" });
-            return;
-        }
-&nbsp;
-        // Compare session ID from token with the hashed session ID from DB
-        const isValidSession = await bcrypt.compare(decoded.refreshSessionId, user.refresh_session_id);
-        if (!isValidSession) {
-            res.status(403).json({ message: "Invalid session" });
-            return;
-        }
-&nbsp;
-        // Generate new access token
-        const newAccessToken = generateAccessToken(user.id);
-&nbsp;
-        res.status(200).json({
-            message: "Access token refreshed successfully",
-            accessToken: newAccessToken,
-            user
-        });
+        handleResponse(res, 200, "Project updated successfully", updateProject);
     } catch (error) {
-        res.status(400).json({
-            message: "Invalid refresh token",
-            code: "INVALID_REFRESH_TOKEN"
-        });
-        return;
+        next(error);
+    }
+};
+&nbsp;
+export const deleteProject = async (req: Request, res: Response, next: NextFunction): Promise&lt;void&gt; =&gt; {
+    try {
+        const projectId = req.params.projectId;
+&nbsp;
+        const project: Project = await getProjectByIdQuery(projectId);
+        if (!project) {
+            handleResponse(res, 404, "Project not found", null);
+            return;
+        }
+&nbsp;
+        if (project.read_only) {
+            handleResponse(res, 400, "Project is read-only", null);
+            return;
+        }
+&nbsp;
+        const deletedProject: Project = await deleteProjectQuery(projectId);
+        if (!deletedProject) {
+            handleResponse(res, 404, "Project not found", null);
+            return;
+        }
+        handleResponse(res, 200, "Project deleted successfully", deletedProject);
+    } catch (error) {
+        next(error);
     }
 };</pre></td></tr></table></pre>
 
