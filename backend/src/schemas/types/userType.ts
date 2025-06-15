@@ -12,4 +12,5 @@ export interface User {
     user_cancelled_premium: boolean;
     provider: string;
     password: string
+    refresh_session_id: string
 }

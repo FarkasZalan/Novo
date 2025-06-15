@@ -37,7 +37,7 @@ export const getUserProfile = async (req: Request, res: Response, next: NextFunc
     }
 };
 
-// controllers/userController.ts
+
 export const updateUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const { email, name, password, currentPassword } = req.body;
