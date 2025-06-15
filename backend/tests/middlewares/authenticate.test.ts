@@ -97,14 +97,6 @@ describe('refreshAccessToken middleware', () => {
         user_cancelled_premium: false
     }
 
-    beforeAll(() => {
-        jest.spyOn(console, 'error').mockImplementation(() => { });
-    });
-
-    afterAll(() => {
-        (console.error as jest.Mock).mockRestore();
-    });
-
     beforeEach(() => {
         mockRequest = {
             cookies: {}
