@@ -118,7 +118,6 @@ app.use("/api", filterRoutes);
 // Error handling middleware
 app.use(errorHandling);
 
-
 // Create tables if it doesn't exist before server starts
 initializeDatabase().then(() => {
     console.log("Database tables initialized");

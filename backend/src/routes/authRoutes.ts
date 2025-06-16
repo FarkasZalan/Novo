@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import { createUser, loginUser, logoutUser, getOAuthState, requestPasswordReset, resetUserPassword, verifyResetPasswordToken, resendVerificationEmail, verifyEmail, oauthCallback } from "../controller/authController";
+import { createUser, loginUser, logoutUser, getOAuthState, requestPasswordReset, resetUserPassword, verifyResetPasswordToken, resendVerificationEmail, verifyEmail } from "../controller/authController";
 import { validateUser } from "../middlewares/inputValidator";
 import { refreshAccessToken } from "../middlewares/authenticate";
 import passport from "passport";
@@ -240,7 +240,51 @@ router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 
  */
 router.get('/auth/google/callback',
     passport.authenticate('google', { session: false, failureRedirect: '/login' }),
-    oauthCallback
+    async (req: Request, res: Response) => {
+        try {
+            const user = req.user; // get from passport where create the user (see config/passport.ts and then findOrCreateOAuthUser function)
+
+            // Generate session ID and tokens similar to regular login
+            const refreshSessionId = crypto.randomUUID();
+            await storeRefreshToken(user.id, refreshSessionId);
+
+            const accessToken = generateAccessToken(user.id);
+            const refreshToken = generateRefreshToken(user.id, refreshSessionId);
+
+            // Set refresh token cookie
+            // strict - cookie sent only on the same site
+            // lax - cookie sent top level nvigations (GET), not with PUT, POST, DELETE
+            // none - cookie sent in cross-site requests - only if secure: true
+            res.cookie("refresh_token", refreshToken, {
+                httpOnly: true,
+                secure: true, // https
+                sameSite: "none",
+                path: "/",  // Set path to root to ensure it's available for all routes
+                maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+            });
+
+            // Generate a temporary state token
+            const stateToken = crypto.randomBytes(32).toString('hex');
+
+            // Store the state token and user data in redis
+            await redisClient.setEx(
+                `oauth_state:${stateToken}`,
+                5 * 60, // 5 minutes expiry
+                JSON.stringify({
+                    accessToken,
+                    user: {
+                        id: user.id
+                    }
+                })
+            );
+
+            // Redirect to frontend with just the state token
+            res.redirect(`${process.env.FRONTEND_URL}/oauth-callback?state=${stateToken}`);
+        } catch (error) {
+            console.error('OAuth callback error:', error);
+            res.redirect('/login?error=oauth_failed');
+        }
+    }
 );
 
 /**
@@ -274,7 +318,48 @@ router.get('/auth/github', passport.authenticate('github', { scope: ['user:email
  */
 router.get('/auth/github/callback',
     passport.authenticate('github', { session: false, failureRedirect: '/login' }),
-    oauthCallback
+    async (req: Request, res: Response) => {
+        try {
+            const user = req.user; // get from passport where create the user (see config/passport.ts and then findOrCreateOAuthUser function)
+
+            // Generate session ID and tokens similar to regular login
+            const refreshSessionId = crypto.randomUUID();
+            await storeRefreshToken(user.id, refreshSessionId);
+
+            const accessToken = generateAccessToken(user.id);
+            const refreshToken = generateRefreshToken(user.id, refreshSessionId);
+
+            // Set refresh token cookie
+            res.cookie("refresh_token", refreshToken, {
+                httpOnly: true,
+                secure: true, // https
+                sameSite: "none",
+                path: "/",  // Set path to root to ensure it's available for all routes
+                maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+            });
+
+            // Generate a temporary state token
+            const stateToken = crypto.randomBytes(32).toString('hex');
+
+            // Store the state token and user data in redis
+            await redisClient.setEx(
+                `oauth_state:${stateToken}`,
+                5 * 60, // 5 minutes expiry
+                JSON.stringify({
+                    accessToken,
+                    user: {
+                        id: user.id,
+                    }
+                })
+            );
+
+            // Redirect to frontend with just the state token
+            res.redirect(`${process.env.FRONTEND_URL}/oauth-callback?state=${stateToken}`);
+        } catch (error) {
+            console.error('OAuth callback error:', error);
+            res.redirect('/login?error=oauth_failed');
+        }
+    }
 );
 
 /**

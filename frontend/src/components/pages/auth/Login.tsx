@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { FaEnvelope, FaLock, FaGoogle, FaGithub } from "react-icons/fa";
+import { FaEnvelope, FaLock, FaGoogle, FaGithub, FaInfoCircle } from "react-icons/fa";
 import { initiateGithubLogin, initiateGoogleLogin, login, resendVerificationEmail } from "../../../services/authService";
 import { useAuth } from "../../../hooks/useAuth";
 
@@ -16,78 +16,26 @@ export const Login = () => {
     const [resendSuccess, setResendSuccess] = useState("");
     const navigate = useNavigate();
     const { setAuthState } = useAuth();
-
-    const handleGoogleLogin = async () => {
-        try {
-            setLoading(true); // Add loading state
-            const result = await initiateGoogleLogin();
-
-            if (result.success) {
-                window.location.href = '/dashboard'; // Force reload to ensure auth state is updated
-            } else {
-                console.error('Login failed:', result.error);
-            }
-        } catch (error: any) {
-            console.error('Login error:', error);
-            if (error.message.includes('Popup blocked')) {
-                alert('Please allow popups for this site and try again.');
-            } else if (error.message.includes('cancelled')) {
-                console.log('User cancelled authentication');
-            } else {
-                alert('Authentication failed. Please try again.');
-            }
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleGithubLogin = async () => {
-        try {
-            setLoading(true); // Add loading state
-            const result = await initiateGithubLogin();
-
-            if (result.success) {
-                window.location.href = '/dashboard'; // Force reload to ensure auth state is updated
-            } else {
-                console.error('Login failed:', result.error);
-            }
-        } catch (error: any) {
-            console.error('Login error:', error);
-            if (error.message.includes('Popup blocked')) {
-                alert('Please allow popups for this site and try again.');
-            } else if (error.message.includes('cancelled')) {
-                console.log('User cancelled authentication');
-            } else {
-                alert('Authentication failed. Please try again.');
-            }
-        } finally {
-            setLoading(false);
-        }
-    };
+    const [isIOS, setIsIOS] = useState(false);
 
     useEffect(() => {
-        const token = localStorage.getItem("temp_access_token");
-        const userJson = localStorage.getItem("temp_user");
-
-        if (token && userJson) {
-            try {
-                const user = JSON.parse(JSON.parse(userJson)); // because it's double stringified
-
-                localStorage.removeItem("temp_access_token");
-                localStorage.removeItem("temp_user");
-
-                // Update auth state
-                setAuthState({ accessToken: token, user: user });
-
-                // Now redirect to dashboard
-                window.location.href = "/dashboard";
-
-            } catch (e) {
-                console.error("Failed to parse auth data", e);
-                window.location.href = "/login?error=invalid_token";
-            }
-        }
+        // Check if the device is iOS so don't let use oauth buttons
+        const userAgent = window.navigator.userAgent.toLowerCase();
+        const isIOSDevice = /iphone|ipad|ipod|macintosh/.test(userAgent);
+        setIsIOS(isIOSDevice);
     }, []);
+
+    const handleGoogleLogin = () => {
+        if (!isIOS) {
+            initiateGoogleLogin();
+        }
+    };
+
+    const handleGithubLogin = () => {
+        if (!isIOS) {
+            initiateGithubLogin();
+        }
+    };
 
     useEffect(() => {
         if (location.state?.registeredEmail) {
@@ -334,27 +282,46 @@ export const Login = () => {
                             </div>
                         </div>
 
+                        {isIOS ? (
+                            <div className="mt-6 bg-indigo-50 dark:bg-indigo-900/10 border border-indigo-200 dark:border-indigo-800 rounded-lg p-4">
+                                <div className="flex items-start">
+                                    <FaInfoCircle className="mt-1 mr-3 flex-shrink-0 text-indigo-500 dark:text-indigo-400" />
+                                    <div>
+                                        <h4 className="text-sm font-medium text-indigo-800 dark:text-indigo-200">
+                                            Heads up, Apple user!
+                                        </h4>
+                                        <p className="mt-1 text-sm text-indigo-700 dark:text-indigo-300">
+                                            We'd love to offer Google and GitHub login, but Apple devices sometimes
+                                            make this tricky. No worries though! You can still sign in with your
+                                            email or try from another device if you prefer social login.
+                                        </p>
+                                        <p className="mt-2 text-xs text-indigo-600 dark:text-indigo-400">
+                                            We're working on making this smoother for you in the future!
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="mt-6 grid grid-cols-2 gap-3">
+                                <button
+                                    type="button"
+                                    onClick={handleGoogleLogin}
+                                    className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors cursor-pointer"
+                                >
+                                    <FaGoogle className="h-5 w-5" />
+                                    <span className="ml-2">Google</span>
+                                </button>
 
-                        <div className="mt-6 grid grid-cols-2 gap-3">
-                            <button
-                                type="button"
-                                onClick={handleGoogleLogin}
-                                className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors cursor-pointer"
-                            >
-                                <FaGoogle className="h-5 w-5" />
-                                <span className="ml-2">Google</span>
-                            </button>
-
-                            <button
-                                type="button"
-                                onClick={handleGithubLogin}
-                                className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors cursor-pointer"
-                            >
-                                <FaGithub className="h-5 w-5 text-gray-800 dark:text-gray-200" />
-                                <span className="ml-2">GitHub</span>
-                            </button>
-                        </div>
-
+                                <button
+                                    type="button"
+                                    onClick={handleGithubLogin}
+                                    className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors cursor-pointer"
+                                >
+                                    <FaGithub className="h-5 w-5 text-gray-800 dark:text-gray-200" />
+                                    <span className="ml-2">GitHub</span>
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
