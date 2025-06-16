@@ -195,6 +195,87 @@ export const getOAuthState = async (req: Request, res: Response, next: NextFunct
     }
 };
 
+export const oauthCallback = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const user = req.user;
+        const refreshSessionId = crypto.randomUUID();
+        await storeRefreshToken(user.id, refreshSessionId);
+        const accessToken = generateAccessToken(user.id);
+        const refreshToken = generateRefreshToken(user.id, refreshSessionId);
+
+        res.cookie("refresh_token", refreshToken, {
+            httpOnly: true,
+            secure: true,
+            sameSite: "none",
+            path: "/",
+            maxAge: 7 * 24 * 60 * 60 * 1000
+        });
+
+        const fullUser = await getUserByIdQuery(user.id);
+
+        const html = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Authentication Successful</title>
+            </head>
+            <body>
+                <script>
+    const authData = {
+        success: true,
+        accessToken: "${accessToken}",
+        user: ${JSON.stringify(fullUser)}
+    };
+
+    if (window.opener && !window.opener.closed) {
+        window.opener.postMessage(authData, "*");
+        setTimeout(() => window.close(), 1000);
+    } else if (window.parent && window.parent !== window) {
+        window.parent.postMessage(authData, "*");
+    } else {
+        // Store token + user locally, then redirect safely
+        localStorage.setItem("temp_access_token", "${accessToken}");
+        localStorage.setItem("temp_user", ${JSON.stringify(JSON.stringify(fullUser))});
+        window.location.href = "${process.env.FRONTEND_URL}/auth/success";
+    }
+</script>
+                <div style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">
+                    <h2>✅ Authentication Successful!</h2>
+                    <p>This window should close automatically...</p>
+                    <p><a href="${process.env.FRONTEND_URL}/dashboard">Continue to Dashboard</a></p>
+                </div>
+            </body>
+            </html>
+        `;
+
+        res.send(html);
+    } catch (error) {
+        const html = `
+            <!DOCTYPE html>
+            <html>
+            <body>
+                <script>
+                    const authData = { success: false, error: "Authentication failed" };
+                    if (window.opener && !window.opener.closed) {
+                        window.opener.postMessage(authData, "*");
+                        setTimeout(() => window.close(), 1000);
+                    } else if (window.parent && window.parent !== window) {
+                        window.parent.postMessage(authData, "*");
+                    } else {
+                        window.location.href = "${process.env.FRONTEND_URL}/login?error=auth_failed";
+                    }
+                </script>
+                <div style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">
+                    <h2>❌ Authentication Failed</h2>
+                    <p><a href="${process.env.FRONTEND_URL}/login">Try Again</a></p>
+                </div>
+            </body>
+            </html>
+        `;
+        res.send(html);
+    }
+}
+
 // send password reset email
 export const requestPasswordReset = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {

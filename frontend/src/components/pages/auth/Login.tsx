@@ -25,17 +25,77 @@ export const Login = () => {
         setIsIOS(isIOSDevice);
     }, []);
 
-    const handleGoogleLogin = () => {
-        if (!isIOS) {
-            initiateGoogleLogin();
+    const handleGoogleLogin = async () => {
+        try {
+            setLoading(true); // Add loading state
+            const result = await initiateGoogleLogin();
+
+            if (result.success) {
+                window.location.href = '/dashboard'; // Force reload to ensure auth state is updated
+            } else {
+                console.error('Login failed:', result.error);
+            }
+        } catch (error: any) {
+            console.error('Login error:', error);
+            if (error.message.includes('Popup blocked')) {
+                alert('Please allow popups for this site and try again.');
+            } else if (error.message.includes('cancelled')) {
+                console.log('User cancelled authentication');
+            } else {
+                alert('Authentication failed. Please try again.');
+            }
+        } finally {
+            setLoading(false);
         }
     };
 
-    const handleGithubLogin = () => {
-        if (!isIOS) {
-            initiateGithubLogin();
+    const handleGithubLogin = async () => {
+        try {
+            setLoading(true); // Add loading state
+            const result = await initiateGithubLogin();
+
+            if (result.success) {
+                window.location.href = '/dashboard'; // Force reload to ensure auth state is updated
+            } else {
+                console.error('Login failed:', result.error);
+            }
+        } catch (error: any) {
+            console.error('Login error:', error);
+            if (error.message.includes('Popup blocked')) {
+                alert('Please allow popups for this site and try again.');
+            } else if (error.message.includes('cancelled')) {
+                console.log('User cancelled authentication');
+            } else {
+                alert('Authentication failed. Please try again.');
+            }
+        } finally {
+            setLoading(false);
         }
     };
+
+    useEffect(() => {
+        const token = localStorage.getItem("temp_access_token");
+        const userJson = localStorage.getItem("temp_user");
+
+        if (token && userJson) {
+            try {
+                const user = JSON.parse(JSON.parse(userJson)); // because it's double stringified
+
+                localStorage.removeItem("temp_access_token");
+                localStorage.removeItem("temp_user");
+
+                // Update auth state
+                setAuthState({ accessToken: token, user: user });
+
+                // Now redirect to dashboard
+                window.location.href = "/dashboard";
+
+            } catch (e) {
+                console.error("Failed to parse auth data", e);
+                window.location.href = "/login?error=invalid_token";
+            }
+        }
+    }, []);
 
     useEffect(() => {
         if (location.state?.registeredEmail) {
