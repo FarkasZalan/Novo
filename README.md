@@ -162,6 +162,17 @@ npm run dev
 
 ---
 
+## ⚙️ Running Tests
+
+* **Backend unit tests:**
+
+  ```bash
+  cd backend
+  npm test
+  ```
+
+---
+
 ## 🧪 Testing API Endpoints
 
 * Access Swagger UI at `http://localhost:5000/api-docs` (or configured port).
