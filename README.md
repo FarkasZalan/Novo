@@ -20,6 +20,7 @@ Novo empowers teams and individuals to organize projects, collaborate seamlessly
 
   * Email/password + OAuth (Google, GitHub)
   * Joi for request validation
+  * JWT tokens for stateless authentication
   * reCAPTCHA on first app load
 * **File Uploads:** Multer
 * **API Testing & Docs:** Swagger
