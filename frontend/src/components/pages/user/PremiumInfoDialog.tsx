@@ -101,7 +101,7 @@ export const PremiumInfoDialog = ({
                                 onClick={copyToClipboard}
                                 className="font-mono text-lg sm:text-xl tracking-wider bg-white/10 hover:bg-white/15 transition-colors rounded px-2 sm:px-3 py-1.5 sm:py-2 flex justify-between items-center cursor-pointer"
                             >
-                                <span className="text-sm sm:text-base">4000 0034 8000 0005</span>
+                                <span className="text-sm sm:text-base lg:text-lg xl:text-xl">4000 0034 8000 0005</span>
                                 <FaCopy className="opacity-60 hover:opacity-90 transition-opacity h-3 w-3 sm:h-4 sm:w-4" />
                             </div>
                         </div>
