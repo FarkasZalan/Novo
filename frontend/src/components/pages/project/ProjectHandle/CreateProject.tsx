@@ -14,6 +14,8 @@ export const CreateProject = () => {
         description?: string;
     }>({});
 
+    const MAX_DESCRIPTION_LENGTH = 200; // Character limit for description
+
     const [formData, setFormData] = useState({
         name: "",
         description: "",
@@ -21,6 +23,12 @@ export const CreateProject = () => {
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
+
+        // Enforce character limit for description
+        if (name === "description" && value.length > MAX_DESCRIPTION_LENGTH) {
+            return;
+        }
+
         setFormData(prev => ({
             ...prev,
             [name]: value
@@ -132,11 +140,21 @@ export const CreateProject = () => {
                                 )}
                             </div>
 
-                            {/* Description */}
+                            {/* Description with character counter */}
                             <div>
-                                <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Description
-                                </label>
+                                <div className="flex justify-between items-baseline">
+                                    <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        Description
+                                    </label>
+                                    <span className={`text-xs ${formData.description.length >= MAX_DESCRIPTION_LENGTH
+                                        ? 'text-red-500 dark:text-red-400'
+                                        : formData.description.length > MAX_DESCRIPTION_LENGTH - 50
+                                            ? 'text-yellow-500 dark:text-yellow-400'
+                                            : 'text-gray-500 dark:text-gray-400'
+                                        }`}>
+                                        {formData.description.length}/{MAX_DESCRIPTION_LENGTH}
+                                    </span>
+                                </div>
                                 <textarea
                                     id="description"
                                     name="description"
@@ -146,6 +164,16 @@ export const CreateProject = () => {
                                     className="block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                                     placeholder="Describe the project goals and objectives..."
                                 />
+                                {formData.description.length > MAX_DESCRIPTION_LENGTH - 50 && (
+                                    <p className={`mt-1 text-xs ${formData.description.length >= MAX_DESCRIPTION_LENGTH
+                                        ? 'text-red-600 dark:text-red-400'
+                                        : 'text-yellow-600 dark:text-yellow-400'
+                                        }`}>
+                                        {formData.description.length >= MAX_DESCRIPTION_LENGTH
+                                            ? "Character limit reached"
+                                            : "Approaching character limit"}
+                                    </p>
+                                )}
                             </div>
 
                             {/* Submit Button */}

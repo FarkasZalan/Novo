@@ -28,7 +28,7 @@ export const Home = () => {
             <section className="relative overflow-hidden">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32">
                     <div className="relative z-10 text-center">
-                        <h1 className="text-4xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
+                        <h1 className="text-4xl md:text-6xl font-bold text-gray-900 dark:text-white mb-10">
                             <span className="block mb-2">Manage Your Work with <span className="text-indigo-600">Novo</span></span>
                             <span className={currentWord === 'Collaborate.' ? 'text-indigo-600' : ''}>
                                 <TypeAnimation

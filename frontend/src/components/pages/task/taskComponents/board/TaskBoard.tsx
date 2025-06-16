@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { FaClock, FaCheckCircle, FaCircle, FaPaperclip, FaFlag, FaBan, FaTag, FaChevronDown, FaTasks } from 'react-icons/fa';
+import { FaClock, FaCheckCircle, FaPaperclip, FaFlag, FaBan, FaTag, FaChevronDown, FaTasks, FaRegClock } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 import { Task } from '../../../../../types/task';
 import StatusColumn from './StatusColumn';
@@ -27,7 +27,7 @@ import { ConfirmationDialog } from '../../../project/ConfirmationDialog';
 const statusLabels: Record<string, { label: string, icon: React.ReactNode, color: string }> = {
     'not-started': {
         label: 'To Do',
-        icon: <FaCircle className="text-gray-400" />,
+        icon: <FaRegClock className="text-gray-400" />,
         color: 'bg-gray-200/50 dark:bg-gray-700/50'
     },
     'in-progress': {

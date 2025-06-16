@@ -35,6 +35,8 @@ export const EditProject = () => {
         description: "",
     });
 
+    const MAX_DESCRIPTION_LENGTH = 200; // Character limit for description
+
     useEffect(() => {
         const loadProject = async () => {
             try {
@@ -61,6 +63,12 @@ export const EditProject = () => {
         if (project?.read_only) return; // Prevent changes if read-only
 
         const { name, value } = e.target;
+
+        // Enforce character limit for description
+        if (name === "description" && value.length > MAX_DESCRIPTION_LENGTH) {
+            return;
+        }
+
         setFormData(prev => ({
             ...prev,
             [name]: value
@@ -315,9 +323,19 @@ export const EditProject = () => {
 
                         {/* Description */}
                         <div>
-                            <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                Description
-                            </label>
+                            <div className="flex justify-between items-baseline">
+                                <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Description
+                                </label>
+                                <span className={`text-xs ${formData.description.length >= MAX_DESCRIPTION_LENGTH
+                                    ? 'text-red-500 dark:text-red-400'
+                                    : formData.description.length > MAX_DESCRIPTION_LENGTH - 50
+                                        ? 'text-yellow-500 dark:text-yellow-400'
+                                        : 'text-gray-500 dark:text-gray-400'
+                                    }`}>
+                                    {formData.description.length}/{MAX_DESCRIPTION_LENGTH}
+                                </span>
+                            </div>
                             <textarea
                                 id="description"
                                 name="description"
@@ -328,11 +346,19 @@ export const EditProject = () => {
                                 className={`block w-full px-4 py-2 border ${fieldErrors.description
                                     ? "border-red-300 dark:border-red-700 focus:ring-red-500 focus:border-red-500"
                                     : "border-gray-300 dark:border-gray-600 focus:ring-indigo-500 focus:border-indigo-500"
-                                    } rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 ${project.read_only ? 'cursor-not-allowed bg-gray-50 dark:bg-gray-700/50' : ''}`}
+                                    } rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 ${project.read_only ? 'cursor-not-allowed bg-gray-50 dark:bg-gray-700/50' : ''
+                                    }`}
                                 placeholder="Describe your project..."
                             />
-                            {fieldErrors.description && (
-                                <p className="mt-1 text-sm text-red-600 dark:text-red-400">{fieldErrors.description}</p>
+                            {formData.description.length > MAX_DESCRIPTION_LENGTH - 50 && (
+                                <p className={`mt-1 text-xs ${formData.description.length >= MAX_DESCRIPTION_LENGTH
+                                    ? 'text-red-600 dark:text-red-400'
+                                    : 'text-yellow-600 dark:text-yellow-400'
+                                    }`}>
+                                    {formData.description.length >= MAX_DESCRIPTION_LENGTH
+                                        ? "Character limit reached"
+                                        : "Approaching character limit"}
+                                </p>
                             )}
                         </div>
 

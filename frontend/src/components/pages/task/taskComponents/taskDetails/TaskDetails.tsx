@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
     FaCheckCircle,
     FaClock,
-    FaCircle,
     FaEdit,
     FaCalendarAlt,
     FaArrowLeft,
@@ -17,7 +16,8 @@ import {
     FaCalendarDay,
     FaUsers,
     FaCrown,
-    FaExclamationCircle
+    FaExclamationCircle,
+    FaRegClock
 } from 'react-icons/fa';
 import { fetchTask } from '../../../../../services/taskService';
 import { fetchProjectById } from '../../../../../services/projectService';
@@ -93,7 +93,7 @@ export const TaskDetails: React.FC = () => {
                 }
             default:
                 return {
-                    icon: <FaCircle className="text-gray-400" />,
+                    icon: <FaRegClock className="text-gray-400" />,
                     text: 'Not Started',
                     badgeClass: 'bg-gray-100 text-gray-800 dark:bg-gray-700/30 dark:text-gray-300'
                 };

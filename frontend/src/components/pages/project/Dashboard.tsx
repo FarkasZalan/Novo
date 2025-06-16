@@ -7,12 +7,12 @@ import {
     FaSearch,
     FaCheckCircle,
     FaClock,
-    FaExclamationTriangle,
     FaCog,
     FaSignOutAlt,
     FaPaperclip,
     FaBan,
-    FaExclamationCircle
+    FaExclamationCircle,
+    FaRegClock
 } from "react-icons/fa";
 import { useEffect, useState } from "react";
 import { fetchProjects } from "../../../services/projectService";
@@ -77,7 +77,7 @@ export const Dashboard = () => {
             case "in-progress":
                 return <FaClock className="text-yellow-500" />;
             case "not-started":
-                return <FaExclamationTriangle className="text-gray-400" />;
+                return <FaRegClock className="text-gray-400" />;
             default:
                 return null;
         }
