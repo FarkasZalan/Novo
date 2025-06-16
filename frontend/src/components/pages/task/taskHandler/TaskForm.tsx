@@ -13,6 +13,7 @@ import { addAssignmentForUsers } from '../../../../services/assignmentService';
 import { addMilestoneToTask, createMilestone, deleteMilestoneFromTask, getAllMilestonesForProject } from '../../../../services/milestonesService';
 import { createLabel, getAllLabelForProject } from '../../../../services/labelService';
 import { SubtaskList } from '../taskComponents/subtasks/SubtaskList';
+import { DEFAULT_COLORS } from '../../../utils/DefaultColors';
 
 export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
     const { projectId, taskId } = useParams<{ projectId: string; taskId: string }>();
@@ -135,7 +136,6 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
                 if (!value.trim()) error = "Title is required";
                 else if (value.length < 2) error = "Title must be at least 2 characters";
                 break;
-            // add validation for other fields if needed
         }
 
         return error;
@@ -433,35 +433,6 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
 
     // Generate a random color that's not already used
     const getRandomUnusedColor = (): string => {
-        // Modern, accessible color palette that works in both light/dark modes
-        const DEFAULT_COLORS = [
-            // WARNING COLORS (3) - bugs/urgent
-            '#E06C5E', // Alert coral (high visibility)
-            '#D95C4A', // Danger rust (strong contrast)
-            '#C74E3D', // Critical red (serious issues)
-
-            // GREENS (3) - success/completed
-            '#5CA271', // Healthy green
-            '#6BB38A', // Fresh mint
-            '#5DAA90', // Calm teal
-
-            // BLUES (3) - info/technical
-            '#4E8FD9', // Trusted blue
-            '#5A9AE6', // Friendly azure
-            '#3D88B0', // Stable steel
-
-            // PURPLES (3) - features/enhancements
-            '#8D74C9', // Creative lavender
-            '#A066A0', // Innovative plum
-            '#B584AD', // Soft berry
-
-            // NEUTRALS (4) - in-progress/notes
-            '#D9AE67', // Active mustard
-            '#C0B18D', // Natural khaki
-            '#B0A79D', // Warm gray
-            '#9196A1'  // Cool gray
-        ];
-
         // Get all colors currently in use
         const usedColors = new Set(labels.map(label => label.color));
 
@@ -690,7 +661,7 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
                                 )}
                             </div>
                         ) : (
-                            /* Regular task milestone selector */
+                            /* parent task milestone selector */
                             <>
                                 {selectedMilestone ? (
                                     <div

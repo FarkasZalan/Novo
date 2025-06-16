@@ -397,8 +397,6 @@ export const TaskDetails: React.FC = () => {
                             />
                         </div>
 
-
-
                         {/* Milestone */}
                         <div className="bg-gray-50/70 dark:bg-gray-700/60 p-4 rounded-lg backdrop-blur-sm">
                             <div className="flex items-center text-gray-500 dark:text-gray-400 mb-2">

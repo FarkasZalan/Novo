@@ -197,7 +197,7 @@ export const SubtaskList: React.FC<SubtaskListProps> = React.memo(({
                             transition={{ duration: 0.2 }}
                             className="overflow-hidden border-t border-gray-100 dark:border-gray-700"
                         >
-                            {/* Add subtask form */}
+                            {/* create subtask form if there are have at least one subtask and the user can manage tasks */}
                             {canManageTasks && !project?.read_only && isAdding && (
                                 <motion.div
                                     initial={{ opacity: 0, height: 0 }}
@@ -380,7 +380,7 @@ export const SubtaskList: React.FC<SubtaskListProps> = React.memo(({
                                                         </div>
                                                     )}
 
-                                                    {/* Assignments - moved to left side */}
+                                                    {/* Assignments */}
                                                     <div className="mt-2">
                                                         <TaskAssignments
                                                             showAssignButtonInCompactMode={true}

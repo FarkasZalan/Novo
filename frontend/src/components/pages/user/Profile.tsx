@@ -20,7 +20,7 @@ export const Profile = () => {
     const [isIOS, setIsIOS] = useState(false);
 
     useEffect(() => {
-        // Check if the device is iOS
+        // Check if the device is iOS so don't let use payment management buttons
         const userAgent = window.navigator.userAgent.toLowerCase();
         const isIOSDevice = /iphone|ipad|ipod|macintosh/.test(userAgent);
         setIsIOS(isIOSDevice);
@@ -201,7 +201,7 @@ export const Profile = () => {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex flex-col md:flex-row items-center justify-between">
                         <div className="flex items-center space-x-3 sm:space-x-4 md:space-x-6 w-full md:w-auto">
-                            {/* Left arrow - visible on all screens */}
+                            {/* Left arrow */}
                             <div
                                 className="flex h-10 w-10 cursor-pointer rounded-full bg-indigo-500 dark:bg-indigo-700 items-center justify-center text-white shadow-md hover:bg-indigo-400 dark:hover:bg-indigo-600 transition-colors duration-200"
                                 onClick={() => navigate('/', { replace: true })}
@@ -211,12 +211,12 @@ export const Profile = () => {
 
                             {/* Profile avatar and info container */}
                             <div className="flex items-center flex-1 min-w-0">
-                                {/* Profile avatar - size adjusts based on screen */}
+                                {/* Profile avatar */}
                                 <div className="h-16 w-16 sm:h-20 sm:w-20 md:h-24 md:w-24 flex-shrink-0 rounded-full bg-indigo-500 dark:bg-indigo-700 flex items-center justify-center text-2xl sm:text-3xl md:text-4xl font-bold">
                                     {getUserInitials(user?.name || user?.email.split('@')[0] || 'U')}
                                 </div>
 
-                                {/* User info - handles text overflow */}
+                                {/* User info */}
                                 <div className="ml-3 sm:ml-4 min-w-0">
                                     <h1 className="text-xl sm:text-2xl md:text-3xl font-bold truncate">
                                         {user?.name || 'User'}
@@ -234,7 +234,7 @@ export const Profile = () => {
                             </div>
                         </div>
 
-                        {/* Edit Profile button - spacing and size adjustments */}
+                        {/* Edit Profile button */}
                         <Link
                             to="/profile-settings"
                             className="mt-4 md:mt-0 px-4 py-2 sm:px-5 sm:py-3 md:px-6 md:py-3 bg-white dark:bg-gray-100 text-indigo-600 dark:text-indigo-800 rounded-lg font-medium hover:bg-gray-100 dark:hover:bg-gray-200 transition-colors flex items-center text-sm sm:text-md md:text-base w-full md:w-auto justify-center"

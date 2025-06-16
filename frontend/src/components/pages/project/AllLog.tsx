@@ -77,7 +77,7 @@ export const AllFilteredLogsComponent = () => {
             const [newLogs, moreAvailable] = await fetchAllFilteredLogForUser(
                 authState.accessToken!,
                 selectedTables,
-                newLimit // Use the newLimit parameter directly
+                newLimit
             );
 
             setLogs(newLogs);
@@ -1459,7 +1459,7 @@ export const AllFilteredLogsComponent = () => {
                 </div>
             </div>
 
-            {/* Active filters chips */}
+            {/* Active filters labels */}
             {selectedTables.length > 0 && (
                 <div className="mb-6 flex flex-wrap gap-2">
                     {selectedTables.map((table) => (

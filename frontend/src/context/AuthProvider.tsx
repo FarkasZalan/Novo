@@ -91,7 +91,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.setItem('darkMode', String(newMode));
     };
 
-
     // logout the user
     const logout = async () => {
         try {
@@ -117,7 +116,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
     };
 
-
     // every time when authState changes run this
     useEffect(() => {
         // save auth state to localStorage if user is logged in if logged out then remove
@@ -139,7 +137,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             console.error('Token refresh failed:', refreshError);
         }
     };
-
 
     // every time when authState token is changes run this
     // interceptor = every HTTP request before it is sent and every HTTP response after it is received

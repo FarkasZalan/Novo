@@ -77,7 +77,7 @@ function App() {
     );
   }
 
-  // Once the CAPTCHA is passed, render the normal app
+  // Once the CAPTCHA is passed, render the rest of the app
   return (
     <AuthProvider>
       <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">

@@ -19,7 +19,7 @@ export const Login = () => {
     const [isIOS, setIsIOS] = useState(false);
 
     useEffect(() => {
-        // Check if the device is iOS
+        // Check if the device is iOS so don't let use oauth buttons
         const userAgent = window.navigator.userAgent.toLowerCase();
         const isIOSDevice = /iphone|ipad|ipod|macintosh/.test(userAgent);
         setIsIOS(isIOSDevice);

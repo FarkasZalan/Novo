@@ -191,7 +191,6 @@ export const TaskBoard: React.FC<TaskBoardProps> = React.memo(({ tasks, setTasks
                 )
             );
 
-
             // update task status on backend
             await updateTaskStatus(activeTask.id, projectId!, authState.accessToken!, newStatus);
 

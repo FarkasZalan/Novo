@@ -50,7 +50,7 @@ export const CommentComponent: React.FC<CommentProps> = ({ projectId, taskId, ca
         if (editingCommentId && textareaRef.current) {
             const textarea = textareaRef.current;
             textarea.focus();
-            // Set cursor to end
+            // Set cursor to end on edit
             textarea.setSelectionRange(textarea.value.length, textarea.value.length);
         }
     }, [editingCommentId]);

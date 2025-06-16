@@ -180,7 +180,7 @@ export const SubtaskListOnBoard: React.FC<SubtaskListProps> = ({
                 </div>
             </button>
 
-            {/* Subtasks list - animated */}
+            {/* Subtasks list */}
             <AnimatePresence>
                 {expanded && (
                     <motion.div

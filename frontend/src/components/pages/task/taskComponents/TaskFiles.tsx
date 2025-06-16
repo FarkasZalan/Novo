@@ -47,7 +47,7 @@ export const TaskFiles: React.FC<TaskFilesProps> = React.memo(({ canManageFiles,
         loadFiles();
     }, [projectId, taskId, authState.accessToken]);
 
-    // Enhanced drag and drop handlers
+    // drag and drop handlers
     const handleDragEnter = (e: React.DragEvent) => {
         e.preventDefault();
         e.stopPropagation();

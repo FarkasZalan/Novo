@@ -13,7 +13,7 @@ export const OAuthCallback = () => {
     useEffect(() => {
         const processOAuth = async () => {
             try {
-                // Extract state token from the URL
+                // Extract state token from the URL and with this state we can fetch the OAuth state data from backend
                 const stateToken = searchParams.get("state");
 
                 if (!stateToken) {

@@ -21,13 +21,12 @@
   --scrollbar-thumb: #d1d5db; /* gray-300 */
   --scrollbar-track: #f3f4f6; /* gray-100 */
   
-  /* Dark theme - these will override the light theme when dark mode is active */
+  /* Dark theme */
   .dark {
     --scrollbar-thumb: #4b5563; /* gray-600 */
     --scrollbar-track: #1f2937; /* gray-800 */
   }
   
-  /* Optional accent colors - customize these as needed */
   --scrollbar-thumb-accent: #6366f1; /* indigo-500 */
   --scrollbar-track-accent: #e0e7ff; /* indigo-100 */
 }
@@ -55,7 +54,6 @@
   border-radius: 4px;
 }
 
-/* Optional accent variant */
 .scrollbar-accent::-webkit-scrollbar-thumb {
   background-color: var(--scrollbar-thumb-accent);
 }
@@ -100,7 +98,7 @@
 .scroll-container::-webkit-scrollbar-track {
   background: var(--scroll-track, #f1f1f1);
   border-radius: 4px;
-  margin: 0 16px; /* Add horizontal margin */
+  margin: 0 16px;
 }
 
 .scroll-container::-webkit-scrollbar-thumb {

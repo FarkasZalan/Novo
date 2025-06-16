@@ -16,13 +16,12 @@ export const updateUser = async (updateData: any, accessToken: string) => {
     try {
         const response = await axios.put(
             `${API_URL}/user/update`,
-            updateData, // Send data directly, no wrapping
+            updateData,
             {
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
-                    // Add any other headers your original request had
                 },
-                withCredentials: true // This is likely what was missing!
+                withCredentials: true
             }
         );
         return response.data.data;

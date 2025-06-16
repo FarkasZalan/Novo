@@ -33,7 +33,7 @@ export const Dashboard = () => {
     const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
     const [projectToLeave, setProjectToLeave] = useState<string | null>(null);
 
-
+    // Fetch projects from the backend
     useEffect(() => {
         const loadProjects = async () => {
             try {
@@ -53,6 +53,7 @@ export const Dashboard = () => {
         }
     }, [authState.accessToken]);
 
+    // Filter projects based on search query and active tab
     const filteredProjects = projects.filter(project => {
         const matchesSearch = project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
             project.description.toLowerCase().includes(searchQuery.toLowerCase());

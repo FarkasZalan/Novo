@@ -28,7 +28,7 @@ export const BotCheck: React.FC<BotCheckProps> = ({ siteKey, onVerified }) => {
     return (
         <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 transition-colors duration-300">
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-md p-8 text-center transform transition-all duration-300 hover:shadow-2xl">
-                {/* Header / Label */}
+                {/* Header */}
                 <div className="mb-6">
                     <div className="flex justify-center mb-4">
                         <div className="w-16 h-16 bg-blue-50 dark:bg-gray-700 rounded-full flex items-center justify-center">

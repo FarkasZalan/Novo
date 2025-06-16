@@ -188,8 +188,6 @@ export const AddMemberDialog = ({ project, onClose, onInvite }: AddMemberModalPr
         searchInputRef.current?.focus();
     };
 
-
-
     const handleSearch = useCallback(async (query: string) => {
         if (query.trim().length < MIN_SEARCH_LENGTH) {
             setPotentialMembers([]);
@@ -216,8 +214,6 @@ export const AddMemberDialog = ({ project, onClose, onInvite }: AddMemberModalPr
             setIsSearching(false);
         }
     }, [authState.accessToken, project.id]);
-
-
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;

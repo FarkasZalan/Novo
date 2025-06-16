@@ -106,7 +106,7 @@ export const handleOAuthCallback = async (token: string, userId: string) => {
     try {
         const response = await axios.get(`${API_URL}/users/${userId}`, {
             headers: {
-                Authorization: `Bearer ${token}`  // Set as Bearer token
+                Authorization: `Bearer ${token}` // Set as Bearer token
             },
             withCredentials: true
         });

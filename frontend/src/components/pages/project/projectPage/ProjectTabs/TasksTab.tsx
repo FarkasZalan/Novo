@@ -173,7 +173,7 @@ export const TasksTab = () => {
                 </div>
             )}
 
-            {/* Header Section - Responsive */}
+            {/* Header Section */}
             <div className="flex flex-col space-y-4 sm:flex-row sm:justify-between sm:items-center sm:space-y-0 mb-6 sm:mb-8">
                 <div className="flex-1 min-w-0">
                     <div className="flex flex-col sm:flex-row sm:items-center">

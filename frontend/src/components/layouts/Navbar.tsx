@@ -37,7 +37,7 @@ export const Navbar = () => {
         }
     };
 
-    // Menu items now animate from top instead of left
+    // Menu items animation from top on mobiles
     const menuItemVariants = {
         hidden: { opacity: 0, y: -10 },
         visible: { opacity: 1, y: 0 }
@@ -47,7 +47,7 @@ export const Navbar = () => {
         <nav className="bg-white dark:bg-gray-900 shadow-md sticky top-0 z-50">
             <div className="mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
-                    {/* Logo/Brand */}
+                    {/* Logo */}
                     <div className="flex-shrink-0 flex items-center">
                         {isAuthenticated ? (
                             <Link
@@ -192,8 +192,8 @@ export const Navbar = () => {
                         exit="hidden"
                         variants={mobileMenuVariants}
                         style={{
-                            top: '4rem', // Height of your navbar (h-16 = 4rem)
-                            zIndex: 40 // Just below the navbar z-index
+                            top: '4rem',
+                            zIndex: 40
                         }}
                     >
                         <div className="pt-2 pb-3 space-y-1 px-2">

@@ -33,14 +33,14 @@ export const ConfirmationDialog = ({
     return ReactDOM.createPortal(
         <div className="fixed inset-0 bg-black/30 backdrop-blur-md flex items-center justify-center z-50 px-2 sm:px-4 py-4 overflow-y-auto">
             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl max-w-md w-full">
-                {/* Icon at the top - centered */}
+                {/* Icon at the top */}
                 <div className="flex justify-center mb-4">
                     <div className="h-12 w-12 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-600 dark:text-red-400">
                         <FaExclamationTriangle className="h-6 w-6" />
                     </div>
                 </div>
 
-                {/* Title and message - centered text */}
+                {/* Title and message */}
                 <div className="text-center">
                     <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
                         {title}
@@ -50,7 +50,7 @@ export const ConfirmationDialog = ({
                     </p>
                 </div>
 
-                {/* Buttons - centered and full width on mobile */}
+                {/* Buttons */}
                 <div className="flex flex-col sm:flex-row justify-center space-y-3 sm:space-y-0 sm:space-x-4">
                     <button
                         onClick={onClose}

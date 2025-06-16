@@ -115,7 +115,6 @@ export const MilestoneDetailsPage: React.FC = () => {
             toast.success('Milestone updated successfully');
         } catch (err: any) {
             if (err.response?.status === 400) {
-                // Check the exact structure from your error response
                 if (err.response.data?.message === "Milestone name already exists") {
                     toast.error('Milestone name already exists');
                 } else {
