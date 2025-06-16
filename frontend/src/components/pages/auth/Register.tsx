@@ -175,7 +175,7 @@ export const Register = () => {
                         </div>
                         <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Almost There!</h3>
                         <p className="text-gray-600 dark:text-gray-300 mb-3">
-                            We've sent a verification link to <span className="font-semibold text-indigo-600 dark:text-indigo-400">{formData.email}</span>
+                            We've sent a verification link to the given email address.
                         </p>
                         <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">
                             Please check your email and click the link to verify your account.
