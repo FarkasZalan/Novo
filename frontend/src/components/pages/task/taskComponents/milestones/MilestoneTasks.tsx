@@ -70,7 +70,6 @@ export const MilestoneTasks: React.FC<MilestoneTasksProps> = ({
             );
             return filteredTasks;
         } catch (err) {
-            console.error("Search failed:", err);
             toast.error("Failed to search tasks. Please try again.");
             return [];
         } finally {

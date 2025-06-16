@@ -59,8 +59,6 @@ export const Profile = () => {
             await deleteAccount(authState.accessToken!);
             await logout();
         } catch (err: any) {
-            console.error("Delete account error:", err);
-
             if (err.response?.status === 401) {
                 setDeleteError("Session expired. Please try again.");
             } else if (err.response?.status === 403) {
@@ -98,12 +96,10 @@ export const Profile = () => {
                 });
 
                 if (error) {
-                    console.error("Error:", error);
                     toast.error("Failed to initiate payment");
                 }
             }
         } catch (err: any) {
-            console.error("Payment error:", err);
             toast.error("Failed to initiate payment");
         } finally {
             setPaymentLoading(false);
@@ -128,7 +124,6 @@ export const Profile = () => {
             toast.success("You have successfully downgraded your subscription");
         } catch (err) {
             toast.error("Failed to downgrade subscription");
-            console.error(err);
         } finally {
             setPaymentLoading(false);
         }
@@ -144,7 +139,6 @@ export const Profile = () => {
             toast.success("You have successfully reactivated your subscription");
         } catch (err) {
             toast.error("Failed to reactivate subscription");
-            console.error(err);
         } finally {
             setPaymentLoading(false);
         }

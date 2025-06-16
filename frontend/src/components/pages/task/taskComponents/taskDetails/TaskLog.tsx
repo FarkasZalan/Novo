@@ -23,10 +23,8 @@ export const TaskLogsComponent = ({ projectId, taskId }: TaskLogProps) => {
                 setLoading(true);
                 const logs = await fetchTaskLog(authState.accessToken!, projectId, taskId);
                 setLogs(logs);
-                console.log(logs);
             } catch (err) {
                 setError("Failed to load task logs");
-                console.error(err);
             } finally {
                 setLoading(false);
             }

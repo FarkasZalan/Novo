@@ -24,12 +24,10 @@ export const storeRefreshToken = async (userId: string, refreshSessionId: string
         );
 
         if (result.rows.length === 0) {
-            console.error('Failed to update user with refresh session ID');
             throw new Error('Failed to update user with refresh session ID');
         }
         return hashedSessionId;
     } catch (error) {
-        console.error('Error storing refresh token:', error);
         throw error;
     }
 }
@@ -43,13 +41,11 @@ export const clearRefreshTokenInDB = async (userId: string) => {
         );
 
         if (result.rows.length === 0) {
-            console.error('Failed to clear refresh token for user');
             throw new Error('Failed to clear refresh token for user');
         }
 
         return result.rows[0];
     } catch (error) {
-        console.error('Error clearing refresh token:', error);
         throw error;
     }
 }

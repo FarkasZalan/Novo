@@ -36,7 +36,6 @@ export const OAuthCallback = () => {
                 // Redirect to dashboard page on success
                 setTimeout(() => {
                     navigate("/dashboard");
-                    console.log("Redirecting to dashboard...");
                 }, 100);
             } catch (err) {
                 navigate("/login", { state: { error: "OAuth authentication failed" } });

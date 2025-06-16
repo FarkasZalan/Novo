@@ -151,7 +151,6 @@ export const TaskList: React.FC<TaskListProps> = React.memo(({
 
             toast.success('Task deleted successfully');
         } catch (err) {
-            console.error(err);
             toast.error('Failed to delete task');
         } finally {
             setLoading(false);
@@ -200,7 +199,6 @@ export const TaskList: React.FC<TaskListProps> = React.memo(({
 
             toast.success('Subtask deleted successfully');
         } catch (err) {
-            console.error(err);
             toast.error('Failed to delete subtask');
         }
     };

@@ -111,7 +111,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
             });
         } catch (err) {
-            console.error("Logout error:", err);
             // Even if the API call fails, clear local auth state
             setAuthState({ user: null, accessToken: null });
             localStorage.removeItem('authState');
@@ -209,8 +208,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                         // Retry the original request with the new token
                         return axios(newRequest);
                     } catch (refreshError) {
-                        console.error("Failed to refresh token:", refreshError);
-
                         // If refresh fails, log out the user
                         await logout();
                         return Promise.reject(refreshError);

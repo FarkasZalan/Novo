@@ -84,7 +84,6 @@ export const MilestonesManagerPage: React.FC<{ project: Project | null }> = Reac
                     }
                 }
             } catch (err) {
-                console.error(err);
                 setError('Failed to load milestones data');
                 toast.error('Failed to load milestones data');
             } finally {
@@ -138,8 +137,6 @@ export const MilestonesManagerPage: React.FC<{ project: Project | null }> = Reac
             setMilestones(updated);
             setIsModalOpen(false);
         } catch (err: any) {
-            console.error(err);
-
             if (err.response?.status === 400) {
                 // Check the exact structure from your error response
                 if (err.response.data?.message === "Milestone name already exists") {
@@ -176,7 +173,6 @@ export const MilestonesManagerPage: React.FC<{ project: Project | null }> = Reac
 
             toast.success('Milestone deleted successfully');
         } catch (err) {
-            console.error(err);
             toast.error('Failed to delete milestone');
         } finally {
             setIsDeleteConfirmOpen(false);
@@ -193,7 +189,6 @@ export const MilestonesManagerPage: React.FC<{ project: Project | null }> = Reac
             const mTasks = await getAllTaskForMilestone(milestone.id, projectId!, authState.accessToken!);
             setMilestoneTasks(mTasks);
         } catch (err) {
-            console.error(err);
             toast.error('Failed to load milestone tasks');
         }
     };
@@ -216,7 +211,6 @@ export const MilestonesManagerPage: React.FC<{ project: Project | null }> = Reac
             const updated = await getAllMilestonesForProject(projectId!, authState.accessToken!);
             setMilestones(updated);
         } catch (err) {
-            console.error(err);
             toast.error('Failed to add tasks to milestone');
         }
     };
@@ -240,7 +234,6 @@ export const MilestonesManagerPage: React.FC<{ project: Project | null }> = Reac
 
             toast.success('Task removed from milestone');
         } catch (err) {
-            console.error(err);
             toast.error('Failed to remove task from milestone');
         }
     };

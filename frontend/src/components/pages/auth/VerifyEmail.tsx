@@ -40,7 +40,6 @@ export const VerifyEmail = () => {
             navigate(window.location.pathname, { replace: true });
         } catch (err: any) {
             const errorMessage = err.response?.data?.message || "Email verification failed";
-            console.error(err);
             setError(errorMessage);
         } finally {
             setLoading(false);
@@ -63,7 +62,6 @@ export const VerifyEmail = () => {
             setResendSuccess(true);
         } catch (err: any) {
             const errorMessage = err.response?.data?.message || "Failed to resend verification email";
-            console.error(err);
             setError(errorMessage);
         } finally {
             setResendLoading(false);

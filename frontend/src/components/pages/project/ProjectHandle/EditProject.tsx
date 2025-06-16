@@ -47,7 +47,6 @@ export const EditProject = () => {
                 });
             } catch (err) {
                 setError("Failed to load project");
-                console.error(err);
             } finally {
                 setLoading(false);
             }

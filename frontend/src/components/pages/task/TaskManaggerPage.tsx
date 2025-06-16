@@ -159,7 +159,6 @@ export const TasksManagerPage: React.FC = () => {
                 }
             } catch (err) {
                 setError('Failed to load tasks');
-                console.error(err);
             } finally {
                 setLoading(false);
             }

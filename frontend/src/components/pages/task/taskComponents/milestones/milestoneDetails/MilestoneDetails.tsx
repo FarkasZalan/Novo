@@ -74,7 +74,6 @@ export const MilestoneDetailsPage: React.FC = () => {
                 }
 
             } catch (err) {
-                console.error(err);
                 setError('Failed to load milestone data');
                 toast.error('Failed to load milestone data');
             } finally {
@@ -115,8 +114,6 @@ export const MilestoneDetailsPage: React.FC = () => {
             setIsEditModalOpen(false);
             toast.success('Milestone updated successfully');
         } catch (err: any) {
-            console.error(err);
-
             if (err.response?.status === 400) {
                 // Check the exact structure from your error response
                 if (err.response.data?.message === "Milestone name already exists") {
@@ -139,7 +136,6 @@ export const MilestoneDetailsPage: React.FC = () => {
             toast.success('Milestone deleted successfully');
             navigate(`/projects/${projectId}/tasks?milestones`, { replace: true });
         } catch (err) {
-            console.error(err);
             toast.error('Failed to delete milestone');
         } finally {
             setIsDeleteConfirmOpen(false);
@@ -170,7 +166,6 @@ export const MilestoneDetailsPage: React.FC = () => {
             setMilestone(updatedMilestone);
             toast.success(`${taskIds.length} task${taskIds.length !== 1 ? 's' : ''} added to milestone`, { id: loadingToast });
         } catch (err) {
-            console.error(err);
             toast.error('Failed to add tasks to milestone');
         } finally {
             setIsAddingTasks(false);
@@ -200,7 +195,6 @@ export const MilestoneDetailsPage: React.FC = () => {
 
             toast.success('Task removed successfully', { id: loadingToast });
         } catch (err) {
-            console.error(err);
             toast.error('Failed to remove task from milestone');
         }
     };

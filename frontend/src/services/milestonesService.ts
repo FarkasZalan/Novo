@@ -119,8 +119,6 @@ export const updateMilestone = async (milestoneId: string, projectId: string, to
                 Authorization: `Bearer ${token}`
             }
         });
-
-        console.log(response.data);
         return response.data.data;
     } catch (error) {
         console.error("Error updating milestone:", error);

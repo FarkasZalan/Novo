@@ -65,7 +65,6 @@ export const deleteAssignmentMyself = async (projectId: string, taskId: string, 
                 }
             }
         );
-        console.log(response.data);
         return response.data;
     } catch (error) {
         console.error("Error deleting project file:", error);

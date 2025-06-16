@@ -47,7 +47,6 @@ export const filterAllUnassignedTaskByTitleForMilestone = async (projectId: stri
                 Authorization: `Bearer ${token}`
             }
         });
-        console.log(response.data.data);
         return response.data.data;
     } catch (error) {
         console.error("Error fetching unassigned tasks for milestone:", error);

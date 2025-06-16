@@ -123,8 +123,6 @@ export const AddMemberDialog = ({ project, onClose, onInvite }: AddMemberModalPr
             onInvite();
             onClose();
         } catch (error: any) {
-            console.error("Failed to add members:", error);
-
             // Check if error is related to premium limitations
             if (error.response?.data?.message?.includes("Premium")) {
                 const isOwner = authState.user?.id === project.owner_id;
@@ -213,7 +211,6 @@ export const AddMemberDialog = ({ project, onClose, onInvite }: AddMemberModalPr
                 is_registered: true
             })));
         } catch (err) {
-            console.error("Search failed:", err);
             setError("Failed to search users. Please try again.");
         } finally {
             setIsSearching(false);

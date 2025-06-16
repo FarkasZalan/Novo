@@ -134,8 +134,6 @@ export const TaskBoard: React.FC<TaskBoardProps> = React.memo(({ tasks, setTasks
     const handleDragEnd = async (event: DragEndEvent) => {
         const { over } = event; // where the task is dropped
 
-        console.log(project?.read_only)
-
         if (project?.read_only) {
             toast.error('This project is read-only. You cannot modify its tasks.');
             return;
@@ -203,7 +201,6 @@ export const TaskBoard: React.FC<TaskBoardProps> = React.memo(({ tasks, setTasks
             // Notify parent of successful update
             onTaskUpdate?.(updatedTask);
         } catch (error) {
-            console.error("Error updating task status:", error);
             toast.error("Failed to update task status");
 
             // Revert optimistic update

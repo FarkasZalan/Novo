@@ -40,7 +40,6 @@ export const FilesTab = () => {
             }
         } catch (err) {
             setError("Failed to load files");
-            console.error(err);
         } finally {
             setLoading(false);
         }
@@ -205,7 +204,6 @@ export const FilesTab = () => {
                     toast.error(`“${result.file.name}” is too large (max 10 MB).`);
                 } else {
                     toast.error(`Failed to upload “${result.file.name}”.`);
-                    console.error(err);
                 }
             }
         });
@@ -264,7 +262,6 @@ export const FilesTab = () => {
             toast.success(`Download started for "${fileName}"`);
         } catch (err) {
             toast.error("Failed to download file");
-            console.error(err);
         }
     };
 
@@ -285,7 +282,6 @@ export const FilesTab = () => {
             toast.success("File deleted successfully!");
         } catch (err) {
             toast.error("Failed to delete file");
-            console.error(err);
         } finally {
             setShowDeleteConfirm(false);
             setFileToDelete(null);

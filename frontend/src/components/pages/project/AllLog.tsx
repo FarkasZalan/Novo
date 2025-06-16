@@ -79,13 +79,12 @@ export const AllFilteredLogsComponent = () => {
                 selectedTables,
                 newLimit // Use the newLimit parameter directly
             );
-            console.log(newLogs);
+
             setLogs(newLogs);
             setHasMore(moreAvailable);
             setLimit(newLimit);
         } catch (err) {
             setError("Failed to load activity logs");
-            console.error(err);
         } finally {
             setLoading(false);
             setLoadingMore(false);

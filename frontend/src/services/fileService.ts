@@ -121,7 +121,6 @@ export const downloadTaskFile = async (fileId: string, procejtId: string, taskId
 
 export const deletetaskFile = async (projectId: string, taskId: string, fileId: string, token: string) => {
     try {
-        console.log(projectId, taskId, fileId, token)
         const response = await axios.delete(`${API_URL}/project/${projectId}/task/${taskId}/files/${fileId}`, {
             headers: {
                 Authorization: `Bearer ${token}`

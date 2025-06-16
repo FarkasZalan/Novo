@@ -13,7 +13,6 @@ export const createComment = async (comment: string, taskId: string, projectId: 
                 Authorization: `Bearer ${token}`
             }
         });
-        console.log(response.data);
         return response.data.data;
     } catch (error) {
         console.error("Error creating comment:", error);
@@ -45,7 +44,6 @@ export const updateComment = async (comment: string, commentId: string, projectI
                 Authorization: `Bearer ${token}`
             }
         });
-        console.log(response.data);
         return response.data.data;
     } catch (error) {
         console.error("Error updating comment:", error);

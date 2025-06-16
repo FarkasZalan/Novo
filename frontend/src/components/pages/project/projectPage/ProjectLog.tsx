@@ -22,10 +22,8 @@ export const ProjectLogsComponent = ({ projectId }: ProjectLogProps) => {
                 setLoading(true);
                 const logs = await fetchProjectLog(authState.accessToken!, projectId);
                 setLogs(logs);
-                console.log(logs);
             } catch (err) {
                 setError("Failed to load project logs");
-                console.error(err);
             } finally {
                 setLoading(false);
             }

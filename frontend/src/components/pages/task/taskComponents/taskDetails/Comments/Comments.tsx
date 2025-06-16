@@ -38,7 +38,6 @@ export const CommentComponent: React.FC<CommentProps> = ({ projectId, taskId, ca
                 }
             } catch (err) {
                 setError('Failed to load comments');
-                console.error(err);
             } finally {
                 setLoading(false);
             }
@@ -89,7 +88,6 @@ export const CommentComponent: React.FC<CommentProps> = ({ projectId, taskId, ca
             }
         } catch (err) {
             toast.error('Failed to add comment');
-            console.error(err);
         } finally {
             setLoading(false);
         }
@@ -115,7 +113,6 @@ export const CommentComponent: React.FC<CommentProps> = ({ projectId, taskId, ca
             }
         } catch (err) {
             toast.error('Failed to update comment');
-            console.error(err);
         } finally {
             setLoading(false);
         }
@@ -146,7 +143,6 @@ export const CommentComponent: React.FC<CommentProps> = ({ projectId, taskId, ca
             }
         } catch (err) {
             toast.error('Failed to delete comment');
-            console.error(err);
         } finally {
             setLoading(false);
             setShowTaskDeleteConfirm(false);

@@ -19,7 +19,6 @@ export const BotCheck: React.FC<BotCheckProps> = ({ siteKey, onVerified }) => {
             await new Promise((resolve) => setTimeout(resolve, 800));
             onVerified();
         } catch (err) {
-            console.error("CAPTCHA verification error:", err);
             recaptchaRef.current?.reset();
         } finally {
             setLoading(false);

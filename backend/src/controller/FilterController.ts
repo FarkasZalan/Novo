@@ -314,7 +314,6 @@ export const getAllFilteredLogForUser = async (req: Request, res: Response, next
         const hasMore = logs.length > requestedLimit;
         handleResponse(res, 200, "Project change logs successfully fetched", [changeLogs, hasMore]);
     } catch (error: any) {
-        console.error(error);
         next(error);
     }
 };
@@ -332,7 +331,6 @@ export const getAllUserByNameOrEmail = async (req: Request, res: Response, next:
 
         handleResponse(res, 200, "Users successfully fetched", users);
     } catch (error: Error | any) {
-        console.log(error);
         next(error);
     }
 }
@@ -368,7 +366,6 @@ export const getAllTaskByNameBasedOnMilestone = async (req: Request, res: Respon
 
         handleResponse(res, 200, "Tasks successfully fetched", tasks);
     } catch (error: Error | any) {
-        console.log(error);
         next(error);
     }
 }

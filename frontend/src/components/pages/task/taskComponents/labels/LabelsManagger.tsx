@@ -54,7 +54,6 @@ export const LabelsManagerPage: React.FC<{ project: Project | null }> = React.me
                     if (current?.role === 'admin') setCanManage(true);
                 }
             } catch (err) {
-                console.error(err);
                 setError('Failed to load labels data');
                 toast.error('Failed to load labels data');
             } finally {
@@ -104,8 +103,6 @@ export const LabelsManagerPage: React.FC<{ project: Project | null }> = React.me
             setLabels(updated);
             setIsModalOpen(false);
         } catch (err: any) {
-            console.error(err);
-
             if (err.response?.status === 400) {
                 // Check the exact structure from your error response
                 if (err.response.data?.message === "Label name already exists") {
@@ -134,7 +131,6 @@ export const LabelsManagerPage: React.FC<{ project: Project | null }> = React.me
             setLabels(labels.filter(l => l.id !== labelToDelete));
             toast.success('Label deleted successfully');
         } catch (err) {
-            console.error(err);
             toast.error('Failed to delete label');
         } finally {
             setIsDeleteConfirmOpen(false);

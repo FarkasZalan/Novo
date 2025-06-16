@@ -63,7 +63,6 @@ export const TaskDetails: React.FC = () => {
                     }
                 }
             } catch (err) {
-                console.error(err);
                 setError('Failed to load task.');
             } finally {
                 setLoading(false);

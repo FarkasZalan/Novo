@@ -99,7 +99,6 @@ export const Login = () => {
             }, 100);
         } catch (err: any) {
             const errorMessage = err.response?.data?.message || "Login failed";
-            console.error(err);
             setError(
                 errorMessage.includes("Invalid email")
                     ? "Invalid email or password"

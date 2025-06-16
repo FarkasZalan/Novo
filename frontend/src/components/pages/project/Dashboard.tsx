@@ -43,7 +43,6 @@ export const Dashboard = () => {
                 setProjects(projects);
             } catch (err) {
                 setError("Failed to load projects");
-                console.error(err);
             } finally {
                 setLoading(false);
             }
@@ -99,7 +98,6 @@ export const Dashboard = () => {
             setProjects(updatedProjects);
             setShowLeaveConfirm(false);
         } catch (err) {
-            console.error("Failed to leave project:", err);
             toast.error("Failed to leave project");
         }
     };
@@ -267,8 +265,8 @@ export const Dashboard = () => {
                             <button
                                 onClick={() => setActiveTab("all")}
                                 className={`flex-shrink-0 whitespace-nowrap py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm cursor-pointer ${activeTab === "all"
-                                        ? "border-indigo-500 text-indigo-600 dark:text-indigo-400"
-                                        : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-500"
+                                    ? "border-indigo-500 text-indigo-600 dark:text-indigo-400"
+                                    : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-500"
                                     }`}
                             >
                                 All Projects
@@ -276,8 +274,8 @@ export const Dashboard = () => {
                             <button
                                 onClick={() => setActiveTab("in-progress")}
                                 className={`flex-shrink-0 whitespace-nowrap py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm cursor-pointer ${activeTab === "in-progress"
-                                        ? "border-yellow-500 text-yellow-600 dark:text-yellow-400"
-                                        : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-500"
+                                    ? "border-yellow-500 text-yellow-600 dark:text-yellow-400"
+                                    : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-500"
                                     }`}
                             >
                                 In Progress
@@ -285,8 +283,8 @@ export const Dashboard = () => {
                             <button
                                 onClick={() => setActiveTab("completed")}
                                 className={`flex-shrink-0 whitespace-nowrap py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm cursor-pointer ${activeTab === "completed"
-                                        ? "border-green-500 text-green-600 dark:text-green-400"
-                                        : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-500"
+                                    ? "border-green-500 text-green-600 dark:text-green-400"
+                                    : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-500"
                                     }`}
                             >
                                 Completed
@@ -294,8 +292,8 @@ export const Dashboard = () => {
                             <button
                                 onClick={() => setActiveTab("not-started")}
                                 className={`flex-shrink-0 whitespace-nowrap py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm cursor-pointer ${activeTab === "not-started"
-                                        ? "border-gray-500 text-gray-600 dark:text-gray-400"
-                                        : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-500"
+                                    ? "border-gray-500 text-gray-600 dark:text-gray-400"
+                                    : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-500"
                                     }`}
                             >
                                 Not Started

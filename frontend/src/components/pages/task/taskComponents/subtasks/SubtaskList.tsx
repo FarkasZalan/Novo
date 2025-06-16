@@ -58,7 +58,6 @@ export const SubtaskList: React.FC<SubtaskListProps> = ({
             toast.success('Subtask added successfully');
         } catch (error) {
             toast.error('Failed to add subtask');
-            console.error('Error adding subtask:', error);
         } finally {
             setIsLoading(false);
         }
@@ -202,7 +201,6 @@ export const SubtaskList: React.FC<SubtaskListProps> = ({
                                         deleteTask(id, projectId, authState.accessToken!).then(onSubtaskUpdated);
                                         toast.success('Subtask deleted successfully');
                                     } catch (err) {
-                                        console.error(err);
                                         toast.error('Failed to delete subtask');
                                     }
 

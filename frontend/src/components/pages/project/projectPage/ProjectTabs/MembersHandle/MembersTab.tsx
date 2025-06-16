@@ -81,7 +81,6 @@ export const MembersTab = ({
 
             toast.success(`User role updated to ${newRole}`);
         } catch (error) {
-            console.error("Failed to update role:", error);
             toast.error("Failed to update user role");
         } finally {
             setChangingRole(null);
@@ -103,7 +102,6 @@ export const MembersTab = ({
             );
             toast.success("Invitation resent successfully");
         } catch (error) {
-            console.error("Failed to resend invitation:", error);
             toast.error("Failed to resend invitation");
         } finally {
             setResendingInvite(null);

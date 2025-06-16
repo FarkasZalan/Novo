@@ -39,7 +39,6 @@ export const ResetPassword = () => {
                 }
             } catch (err: any) {
                 const errorMessage = err.response?.data?.message || "Token verification failed";
-                console.error(err);
                 setError(errorMessage);
             } finally {
                 setLoading(false);
@@ -99,7 +98,6 @@ export const ResetPassword = () => {
             setSuccess(true);
         } catch (err: any) {
             const errorMessage = err.response?.data?.message || "Password reset failed";
-            console.error(err);
             setError(errorMessage);
         } finally {
             setLoading(false);

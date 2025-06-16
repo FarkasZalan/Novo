@@ -116,7 +116,7 @@ app.use("/api", filterRoutes);
 app.use(errorHandling);
 
 
-// Create user table if it doesn't exist before server starts
+// Create tables if it doesn't exist before server starts
 initializeDatabase().then(() => {
     console.log("Database tables initialized");
     // Connect to Redis

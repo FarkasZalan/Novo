@@ -29,7 +29,6 @@ export const ForgotPassword = () => {
             setSuccess(true);
         } catch (err: any) {
             const errorMessage = err.response?.data?.message || "Password reset request failed";
-            console.error(err);
             setError(errorMessage);
         } finally {
             setLoading(false);

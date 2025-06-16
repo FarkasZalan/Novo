@@ -280,7 +280,6 @@ export const getDahboardLogForUser = async (req: Request, res: Response, next: N
 
         handleResponse(res, 200, "Project change logs successfully fetched", changeLogs);
     } catch (error: any) {
-        console.error(error);
         next(error);
     }
 };
@@ -531,7 +530,6 @@ export const getProjectLogs = async (req: Request, res: Response, next: NextFunc
 
         handleResponse(res, 200, "Project change logs successfully fetched", changeLogs);
     } catch (error: Error | any) {
-        console.log(error);
         next(error);
     }
 };
@@ -694,7 +692,6 @@ export const getTaskLogs = async (req: Request, res: Response, next: NextFunctio
 
         handleResponse(res, 200, "Project change logs successfully fetched", changeLogs);
     } catch (error: Error | any) {
-        console.log(error);
         next(error);
     }
 };
@@ -740,7 +737,6 @@ export const getCommentLogs = async (req: Request, res: Response, next: NextFunc
 
         handleResponse(res, 200, "Project change logs successfully fetched", changeLogs);
     } catch (error: Error | any) {
-        console.log(error);
         next(error);
     }
 };
@@ -781,7 +777,6 @@ export const getMilestoneLogs = async (req: Request, res: Response, next: NextFu
 
         handleResponse(res, 200, "Project change logs successfully fetched", changeLogs);
     } catch (error: Error | any) {
-        console.log(error);
         next(error);
     }
 };
@@ -845,7 +840,6 @@ export const getUserLog = async (req: Request, res: Response, next: NextFunction
 
         handleResponse(res, 200, "Project change logs successfully fetched", changeLogs);
     } catch (error: Error | any) {
-        console.log(error);
         next(error);
     }
 };

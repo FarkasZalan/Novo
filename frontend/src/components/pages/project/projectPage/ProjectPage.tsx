@@ -77,7 +77,6 @@ export const ProjectPage = () => {
                 await loadMemberData();
             } catch (err) {
                 setError("Failed to load project");
-                console.error(err);
             } finally {
                 setLoading(false);
             }
@@ -133,7 +132,6 @@ export const ProjectPage = () => {
                     setMembers(allMembers);
                 } catch (err) {
                     setMembersError("Failed to load project members");
-                    console.error(err);
                 } finally {
                     setMembersLoading(false);
                 }
@@ -185,7 +183,6 @@ export const ProjectPage = () => {
                     setMembers(allMembers);
                 } catch (err) {
                     setMembersError("Failed to load project members");
-                    console.error(err);
                 } finally {
                     setMembersLoading(false);
                 }
@@ -257,7 +254,6 @@ export const ProjectPage = () => {
                 setMembers([...transformedMembers, ...transformedPendingMembers]);
             } catch (err) {
                 setMembersError("Failed to load project members");
-                console.error(err);
             } finally {
                 setMembersLoading(false);
             }
@@ -291,7 +287,6 @@ export const ProjectPage = () => {
             await leaveProject(projectId, authState.user.id, authState.user.id, authState.accessToken!);
             navigate('/dashboard');
         } catch (err) {
-            console.error("Failed to leave project:", err);
             toast.error("Failed to leave project");
         }
     };

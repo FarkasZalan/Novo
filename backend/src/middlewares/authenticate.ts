@@ -44,7 +44,6 @@ export const refreshAccessToken = async (req: Request, res: Response, next: Next
     try {
         const refreshToken = req.cookies.refresh_token; // Get refresh token from cookie
         if (!refreshToken) {
-            console.error('No refresh token found in cookies');
             res.status(400).json({
                 message: "No refresh token found in cookies",
                 code: "NO_REFRESH_TOKEN" // Add specific error code
@@ -65,7 +64,6 @@ export const refreshAccessToken = async (req: Request, res: Response, next: Next
 
         // Check if the decoded token has the required properties
         if (!decoded.id) {
-            console.error('Refresh token missing id property');
             res.status(403).json({ message: "Invalid refresh token format" });
             return;
         }

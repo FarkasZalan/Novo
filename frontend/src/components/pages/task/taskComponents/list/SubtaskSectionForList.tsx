@@ -62,7 +62,6 @@ export const SubtaskList: React.FC<SubtaskListProps> = React.memo(({
             onSubtaskStatusChange(task.id, subtaskId, newStatus);
             await updateTaskStatus(subtaskId, projectId, authState.accessToken, newStatus);
         } catch (error) {
-            console.error('Error updating subtask:', error);
             toast.error('Failed to update subtask');
         }
     };
@@ -115,7 +114,6 @@ export const SubtaskList: React.FC<SubtaskListProps> = React.memo(({
             toast.success('Subtask added successfully');
         } catch (error) {
             toast.error('Failed to add subtask');
-            console.error('Error adding subtask:', error);
         } finally {
             setIsLoading(false);
         }

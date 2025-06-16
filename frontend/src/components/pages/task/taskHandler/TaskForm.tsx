@@ -116,7 +116,6 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
                     }
                 }
             } catch (err) {
-                console.error(err);
                 setError('Failed to load data');
             } finally {
                 setInitialLoading(false);
@@ -181,7 +180,6 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
             setMilestoneSearchTerm('');
             toast.success(`Milestone "${milestoneSearchTerm.trim()}" created`);
         } catch (err) {
-            console.error(err);
             toast.error('Failed to create milestone');
         } finally {
             setLoading(false);
@@ -276,7 +274,6 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
             }
             navigate(-1);
         } catch (err) {
-            console.error(err);
             setError('Failed to save task. Please try again.');
         } finally {
             setLoading(false);
@@ -329,7 +326,6 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
                     toast.error(`“${result.file.name}” is too large (max 10 MB).`);
                 } else {
                     toast.error(`Failed to upload “${result.file.name}”.`);
-                    console.error(err);
                 }
             }
         });
@@ -409,7 +405,6 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
             await deleteTask(taskId, projectId!, authState.accessToken!);
             navigate(`/projects/${projectId}/tasks`, { replace: true });
         } catch (err) {
-            console.error(err);
             toast.error('Failed to delete task');
         } finally {
             setLoading(false);
@@ -500,7 +495,6 @@ export const TaskForm: React.FC<{ isEdit: boolean }> = ({ isEdit }) => {
             setLabelSearchTerm('');
             toast.success(`Label "${labelSearchTerm.trim()}" created`);
         } catch (err) {
-            console.error(err);
             toast.error('Failed to create label');
         } finally {
             setLoading(false);

@@ -38,7 +38,6 @@ export const TaskFiles: React.FC<TaskFilesProps> = React.memo(({ canManageFiles,
             }
         } catch (err) {
             setError("Failed to load files");
-            console.error(err);
         } finally {
             setLoading(false);
         }
@@ -163,7 +162,6 @@ export const TaskFiles: React.FC<TaskFilesProps> = React.memo(({ canManageFiles,
             toast.success(`Download started for "${fileName}"`);
         } catch (err) {
             toast.error("Failed to download file");
-            console.error(err);
         }
     };
 
@@ -182,7 +180,6 @@ export const TaskFiles: React.FC<TaskFilesProps> = React.memo(({ canManageFiles,
         } catch (err) {
             toast.error("Failed to delete file");
             setLoading(false);
-            console.error(err);
         } finally {
             setShowTaskDeleteConfirm(false);
             setFileToDelete(null);
