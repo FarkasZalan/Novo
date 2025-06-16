@@ -41,6 +41,7 @@ export const createComment = async (req: Request, res: Response, next: NextFunct
         const newComment: Comment = await getCommentByIdQuery(createdComment.id);
         const projectOwner: User = await getUserByIdQuery(project.owner_id);
 
+        // if the owner have premium then send email to all assigned users for the comment
         if (projectOwner.is_premium) {
             const taskData = await getTaskByIdQuery(taskId);
             const projectData = await getProjectByIdQuery(projectId);
@@ -101,6 +102,7 @@ export const updateComment = async (req: Request, res: Response, next: NextFunct
 
         const projectOwner: User = await getUserByIdQuery(project.owner_id);
 
+        // if the owner have premium then send email to all assigned users for the comment
         if (projectOwner.is_premium) {
             const taskData = await getTaskByIdQuery(taskId);
             const projectData = await getProjectByIdQuery(projectId);

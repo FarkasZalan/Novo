@@ -1,5 +1,6 @@
 import pool from "../config/db";
 
+// create audit triggers for these tables to log every change into the changelog table
 export const addAuditTriggers = async () => {
     const tables = [
         "tasks",

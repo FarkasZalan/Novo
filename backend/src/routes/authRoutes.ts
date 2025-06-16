@@ -252,10 +252,13 @@ router.get('/auth/google/callback',
             const refreshToken = generateRefreshToken(user.id, refreshSessionId);
 
             // Set refresh token cookie
+            // strict - cookie sent only on the same site
+            // lax - cookie sent top level nvigations (GET), not with PUT, POST, DELETE
+            // none - cookie sent in cross-site requests - only if secure: true
             res.cookie("refresh_token", refreshToken, {
                 httpOnly: true,
-                secure: true,  // Only allow secure cookies in production mode
-                sameSite: "none",  // Changed from "strict" to "lax" to allow cross-site requests
+                secure: true, // https
+                sameSite: "none",
                 path: "/",  // Set path to root to ensure it's available for all routes
                 maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
             });
@@ -329,8 +332,8 @@ router.get('/auth/github/callback',
             // Set refresh token cookie
             res.cookie("refresh_token", refreshToken, {
                 httpOnly: true,
-                secure: true,  // Only allow secure cookies in production mode
-                sameSite: "none",  // Changed from "strict" to "lax" to allow cross-site requests
+                secure: true, // https
+                sameSite: "none",
                 path: "/",  // Set path to root to ensure it's available for all routes
                 maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
             });

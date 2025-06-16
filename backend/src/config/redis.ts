@@ -3,6 +3,8 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+// redis is used for store the sessions for oauth auth
+
 const redisClient = createClient({
     url: process.env.REDIS_URL
 });

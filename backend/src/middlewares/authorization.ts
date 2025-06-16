@@ -45,7 +45,7 @@ export const authorizeProjectForOwner = async (req: Request, res: Response, next
         return
     }
 
-    // user is authorized to access this project
+    // user is the owner of this project (for change or delete the project)
     next();
 }
 
@@ -67,7 +67,7 @@ export const authorizeProjectForOwnerAndAdmin = async (req: Request, res: Respon
         return
     }
 
-    // user is authorized to access this project
+    // user is authorized to access this project - owner or admin (for add new users, tasks, files...)
     next();
 }
 
@@ -95,7 +95,7 @@ export const authorizeTask = async (req: Request, res: Response, next: NextFunct
         return
     }
 
-    // Task is owned by the user
+    // user is authorized to access this task
     next();
 }
 
@@ -123,7 +123,7 @@ export const authorizeTaskForOwnerAndAdmin = async (req: Request, res: Response,
         return
     }
 
-    // Task is owned by the user
+    // user is authorized to access this task - owner or admin(create, update, delete...)
     next();
 }
 
@@ -151,7 +151,7 @@ export const authorizeAssignmentsForMember = async (req: Request, res: Response,
         return
     }
 
-    // Task is owned by the user
+    // user is authorized to access this task (assign myself, unassign myself)
     next();
 }
 
@@ -179,6 +179,6 @@ export const authorizeAssignmentsForOwnerAndAdmin = async (req: Request, res: Re
         return
     }
 
-    // Task is owned by the user
+    // user is authorized to access this task - owner or admin (assign others, unassign others)
     next();
 }

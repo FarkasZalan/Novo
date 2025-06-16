@@ -20,6 +20,8 @@ const handleResponse = (res: Response, status: number, message: string, data: an
 };
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+
+// need to create a new item on stripe account (subscription with monthly renewal) and then get the price id from there
 const priceId = process.env.PREMIUM_PLAN_PRICE_ID!;
 
 

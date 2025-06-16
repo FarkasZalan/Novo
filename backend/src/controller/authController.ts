@@ -103,10 +103,13 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
         const refreshToken = generateRefreshToken(user.id, refreshSessionId);
 
         // 4. Store refresh token in a HTTP-only cookie
+        // strict - cookie sent only on the same site
+        // lax - cookie sent top level nvigations (GET), not with PUT, POST, DELETE
+        // none - cookie sent in cross-site requests - only if secure: true
         res.cookie("refresh_token", refreshToken, {
             httpOnly: true,
-            secure: true,
-            sameSite: "none",  // Changed from "lax" to "none" for consistency
+            secure: true, // https
+            sameSite: "none",
             path: "/",
             maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
         });
@@ -129,7 +132,7 @@ export const logoutUser = async (req: Request, res: Response, next: NextFunction
         res.clearCookie("refresh_token", {
             httpOnly: true,
             secure: true,
-            sameSite: "lax",
+            sameSite: "none",
             path: "/" // Set path to root to ensure it's available for all routes
         });
 

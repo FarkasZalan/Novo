@@ -9,11 +9,15 @@ jest.mock('../../src/models/userModel');
 jest.mock('bcryptjs');
 
 describe('User Controller', () => {
+    // mock request and response for the endpoint tests
     let mockRequest: Partial<Request>;
     let mockResponse: Partial<Response>;
     let mockNext: NextFunction;
+
+    // mock data
     let mockUser: User;
 
+    // initialize mock data before each test
     beforeEach(() => {
         mockUser = {
             id: '1',
@@ -32,9 +36,11 @@ describe('User Controller', () => {
             refresh_session_id: ''
         };
 
+        // track how if and how it was called during the test
         mockNext = jest.fn();
     });
 
+    // reset all mocks after each test
     afterEach(() => {
         jest.clearAllMocks();
     });
@@ -314,7 +320,7 @@ describe('User Controller', () => {
             expect(clearCookiesMock).toHaveBeenCalledWith('refresh_token', {
                 httpOnly: true,
                 secure: true,
-                sameSite: 'lax',
+                sameSite: 'none',
                 path: '/'
             });
             expect(mockResponse.status).toHaveBeenCalledWith(200);

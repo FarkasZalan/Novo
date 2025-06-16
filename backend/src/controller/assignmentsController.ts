@@ -98,6 +98,7 @@ export const createAssignmentForUsers = async (req: Request, res: Response, next
 
                 addedUsers.push({ newAssignment, status: 'success' });
             } catch (error: any) {
+                // if the user already exists
                 if (error.code === "23505") {
                     addedUsers.push({ user_id, status: "exists" });
                 } else {

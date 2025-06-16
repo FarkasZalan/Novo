@@ -46,7 +46,7 @@ export const refreshAccessToken = async (req: Request, res: Response, next: Next
         if (!refreshToken) {
             res.status(400).json({
                 message: "No refresh token found in cookies",
-                code: "NO_REFRESH_TOKEN" // Add specific error code
+                code: "NO_REFRESH_TOKEN" // specific errror code for easier handling on frontend (AuthProvider.tsx)
             });
             return;
         }

@@ -6,7 +6,7 @@ export const getAllMilestoneForReminderQuery = async () => {
 
     const today = new Date();
     const tomorrowEnd = endOfDay(addDays(today, 1));
-    const result = await pool.query("SELECT * FROM milestones WHERE due_date < $1", [tomorrowEnd]);
+    const result = await pool.query("SELECT * FROM milestones WHERE all_tasks_count = completed_tasks_count AND due_date < $1", [tomorrowEnd]);
     return result.rows;
 }
 

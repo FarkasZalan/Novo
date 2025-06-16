@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 
-// Centralized error handling middleware
+// global error handling middleware
 const errorHandling = (err: any, req: Request, res: Response, next: NextFunction) => {
     if (err.code === "LIMIT_FILE_SIZE") {
         res.status(413).json({

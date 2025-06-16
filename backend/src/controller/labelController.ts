@@ -129,7 +129,6 @@ export const getAllLabelForProject = async (req: Request, res: Response, next: N
 };
 
 // task label related
-
 export const getAllLabelForTask = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const task_id = req.params.taskId;

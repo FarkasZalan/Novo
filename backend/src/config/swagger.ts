@@ -13,7 +13,7 @@ const options: swaggerJsdoc.Options = {
         },
         servers: [
             {
-                url: BACKEND_URL, // Ensure this matches your server
+                url: BACKEND_URL,
                 description: "Local server",
             },
         ],
@@ -35,7 +35,7 @@ const options: swaggerJsdoc.Options = {
             },
         ],
     },
-    apis: ["./src/routes/*.ts"], // Ensure the path is correct
+    apis: ["./src/routes/*.ts"],
 };
 
 const swaggerSpec = swaggerJsdoc(options);

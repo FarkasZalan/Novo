@@ -37,10 +37,11 @@ const port = process.env.PORT || 3000;
 
 // Session:
 // A session is a way to store information about user authentication so don't need to login every refresh or navigation
-// now we store session in redis
 
 // session is required to OAuth because we need to store the state of the user in the session what retuns from the OAuth provider (Google or Github auth screen)
 // and with this session don't need to login every refresh or navigation
+
+// use redis to store oauth sessions instead of in-memory because if the server restart the session will be lost
 app.use(session({
     store: new RedisStore({
         client: redisClient,
@@ -57,6 +58,7 @@ app.use(session({
     }
 }));
 
+// Initialize passport for oauth authentication (Google or Github)
 app.use(passport.initialize());
 
 // integrate express session with passport
@@ -84,6 +86,7 @@ app.use(cors({
     optionsSuccessStatus: 204
 }));
 
+// because I deploy the app on Render need to ensure that the app trust the X-Forwarded-Proto headers
 app.enable('trust proxy');
 
 // Cookie parser middleware

@@ -11,21 +11,8 @@ import { User } from '../schemas/types/userType';
 
 dotenv.config();
 
-// Extend Express User interface to include our custom properties
-declare global {
-    namespace Express {
-        interface User {
-            id: string;
-            email: string;
-            name: string;
-            is_premium: boolean;
-            provider: string;
-        }
-    }
-}
-
 export const configurePassport = () => {
-    // Google Strategy
+    // Google Strategy - these parameters come from the Google developer console
     passport.use(new GoogleStrategy({
         clientID: process.env.GOOGLE_CLIENT_ID!,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
@@ -55,6 +42,7 @@ export const configurePassport = () => {
             // Find or create user in the database
             const user = await findOrCreateOAuthUser(userData, 'google');
 
+            // if user was a pending user, add them to invited project(s)
             const pendingUserProjects = await getPendingProjectsForPendingUserByEmailQuery(user.email);
 
             if (pendingUserProjects) {
@@ -75,7 +63,7 @@ export const configurePassport = () => {
         }
     }));
 
-    // GitHub Strategy
+    // GitHub Strategy - these parameters come from the GitHub developer console similar to Google
     passport.use(new GitHubStrategy({
         clientID: process.env.GITHUB_CLIENT_ID!,
         clientSecret: process.env.GITHUB_CLIENT_SECRET!,
@@ -118,12 +106,13 @@ export const configurePassport = () => {
         }
     }));
 
-    // Serialize and deserialize user
+    // Store the user id in the session - runs once after successful authentication
+    // in the oauth startegies the done function is call the serializeUser
     passport.serializeUser((user: any, done: any) => {
-        done(null, user.id); // Store only user ID in the session
+        done(null, user.id);
     });
 
-    // Retrieve user from the session
+    // Retrieve full user object from the session - runs every time a request is made to restore user data from session
     passport.deserializeUser(async (id: string, done: any) => {
         try {
             const result = await pool.query("SELECT * FROM users WHERE id = $1", [id]);

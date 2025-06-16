@@ -11,28 +11,27 @@ jest.mock('jsonwebtoken');
 jest.mock('../../src/config/db');
 
 describe('authenticateToken middleware', () => {
+    // mock request and response for the endpoint tests
     let mockRequest: Partial<Request>;
     let mockResponse: Partial<Response>;
     let mockNext: jest.MockedFunction<NextFunction>;
 
-    beforeAll(() => {
-        jest.spyOn(console, 'error').mockImplementation(() => { });
-    });
-
-    afterAll(() => {
-        (console.error as jest.Mock).mockRestore();
-    });
-
+    // initialize mock data before each test
     beforeEach(() => {
+        // for authenticateToken
         mockRequest = {
             headers: {
                 authorization: 'Bearer valid.token.here'
             },
         };
+
+        // response format
         mockResponse = {
             status: jest.fn().mockReturnThis(),
             json: jest.fn(),
         };
+
+        // for refreshAccessToken
         mockNext = jest.fn();
 
         // Reset all mocks

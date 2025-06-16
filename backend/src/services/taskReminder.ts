@@ -48,6 +48,7 @@ export const checkDueTasksAndSendReminders = async () => {
 
 export const checkDueMilestonesAndSendReminders = async () => {
     try {
+        // get all milestones that are not completed
         const milestones = await getAllMilestoneForReminderQuery();
 
         for (const milestone of milestones) {

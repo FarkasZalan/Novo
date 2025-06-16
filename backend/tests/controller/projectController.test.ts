@@ -5,15 +5,20 @@ import { Project } from "../../src/schemas/types/projectTyoe";
 import { Request, Response, NextFunction } from 'express';
 import { DEFAULT_COLORS } from "../../src/utils/default-colors";
 
+// mock dependencies
 jest.mock('../../src/models/projectModel');
 jest.mock("../../src/models/labelModel");
 
 describe('ProjectController', () => {
+    // mock request and response for the endpoint tests
     let mockRequest: Partial<Request>;
     let mockResponse: Partial<Response>;
     let mockNext: NextFunction;
+
+    // mock data
     let mockProject: Project;
 
+    // initialize mock data before each test
     beforeEach(() => {
         mockProject = {
             id: '1',
@@ -29,9 +34,11 @@ describe('ProjectController', () => {
             read_only: false
         };
 
+        // track how if and how it was called during the test
         mockNext = jest.fn();
     });
 
+    // reset all mocks after each test
     afterEach(() => {
         jest.clearAllMocks();
     });

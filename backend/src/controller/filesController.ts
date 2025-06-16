@@ -199,7 +199,7 @@ export const deleteFileFromTask = async (req: Request, res: Response, next: Next
 };
 
 
-// basic file controller functions
+// basic file controller function
 export const downloadFile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const fileId = req.params.fileId;

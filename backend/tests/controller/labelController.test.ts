@@ -5,16 +5,21 @@ import { getProjectByIdQuery } from '../../src/models/projectModel';
 import { Project } from '../../src/schemas/types/projectTyoe';
 import { createLabel, deleteLabel, updateLabel } from '../../src/controller/labelController';
 
+// mock dependencies
 jest.mock("../../src/models/labelModel");
 jest.mock('../../src/models/projectModel');
 
 describe('Label Controller', () => {
+    // mock request and response for the endpoint tests
     let mockRequest: Partial<Request>;
     let mockResponse: Partial<Response>;
     let mockNext: NextFunction;
+
+    // mock data
     let mockLabel: Label;
     let mockProject: Project;
 
+    // initialize mock data before each test
     beforeEach(() => {
         mockLabel = {
             id: '1',
@@ -39,9 +44,11 @@ describe('Label Controller', () => {
             read_only: false
         };
 
+        // track how if and how it was called during the test
         mockNext = jest.fn();
     });
 
+    // reset all mocks after each test
     afterEach(() => {
         jest.clearAllMocks();
     });

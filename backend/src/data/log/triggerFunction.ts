@@ -1,5 +1,7 @@
 import pool from "../../config/db";
 
+// store the changes in the change_logs table with:
+// table_name, operation, old_data, new_data, changed_by, created_at
 export const createChangeLogTriggerFunction = async () => {
     const query = `
     CREATE OR REPLACE FUNCTION log_table_changes()
