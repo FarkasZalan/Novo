@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { FaEnvelope, FaLock, FaGoogle, FaGithub, FaInfoCircle } from "react-icons/fa";
+import { FaEnvelope, FaLock, FaGoogle, FaGithub } from "react-icons/fa";
 import { initiateGithubLogin, initiateGoogleLogin, login, resendVerificationEmail } from "../../../services/authService";
 import { useAuth } from "../../../hooks/useAuth";
 
@@ -16,14 +16,6 @@ export const Login = () => {
     const [resendSuccess, setResendSuccess] = useState("");
     const navigate = useNavigate();
     const { setAuthState } = useAuth();
-    const [isIOS, setIsIOS] = useState(false);
-
-    useEffect(() => {
-        // Check if the device is iOS so don't let use oauth buttons
-        const userAgent = window.navigator.userAgent.toLowerCase();
-        const isIOSDevice = /iphone|ipad|ipod|macintosh/.test(userAgent);
-        setIsIOS(isIOSDevice);
-    }, []);
 
     const handleGoogleLogin = async () => {
         try {
