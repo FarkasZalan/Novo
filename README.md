@@ -4,6 +4,18 @@ A powerful and scalable task management application built with Node.js (backend)
 
 ---
 
+## ⚠️ Known Limitations on Apple Devices (iOS & macOS)
+
+Some features rely on third-party cookies or cross-site redirects, which are **restricted by default in all browsers on Apple platforms** — including Safari, Chrome, and Firefox. These limitations are enforced at the system level via WebKit, which all browsers must use on iOS/macOS. This causes:
+
+* **OAuth login (Google, GitHub)** may fail or lose session context after redirection, because Apple browsers block third-party cookies and localStorage during OAuth flows.
+* **Stripe Checkout payments** may not correctly finalize after returning from Stripe, due to session state not being restored.
+
+> ✅ These issues **do not affect browsers on non-Apple platforms** (e.g., Android, Windows, Linux).
+> 🔒 We recommend using **email/password login** and performing payments in browsers on Android, Windows, or Linux for full compatibility.
+
+---
+
 ## 🚀 Overview
 
 Novo empowers teams and individuals to organize projects, collaborate seamlessly, and stay on top of deadlines. With flexible authentication, robust project/task management, real-time notifications, and premium features, Novo is designed for both small teams and large organizations.
