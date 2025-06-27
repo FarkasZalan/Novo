@@ -11,7 +11,7 @@ Some features rely on third-party cookies or cross-site redirects, which are **r
 * **OAuth login (Google, GitHub)** may fail or lose session context after redirection, because Apple browsers block third-party cookies and localStorage during OAuth flows.
 * **Stripe Checkout payments** may not correctly finalize after returning from Stripe, due to session state not being restored.
 
-✅ These issues **do not affect browsers on non-Apple platforms** (e.g., Android, Windows, Linux).
+✅ These issues **do not affect browsers on non-Apple platforms** (e.g., Android, Windows, Linux).<br>
 🔒 We recommend using **email/password login** and performing payments in browsers on Android, Windows, or Linux for full compatibility.
 
 ---
